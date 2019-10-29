@@ -14,18 +14,22 @@ function advectionStiff(degFT::degF{1}, phiTtrans::Array{Array{Array{Float64,1},
     nT=length(phiT);
     nF=size(phiF,2);
 
+    w=zeros(sk);
+    gradw1=zeros(sk);
+    gradw2=zeros(sk);
+
     M=zeros(size(degFT.coordinates,2),1);
     for k in 1:m.topology.size[3]
 
         globalNumW=@views l2g(degFW,k);
 
-        w=zeros(sk);
+        fill!(w,0.0);
         for i in 1:length(globalNumW)
             w+=wval[globalNumW[i]]*phiW[i];
         end
 
-        gradw1=zeros(sk);
-        gradw2=zeros(sk);
+        fill!(gradw1,0.0);
+        fill!(gradw2,0.0);
         for r in 1:sk[2]
             for l in 1:sk[1]
                 for j in 1:size(gradphiW,2)
@@ -60,6 +64,9 @@ function advectionStiff(degFT::degF{1}, phiTtrans::Array{Array{Array{Float64,1},
     dJ1=Array{Float64,1}(undef,sk[1]);
     dJ2=Array{Float64,1}(undef,sk[1]);
 
+    w1=zeros(sk[1]);
+    w2=zeros(sk[1]);
+
     z=1;
     for e in 1:length(edgeData[1])
         inc1=edgeData[2][z];
@@ -82,8 +89,8 @@ function advectionStiff(degFT::degF{1}, phiTtrans::Array{Array{Array{Float64,1},
         jacobi!(J1, dJ1,m,inc1,kubPn1);
         jacobi!(J2, dJ2,m,inc2,kubPn2);
 
-        w1=zeros(sk[1])
-        w2=zeros(sk[1])
+        fill!(w1,0.0);
+        fill!(w2,0.0);
         globalNumW1=@views l2g(degFW,inc1);
         globalNumW2=@views l2g(degFW,inc2);
         for i in 1:length(globalNumW1)
@@ -155,21 +162,28 @@ function advectionStiff(degFT::degF{2}, phiTtrans::Array{Array{Array{Float64,1},
     ddJ=Array{Float64,2}(undef,sk);
     jphiT=initPhi(size(phiT),sk);
 
+    w1=zeros(sk);
+    w2=zeros(sk);
+    gradw11=zeros(sk);
+    gradw12=zeros(sk);
+    gradw21=zeros(sk);
+    gradw22=zeros(sk);
+
     for k in 1:m.topology.size[3]
         jacobi!(ddJ,jphiT,m,k,kubPoints,phiT);
         globalNumW=@views l2g(degFW,k);
 
-        w1=zeros(sk);
-        w2=zeros(sk);
+        fill!(w1,0.0);
+        fill!(w2,0.0);
         for i in 1:length(globalNumW)
             w1+=wval[globalNumW[i]]*phiW[1,i];
             w2+=wval[globalNumW[i]]*phiW[2,i];
         end
 
-        gradw11=zeros(sk);
-        gradw12=zeros(sk);
-        gradw21=zeros(sk);
-        gradw22=zeros(sk);
+        fill!(gradw11,0.0);
+        fill!(gradw12,0.0);
+        fill!(gradw21,0.0);
+        fill!(gradw22,0.0);
         zg=0;
         for i in 1:size(phiW,2)
             gradw11+=wval[globalNumW[i]]*gradphiW[1,1+zg];
@@ -207,6 +221,11 @@ function advectionStiff(degFT::degF{2}, phiTtrans::Array{Array{Array{Float64,1},
     jphiWn2=initPhi(size(phiW),sk[1])
     jphiTn2=initPhi(size(phiT),sk[1]);
 
+    w11=zeros(sk[1])
+    w12=zeros(sk[1])
+    w21=zeros(sk[1])
+    w22=zeros(sk[1])
+
     z=1;
     for e in 1:length(edgeData[1])
         inc1=edgeData[2][z];
@@ -231,10 +250,10 @@ function advectionStiff(degFT::degF{2}, phiTtrans::Array{Array{Array{Float64,1},
         jacobi!(J2,ddJ2,jphiWn2,jphiTn2,m,inc2,kubPn2, phiWn2, phiTn2);
 
 
-        w11=zeros(sk[1])
-        w12=zeros(sk[1])
-        w21=zeros(sk[1])
-        w22=zeros(sk[1])
+        fill!(w11,0.0);
+        fill!(w12,0.0);
+        fill!(w21,0.0);
+        fill!(w22,0.0);
         globalNumW1=@views l2g(degFW,inc1);
         globalNumW2=@views l2g(degFW,inc2);
         for i in 1:length(globalNumW1)
