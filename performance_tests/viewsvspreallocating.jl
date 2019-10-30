@@ -1,10 +1,13 @@
 using BenchmarkTools
 
-#meantime: 1.903ms
-#allocs estimate: 2
-#memory estimate: 7.63MiB
-function testview()
-    vector=rand(1000000+5)
+function testest(a,b)
+    return a*b;
+end
+
+#meantime: 547.947 μs
+#allocs estimate: 0
+#memory estimate: 0
+function testview(vector)
     sum1=0.0;
 
     for i in 1:1000000
@@ -13,11 +16,22 @@ function testview()
     end
 end
 
-#meantime: 9.429ms
-#allocs estimate: 3
-#memory estimate: 7.63MiB
-function testpreallocatearray()
-    vector=rand(1000000+5)
+#meantime: 15.206ns ########### WINNER
+#allocs estimate: 0
+#memory estimate: 0
+function testviewinbounds(vector)
+    sum1=0.0;
+
+    for i in 1:1000000
+        a= @inbounds @views vector[i:i+5];
+        #sum1+=sum(a);
+    end
+end
+
+#meantime: 6.004ms
+#allocs estimate: 1
+#memory estimate: 128 bytes
+function testpreallocatearray(vector)
     sum1=0.0
     a=ones(6);
 
@@ -30,14 +44,13 @@ function testpreallocatearray()
     end
 end
 
-#meantime: 1.871ms
-#allocs estimate: 2
-#memory estimate: 7.63MiB
-function testpreallocateview()
-    vector=rand(1000000+5)
+#meantime: 415.998 μs
+#allocs estimate: 0
+#memory estimate: 0 bytes
+function testpreallocateview(vector)
     sum1=0.0
     a = @views vector[1:6]
-    
+
     for i in 1:1000000
         a= @views vector[i:i+5];
         #sum1+=sum(a);

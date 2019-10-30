@@ -15,8 +15,8 @@ function testBoussinesq()
     dt=1.0;
     tend=3000.0;
 
-    #solSaves=15.0:15:tend; #determines at which points of time the solution is saved
-    solSaves=tend;
+    solSaves=15.0:15:tend; #determines at which points of time the solution is saved
+    #solSaves=tend;
 
     b0=0.01;
     H=10000;
@@ -35,6 +35,7 @@ function testBoussinesq()
 
     for i in collect(solSaves)
         solveB!(pv,Fp,Fv,Fb,dt,i,method);
+        println(i);
     end
 
     #Speichern des Endzeitpunktes als vtu-Datei:

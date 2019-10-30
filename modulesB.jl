@@ -4,7 +4,8 @@ using SuiteSparse;
 using Plots;
 using Distributed;
 
-pyplot()
+#pyplot()
+gr() #Pkg.build("CodecZlib") #Pkg.build("LightXML")
 
 include("solution.jl");
 @solution(v,p,b);

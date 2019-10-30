@@ -121,7 +121,7 @@ function plotSolution(p::femProblem, key::Symbol, t::Float64, filename::String, 
                 coord=p.mesh.geometry.coordinates[:,inc[rstart2:rend2]];
                 fillPoly(coord, ColorGradient(c)[trans(skm)]);
             end
-            
+
             pf=plot(pl,pc,layout=grid(2,1,heights=[0.98,0.02]))
             savefig(pf, filename);
         end
@@ -131,6 +131,6 @@ end
 function fillPoly(c::Array{Float64,2}, fc::RGBA{Float64}; fillrange::Int64=0, fillalpha::Float64=1.0)
     x=push!(c[1,:],c[1,1]);
     y=push!(c[2,:],c[2,1]);
-    p=Plots.plot!(x,y,fill=(fillrange,fillalpha,fc),legend=false, linecolor=:white, linewidth=0);
+    p=Plots.plot!(x,y,fill=(fillrange,fillalpha,fc),legend=false, linecolor=fc, linewidth=0.0);
     return(p)
 end
