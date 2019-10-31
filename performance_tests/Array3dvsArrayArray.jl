@@ -1,3 +1,5 @@
+using BenchmarkTools
+
 A1=Array{Array{Float64,2},1}(undef,10)
 B1=Array{Array{Float64,2},1}(undef,10)
 
@@ -16,10 +18,10 @@ end
 
 function arrayarray(A::Array{Array{Float64,2},1}, B::Array{Array{Float64,2},1})
     sum=0.0;
-    for i in 1:10
-        for j in 1:10
-            for k=1:1000
-                for l=1:1000
+    for k in 1:size(A[1])[2]
+        for l in 1:size(A[1])[1]
+            for j=1:length(B)
+                for i=1:length(A)
                     sum+=A[i][l,k]*B[j][l,k]
                 end
             end
@@ -30,10 +32,10 @@ end
 
 function array3d(A::Array{Float64,3}, B::Array{Float64,3})
     sum=0.0;
-    for k in 1:1000
-        for l in 1:1000
-            for i=1:10
-                for j=1:10
+    for k in 1:size(A)[3]
+        for l in 1:size(A)[2]
+            for i=1:size(A)[1]
+                for j=1:size(B)[1]
                     sum+=A[i,l,k]*B[j,l,k]
                 end
             end
