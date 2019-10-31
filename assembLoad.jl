@@ -2,15 +2,16 @@ function assembLoad(degF::degF{1}, f, m::mesh, kubPoints::Array{Float64,2}, kubW
     phiT=degF.phi;
     sk=size(kubWeights);
 
-    J=Array{Array{Float64,2},2}(undef,2,2);
+    J=initPhi((2,2),sk);
     dJ=Array{Float64,2}(undef,sk);
+    jcoord=Array{Float64,2}(undef,2,m.meshType);
     gb=zeros(size(degF.coordinates,2))
 
     iter=length(phiT);
     for k in 1:m.topology.size[m.topology.D+1]
         coord=@views m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][k]:m.topology.offset["20"][k+1]-1]]
 
-        jacobi!(J,dJ,m,k,kubPoints);
+        jacobi!(J,dJ,m,k,kubPoints,jcoord);
         ft=Array{Float64,2}(undef,sk);
         for i=1:sk[1], j=1:sk[2]
             xy=transformation(m,coord,kubPoints[1,i],kubPoints[2,j])
@@ -33,16 +34,17 @@ function assembLoad(degF::degF{2}, f, m::mesh, kubPoints::Array{Float64,2}, kubW
     phiT=degF.phi;
     sk=size(kubWeights);
 
-    J=Array{Array{Float64,2},2}(undef,2,2);
+    J=initPhi((2,2),sk);
     ddJ=Array{Float64,2}(undef,sk);
     jphiT=initPhi(size(phiT),sk);
+    jcoord=Array{Float64,2}(undef,2,m.meshType);
     gb=zeros(size(degF.coordinates,2));
 
     iter=size(phiT,2);
     for k in 1:m.topology.size[m.topology.D+1]
         coord=@views m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][k]:m.topology.offset["20"][k+1]-1]]
 
-        jacobi!(J,ddJ,jphiT,m,k,kubPoints,phiT);
+        jacobi!(J,ddJ,jphiT,m,k,kubPoints,phiT,jcoord);
         ft1=Array{Float64,2}(undef,sk);
         ft2=Array{Float64,2}(undef,sk);
         for i=1:sk[1], j=1:sk[2]

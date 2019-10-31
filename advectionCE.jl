@@ -3,7 +3,7 @@ function advection(p::femProblem, gamma::Float64, y::solution,
                   MrT::SparseMatrixCSC{Float64,Int64}, MrV::SparseMatrixCSC{Float64,Int64})
 
   fTtheta=p.femType[:rhoTheta]; fTv=p.femType[:rhoV];
-  Fv=p.massM[fTv[1]];
+  Fv=@views p.massM[fTv[1]];
   nRhoV=p.degFBoundary[p.femType[:rhoV][1]].num;
   nRhoTheta=p.degFBoundary[p.femType[:rhoTheta][1]].num;
 
@@ -28,9 +28,18 @@ function advection(p::femProblem, gamma::Float64, y::solution,
     cR=projectRhoChi(p,y.rho,y.rhoTheta,:rho,:rhoTheta,MrT);
     if p.taskRecovery
       cR=recovery(p,fTtheta,cR,:theta);
-      Sth=advectionStiffMatrix(p,fTtheta[1],nquadPhi[fTtheta[1]],fTv[1],nquadPhi[fTv[1]],y.rhoV,fTtheta[3],nquadPhi[fTtheta[3]],cR,gamma,nquadPoints, p.edgeData);
+      Sth=advectionStiffMatrix(p.degFBoundary[fTtheta[1]],nquadPhi[fTtheta[1]],
+                         p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],y.rhoV,
+                         p.degFBoundary[fTtheta[3]],nquadPhi[fTtheta[3]],cR,
+                         gamma,p.mesh,p.kubPoints,p.kubWeights,
+                         nquadPoints, p.edgeData);
+
     else
-      Sth=advectionStiffMatrix(p,fTtheta[1],nquadPhi[fTtheta[1]],fTv[1],nquadPhi[fTv[1]],y.rhoV,fTtheta[1],nquadPhi[fTtheta[1]],cR,gamma,nquadPoints, p.edgeData);
+      Sth=advectionStiffMatrix(p.degFBoundary[fTtheta[1]],nquadPhi[fTtheta[1]],
+                         p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],y.rhoV,
+                         p.degFBoundary[fTtheta[1]],nquadPhi[fTtheta[1]],cR,
+                         gamma,p.mesh,p.kubPoints,p.kubWeights,
+                         nquadPoints, p.edgeData);
     end
   else
     rCv=zeros(nRhoV);

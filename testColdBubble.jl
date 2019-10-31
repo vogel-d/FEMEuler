@@ -81,9 +81,12 @@ function testColdBubble()
     MrV=assembMass(p.degFBoundary[femType[:rhoV][1]], p.mesh, p.kubPoints, p.kubWeights);
 
     y=p.solution[0.0];
+    Y=Array{solution,1}(undef,MISMethod.nStage+1);
+    FY=Array{solution,1}(undef,MISMethod.nStage);
+    SthY=Array{SparseMatrixCSC{Float64,Int64},1}(undef,MISMethod.nStage);
     Time=0.0;
     for i=1:nIter
-      y=splitExplicit(p,gamma,nquadPhi,nquadPoints,MrT,MrV,MISMethod,y,Time,dt,ns);
+      y=splitExplicit(y,Y,FY,SthY,p,gamma,nquadPhi,nquadPoints,MrT,MrV,MISMethod,Time,dt,ns);
       Time=Time+dt
       p.solution[Time]=y;
       p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);

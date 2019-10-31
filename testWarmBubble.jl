@@ -16,6 +16,8 @@ function testWarmBubble()
 
     p=femProblem(:quad, 160, 80, femType, t=:compressible, advection=advection, taskRecovery=taskRecovery,
                  xl=-10000.0, xr=10000.0, yr=10000.0);
+    #p=femProblem(:quad, 80, 40, femType, t=:compressible, advection=advection, taskRecovery=taskRecovery,
+    #                          xl=-10000.0, xr=10000.0, yr=10000.0);
     #adaptGeometry!(pv,0.3,0.3,false); #sin perbutation
 
     boundaryCondition = (:periodic, :constant); #(top/bottom, east/west)
@@ -28,7 +30,6 @@ function testWarmBubble()
     ns=15;
     EndTime=1000.0;
     nIter=Int64(EndTime/dt);
-    nIter=500;
 
     #start functions
     xCM=0.0; zCM=2000.0;
@@ -72,10 +73,13 @@ function testWarmBubble()
     MrV=assembMass(p.degFBoundary[femType[:rhoV][1]], p.mesh, p.kubPoints, p.kubWeights);
 
     y=p.solution[0.0];
+    Y=Array{solution,1}(undef,MISMethod.nStage+1);
+    FY=Array{solution,1}(undef,MISMethod.nStage);
+    SthY=Array{SparseMatrixCSC{Float64,Int64},1}(undef,MISMethod.nStage);
     Time=0.0;
     for i=1:nIter
-      @time y=splitExplicit(p,gamma,nquadPhi,nquadPoints,MrT,MrV,MISMethod,y,Time,dt,ns);
-      Time=Time+dt
+      y=splitExplicit(y,Y,FY,SthY,p,gamma,nquadPhi,nquadPoints,MrT,MrV,MISMethod,Time,dt,ns);
+      Time+=dt
       p.solution[Time]=y;
       p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)

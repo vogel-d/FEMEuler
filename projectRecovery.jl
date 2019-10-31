@@ -4,19 +4,25 @@ function projectRecovery(degFH::degF{1},degF::degF{1},cval::Array{Float64,1},mas
     sph=length(phiH)
     sk=size(kubWeights);
 
-    J=Array{Array{Float64,2},2}(undef,2,2);
+    J=initPhi((2,2),sk);
     dJ=Array{Float64,2}(undef,sk);
+    coord=Array{Float64,2}(undef,2,m.meshType);
+
+    cl=zeros(sk);
+
+    globalNum=Array{Int64,1}(undef,length(phi));
+    globalNumH=Array{Int64,1}(undef,length(phiH));
 
     gbh=zeros(size(degFH.coordinates,2))
     for k in 1:m.topology.size[m.topology.D+1]
-        jacobi!(J,dJ,m,k,kubPoints);
+        jacobi!(J,dJ,m,k,kubPoints,coord);
 
-        globalNum=@views l2g(degF,k);
-        globalNumH=@views l2g(degFH,k);
+        l2g!(globalNum,degF,k);
+        l2g!(globalNumH,degFH,k);
 
-        cl=zeros(sk);
+        fill!(cl,0.0);
         for i in 1:length(globalNum)
-            cl+=cval[globalNum[i]]*phi[i];
+            @. cl+=cval[globalNum[i]]*phi[i];
         end
 
         for j in 1:sph
@@ -36,23 +42,30 @@ function projectRecovery(degFH::degF{2},degF::degF{2},cval::Array{Float64,1},mas
     sph=size(phiH,2);
     sk=size(kubWeights);
 
-    J=Array{Array{Float64,2},2}(undef,2,2);
+    J=initPhi((2,2),sk);
     ddJ=Array{Float64,2}(undef,sk);
     jphi=initPhi(size(phi),sk);
     jphiH=initPhi(size(phiH),sk);
+    coord=Array{Float64,2}(undef,2,m.meshType);
+
+    cl1=zeros(sk);
+    cl2=zeros(sk);
+
+    globalNum=Array{Int64,1}(undef,size(phi,2));
+    globalNumH=Array{Int64,1}(undef,size(phiH,2));
 
     gbh=zeros(size(degFH.coordinates,2))
     for k in 1:m.topology.size[m.topology.D+1]
-        jacobi!(J,ddJ,jphi,jphiH,m,k,kubPoints, phi, phiH);
+        jacobi!(J,ddJ,jphi,jphiH,m,k,kubPoints, phi, phiH,coord);
 
-        globalNum=@views l2g(degF,k);
-        globalNumH=@views l2g(degFH,k);
+        l2g!(globalNum,degF,k);
+        l2g!(globalNumH,degFH,k);
 
-        cl1=zeros(sk);
-        cl2=zeros(sk);
+        fill!(cl1,0.0);
+        fill!(cl2,0.0);
         for i in 1:length(globalNum)
-            cl1+=cval[globalNum[i]]*jphi[1,i];
-            cl2+=cval[globalNum[i]]*jphi[2,i];
+            @. cl1+=cval[globalNum[i]]*jphi[1,i];
+            @. cl2+=cval[globalNum[i]]*jphi[2,i];
         end
 
         for j in 1:sph

@@ -99,19 +99,22 @@ function assembStiff(degFs::degF{1}, degFv::degF{2}, z::Array{Float64,1}, m::mes
     cols=Int64[];
     vals=Float64[];
 
-    J=Array{Array{Float64,2},2}(undef,2,2);
-    ddJ=Array{Float64,2}(undef,size(kubWeights));
-    jphiF=initPhi(size(phiF),size(kubWeights));
+    sk=size(kubWeights)
+
+    J=initPhi((2,2),sk);
+    ddJ=Array{Float64,2}(undef,sk);
+    jphiF=initPhi(size(phiF),sk);
+    coord=Array{Float64,2}(undef,2,m.meshType);
 
     lS=zeros(length(phiT), size(phiF,2));
 
     for k in 1:m.topology.size[m.topology.D+1]
-        jacobi!(J,ddJ,jphiF,m, k, kubPoints, phiF);
+        jacobi!(J,ddJ,jphiF,m, k, kubPoints, phiF,coord);
         for i in 1:length(phiT)
             for j in 1:size(phiF,2)
                 currentval=0.0;
-                for k in 1:size(kubWeights,2)
-                    for l in 1:size(kubWeights,1)
+                for k in 1:sk[2]
+                    for l in 1:sk[1]
                         currentval+=kubWeights[l,k]*phiT[i][l,k]*(z[1]*jphiF[1,j][l,k]+z[2]*jphiF[2,j][l,k]);
                     end
                 end
@@ -148,21 +151,23 @@ function assembStiff!(p::femProblem, comp::Symbol)
 
     kubPoints=p.kubPoints;
     kubWeights=p.kubWeights;
+    sk=size(kubWeights)
 
-    J=Array{Array{Float64,2},2}(undef,2,2);
-    dJ=Array{Float64,2}(undef,size(kubWeights));
+    J=initPhi((2,2),sk);
+    dJ=Array{Float64,2}(undef,sk);
+    coord=Array{Float64,2}(undef,2,m.meshType);
 
     nDF=size(degF[comp].coordinates,2);
     S=spzeros(nDF,nDF);
     lS=zeros(size(dphiRef,2), size(dphiRef,2));
 
     for k in 1:m.topology.size[m.topology.D+1]
-        jacobi!(J,dJ,m,k,kubPoints);
+        jacobi!(J,dJ,m,k,kubPoints,coord);
 
         for j in 1:size(dphiRef,2)
             for i in 1:size(dphiRef,2)
-                for k in 1:size(kubWeights,2)
-                    for l in 1:size(kubWeights,1)
+                for k in 1:sk[2]
+                    for l in 1:sk[1]
                         lS[i,j]+=kubWeights[l,k]*dJ[l,k]*(dphiRef[1,i][l,k]*dphiRef[1,j][l,k]+dphiRef[2,i][l,k]*dphiRef[2,j][l,k]);
                     end
                 end

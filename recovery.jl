@@ -1,4 +1,4 @@
-function recovery(p::femProblem, comp::Array{Symbol,1}, cval::Array{Float64,1})
+function recovery(p::femProblem, comp::Array{Symbol,1}, cval::Array{Float64,1}) #,m::mesh,kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
     m=p.mesh;
     kubPoints=p.kubPoints;
     kubWeights=p.kubWeights;

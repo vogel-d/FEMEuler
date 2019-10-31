@@ -4,20 +4,26 @@ function assembMassRho(degF::degF{1}, degFRho::degF{1}, valRho::Array{Float64,1}
     sk=size(kubWeights);
     iter=length(phi);
 
+    J=initPhi((2,2),sk);
+    dJ=Array{Float64,2}(undef,sk);
+    coord=Array{Float64,2}(undef,2,m.meshType);
+
+    globalNum=Array{Int64,1}(undef,length(phi));
+    globalNumRho=Array{Int64,1}(undef,length(phiRho));
+
+    cRho=zeros(sk);
+
     rows=Int64[];
     cols=Int64[];
     vals=Float64[];
-
-    J=Array{Array{Float64,2},2}(undef,2,2);
-    dJ=Array{Float64,2}(undef,sk);
     for k in 1:m.topology.size[m.topology.D+1]
-        jacobi!(J,dJ,m,k,kubPoints);
-        globalNum=@views l2g(degF,k);
-        globalNumRho=@views l2g(degFRho,k);
+        jacobi!(J,dJ,m,k,kubPoints,coord);
+        l2g!(globalNum,degF,k);
+        l2g!(globalNumRho,degFRho,k);
 
-        cRho=zeros(sk);
+        fill!(cRho,0.0);
         for i in 1:length(globalNumRho)
-            cRho+=valRho[globalNumRho[i]]*phiRho[i];
+            @. cRho+=valRho[globalNumRho[i]]*phiRho[i];
         end
 
         for j in 1:iter
@@ -45,20 +51,27 @@ function assembMassRho(degF::degF{2}, degFRho::degF{1}, valRho::Array{Float64,1}
     sk=size(kubWeights);
     iter=size(phi,2);
 
+    J=initPhi((2,2),sk);
+    ddJ=Array{Float64,2}(undef,sk);
+    jphi=initPhi(size(phi),sk);
+    coord=Array{Float64,2}(undef,2,m.meshType);
+
+    globalNum=Array{Int64,1}(undef,size(phi,2));
+    globalNumRho=Array{Int64,1}(undef,size(phiRho,2));
+
+    cRho=zeros(sk);
+
     rows=Int64[];
     cols=Int64[];
     vals=Float64[];
-
-    J=Array{Array{Float64,2},2}(undef,2,2);
-    ddJ=Array{Float64,2}(undef,sk);
-    jphi=initPhi(size(phi),sk);
     for k in 1:m.topology.size[m.topology.D+1]
-        jacobi!(J,ddJ,jphi,m,k,kubPoints, phi);
-        globalNum=@views l2g(degF,k);
-        globalNumRho=@views l2g(degFRho,k);
-        cRho=zeros(sk);
+        jacobi!(J,ddJ,jphi,m,k,kubPoints, phi,coord);
+        l2g!(globalNum,degF,k);
+        l2g!(globalNumRho,degFRho,k);
+
+        fill!(cRho,0.0);
         for i in 1:length(globalNumRho)
-            cRho+=valRho[globalNumRho[i]]*phiRho[i];
+            @. cRho+=valRho[globalNumRho[i]]*phiRho[i];
         end
 
         for j in 1:iter
