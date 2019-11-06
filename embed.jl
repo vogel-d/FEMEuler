@@ -67,6 +67,7 @@ function embed(comp::Symbol,degF::degF{2},cval::Array{Float64,1},compRec::Symbol
 
     globalNum=Array{Int64,1}(undef,size(degF.phi,2));
     globalNumRec=Array{Int64,1}(undef,size(degFRec.phi,2));
+
     if comp==:VecP1 && compRec==:VecDG1
         for i in 1:n
             l2g!(globalNum,degF,i);
@@ -76,10 +77,10 @@ function embed(comp::Symbol,degF::degF{2},cval::Array{Float64,1},compRec::Symbol
             end
         end
     elseif (comp==:RT0 || comp==:RT0B) && compRec==:VecDG1
+        h=[1,1,2,2,3,3,4,4];
         for i in 1:n
             l2g!(globalNum,degF,i);
             l2g!(globalNumRec,degFRec,i);
-            h=[1,1,2,2,3,3,4,4];
             for j in 1:8
                 cEmbed[globalNumRec[j]]+=cval[globalNum[h[j]]];
             end
@@ -87,5 +88,6 @@ function embed(comp::Symbol,degF::degF{2},cval::Array{Float64,1},compRec::Symbol
     else
         error("Entsprechende embed-Funktion fehlt.")
     end
+
     return cEmbed;
 end

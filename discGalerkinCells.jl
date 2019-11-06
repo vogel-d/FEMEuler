@@ -11,7 +11,7 @@ function discGalerkinCells!(M::Array{Float64,2},
     gradw1=zeros(sk);
     gradw2=zeros(sk);
 
-    for k in 1:m.topology.size[3]
+    @inbounds for k in 1:m.topology.size[3]
         l2g!(globalNumW,degFW,k);
 
         fill!(w,0.0);

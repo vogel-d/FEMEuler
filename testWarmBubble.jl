@@ -14,10 +14,10 @@ function testWarmBubble()
     taskRecovery=true;
     advection=true;
 
-    p=femProblem(:quad, 160, 80, femType, t=:compressible, advection=advection, taskRecovery=taskRecovery,
-                 xl=-10000.0, xr=10000.0, yr=10000.0);
-    #p=femProblem(:quad, 80, 40, femType, t=:compressible, advection=advection, taskRecovery=taskRecovery,
-    #                          xl=-10000.0, xr=10000.0, yr=10000.0);
+    #p=femProblem(:quad, 160, 80, femType, t=:compressible, advection=advection, taskRecovery=taskRecovery,
+    #             xl=-10000.0, xr=10000.0, yr=10000.0);
+    p=femProblem(:quad, 80, 40, femType, t=:compressible, advection=advection, taskRecovery=taskRecovery,
+                              xl=-10000.0, xr=10000.0, yr=10000.0);
     #adaptGeometry!(pv,0.3,0.3,false); #sin perbutation
 
     boundaryCondition = (:periodic, :constant); #(top/bottom, east/west)
@@ -30,6 +30,7 @@ function testWarmBubble()
     ns=15;
     EndTime=1000.0;
     nIter=Int64(EndTime/dt);
+    nIter=1;
 
     #start functions
     xCM=0.0; zCM=2000.0;
@@ -78,7 +79,7 @@ function testWarmBubble()
     SthY=Array{SparseMatrixCSC{Float64,Int64},1}(undef,MISMethod.nStage);
     Time=0.0;
     for i=1:nIter
-      y=splitExplicit(y,Y,FY,SthY,p,gamma,nquadPhi,nquadPoints,MrT,MrV,MISMethod,Time,dt,ns);
+      @time y=splitExplicit(y,Y,FY,SthY,p,gamma,nquadPhi,nquadPoints,MrT,MrV,MISMethod,Time,dt,ns);
       Time+=dt
       p.solution[Time]=y;
       p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
@@ -93,7 +94,7 @@ function testWarmBubble()
     end
     correctVelocity!(p);
     #Speichern des Endzeitpunktes als vtu-Datei:
-    unstructured_vtk(p, EndTime, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
+    #unstructured_vtk(p, EndTime, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
     #Speichern aller berechneten Zwischenwerte als vtz-Datei:
     #unstructured_vtk(p, sort(collect(keys(p.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
 
