@@ -72,7 +72,7 @@ function assembMass(degF::degF{4}, m::mesh, kubPoints::Array{Float64,2}, kubWeig
     vals=Float64[];
     for k in 1:m.topology.size[m.topology.D+1]
         jacobi!(J,ddJ,jphiRef,m,k,kubPoints, phiRef,coord);
-        globalNum=l2g(degF,k);
+        l2g!(globalNum,degF,k);
         for j in 1:iter
             for i in 1:iter
                 currentval=0.0;
