@@ -151,11 +151,6 @@ function coordTrans(mt::Int64, normals::Array{Float64,2}, type::Array{Symbol,1},
     return nquadPhi, nquadPoints;
 end
 
-function initQuadPhi(phi::Array{Function,1})
-    quadPhi=Array{Float64,4}(undef,psize[1],sk,psize[2],size(normals,2));
-
-end
-
 function splitExplicit(y0::solution,Y::Array{solution,1},FY::Array{solution,1},SthY::Array{SparseMatrixCSC{Float64,Int64},1},
                       p::femProblem, gamma::Float64,
                       nquadPhi::Dict{Symbol, Array{Float64,4}},

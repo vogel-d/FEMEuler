@@ -1,13 +1,14 @@
-function assembLoad(degF::degF{1}, f, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
+function assembLoad(degF::degF{3}, f, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
     phiT=degF.phi;
     sk=size(kubWeights);
+    iter=size(phiT,3);
 
     J=initPhi((2,2),sk);
     dJ=Array{Float64,2}(undef,sk);
     jcoord=Array{Float64,2}(undef,2,m.meshType);
-    gb=zeros(size(degF.coordinates,2))
+    globalNum=Array{Int64,1}(undef,size(phiT,3));
 
-    iter=length(phiT);
+    gb=zeros(size(degF.coordinates,2))
     for k in 1:m.topology.size[m.topology.D+1]
         coord=@views m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][k]:m.topology.offset["20"][k+1]-1]]
 
@@ -18,11 +19,11 @@ function assembLoad(degF::degF{1}, f, m::mesh, kubPoints::Array{Float64,2}, kubW
             ft[i,j]=f(xy[1],xy[2]);
         end
 
-        globalNum=l2g(degF,k);
+        l2g!(globalNum,degF,k);
         for j in 1:iter
             for r in 1:sk[2]
                 for l in 1:sk[1]
-                    gb[globalNum[j]]+=kubWeights[l,r]*phiT[j][l,r]*ft[l,r]*dJ[l,r];
+                    gb[globalNum[j]]+=kubWeights[l,r]*phiT[l,r,j]*ft[l,r]*dJ[l,r];
                 end
             end
         end
@@ -30,17 +31,18 @@ function assembLoad(degF::degF{1}, f, m::mesh, kubPoints::Array{Float64,2}, kubW
     return gb;
 end
 
-function assembLoad(degF::degF{2}, f, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
+function assembLoad(degF::degF{4}, f, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
     phiT=degF.phi;
     sk=size(kubWeights);
+    iter=size(phiT,4);
 
     J=initPhi((2,2),sk);
     ddJ=Array{Float64,2}(undef,sk);
-    jphiT=initPhi(size(phiT),sk);
+    jphiT=Array{Float64,4}(undef,size(phiT,1),sk[1],sk[2],size(phiT,4));
     jcoord=Array{Float64,2}(undef,2,m.meshType);
-    gb=zeros(size(degF.coordinates,2));
+    globalNum=Array{Int64,1}(undef,size(phiT,4));
 
-    iter=size(phiT,2);
+    gb=zeros(size(degF.coordinates,2));
     for k in 1:m.topology.size[m.topology.D+1]
         coord=@views m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][k]:m.topology.offset["20"][k+1]-1]]
 
@@ -53,11 +55,11 @@ function assembLoad(degF::degF{2}, f, m::mesh, kubPoints::Array{Float64,2}, kubW
             ft2[i,j]=f[2](xy[1],xy[2]);
         end
 
-        globalNum=l2g(degF,k);
+        l2g!(globalNum,degF,k);
         for j in 1:iter
             for r in 1:sk[2]
                 for l in 1:sk[1]
-                    gb[globalNum[j]]+=kubWeights[l,r]*(ft1[l,r]*jphiT[1,j][l,r]+ft2[l,r]*jphiT[2,j][l,r]);
+                    gb[globalNum[j]]+=kubWeights[l,r]*(ft1[l,r]*jphiT[1,l,r,j]+ft2[l,r]*jphiT[2,l,r,j]);
                 end
             end
         end

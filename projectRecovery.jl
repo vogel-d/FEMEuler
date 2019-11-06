@@ -1,7 +1,7 @@
-function projectRecovery(degFH::degF{1},degF::degF{1},cval::Array{Float64,1},massMH::SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64},m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
+function projectRecovery(degFH::degF{3},degF::degF{3},cval::Array{Float64,1},massMH::SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64},m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
     phi=@views degF.phi;
     phiH=@views degFH.phi;
-    sph=length(phiH)
+    sph=size(phiH,3)
     sk=size(kubWeights);
 
     J=initPhi((2,2),sk);
@@ -10,8 +10,8 @@ function projectRecovery(degFH::degF{1},degF::degF{1},cval::Array{Float64,1},mas
 
     cl=zeros(sk);
 
-    globalNum=Array{Int64,1}(undef,length(phi));
-    globalNumH=Array{Int64,1}(undef,length(phiH));
+    globalNum=Array{Int64,1}(undef,size(phi,3));
+    globalNumH=Array{Int64,1}(undef,size(phiH,3));
 
     gbh=zeros(size(degFH.coordinates,2))
     for k in 1:m.topology.size[m.topology.D+1]
@@ -22,13 +22,13 @@ function projectRecovery(degFH::degF{1},degF::degF{1},cval::Array{Float64,1},mas
 
         fill!(cl,0.0);
         for i in 1:length(globalNum)
-            @. cl+=cval[globalNum[i]]*phi[i];
+            @views @. cl+=cval[globalNum[i]]*phi[:,:,i];
         end
 
         for j in 1:sph
             for k in 1:sk[2]
                 for l in 1:sk[1]
-                    gbh[globalNumH[j]]+=kubWeights[l,k]*cl[l,k]*phiH[j][l,k]*dJ[l,k];
+                    gbh[globalNumH[j]]+=kubWeights[l,k]*cl[l,k]*phiH[l,k,j]*dJ[l,k];
                 end
             end
         end
@@ -36,23 +36,23 @@ function projectRecovery(degFH::degF{1},degF::degF{1},cval::Array{Float64,1},mas
     return massMH\gbh;
 end
 
-function projectRecovery(degFH::degF{2},degF::degF{2},cval::Array{Float64,1},massMH::SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64},m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
+function projectRecovery(degFH::degF{4},degF::degF{4},cval::Array{Float64,1},massMH::SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64},m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
     phi=@views degF.phi;
     phiH=@views degFH.phi;
-    sph=size(phiH,2);
+    sph=size(phiH,4);
     sk=size(kubWeights);
 
     J=initPhi((2,2),sk);
     ddJ=Array{Float64,2}(undef,sk);
-    jphi=initPhi(size(phi),sk);
-    jphiH=initPhi(size(phiH),sk);
+    jphi=Array{Float64,4}(undef,size(phi,1),sk[1],sk[2],size(phi,4));
+    jphiH=Array{Float64,4}(undef,size(phiH,1),sk[1],sk[2],size(phiH,4));
     coord=Array{Float64,2}(undef,2,m.meshType);
 
     cl1=zeros(sk);
     cl2=zeros(sk);
 
-    globalNum=Array{Int64,1}(undef,size(phi,2));
-    globalNumH=Array{Int64,1}(undef,size(phiH,2));
+    globalNum=Array{Int64,1}(undef,size(phi,4));
+    globalNumH=Array{Int64,1}(undef,size(phiH,4));
 
     gbh=zeros(size(degFH.coordinates,2))
     for k in 1:m.topology.size[m.topology.D+1]
@@ -64,14 +64,14 @@ function projectRecovery(degFH::degF{2},degF::degF{2},cval::Array{Float64,1},mas
         fill!(cl1,0.0);
         fill!(cl2,0.0);
         for i in 1:length(globalNum)
-            @. cl1+=cval[globalNum[i]]*jphi[1,i];
-            @. cl2+=cval[globalNum[i]]*jphi[2,i];
+            @views @. cl1+=cval[globalNum[i]]*jphi[1,:,:,i];
+            @views @. cl2+=cval[globalNum[i]]*jphi[2,:,:,i];
         end
 
         for j in 1:sph
             for r in 1:sk[2]
                 for l in 1:sk[1]
-                    gbh[globalNumH[j]]+=kubWeights[l,r]*ddJ[l,r]*(cl1[l,r]*jphiH[1,j][l,r]+cl2[l,r]*jphiH[2,j][l,r]);
+                    gbh[globalNumH[j]]+=kubWeights[l,r]*ddJ[l,r]*(cl1[l,r]*jphiH[1,l,r,j]+cl2[l,r]*jphiH[2,l,r,j]);
                 end
             end
         end

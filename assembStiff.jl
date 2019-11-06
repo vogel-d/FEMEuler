@@ -46,7 +46,7 @@ function assembStiff!(p::femProblem)
 end
 
 #skalare Größe mit Divergenz von vektorieller Größe
-function assembStiff(degFs::degF{1}, degFv::degF{2}, nf::Int64, kubWeights::Array{Float64,2})
+function assembStiff(degFs::degF{3}, degFv::degF{4}, nf::Int64, kubWeights::Array{Float64,2})
 
     nT=size(degFs.coordinates,2);
     nF=size(degFv.coordinates,2);
@@ -60,21 +60,23 @@ function assembStiff(degFs::degF{1}, degFv::degF{2}, nf::Int64, kubWeights::Arra
     # hier ist Assemblieren nur einmal nötig, da sich die Determinanten der Jacobi-Matrix jeweils
     # wegkürzt, weshalb die lokale Steifigkeitsmatrix unabhängig von den Koordinaten der jeweiligen Fläche ist.
 
-    lS=zeros(length(phiT), length(divphiF));
-    for i in 1:length(phiT)
-        for j in 1:length(divphiF)
+    lS=zeros(size(phiT,3), size(divphiF,3));
+    for i in 1:size(phiT,3)
+        for j in 1:size(divphiF,3)
             currentval=0.0;
             for k in 1:size(kubWeights,2)
                 for l in 1:size(kubWeights,1)
-                    currentval+=kubWeights[l,k]*phiT[i][l,k]*divphiF[j][l,k];
+                    currentval+=kubWeights[l,k]*phiT[l,k,i]*divphiF[l,k,j];
                 end
             end
             lS[i,j] = currentval;
         end
     end
+    globalNumT=Array{Int64,1}(undef,size(phiT,3));
+    globalNumF=Array{Int64,1}(undef,size(divphiF,3));
     for k in 1:nf
-        globalNumT=l2g(degFs,k);
-        globalNumF=l2g(degFv,k);
+        l2g!(globalNumT,degFs,k);
+        l2g!(globalNumF,degFv,k);
         for j in 1:length(globalNumF)
             for i in 1:length(globalNumT)
                 if !isequal(lS[i,j],0.0) || (globalNumT[i]==nT && globalNumF[j]==nF)
@@ -89,7 +91,7 @@ function assembStiff(degFs::degF{1}, degFv::degF{2}, nf::Int64, kubWeights::Arra
 end
 
 #skalare Größe mit vektorieller Größe
-function assembStiff(degFs::degF{1}, degFv::degF{2}, z::Array{Float64,1}, m::mesh, kubWeights::Array{Float64,2}, kubPoints::Array{Float64,2})
+function assembStiff(degFs::degF{3}, degFv::degF{4}, z::Array{Float64,1}, m::mesh, kubWeights::Array{Float64,2}, kubPoints::Array{Float64,2})
     nT=size(degFs.coordinates,2);
     nF=size(degFv.coordinates,2);
     phiT=degFs.phi;
@@ -103,27 +105,29 @@ function assembStiff(degFs::degF{1}, degFv::degF{2}, z::Array{Float64,1}, m::mes
 
     J=initPhi((2,2),sk);
     ddJ=Array{Float64,2}(undef,sk);
-    jphiF=initPhi(size(phiF),sk);
+    jphiF=Array{Float64,4}(undef,size(phiF,1),sk[1],sk[2],size(phiF,4));
     coord=Array{Float64,2}(undef,2,m.meshType);
+    globalNumT=Array{Int64,1}(undef,size(phiT,3));
+    globalNumF=Array{Int64,1}(undef,size(phiF,4));
 
-    lS=zeros(length(phiT), size(phiF,2));
+    lS=zeros(size(phiT,3), size(phiF,4));
 
     for k in 1:m.topology.size[m.topology.D+1]
         jacobi!(J,ddJ,jphiF,m, k, kubPoints, phiF,coord);
-        for i in 1:length(phiT)
-            for j in 1:size(phiF,2)
+        for i in 1:size(phiT,3)
+            for j in 1:size(phiF,4)
                 currentval=0.0;
                 for k in 1:sk[2]
                     for l in 1:sk[1]
-                        currentval+=kubWeights[l,k]*phiT[i][l,k]*(z[1]*jphiF[1,j][l,k]+z[2]*jphiF[2,j][l,k]);
+                        currentval+=kubWeights[l,k]*phiT[l,k,i]*(z[1]*jphiF[1,l,k,j]+z[2]*jphiF[2,l,k,j]);
                     end
                 end
                 lS[i,j] = currentval;
             end
         end
 
-        globalNumT=l2g(degFs,k);
-        globalNumF=l2g(degFv,k);
+        l2g!(globalNumT,degFs,k);
+        l2g!(globalNumF,degFv,k);
 
         for j in 1:length(globalNumF)
             for i in 1:length(globalNumT)
@@ -156,25 +160,26 @@ function assembStiff!(p::femProblem, comp::Symbol)
     J=initPhi((2,2),sk);
     dJ=Array{Float64,2}(undef,sk);
     coord=Array{Float64,2}(undef,2,m.meshType);
+    globalNum=Array{Int64,1}(undef,size(dphiRef,4));
 
     nDF=size(degF[comp].coordinates,2);
     S=spzeros(nDF,nDF);
-    lS=zeros(size(dphiRef,2), size(dphiRef,2));
+    lS=zeros(size(dphiRef,4), size(dphiRef,4));
 
     for k in 1:m.topology.size[m.topology.D+1]
         jacobi!(J,dJ,m,k,kubPoints,coord);
 
-        for j in 1:size(dphiRef,2)
-            for i in 1:size(dphiRef,2)
+        for j in 1:size(dphiRef,4)
+            for i in 1:size(dphiRef,4)
                 for k in 1:sk[2]
                     for l in 1:sk[1]
-                        lS[i,j]+=kubWeights[l,k]*dJ[l,k]*(dphiRef[1,i][l,k]*dphiRef[1,j][l,k]+dphiRef[2,i][l,k]*dphiRef[2,j][l,k]);
+                        lS[i,j]+=kubWeights[l,k]*dJ[l,k]*(dphiRef[1,l,k,i]*dphiRef[1,l,k,j]+dphiRef[2,l,k,i]*dphiRef[2,l,k,j]);
                     end
                 end
             end
         end
 
-        globalNum=l2g(degF[comp],k);
+        l2g!(globalNum,degF[comp],k);
         for j in 1:length(globalNum)
             for i in 1:length(globalNum)
                 S[globalNum[i],globalNum[j]]+=lS[i,j];

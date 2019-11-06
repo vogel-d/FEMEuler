@@ -7,9 +7,9 @@ mutable struct degF{N}
     offset::Array{Int64,1};
     referenceCoordinates::Array{Float64,2};
     referenceBoundary::Array{Float64,2};
-    phi::Array{Array{Float64,2},N};
-    divphi::Array{Array{Float64,2},1};
-    gradphi::Array{Array{Float64,2},2};
+    phi::Array{Float64,N};
+    divphi::Array{Float64,3};
+    gradphi::Array{Float64,4};
     discont::Bool;
     components::Array{Int64,1};
 end

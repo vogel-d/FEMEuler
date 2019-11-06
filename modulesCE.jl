@@ -27,7 +27,7 @@ include("initPhi.jl")
 include("adaptGeometry.jl")
 include("additionalFunctions.jl")
 include("correctVelocity.jl")
-
+include("hdimarray.jl")
 
 include("generateEquals.jl")
 include("generateMixedBoundary.jl")

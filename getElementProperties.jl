@@ -198,7 +198,7 @@ function getQuadElementProperties(type::Symbol, kubPoints::Array{Float64,2})
         kubGrad[ki,kj]=kubVal;
     end
 
-    return kubPhi, kubDiv,  kubGrad, c,cm, comp, discontType
+    return hdimarray(kubPhi), hdimarray(kubDiv),  hdimarray(kubGrad), c,cm, comp, discontType
 end
 
 
@@ -291,5 +291,5 @@ function getTriElementProperties(type::Symbol, kubPoints::Array{Float64,2})
         kubGrad[ki,kj]=kubVal;
     end
 
-    return kubPhi, kubDiv,  kubGrad, c,cm, comp, discontType
+    return hdimarray(kubPhi), hdimarray(kubDiv),  hdimarray(kubGrad), c,cm, comp, discontType
 end

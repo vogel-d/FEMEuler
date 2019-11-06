@@ -1,6 +1,6 @@
-function advectionStiffMatrix(degFT::degF{1}, phiTtrans::Array{Array{Array{Float64,1},2},1},
-                              degFF::degF{2}, phiFtrans::Array{Array{Array{Float64,1},2},1},fval::Array{Float64,1},
-                              degFW::degF{1}, phiWtrans::Array{Array{Array{Float64,1},2},1},wval::Array{Float64,1},
+function advectionStiffMatrix(degFT::degF{3}, phiTtrans::Array{Float64,4},
+                              degFF::degF{4}, phiFtrans::Array{Float64,4},fval::Array{Float64,1},
+                              degFW::degF{3}, phiWtrans::Array{Float64,4},wval::Array{Float64,1},
                               gamma::Float64, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2},
                               nquadPoints::Array{Array{Float64,2},1}, edgeData::Array{Array{Int64,1},1})
 
@@ -13,13 +13,13 @@ function advectionStiffMatrix(degFT::degF{1}, phiTtrans::Array{Array{Array{Float
 
     sk=size(kubWeights);
 
-    globalNumT1=Array{Int64,1}(undef,length(phiT));
-    globalNumF1=Array{Int64,1}(undef,size(phiF,2));
-    globalNumW1=Array{Int64,1}(undef,length(phiW));
+    globalNumT1=Array{Int64,1}(undef,size(phiT,3));
+    globalNumF1=Array{Int64,1}(undef,size(phiF,4));
+    globalNumW1=Array{Int64,1}(undef,size(phiW,3));
 
-    globalNumT2=Array{Int64,1}(undef,length(phiT));
-    globalNumF2=Array{Int64,1}(undef,size(phiF,2));
-    globalNumW2=Array{Int64,1}(undef,length(phiW));
+    globalNumT2=Array{Int64,1}(undef,size(phiT,3));
+    globalNumF2=Array{Int64,1}(undef,size(phiF,4));
+    globalNumW2=Array{Int64,1}(undef,size(phiW,3));
 
     rows=Int64[];
     cols=Int64[];

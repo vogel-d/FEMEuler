@@ -1,7 +1,7 @@
 function discGalerkinCells!(M::Array{Float64,2},
-                            degFT::degF{1},phiT::Array{Array{Float64,2},1}, globalNumT::Array{Int64,1},
-                            degFF::degF{2},phiF::Array{Array{Float64,2},2}, dphiF::Array{Array{Float64,2},1}, fval::SparseVector{Float64,Int64}, globalNumF::Array{Int64,1},
-                            degFW::degF{1},phiW::Array{Array{Float64,2},1}, gradphiW::Array{Array{Float64,2},2}, wval::Array{Float64,1}, globalNumW::Array{Int64,1},
+                            degFT::degF{3},phiT::Array{Float64,3}, globalNumT::Array{Int64,1},
+                            degFF::degF{4},phiF::Array{Float64,4}, dphiF::Array{Float64,3}, fval::SparseVector{Float64,Int64}, globalNumF::Array{Int64,1},
+                            degFW::degF{3},phiW::Array{Float64,3}, gradphiW::Array{Float64,4}, wval::Array{Float64,1}, globalNumW::Array{Int64,1},
                             m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
 
 
@@ -16,14 +16,14 @@ function discGalerkinCells!(M::Array{Float64,2},
 
         fill!(w,0.0);
         for i in 1:length(globalNumW)
-            @. w+=wval[globalNumW[i]]*phiW[i];
+            @views @. w+=wval[globalNumW[i]]*phiW[:,:,i];
         end
 
         fill!(gradw1,0.0);
         fill!(gradw2,0.0);
-        for j in 1:size(gradphiW,2)
-            @. gradw1+=wval[globalNumW[j]]*gradphiW[1,j]
-            @. gradw2+=wval[globalNumW[j]]*gradphiW[2,j];
+        for j in 1:length(globalNumW)
+            @views @. gradw1+=wval[globalNumW[j]]*gradphiW[1,:,:,j]
+            @views @. gradw2+=wval[globalNumW[j]]*gradphiW[2,:,:,j];
         end
 
         l2g!(globalNumF,degFF,k);
@@ -36,7 +36,7 @@ function discGalerkinCells!(M::Array{Float64,2},
                 gj=globalNumF[j];
                 for r in 1:size(kubWeights,2)
                     for l in 1:size(kubWeights,1)
-                        z+=fval[gj]*kubWeights[l,r]*phiT[i][l,r]*(w[l,r]*dphiF[j][l,r]+(gradw1[l,r]*phiF[1,j][l,r]+gradw2[l,r]*phiF[2,j][l,r]));
+                        z+=fval[gj]*kubWeights[l,r]*phiT[l,r,i]*(w[l,r]*dphiF[l,r,j]+(gradw1[l,r]*phiF[1,l,r,j]+gradw2[l,r]*phiF[2,l,r,j]));
                     end
                 end
             end
@@ -48,16 +48,16 @@ function discGalerkinCells!(M::Array{Float64,2},
 end
 
 function discGalerkinCells!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Array{Float64,1},
-                            degFT::degF{1},phiT::Array{Array{Float64,2},1}, globalNumT::Array{Int64,1},
-                            degFF::degF{2},phiF::Array{Array{Float64,2},2}, dphiF::Array{Array{Float64,2},1}, fval::Array{Float64,1}, globalNumF::Array{Int64,1},
-                            degFW::degF{1},phiW::Array{Array{Float64,2},1}, gradphiW::Array{Array{Float64,2},2}, wval::Array{Float64,1}, globalNumW::Array{Int64,1},
+                            degFT::degF{3},phiT::Array{Float64,3}, globalNumT::Array{Int64,1},
+                            degFF::degF{4},phiF::Array{Float64,4}, dphiF::Array{Float64,3}, fval::Array{Float64,1}, globalNumF::Array{Int64,1},
+                            degFW::degF{3},phiW::Array{Float64,3}, gradphiW::Array{Float64,4}, wval::Array{Float64,1}, globalNumW::Array{Int64,1},
                             m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
 
 
     sk=size(kubWeights);
 
-    nT=length(phiT);
-    nF=size(phiF,2);
+    nT=size(phiT,3);
+    nF=size(phiF,4);
 
     w=zeros(sk);
     gradw1=zeros(sk);
@@ -70,14 +70,14 @@ function discGalerkinCells!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
 
         fill!(w,0.0);
         for i in 1:length(globalNumW)
-            @. w+=wval[globalNumW[i]]*phiW[i];
+            @views @. w+=wval[globalNumW[i]]*phiW[:,:,i];
         end
 
         fill!(gradw1,0.0);
         fill!(gradw2,0.0);
-        for j in 1:size(gradphiW,2)
-            @. gradw1+=wval[globalNumW[j]]*gradphiW[1,j]
-            @. gradw2+=wval[globalNumW[j]]*gradphiW[2,j];
+        for j in 1:length(globalNumW)
+            @views @. gradw1+=wval[globalNumW[j]]*gradphiW[1,:,:,j]
+            @views @. gradw2+=wval[globalNumW[j]]*gradphiW[2,:,:,j];
         end
 
         fill!(lM,0.0);
@@ -85,7 +85,7 @@ function discGalerkinCells!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
             for i in 1:nT
                 for r in 1:sk[2]
                     for l in 1:sk[1]
-                        lM[i,j]+=kubWeights[l,r]*phiT[i][l,r]*(w[l,r]*dphiF[j][l,r]+(gradw1[l,r]*phiF[1,j][l,r]+gradw2[l,r]*phiF[2,j][l,r]));
+                        lM[i,j]+=kubWeights[l,r]*phiT[l,r,i]*(w[l,r]*dphiF[l,r,j]+(gradw1[l,r]*phiF[1,l,r,j]+gradw2[l,r]*phiF[2,l,r,j]));
                     end
                 end
             end
@@ -108,16 +108,16 @@ end
 
 
 function discGalerkinCells!(M::Array{Float64,2},
-                            degFT::degF{2},phiT::Array{Array{Float64,2},2}, globalNumT::Array{Int64,1},
-                            degFF::degF{2},phiF::Array{Array{Float64,2},2}, dphiF::Array{Array{Float64,2},1}, fval::SparseVector{Float64,Int64}, globalNumF::Array{Int64,1},
-                            degFW::degF{2},phiW::Array{Array{Float64,2},2}, gradphiW::Array{Array{Float64,2},2}, wval::Array{Float64,1}, globalNumW::Array{Int64,1},
+                            degFT::degF{4},phiT::Array{Float64,4}, globalNumT::Array{Int64,1},
+                            degFF::degF{4},phiF::Array{Float64,4}, dphiF::Array{Float64,3}, fval::SparseVector{Float64,Int64}, globalNumF::Array{Int64,1},
+                            degFW::degF{4},phiW::Array{Float64,4}, gradphiW::Array{Float64,4}, wval::Array{Float64,1}, globalNumW::Array{Int64,1},
                             m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2}, coord::Array{Float64,2})
 
 
     sk=size(kubWeights);
 
     ddJ=Array{Float64,2}(undef,sk);
-    jphiT=initPhi(size(phiT),sk);
+    jphiT=Array{Float64,4}(undef,size(phiT,1),sk[1],sk[2],size(phiT,4));
 
     w1=zeros(sk);
     w2=zeros(sk);
@@ -133,8 +133,8 @@ function discGalerkinCells!(M::Array{Float64,2},
         fill!(w1,0.0);
         fill!(w2,0.0);
         for i in 1:length(globalNumW)
-            @. w1+= wval[globalNumW[i]]* phiW[1,i];
-            @. w2+=wval[globalNumW[i]]*phiW[2,i];
+            @views @. w1+= wval[globalNumW[i]]* phiW[1,:,:,i];
+            @views @. w2+=wval[globalNumW[i]]*phiW[2,:,:,i];
         end
 
         fill!(gradw11,0.0);
@@ -143,10 +143,10 @@ function discGalerkinCells!(M::Array{Float64,2},
         fill!(gradw22,0.0);
         zg=0;
         for i in 1:size(phiW,2)
-            @. gradw11+=wval[globalNumW[i]]*gradphiW[1,1+zg];
-            @. gradw12+=wval[globalNumW[i]]*gradphiW[1,2+zg];
-            @. gradw21+=wval[globalNumW[i]]*gradphiW[2,1+zg];
-            @. gradw22+=wval[globalNumW[i]]*gradphiW[2,2+zg];
+            @views @. gradw11+=wval[globalNumW[i]]*gradphiW[1,:,:,1+zg];
+            @views @. gradw12+=wval[globalNumW[i]]*gradphiW[1,:,:,2+zg];
+            @views @. gradw21+=wval[globalNumW[i]]*gradphiW[2,:,:,1+zg];
+            @views @. gradw22+=wval[globalNumW[i]]*gradphiW[2,:,:,2+zg];
             zg+=2;
         end
 
@@ -160,7 +160,7 @@ function discGalerkinCells!(M::Array{Float64,2},
                 gj=globalNumF[j];
                 for r in 1:size(kubWeights,2)
                     for l in 1:size(kubWeights,1)
-                        z+=fval[gj]*kubWeights[l,r]*ddJ[l,r]^2*(jphiT[1,i][l,r]*(dphiF[j][l,r]*w1[l,r]+gradw11[l,r]*phiF[1,j][l,r]+gradw12[l,r]*phiF[2,j][l,r])+jphiT[2,i][l,r]*(dphiF[j][l,r]*w2[l,r]+gradw21[l,r]*phiF[1,j][l,r]+gradw22[l,r]*phiF[2,j][l,r]));
+                        z+=fval[gj]*kubWeights[l,r]*ddJ[l,r]^2*(jphiT[1,l,r,i]*(dphiF[l,r,j]*w1[l,r]+gradw11[l,r]*phiF[1,l,r,j]+gradw12[l,r]*phiF[2,l,r,j])+jphiT[2,l,r,i]*(dphiF[l,r,j]*w2[l,r]+gradw21[l,r]*phiF[1,l,r,j]+gradw22[l,r]*phiF[2,l,r,j]));
                     end
                 end
             end

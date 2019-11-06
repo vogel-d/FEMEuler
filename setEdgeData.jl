@@ -2,6 +2,7 @@ function setEdgeData!(p::femProblem, compVf::Symbol)
     m=p.mesh;
     equals=p.equals;
     degFVf=p.degFBoundary[p.femType[compVf][1]];
+    globalNumVf=Array{Int64,1}(undef,size(degFVf.phi,4));
     mt=m.meshType;
     mt==4 ?  normal=[0.5 0.0 1.0 1.0 0.5 0.0 0.0 -1.0; 0.0 -1.0 0.5 0.0 1.0 1.0 0.5 0.0] : normal=[0.5 0.0 0.5 1/sqrt(2) 0.0 -1.0; 0.0 -1.0 0.5 1/sqrt(2) 0.5 0.0];
     offe=m.topology.offset["12"];
@@ -63,7 +64,7 @@ function setEdgeData!(p::femProblem, compVf::Symbol)
             end
 
         end
-        globalNumVf=l2g(degFVf,inc[1])
+        l2g!(globalNumVf,degFVf,inc[1])
         for i in 1:mt
             rb=t1(degFVf.referenceBoundary[i,1:2]);
             if isapprox(rb,mva)

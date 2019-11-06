@@ -1,8 +1,8 @@
-function embed(comp::Symbol,degF::degF{1},cval::Array{Float64,1},compRec::Symbol,degFRec::degF{1},n::Int64)
+function embed(comp::Symbol,degF::degF{3},cval::Array{Float64,1},compRec::Symbol,degFRec::degF{3},n::Int64)
     cEmbed=zeros(size(degFRec.coordinates,2));
 
-    globalNum=Array{Int64,1}(undef,length(degF.phi));
-    globalNumRec=Array{Int64,1}(undef,length(degFRec.phi));
+    globalNum=Array{Int64,1}(undef,size(degF.phi,3));
+    globalNumRec=Array{Int64,1}(undef,size(degFRec.phi,3));
     if comp==:DG0 && compRec==:DG1
         for i in 1:n
             l2g!(globalNum,degF,i);
@@ -40,10 +40,10 @@ function embed(comp::Symbol,degF::degF{1},cval::Array{Float64,1},compRec::Symbol
         cEmbed=cEmbed./z;
     elseif (comp==:P1y || comp==:DG1y )&& compRec==:P1
         z=zeros(size(degFRec.coordinates,2));
+        h=[1,1,2,2];
         for i in 1:n
             l2g!(globalNum,degF,i);
             l2g!(globalNumRec,degFRec,i);
-            h=[1,1,2,2];
             for j in 1:length(globalNumRec)
                 cEmbed[globalNumRec[j]]+=cval[globalNum[h[j]]];
                 z[globalNumRec[j]]+=1;
@@ -62,11 +62,11 @@ function embed(comp::Symbol,degF::degF{1},cval::Array{Float64,1},compRec::Symbol
     return cEmbed;
 end
 
-function embed(comp::Symbol,degF::degF{2},cval::Array{Float64,1},compRec::Symbol,degFRec::degF{2},n::Int64)
+function embed(comp::Symbol,degF::degF{4},cval::Array{Float64,1},compRec::Symbol,degFRec::degF{4},n::Int64)
     cEmbed=zeros(size(degFRec.coordinates,2));
 
-    globalNum=Array{Int64,1}(undef,size(degF.phi,2));
-    globalNumRec=Array{Int64,1}(undef,size(degFRec.phi,2));
+    globalNum=Array{Int64,1}(undef,size(degF.phi,4));
+    globalNumRec=Array{Int64,1}(undef,size(degFRec.phi,4));
 
     if comp==:VecP1 && compRec==:VecDG1
         for i in 1:n

@@ -1,5 +1,5 @@
-function projectPressure(degFP::degF{1},massMP::SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64},
-                        degFRT::degF{1},valRT::Array{Float64,1},
+function projectPressure(degFP::degF{3},massMP::SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64},
+                        degFRT::degF{3},valRT::Array{Float64,1},
                         m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
     phiRT=@views degFRT.phi;
     phiP=@views degFP.phi;
@@ -9,8 +9,8 @@ function projectPressure(degFP::degF{1},massMP::SuiteSparse.UMFPACK.UmfpackLU{Fl
     dJ=Array{Float64,2}(undef,sk);
     coord=Array{Float64,2}(undef,2,m.meshType);
 
-    globalNumRT=Array{Int64,1}(undef,length(phiRT));
-    globalNumP=Array{Int64,1}(undef,length(phiP));
+    globalNumRT=Array{Int64,1}(undef,size(phiRT,3));
+    globalNumP=Array{Int64,1}(undef,size(phiP,3));
 
     cl=zeros(sk);
 
@@ -23,7 +23,7 @@ function projectPressure(degFP::degF{1},massMP::SuiteSparse.UMFPACK.UmfpackLU{Fl
 
         fill!(cl,0.0);
         for i in 1:length(globalNumRT)
-            @. cl+=valRT[globalNumRT[i]]*phiRT[1,i];
+            @views @. cl+=valRT[globalNumRT[i]]*phiRT[:,:,i];
         end
 
         Cpd=1004.0;
@@ -33,10 +33,10 @@ function projectPressure(degFP::degF{1},massMP::SuiteSparse.UMFPACK.UmfpackLU{Fl
         Pres2=(1.0/(1.0-kappa));
         cl=Pres1.*cl.^Pres2;
 
-        for j in 1:length(phiP)
+        for j in 1:length(globalNumP)
             for r in 1:sk[2]
                 for l in 1:sk[1]
-                    gbh[globalNumP[j]]+=kubWeights[l,r]*cl[l,r]*phiP[1,j][l,r]*dJ[l,r];
+                    gbh[globalNumP[j]]+=kubWeights[l,r]*cl[l,r]*phiP[l,r,j]*dJ[l,r];
                 end
             end
         end
