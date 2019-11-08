@@ -1,12 +1,12 @@
-function splitExplicit(y0::solution,Y::Array{solution,1},FY::Array{solution,1},SthY::Array{SparseMatrixCSC{Float64,Int64},1},
+function splitExplicit(y0::solution,
                       p::femProblem, gamma::Float64,
                       nquadPhi::Dict{Symbol, Array{Float64,4}},
                       nquadPoints::Array{Array{Float64,2},1},MrT::SparseMatrixCSC{Float64,Int64}, MrV::SparseMatrixCSC{Float64,Int64},
                       MIS::MIS,t0::Float64,dt::Float64,ns::Int64)
   stage=MIS.nStage;
-  #Y=Array{solution,1}(undef,stage+1);
-  #FY=Array{solution,1}(undef,stage);
-  #SthY=Array{SparseMatrixCSC{Float64,Int64},1}(undef,stage);
+  Y=Array{solution,1}(undef,stage+1);
+  FY=Array{solution,1}(undef,stage);
+  SthY=Array{SparseMatrixCSC{Float64,Int64},1}(undef,stage);
 
   numRho=p.degFBoundary[p.femType[:rho][1]].num
   numRhoV=p.degFBoundary[p.femType[:rhoV][1]].num

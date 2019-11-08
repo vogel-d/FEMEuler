@@ -271,7 +271,7 @@ function discGalerkinEdges!(M::Array{Float64,2},
         fill!(lM22,0.0);
         for j in 1:nF
             for i in 1:nT
-                for r in 1:length(quadWeights)
+                for r in 1:sk
                     lM11[i,j]+=le^2*quadWeights[r]*ddJ1[r]*ddJ1[r]^2*(n[1]*phiFn1[1,r,j]+n[2]*phiFn1[2,r,j])*(w11[r]*jphiTn1[1,r,i]+w12[r]*jphiTn1[2,r,i]);
                     lM12[i,j]+=le^2*quadWeights[r]*ddJ1[r]*ddJ2[r]^2*(n[1]*phiFn2[1,r,j]+n[2]*phiFn2[2,r,j])*(w21[r]*jphiTn1[1,r,i]+w22[r]*jphiTn1[2,r,i]);
                     lM21[i,j]+=le^2*quadWeights[r]*ddJ2[r]*ddJ1[r]^2*(n[1]*phiFn1[1,r,j]+n[2]*phiFn1[2,r,j])*(w11[r]*jphiTn2[1,r,i]+w12[r]*jphiTn2[2,r,i]);

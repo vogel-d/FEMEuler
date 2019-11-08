@@ -142,7 +142,7 @@ function discGalerkinCells!(M::Array{Float64,2},
         fill!(gradw21,0.0);
         fill!(gradw22,0.0);
         zg=0;
-        for i in 1:size(phiW,2)
+        for i in 1:length(globalNumW)
             @views @. gradw11+=wval[globalNumW[i]]*gradphiW[1,:,:,1+zg];
             @views @. gradw12+=wval[globalNumW[i]]*gradphiW[1,:,:,2+zg];
             @views @. gradw21+=wval[globalNumW[i]]*gradphiW[2,:,:,1+zg];

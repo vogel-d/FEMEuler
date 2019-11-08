@@ -5,6 +5,9 @@ function projectPressure(degFP::degF{3},massMP::SuiteSparse.UMFPACK.UmfpackLU{Fl
     phiP=@views degFP.phi;
     sk=size(kubWeights);
 
+    #display(phiRT)
+    #display(phiP)
+
     J=initPhi((2,2),sk);
     dJ=Array{Float64,2}(undef,sk);
     coord=Array{Float64,2}(undef,2,m.meshType);
