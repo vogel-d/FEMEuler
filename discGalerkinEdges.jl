@@ -42,8 +42,12 @@ function discGalerkinEdges!(M::Array{Float64,2},
         l2g!(globalNumW1,degFW,inc1);
         l2g!(globalNumW2,degFW,inc2);
         for i in 1:length(globalNumW1)
-            @views @. w1+=wval[globalNumW1[i]]*phiWn1[1,:,i];
-            @views @. w2+=wval[globalNumW2[i]]*phiWn2[1,:,i];
+            #@views @. w1+=wval[globalNumW1[i]]*phiWn1[1,:,i];
+            #@views @. w2+=wval[globalNumW2[i]]*phiWn2[1,:,i];
+            for r in 1:sk
+                w1[r]+=wval[globalNumW1[i]]*phiWn1[1,r,i];
+                w2[r]+=wval[globalNumW2[i]]*phiWn2[1,r,i];
+            end
         end
 
         s=0.0;
@@ -131,8 +135,12 @@ function discGalerkinEdges!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
         l2g!(globalNumW1,degFW,inc1);
         l2g!(globalNumW2,degFW,inc2);
         for i in 1:length(globalNumW1)
-            @views @. w1+=wval[globalNumW1[i]]*phiWn1[1,:,i];
-            @views @. w2+=wval[globalNumW2[i]]*phiWn2[1,:,i];
+            #@views @. w1+=wval[globalNumW1[i]]*phiWn1[1,:,i];
+            #@views @. w2+=wval[globalNumW2[i]]*phiWn2[1,:,i];
+            for r in 1:sk
+                w1[r]+=wval[globalNumW1[i]]*phiWn1[1,r,i];
+                w2[r]+=wval[globalNumW2[i]]*phiWn2[1,r,i];
+            end
         end
 
         s=0.0;
@@ -253,10 +261,16 @@ function discGalerkinEdges!(M::Array{Float64,2},
         l2g!(globalNumW1,degFW,inc1);
         l2g!(globalNumW2,degFW,inc2);
         for i in 1:length(globalNumW1)
-            @views @. w11+=wval[globalNumW1[i]]*jphiWn1[1,:,i];
-            @views @. w12+=wval[globalNumW1[i]]*jphiWn1[2,:,i];
-            @views @. w21+=wval[globalNumW2[i]]*jphiWn2[1,:,i];
-            @views @. w22+=wval[globalNumW2[i]]*jphiWn2[2,:,i];
+            #@views @. w11+=wval[globalNumW1[i]]*jphiWn1[1,:,i];
+            #@views @. w12+=wval[globalNumW1[i]]*jphiWn1[2,:,i];
+            #@views @. w21+=wval[globalNumW2[i]]*jphiWn2[1,:,i];
+            #@views @. w22+=wval[globalNumW2[i]]*jphiWn2[2,:,i];
+            for r in 1:sk
+                w11[r]+=wval[globalNumW1[i]]*jphiWn1[1,r,i];
+                w12[r]+=wval[globalNumW1[i]]*jphiWn1[2,r,i];
+                w21[r]+=wval[globalNumW2[i]]*jphiWn2[1,r,i];
+                w22[r]+=wval[globalNumW2[i]]*jphiWn2[2,r,i];
+            end
         end
 
         s=0.0;

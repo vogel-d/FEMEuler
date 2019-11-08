@@ -26,7 +26,12 @@ function projectPressure(degFP::degF{3},massMP::SuiteSparse.UMFPACK.UmfpackLU{Fl
 
         fill!(cl,0.0);
         for i in 1:length(globalNumRT)
-            @views @. cl+=valRT[globalNumRT[i]]*phiRT[:,:,i];
+            #@views @. cl+=valRT[globalNumRT[i]]*phiRT[:,:,i];
+            for r in 1:sk[2]
+                for l in 1:sk[1]
+                    cl[l,r]+=valRT[globalNumRT[i]]*phiRT[l,r,i];
+                end
+            end
         end
 
         Cpd=1004.0;
