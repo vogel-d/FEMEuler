@@ -23,7 +23,12 @@ function assembMassRho(degF::degF{3}, degFRho::degF{3}, valRho::Array{Float64,1}
 
         fill!(cRho,0.0);
         for i in 1:length(globalNumRho)
-            @views @. cRho+=valRho[globalNumRho[i]]*phiRho[:,:,i];
+            #@views @. cRho+=valRho[globalNumRho[i]]*phiRho[:,:,i];
+            for r in 1:sk[2]
+                for l in 1:sk[1]
+                    cRho[l,r]+=valRho[globalNumRho[i]]*phiRho[l,r,i];
+                end
+            end
         end
 
         for j in 1:iter
@@ -71,7 +76,12 @@ function assembMassRho(degF::degF{4}, degFRho::degF{3}, valRho::Array{Float64,1}
 
         fill!(cRho,0.0);
         for i in 1:length(globalNumRho)
-            @views @. cRho+=valRho[globalNumRho[i]]*phiRho[:,:,i];
+            #@views @. cRho+=valRho[globalNumRho[i]]*phiRho[:,:,i];
+            for r in 1:sk[2]
+                for l in 1:sk[1]
+                    cRho[l,r]+=valRho[globalNumRho[i]]*phiRho[l,r,i];
+                end
+            end
         end
 
         for j in 1:iter

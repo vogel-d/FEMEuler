@@ -22,7 +22,12 @@ function projectRecovery(degFH::degF{3},degF::degF{3},cval::Array{Float64,1},mas
 
         fill!(cl,0.0);
         for i in 1:length(globalNum)
-            @views @. cl+=cval[globalNum[i]]*phi[:,:,i];
+            #@views @. cl+=cval[globalNum[i]]*phi[:,:,i];
+            for r in 1:sk[2]
+                for l in 1:sk[1]
+                    cl[l,r]+=cval[globalNum[i]]*phi[l,r,i];
+                end
+            end
         end
 
         for j in 1:sph
@@ -64,8 +69,14 @@ function projectRecovery(degFH::degF{4},degF::degF{4},cval::Array{Float64,1},mas
         fill!(cl1,0.0);
         fill!(cl2,0.0);
         for i in 1:length(globalNum)
-            @views @. cl1+=cval[globalNum[i]]*jphi[1,:,:,i];
-            @views @. cl2+=cval[globalNum[i]]*jphi[2,:,:,i];
+            #@views @. cl1+=cval[globalNum[i]]*jphi[1,:,:,i];
+            #@views @. cl2+=cval[globalNum[i]]*jphi[2,:,:,i];
+            for r in 1:sk[2]
+                for l in 1:sk[1]
+                    cl1[l,r]+=cval[globalNum[i]]*phi[1,l,r,i];
+                    cl2[l,r]+=cval[globalNum[i]]*phi[2,l,r,i];
+                end
+            end
         end
 
         for j in 1:sph

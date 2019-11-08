@@ -133,8 +133,14 @@ function discGalerkinCells!(M::Array{Float64,2},
         fill!(w1,0.0);
         fill!(w2,0.0);
         for i in 1:length(globalNumW)
-            @views @. w1+= wval[globalNumW[i]]* phiW[1,:,:,i];
-            @views @. w2+=wval[globalNumW[i]]*phiW[2,:,:,i];
+            #@views @. w1+= wval[globalNumW[i]]* phiW[1,:,:,i];
+            #@views @. w2+=wval[globalNumW[i]]*phiW[2,:,:,i];
+            for r in 1:sk[2]
+                for l in 1:sk[1]
+                    w1[l,r]+= wval[globalNumW[i]]* phiW[1,l,r,i];
+                    w2[l,r]+=wval[globalNumW[i]]*phiW[2,l,r,,i];
+                end
+            end
         end
 
         fill!(gradw11,0.0);
@@ -143,10 +149,18 @@ function discGalerkinCells!(M::Array{Float64,2},
         fill!(gradw22,0.0);
         zg=0;
         for i in 1:length(globalNumW)
-            @views @. gradw11+=wval[globalNumW[i]]*gradphiW[1,:,:,1+zg];
-            @views @. gradw12+=wval[globalNumW[i]]*gradphiW[1,:,:,2+zg];
-            @views @. gradw21+=wval[globalNumW[i]]*gradphiW[2,:,:,1+zg];
-            @views @. gradw22+=wval[globalNumW[i]]*gradphiW[2,:,:,2+zg];
+            #@views @. gradw11+=wval[globalNumW[i]]*gradphiW[1,:,:,1+zg];
+            #@views @. gradw12+=wval[globalNumW[i]]*gradphiW[1,:,:,2+zg];
+            #@views @. gradw21+=wval[globalNumW[i]]*gradphiW[2,:,:,1+zg];
+            #@views @. gradw22+=wval[globalNumW[i]]*gradphiW[2,:,:,2+zg];
+            for r in 1:sk[2]
+                for l in 1:sk[1]
+                    gradw11[l,r]+=wval[globalNumW[i]]*gradphiW[1,l,r,1+zg];
+                    gradw12[l,r]+=wval[globalNumW[i]]*gradphiW[1,l,r,2+zg];
+                    gradw21[l,r]+=wval[globalNumW[i]]*gradphiW[2,l,r,1+zg];
+                    gradw22[l,r]+=wval[globalNumW[i]]*gradphiW[2,l,r,2+zg];
+                end
+            end
             zg+=2;
         end
 
