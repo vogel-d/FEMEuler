@@ -232,6 +232,7 @@ function discGalerkinEdges!(M::Array{Float64,2},
 
     z=1;
     for e in 1:length(edgeData[1])
+
         inc1=edgeData[2][z];
         inc2=edgeData[2][z+1];
         eT1=edgeData[3][z];
@@ -252,7 +253,6 @@ function discGalerkinEdges!(M::Array{Float64,2},
 
         jacobi!(J1,ddJ1,jphiWn1,jphiTn1,m,inc1,kubPn1, phiWn1, phiTn1, coord);
         jacobi!(J2,ddJ2,jphiWn2,jphiTn2,m,inc2,kubPn2, phiWn2, phiTn2, coord);
-
 
         fill!(w11,0.0);
         fill!(w12,0.0);
@@ -278,6 +278,7 @@ function discGalerkinEdges!(M::Array{Float64,2},
             s+=fval[i];
         end
         s<=0.0 ? gammaLoc=-gamma : gammaLoc=gamma;
+
 
         fill!(lM11,0.0);
         fill!(lM12,0.0);
@@ -313,7 +314,6 @@ function discGalerkinEdges!(M::Array{Float64,2},
             end
 
         end
-
     end
     return nothing;
 end

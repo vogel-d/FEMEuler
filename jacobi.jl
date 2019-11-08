@@ -222,10 +222,12 @@ function jacobi!(J::Array{Array{Float64,1},2},dJ::Array{Float64,1},m::mesh, fid:
 end
 
 function jacobi!(J::Array{Array{Float64,1},2},ddJ::Array{Float64,1},jphi::Array{Float64,3},jpsi::Array{Float64,3},m::mesh, fid::Int64, kubPoints::Array{Float64,2}, phi, psi, coord::Array{Float64,2})
+
     key="20";
     mt=m.meshType;
     rstart=m.topology.offset[key][fid];
     z=1;
+
     for j in rstart:rstart+mt-1
         for i in 1:2
             coord[i,z]=m.geometry.coordinates[i,m.topology.incidence[key][j]];
@@ -265,6 +267,6 @@ function jacobi!(J::Array{Array{Float64,1},2},ddJ::Array{Float64,1},jphi::Array{
             end
         end
     end
-
+    
     return nothing;
 end
