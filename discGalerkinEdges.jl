@@ -6,7 +6,7 @@ function discGalerkinEdges!(M::Array{Float64,2},
 
 
 
-    nT=size(phiT,2);
+    nT=length(phiT);
     nF=size(phiF,2);
     sk=length(quadWeights)
 
@@ -66,6 +66,7 @@ function discGalerkinEdges!(M::Array{Float64,2},
                 end
             end
         end
+
         l2g!(globalNumF1,degFF,inc1);
         l2g!(globalNumT1,degFT,inc1);
         l2g!(globalNumF2,degFF,inc2);
