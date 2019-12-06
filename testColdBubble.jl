@@ -62,7 +62,7 @@ function testColdBubble()
     f=Dict(:rho=>frho,:theta=>ftheta,:v=>fvel);
 
     assembFEM!(p, boundaryCondition);
-    p.boundaryValues[(:theta,:P1)]=300*ones(size(p.degFBoundary[:P1].coordinates,2)-p.degFBoundary[:P1].num);
+    p.boundaryValues[(:theta,:P1)]=300*ones(p.degFBoundary[:P1].numB-p.degFBoundary[:P1].num);
     applyStartValues!(p, f);
 
     rho0=p.solution[0.0].rho;
