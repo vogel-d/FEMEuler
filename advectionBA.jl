@@ -11,7 +11,6 @@ function advection(p::femProblem, gamma::Float64, Vfval::SparseVector{Float64,In
                      gamma,p.mesh,p.kubPoints,p.kubWeights,
                      nquadPoints,p.edgeData);
     rCp=Fp\S;
-
     cR=recovery(p,fTb,cval.b);
     S=advectionStiff(p.degFBoundary[fTb[1]],nquadPhi[fTb[1]],
                      p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
@@ -19,7 +18,6 @@ function advection(p::femProblem, gamma::Float64, Vfval::SparseVector{Float64,In
                      gamma,p.mesh,p.kubPoints,p.kubWeights,
                      nquadPoints,p.edgeData);
     rCb=Fb\S;
-
     cR=recovery(p,fTv,cval.v);
     S=advectionStiff(p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],
                      p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
@@ -27,7 +25,6 @@ function advection(p::femProblem, gamma::Float64, Vfval::SparseVector{Float64,In
                      gamma,p.mesh,p.kubPoints,p.kubWeights,
                      nquadPoints,p.edgeData);
     rCv=Fv\S;
-
   else
     S=advectionStiff(p.degFBoundary[fTp[1]],nquadPhi[fTp[1]],
                      p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,

@@ -20,10 +20,9 @@ function splitExplicit(y0::solution,Y::Array{solution,1},FY::Array{solution,1},S
     for j in 1:i
       Y[i+1]=MIS.alpha[i+1,j]*(Y[j]-y0)+Y[i+1];
     end
-    #println("Advektion:")
-    @time FY[i], SthY[i]=advection(p,gamma,Y[i],nquadPoints,nquadPhi,MrT,MrV);
-    #println("MIS Zeug:")
-    #@time begin
+
+    FY[i], SthY[i]=advection(p,gamma,Y[i],nquadPoints,nquadPhi,MrT,MrV);
+
     fSlow=createSolution(length(y0.rho),length(y0.rhoV),length(y0.rhoTheta),length(y0.v),length(y0.theta));
     SthSlow=spzeros(size(SthY[i],1),size(SthY[i],2))
 
@@ -39,8 +38,7 @@ function splitExplicit(y0::solution,Y::Array{solution,1},FY::Array{solution,1},S
     Y[i+1].rhoV[numRhoV+1:end]=y0.rhoV[numRhoV+1:end];
     Y[i+1].rho[numRho+1:end]=y0.rho[numRho+1:end];
     Y[i+1].rhoTheta[numRhoTheta+1:end]=y0.rhoTheta[numRhoTheta+1:end];
-    #end
-    #println("Symp Euler:")
+    
     symplektischerEuler!(Y[i+1],p,fSlow,SthSlow,nsLoc,dtauLoc);
   end
   return Y[stage+1];

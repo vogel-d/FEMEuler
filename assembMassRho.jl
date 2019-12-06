@@ -3,6 +3,7 @@ function assembMassRho(degF::degF{1}, degFRho::degF{1}, valRho::Array{Float64,1}
     phiRho=@views degFRho.phi;
     sk=size(kubWeights);
     iter=length(phi);
+    n=size(degF.coordinates,2);
 
     J=initPhi((2,2),sk);
     dJ=Array{Float64,2}(undef,sk);
@@ -34,7 +35,7 @@ function assembMassRho(degF::degF{1}, degFRho::degF{1}, valRho::Array{Float64,1}
                         currentval+=kubWeights[l,r]*cRho[l,r]*phi[i][l,r]*phi[j][l,r]*dJ[l,r];
                     end
                 end
-                if !isequal(currentval,0.0)
+                if !isequal(currentval,0.0) || (globalNum[i]==n && globalNum[j]==n)
                     push!(rows,globalNum[i]);
                     push!(cols,globalNum[j]);
                     push!(vals,currentval);
@@ -50,6 +51,7 @@ function assembMassRho(degF::degF{2}, degFRho::degF{1}, valRho::Array{Float64,1}
     phiRho=@views degFRho.phi;
     sk=size(kubWeights);
     iter=size(phi,2);
+    n=size(degF.coordinates,2);
 
     J=initPhi((2,2),sk);
     ddJ=Array{Float64,2}(undef,sk);
@@ -82,7 +84,7 @@ function assembMassRho(degF::degF{2}, degFRho::degF{1}, valRho::Array{Float64,1}
                         currentval+=kubWeights[l,r]*ddJ[l,r]*cRho[l,r]*(jphi[1,i][l,r]*jphi[1,j][l,r]+jphi[2,i][l,r]*jphi[2,j][l,r]);
                     end
                 end
-                if !isequal(currentval,0.0)
+                if !isequal(currentval,0.0) || (globalNum[i]==n && globalNum[j]==n)
                     push!(rows,globalNum[i]);
                     push!(cols,globalNum[j]);
                     push!(vals,currentval);
