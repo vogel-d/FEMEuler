@@ -1,3 +1,25 @@
+function adaptGeometry!(p::femProblem,hm::Float64,a::Float64)
+    m=p.mesh;
+    H=m.geometry.r[2];
+    h(x)=(hm*a^2)/(x^2+a^2); #Witch of Agnesi
+    coord=m.geometry.coordinates;
+    for i in 1:(m.topology.n[1]+1)
+        coord[2,i]=h(coord[1,i]);
+    end
+    for i in (m.topology.n[1]+2):size(coord,2)
+        z0=h(coord[1,i])
+        coord[2,i]=H*(coord[2,i]+z0)/(H+z0); #Gal-Chen & Sommerville transformation
+    end
+    b=getBoundary(m);
+    for k in keys(p.degF)
+        p.degF[k]=degF(p.mesh, k, b, p.boundary,p.kubPoints);
+    end
+    if !isempty(p.massM) || !isempty(p.stiffM)
+            assembFEM!(p,p.boundaryCondition);
+    end
+    return nothing;
+end
+
 function adaptGeometry!(p::femProblem,vid::Array{Int64,1},c::Array{Float64,2})
     p.mesh.geometry.coordinates[:,vid]=c;
     b=getBoundary(p.mesh);
@@ -6,11 +28,8 @@ function adaptGeometry!(p::femProblem,vid::Array{Int64,1},c::Array{Float64,2})
             p.degF[k]=degF(p.mesh, k, b, p.boundary,p.kubPoints);
     end
 
-    if !isempty(p.massM)
-            assembMass!(p);
-    end
-    if !isempty(p.stiffM)
-            assembStiff!(p);
+    if !isempty(p.massM) || !isempty(p.stiffM)
+            assembFEM!(p,p.boundaryCondition);
     end
 
     return nothing;
@@ -61,11 +80,8 @@ function adaptGeometry!(p::femProblem,r::Float64,adaptBoundary::Bool)
         for k in keys(p.degF)
             p.degF[k]=degF(p.mesh, k, b, p.boundary,p.kubPoints);
         end
-        if !isempty(p.massM)
-                assembMass!(p);
-        end
-        if !isempty(p.stiffM)
-                assembStiff!(p);
+        if !isempty(p.massM) || !isempty(p.stiffM)
+                assembFEM!(p,p.boundaryCondition);
         end
         return nothing;
 end
@@ -122,11 +138,8 @@ function adaptGeometry!(p::femProblem,pertX::Float64, pertY::Float64,adaptBounda
         for k in keys(p.degF)
             p.degF[k]=degF(p.mesh, k, b, p.boundary,p.kubPoints);
         end
-        if !isempty(p.massM)
-                assembMass!(p);
-        end
-        if !isempty(p.stiffM)
-                assembStiff!(p);
+        if !isempty(p.massM) || !isempty(p.stiffM)
+                assembFEM!(p,p.boundaryCondition);
         end
         return nothing;
 end
