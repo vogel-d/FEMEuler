@@ -12,14 +12,14 @@ mutable struct degF{N}
 
     #referenceBoundary::Array{Float64,2}; #in setEdgeData.jl ->setEdgeData in degF/femProblem, dann Speichern nicht notwendig oder extra Funktion, die es abhängig von FE-Raum aussucht
     #-> cm in getElementProperties
-    phi::Array{Array{Float64,2},N};
-    divphi::Array{Array{Float64,2},1};
-    gradphi::Array{Array{Float64,2},2};
+    phi::Array{Array{Float,2},N};
+    divphi::Array{Array{Float,2},1};
+    gradphi::Array{Array{Float,2},2};
     components::Array{Int,1}; #in plotSolution.jl und vtk.jl
 end
 
 
-function degF(m::mesh, femType::Symbol, boundaryEdges::Set{Int}, kubPoints::Array{Float64,2})
+function degF(m::mesh, femType::Symbol, boundaryEdges::Set{Int}, boundaryVertices::Set{Int}, kubPoints::Array{Float64,2})
     nf=m.topology.size[3];
     ne=m.topology.size[2];
     nv=m.topology.size[1];
@@ -39,6 +39,13 @@ function degF(m::mesh, femType::Symbol, boundaryEdges::Set{Int}, kubPoints::Arra
     ndegF=refFace+nef*refEdge+nvf*refVert
     inc=zeros(Int, nf*ndegF);
     off=collect(1:ndegF:nf*ndegF+1);
+
+    #nbe=length(boundaryEdges); #Anzahl äußerer Kanten
+    #nie=ne-nbe; #Anzahl innerer Kanten
+    indEint=Array{Int,1}();
+    indEbound=Array{Int,1}();
+    indVint=Array{Int,1}();
+    indVbound=Array{Int,1}();
     for f in 1:nf
         for d in 1:refFace
             inc[off[f]+d-1]=refFace*(f-1)+d;
@@ -46,10 +53,19 @@ function degF(m::mesh, femType::Symbol, boundaryEdges::Set{Int}, kubPoints::Arra
 
         vert=incfv[offfv[f]:offfv[f+1]-1];
         zv=off[f]+refFace+nef*refEdge
-        for i in 1:length(vert)
-            for d in 1:refVert
-                inc[zv]=nf*refFace+ne*refEdge+refVert*(vert[i]-1)+d; #evtl in zwei Konstanten speichern
-                zv+=1;
+        for v in vert
+            if !in(v,boundaryVertices)
+                for d in 1:refVert
+                    inc[zv]=nf*refFace+ne*refEdge+refVert*(v-1)+d; #evtl in zwei Konstanten speichern
+                    push!(indVint,zv);
+                    zv+=1;
+                end
+            else
+                for d in 1:refVert
+                    inc[zv]=nf*refFace+ne*refEdge+refVert*(v-1)+d; #evtl in zwei Konstanten speichern
+                    push!(indVbound,zv);
+                    zv+=1;
+                end
             end
         end
         #Randbedingungen, bei Erstellen BoundaryEdges alle anliegenden Vert in anderes Set
@@ -82,16 +98,26 @@ function degF(m::mesh, femType::Symbol, boundaryEdges::Set{Int}, kubPoints::Arra
             if !in(e,boundaryEdges)
                 for d in 1:refEdge
                     inc[ze]=nf*refFace+refEdge*(e-1)+d; #evtl in zwei Konstanten speichern
+                    push!(indEint,ze)
                     ze+=1;
                 end
             else
-                #Evtl. hier Wert + Anzahl innerer RB
+                #Free Slip RB
                 for d in 1:refEdge
                     inc[ze]=nf*refFace+refEdge*(e-1)+d; #evtl in zwei Konstanten speichern
+                    push!(indEbound,ze)
                     ze+=1;
                 end
             end
         end
+    end
+
+    #Sortieren der Randfreiheitsgrade nach hinten
+    for i in 1:length(indEint)
+        inc[indEint[i]]=
+    end
+    for i in 1:length(indEint)
+        inc[indEbound[i]]=
     end
     nb=nf*refFace+ne*refEdge+nv*refVert;
     n=nb-length(boundaryEdges)*refEdge;

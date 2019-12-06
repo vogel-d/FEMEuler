@@ -4,7 +4,6 @@ mutable struct femProblem
     boundaryValues::Dict{Tuple{Symbol,Symbol}, Array{Float64,1}};
     degFBoundary::Dict{Symbol, degF};
     femType::Dict{Symbol, Array{Symbol,1}};
-    equals::SparseVector{Int64,Int64}; #nur in generateBoundary und setEdgeData
     edgeData::Array{Array{Int64,1},1};
     solution::Dict{Float64, solution};
     massM::Dict{Symbol, SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64}};
@@ -20,11 +19,11 @@ end
 
 #Konstruktoren
 
-function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}};advection::Bool=true, taskRecovery::Bool=false, t::Symbol=:boussinesq, g::Int64=9)
+function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}}, cond::Tuple{Symbol,Symbol};advection::Bool=true, taskRecovery::Bool=false, t::Symbol=:boussinesq, g::Int64=9)
     sol=Dict{Float64, solution}()
     kubPoints, kubWeights=getKub(g, m.meshType);
     dF=Dict{Symbol, degF}()
-    boundaryEdges=getBoundary(m);
+    boundaryEdges, boundaryVertices=getBoundary(m);
 
     femElements=Set{Symbol}()
     for k in collect(keys(femType))
@@ -34,7 +33,7 @@ function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}};advection::B
     end
 
     for k in femElements
-        dF[k]=degF(m,k,boundaryEdges,kubPoints);
+        dF[k]=degF(m,k,boundaryEdges,boundaryVertices,kubPoints);
     end
     edgeData=Array{Array{Int64,1},1}();
     equals=spzeros(Int64,0);
@@ -43,13 +42,12 @@ function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}};advection::B
     stiffM=Dict();
     loadV=Dict();
     bV=Dict();
-    cond=(:nothing,:nothing);
     s=Set{Symbol}([:poisson,:boussinesq,:combressible]);
     !in(t,s) && error("Die Methode $t ist keine zulässige Eingabe. Möglich sind $s");
     femProblem(m,cond,bV,dF,femType,equals,edgeData,sol,massM,massMB,stiffM,t,kubWeights, kubPoints, taskRecovery, advection);
 end
 
-function femProblem(meth::Symbol, nx::Int64, ny::Int64, femType::Dict{Symbol,Array{Symbol,1}};advection::Bool=true,  taskRecovery::Bool=false,  t::Symbol=:boussinesq,
+function femProblem(meth::Symbol, nx::Int64, ny::Int64, femType::Dict{Symbol,Array{Symbol,1}}, cond::Tuple{Symbol,Symbol};advection::Bool=true,  taskRecovery::Bool=false,  t::Symbol=:boussinesq,
                     g::Int64=9, xl::Float64=0.0, yl::Float64=0.0,xr::Float64=Float64(nx), yr::Float64=Float64(ny))
     if meth==:quad
         m=generateRectMesh(nx,ny,xl,yl,xr,yr);
@@ -66,7 +64,7 @@ function femProblem(meth::Symbol, nx::Int64, ny::Int64, femType::Dict{Symbol,Arr
     kubPoints, kubWeights=getKub(g, m.meshType);
     sol=Dict{Float64, solution}();
     dF=Dict{Symbol, degF}()
-    boundaryEdges=getBoundary(m);
+    boundaryEdges, boundaryVertices=getBoundary(m);
 
     femElements=Set{Symbol}()
     for k in collect(keys(femType))
@@ -76,7 +74,7 @@ function femProblem(meth::Symbol, nx::Int64, ny::Int64, femType::Dict{Symbol,Arr
     end
 
     for k in femElements
-        dF[k]=degF(m,k,boundaryEdges,kubPoints);
+        dF[k]=degF(m,k,boundaryEdges,boundaryVertices,kubPoints);
     end
     #=
     femElements=collect(femElements)
@@ -94,7 +92,6 @@ function femProblem(meth::Symbol, nx::Int64, ny::Int64, femType::Dict{Symbol,Arr
     stiffM=Dict();
     loadV=Dict();
     bV=Dict();
-    cond=(:nothing,:nothing);
     s=Set{Symbol}([:poisson,:boussinesq,:compressible]);
     !in(t,s) && error("Die Methode $t ist keine zulässige Eingabe. Möglich sind $s");
     femProblem(m,cond,bV,dF,femType,equals,edgeData,sol,massM,massMB,stiffM,t,kubWeights, kubPoints, taskRecovery, advection);
