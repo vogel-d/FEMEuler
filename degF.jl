@@ -116,9 +116,16 @@ function degF(m::mesh, femType::Symbol, boundaryEdges::Set{Int}, boundaryVertice
     for i in 1:length(indEint)
         inc[indEint[i]]=
     end
-    for i in 1:length(indEint)
+    for i in 1:length(indEbound)
         inc[indEbound[i]]=
     end
+    for i in 1:length(indVint)
+        inc[indVint[i]]=
+    end
+    for i in 1:length(indVbound)
+        inc[indVbound[i]]=
+    end
+
     nb=nf*refFace+ne*refEdge+nv*refVert;
     n=nb-length(boundaryEdges)*refEdge;
     degF(nb,n, inc, off, phi, divphi, gradphi, comp);

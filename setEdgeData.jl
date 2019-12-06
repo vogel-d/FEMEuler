@@ -1,6 +1,6 @@
 function setEdgeData!(p::femProblem, compVf::Symbol)
     m=p.mesh;
-    equals=p.equals;
+    equals=generateEquals(m,p.boundaryCondition);
     degFVf=p.degFBoundary[p.femType[compVf][1]];
     mt=m.meshType;
     mt==4 ?  normal=[0.5 0.0 1.0 1.0 0.5 0.0 0.0 -1.0; 0.0 -1.0 0.5 0.0 1.0 1.0 0.5 0.0] : normal=[0.5 0.0 0.5 1/sqrt(2) 0.0 -1.0; 0.0 -1.0 0.5 1/sqrt(2) 0.5 0.0];
