@@ -17,114 +17,142 @@ function getQuadElementProperties(type::Symbol, kubPoints::Array{Float64,2})
 
     if type==:DG0
         phi=[f1];
-        c=reshape([0.5; 0.5],2,1);
+        #c=reshape([0.5; 0.5],2,1);
         divphi=[null];
         gradphi=reshape([null,null],2,1);
 
-        cm=[0.5 0.0 0.0; 1.0 0.5 0.0; 0.5 1.0 0.0; 0.0 0.5 0.0];
-        comp=[0];
+        nFace=1;
+        nEdge=0;
+        nVert=0;
 
-        discontType= true;
+        #cm=[0.5 0.0 0.0; 1.0 0.5 0.0; 0.5 1.0 0.0; 0.0 0.5 0.0];
+        comp=[0];
 
     elseif type==:P1
         phi=[fl,fxmxy,fymxy,fxy];
-        c=[0.0 1.0 0.0 1.0 ;0.0 0.0 1.0 1.0];
+        #c=[0.0 1.0 0.0 1.0 ;0.0 0.0 1.0 1.0];
 
         divphi=[null null null null];
         gradphi=[fym1 f1my fmy fy;
                  fxm1 fmx f1mx fx];
 
-        cm=[0.5 0.0 1.0 1.0 0.0 0.0; 1.0 0.5 0.0 1.0 0.0 1.0; 0.5 1.0 0.0 0.0 1.0 1.0; 0.0 0.5 1.0 0.0 1.0 0.0];
-        comp=[0, 0, 0, 0];
-        discontType= false;
+        nFace=0;
+        nEdge=0;
+        nVert=1;
 
+        #cm=[0.5 0.0 1.0 1.0 0.0 0.0; 1.0 0.5 0.0 1.0 0.0 1.0; 0.5 1.0 0.0 0.0 1.0 1.0; 0.0 0.5 1.0 0.0 1.0 0.0];
+        comp=[0, 0, 0, 0];
+
+    #=
     elseif type==:P1x
         phi=[f1mx,fx];
-        c=[0.0 1.0;0.5 0.5];
+        #c=[0.0 1.0;0.5 0.5];
 
         divphi=[null null];
         gradphi=[fm1 f1;
                  null null];
 
-        cm=[0.5 0.0 0.0 0.0; 1.0 0.5 0.0 1.0; 0.5 1.0 0.0 0.0; 0.0 0.5 1.0 0.0];
+        nFace=0;
+        nEdge=1;
+        nVert=0;
+
+        #cm=[0.5 0.0 0.0 0.0; 1.0 0.5 0.0 1.0; 0.5 1.0 0.0 0.0; 0.0 0.5 1.0 0.0];
         comp=[0, 0];
-        discontType= false;
 
     elseif type==:P1y
         phi=[f1my,fy];
-        c=[0.5 0.5;0.0 1.0];
+        #c=[0.5 0.5;0.0 1.0];
 
         divphi=[null null];
         gradphi=[null null;
                  fm1 f1];
 
-        cm=[0.5 0.0 1.0 0.0; 1.0 0.5 0.0 0.0; 0.5 1.0 0.0 1.0; 0.0 0.5 0.0 0.0];
-        comp=[0, 0];
-        discontType= false;
+        nFace=0;
+        nEdge=1;
+        nVert=0;
 
+        #cm=[0.5 0.0 1.0 0.0; 1.0 0.5 0.0 0.0; 0.5 1.0 0.0 1.0; 0.0 0.5 0.0 0.0];
+        comp=[0, 0];
+    =#
     elseif type==:DG1
         phi=[fl,fxmxy,fymxy,fxy];
-        c=[0.0 1.0 0.0 1.0 ;0.0 0.0 1.0 1.0];
+        #c=[0.0 1.0 0.0 1.0 ;0.0 0.0 1.0 1.0];
 
         divphi=[null null null null];
         gradphi=[fym1 f1my fmy fy;
                  fxm1 fmx f1mx fx];
 
-        cm=[0.5 0.0 0.0 0.0 0.0 0.0; 1.0 0.5 0.0 0.0 0.0 0.0; 0.5 1.0 0.0 0.0 0.0 0.0; 0.0 0.5 0.0 0.0 0.0 0.0];
-        comp=[0, 0, 0, 0];
-        discontType= true;
 
+        nFace=4;
+        nEdge=0;
+        nVert=0;
+
+        #cm=[0.5 0.0 0.0 0.0 0.0 0.0; 1.0 0.5 0.0 0.0 0.0 0.0; 0.5 1.0 0.0 0.0 0.0 0.0; 0.0 0.5 0.0 0.0 0.0 0.0];
+        comp=[0, 0, 0, 0];
+    #=
     elseif type==:DG1x
         phi=[f1mx,fx];
-        c=[0.0 1.0;0.5 0.5];
+        #c=[0.0 1.0;0.5 0.5];
 
         divphi=[null null];
         gradphi=[fm1 f1;
                  null null];
 
-        cm=[0.5 0.0 0.0 0.0; 1.0 0.5 0.0 0.0; 0.5 1.0 0.0 0.0; 0.0 0.5 0.0 0.0];
+        nFace=2;
+        nEdge=0;
+        nVert=0;
+
+        #cm=[0.5 0.0 0.0 0.0; 1.0 0.5 0.0 0.0; 0.5 1.0 0.0 0.0; 0.0 0.5 0.0 0.0];
         comp=[0, 0];
-        discontType= true;
+
     elseif type==:DG1y
         phi=[f1mx,fx];
-        c=[0.0 1.0;0.5 0.5];
+        #c=[0.0 1.0;0.5 0.5];
 
         divphi=[null null];
         gradphi=[fm1 f1;
                  null null];
 
-        cm=[0.5 0.0 0.0 0.0; 1.0 0.5 0.0 0.0; 0.5 1.0 0.0 0.0; 0.0 0.5 0.0 0.0];
+        nFace=2;
+        nEdge=0;
+        nVert=0;
+
+        #cm=[0.5 0.0 0.0 0.0; 1.0 0.5 0.0 0.0; 0.5 1.0 0.0 0.0; 0.0 0.5 0.0 0.0];
         comp=[0, 0];
-        discontType= true;
+    =#
     elseif type==:RT0
 
         phi=[null fx null f1mx;
              f1my null fy null];
-        c=[0.5 1.0 0.5 0.0;
-           0.0 0.5 1.0 0.5];
+        #c=[0.5 1.0 0.5 0.0;
+        #   0.0 0.5 1.0 0.5];
 
         divphi=[fm1, f1, f1, fm1];
         gradphi=[null null f1 null null null fm1 null;
                  null fm1 null null null f1 null null];
 
-        cm=[0.5 0.0 1.0 0.0 0.0 0.0; 1.0 0.5 0.0 1.0 0.0 0.0; 0.5 1.0 0.0 0.0 1.0 0.0; 0.0 0.5 0.0 0.0 0.0 1.0];
-        comp=[2,1,2,1];
+        nFace=0;
+        nEdge=1;
+        nVert=0;
 
-        discontType= false;
+        #cm=[0.5 0.0 1.0 0.0 0.0 0.0; 1.0 0.5 0.0 1.0 0.0 0.0; 0.5 1.0 0.0 0.0 1.0 0.0; 0.0 0.5 0.0 0.0 0.0 1.0];
+        comp=[2,1,2,1];
 
     elseif type==:RT0B #Broken RT0
 
         phi=[null fx null f1mx; f1my null fy null];
-        c=[0.5 1.0 0.5 0.0; 0.0 0.5 1.0 0.5];
+        #c=[0.5 1.0 0.5 0.0; 0.0 0.5 1.0 0.5];
 
         divphi=[fm1, f1, f1, fm1];
         gradphi=[null null f1 null null null fm1 null;
                  null fm1 null null null f1 null null];
 
-        cm=[0.5 0.0 0.0 0.0 0.0 0.0; 1.0 0.5 0.0 0.0 0.0 0.0; 0.5 1.0 0.0 0.0 0.0 0.0; 0.0 0.5 0.0 0.0 0.0 0.0];
-        comp=[2,1,2,1];
+        nFace=4;
+        nEdge=0;
+        nVert=0;
 
-        discontType= true;
+        #cm=[0.5 0.0 0.0 0.0 0.0 0.0; 1.0 0.5 0.0 0.0 0.0 0.0; 0.5 1.0 0.0 0.0 0.0 0.0; 0.0 0.5 0.0 0.0 0.0 0.0];
+        comp=[2,1,2,1];
 
     elseif type==:VecP1
         phi=[null null fxmxy fxy null null fymxy fl;
@@ -134,17 +162,19 @@ function getQuadElementProperties(type::Symbol, kubPoints::Array{Float64,2})
         gradphi=[null null null null f1my fmx fy fx null null null null fmy f1mx fym1 fxm1;
                 fym1 fxm1 f1my fmx null null null null fy fx fmy f1mx null null null null];
 
-        c=[0.0 1.0 1.0 1.0 1.0 0.0 0.0 0.0;
-           0.0 0.0 0.0 1.0 1.0 1.0 1.0 0.0];
+        nFace=0;
+        nEdge=0;
+        nVert=2;
 
-        cm=[0.5 0.0 1.0 1.0 0.0 0.0 0.0 0.0 0.0 0.0;
-             1.0 0.5 0.0 0.0 1.0 1.0 0.0 0.0 0.0 0.0;
-             0.5 1.0 0.0 0.0 0.0 0.0 1.0 1.0 0.0 0.0;
-             0.0 0.5 0.0 0.0 0.0 0.0 0.0 0.0 1.0 1.0];
+        #c=[0.0 1.0 1.0 1.0 1.0 0.0 0.0 0.0;
+        #   0.0 0.0 0.0 1.0 1.0 1.0 1.0 0.0];
+
+        #cm=[0.5 0.0 1.0 1.0 0.0 0.0 0.0 0.0 0.0 0.0;
+        #     1.0 0.5 0.0 0.0 1.0 1.0 0.0 0.0 0.0 0.0;
+        #     0.5 1.0 0.0 0.0 0.0 0.0 1.0 1.0 0.0 0.0;
+        #     0.0 0.5 0.0 0.0 0.0 0.0 0.0 0.0 1.0 1.0];
 
         comp=[2, 2, 1, 1, 2, 2, 1, 1];
-
-        discontType= false;
 
     elseif type==:VecDG1
 
@@ -155,13 +185,17 @@ function getQuadElementProperties(type::Symbol, kubPoints::Array{Float64,2})
         gradphi=[null null null null f1my fmx fy fx null null null null fmy f1mx fym1 fxm1;
                 fym1 fxm1 f1my fmx null null null null fy fx fmy f1mx null null null null];
 
-        c=[0.0 1.0 1.0 1.0 1.0 0.0 0.0 0.0;
-           0.0 0.0 0.0 1.0 1.0 1.0 1.0 0.0];
+        nFace=8;
+        nEdge=0;
+        nVert=0;
 
-        cm=[0.5 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0;
-            1.0 0.5 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0;
-            0.5 1.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0;
-            0.0 0.5 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0];
+        #c=[0.0 1.0 1.0 1.0 1.0 0.0 0.0 0.0;
+        #   0.0 0.0 0.0 1.0 1.0 1.0 1.0 0.0];
+
+        #cm=[0.5 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0;
+        #    1.0 0.5 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0;
+        #    0.5 1.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0;
+        #    0.0 0.5 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0];
 
         comp=[2, 2, 1, 1, 2, 2, 1, 1];
 
@@ -198,7 +232,7 @@ function getQuadElementProperties(type::Symbol, kubPoints::Array{Float64,2})
         kubGrad[ki,kj]=kubVal;
     end
 
-    return kubPhi, kubDiv,  kubGrad, c,cm, comp, discontType
+    return kubPhi, kubDiv,  kubGrad, comp, nFace, nEdge, nVert
 end
 
 
@@ -221,46 +255,54 @@ function getTriElementProperties(type::Symbol, kubPoints::Array{Float64,2})
 
     if type==:DG0
         phi=[f1];
-        c=[1/3 0.0; 1/3 0.0];
-        c=c[:,1:1];
+        #c=[1/3 0.0; 1/3 0.0];
+        #c=c[:,1:1];
         divphi=[null];
         gradphi=reshape([null,null],2,1);
 
-        cm=[0.5 0.0 0.0; 0.5 0.5 0.0; 0.0 0.5 0.0];
-        comp=[0];
+        nFace=1;
+        nEdge=0;
+        nVert=0;
 
-        discontType= true;
+        #cm=[0.5 0.0 0.0; 0.5 0.5 0.0; 0.0 0.5 0.0];
+        comp=[0];
 
     elseif type==:RT0
 
         phi=[fxm1 fx fsx; fy fym1 fsy];
-        c=[0.5 0.0 0.5; 0.0 0.5 0.5];
+        #c=[0.5 0.0 0.5; 0.0 0.5 0.5];
 
         divphi=[f2, f2, f2s];
         gradphi=[f1 null f1 null f1s null; null f1 null f1 null f1s];
 
-        cm=[0.5 0.0 0.0 1.0 0.0;
-            0.5 0.5 0.0 0.0 1.0;
-            0.0 0.5 1.0 0.0 0.0];
+        nFace=0;
+        nEdge=1;
+        nVert=0;
+
+        #cm=[0.5 0.0 0.0 1.0 0.0;
+        #    0.5 0.5 0.0 0.0 1.0;
+        #    0.0 0.5 1.0 0.0 0.0];
         comp=[0];
 
-        discontType=false;
 
     elseif type==:P1
         phi=[f1mxy fx fy];
-        c=[0.0 1.0 0.0; 0.0 0.0 1.0];
+        #c=[0.0 1.0 0.0; 0.0 0.0 1.0];
 
         divphi=[null null null];
 
         gradphi=[fmy f1 null;
                  fmx null f1];
 
-        cm=[0.5 0.0 1.0 1.0 0.0;
-            0.5 0.5 0.0 1.0 1.0;
-            0.0 0.5 1.0 0.0 1.0];
+        nFace=0;
+        nEdge=0;
+        nVert=1;
+
+        #cm=[0.5 0.0 1.0 1.0 0.0;
+        #    0.5 0.5 0.0 1.0 1.0;
+        #    0.0 0.5 1.0 0.0 1.0];
 
         comp=[0, 0, 0];
-        discontType=false;
     end
 
     sk=size(kubPoints,2);
@@ -291,5 +333,5 @@ function getTriElementProperties(type::Symbol, kubPoints::Array{Float64,2})
         kubGrad[ki,kj]=kubVal;
     end
 
-    return kubPhi, kubDiv,  kubGrad, c,cm, comp, discontType
+    return kubPhi, kubDiv,  comp, nFace, nEdge, nVert
 end

@@ -5,18 +5,12 @@ function getBoundary(m::mesh)
     meshConnectivity!(m,dim-1,dim);
     off=m.topology.offset["$(dim-1)$dim"];
     inc=m.topology.incidence["$(dim-1)$dim"];
-
-    b=Dict{Int64, Array{Int64,1}}();
-    for i in 1:(length(off)-1)
-        if off[i+1]-off[i]==1
+    b=Set{Int64}();
+    for e in 1:(length(off)-1)
+        if off[e+1]-off[e]==1
             #immer, wenn die Grenzen im Offset sich nur um 1 unterscheiden
             #wird die Entitäts-ID in boundary gespeichert
-            fi=inc[off[i]];
-            if haskey(b, fi)
-                push!(b[fi],i);
-            else
-                b[fi]=[i];
-            end
+            push!(b,e)
         end
     end
 

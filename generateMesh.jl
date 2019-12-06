@@ -42,19 +42,20 @@ function generateRectMesh(nx::Int64, ny::Int64, xl::Float64=0.0, yl::Float64=0.0
     #Berechnen der Inzidenz 1->0
     ince=Int64[];
     z=1;
-    for k in 1:(ny+1)
-        for h in 1:nx
-            i=[z, z+1];
-            append!(ince,i);
-            z+=1;
-        end
-        z+=1;
-    end
-    z=1;
     for k in 1:(nx+1)*ny
         i=[z, z+nx+1];
         append!(ince,i);
         z+=1;
+    end
+    zh=1;
+    for h in 1:nx
+        z=zh;
+        for k in 1:(ny+1)
+            i=[z, z+1]
+            append!(ince,i);
+            z+=nx+1
+        end
+        zh+=1;
     end
 
     #Initialisieren der Inzidenz mit den Einträgen "20" und "10"
