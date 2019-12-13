@@ -34,13 +34,11 @@ function degF(m::mesh, femType::Symbol, ordEdgesB::Array{Int,1}, nebP::Int, nebC
     ndegF=refFace+nef*refEdge+nvf*refVert
     inc=zeros(Int, nf*ndegF);
     off=collect(1:ndegF:nf*ndegF+1);
-    setv=Set{Int}()
-    sete=Set{Int}()
     for f in 1:nf
         for d in 1:refFace
             inc[off[f]+d-1]=refFace*(f-1)+d;
         end
-        
+
         vert=incfv[offfv[f]:offfv[f+1]-1];
         zv=off[f]+refFace+nef*refEdge
         for v in vert
@@ -51,9 +49,7 @@ function degF(m::mesh, femType::Symbol, ordEdgesB::Array{Int,1}, nebP::Int, nebC
                 end
             elseif m.boundaryVertices[v]<0
                 for d in 1:refVert
-                    #inc[zv]=nf*refFace+ne*refEdge+refVert*(-m.boundaryVertices[v]-1)+d; #evtl in zwei Konstanten speichern
                     inc[zv]=nf*refFace+ne*refEdge+refVert*(ordVerticesB[-m.boundaryVertices[v]]-1)+d; #evtl in zwei Konstanten speichern
-                    push!(setv,v)
                     zv+=1;
                 end
             end
@@ -91,9 +87,7 @@ function degF(m::mesh, femType::Symbol, ordEdgesB::Array{Int,1}, nebP::Int, nebC
                 end
             elseif m.boundaryEdges[e]<0
                 for d in 1:refEdge
-                    #inc[ze]=nf*refFace+refEdge*(-m.boundaryEdges[e]-1)+d; #evtl in zwei Konstanten speichern
                     inc[ze]=nf*refFace+refEdge*(ordEdgesB[-m.boundaryEdges[e]]-1)+d; #evtl in zwei Konstanten speichern
-                    push!(sete,e)
                     ze+=1;
                 end
             end

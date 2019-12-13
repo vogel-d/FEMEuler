@@ -108,9 +108,9 @@ function generateRectMesh(nx::Int64, ny::Int64, condEW::Symbol, condTB::Symbol, 
                 bE[i]=1;
             elseif b1<0 && b2<0
                 if coord[1,v1]==coord[1,v2]
-                    bE[i]=-i+ny;
-                elseif coord[2,v1]==coord[2,v2]
                     bE[i]=-i+nx;
+                elseif coord[2,v1]==coord[2,v2]
+                    bE[i]=-i+ny;
                 end
             end
         end

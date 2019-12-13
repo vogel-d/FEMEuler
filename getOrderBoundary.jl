@@ -5,7 +5,6 @@ function getOrderBoundary(boundary::SparseVector{Int,Int})
     d=0;
     anzP=0;
     anzC=0;
-    display(sortBoundary')
     for i in 1:length(boundary)
         if boundary[i]<0
             sortBoundary[i]=0;
@@ -21,12 +20,10 @@ function getOrderBoundary(boundary::SparseVector{Int,Int})
             end
         end
     end
-    #display(sortBoundary')
     ordB=sortBoundary[int];
     append!(ordB, sortBoundary[bound]);
     invert!(ordB);
     sortBoundary[int]=ordB[sortBoundary[int]];
     sortBoundary[bound]=ordB[sortBoundary[bound]];
-    display(sortBoundary')
     return sortBoundary, anzP, anzC;
 end
