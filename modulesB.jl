@@ -16,6 +16,7 @@ include("meshFunctions.jl");
 include("findall.jl");
 include("transformation.jl")
 
+include("getOrderBoundary.jl")
 include("getElementProperties.jl")
 include("degF.jl");
 include("getBoundary.jl")
@@ -29,12 +30,12 @@ include("adaptGeometry.jl")
 include("additionalFunctions.jl")
 
 include("generateEquals.jl")
-include("generateMixedBoundary.jl")
-include("generatePeriodicBoundary.jl")
+#include("generateMixedBoundary.jl")
+#include("generatePeriodicBoundary.jl")
 include("assembMass.jl");
 include("assembLoad.jl");
 include("assembStiff.jl");
-include("assembFEM.jl");
+#include("assembFEM.jl");
 include("applyStartValues.jl");
 include("solveB.jl");
 
