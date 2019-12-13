@@ -4,29 +4,29 @@ function testBoussinesq()
     filename = "test";
 
     femType=Dict(:p=>[:DG0], :v=>[:RT0], :b=>[:P1]);
+    boundaryCondition = (:periodic,:constant); #(east/west, top/bottom)
 
-    pv=femProblem(:quad, 300, 10, femType, xr=300000.0, yr=10000.0);
-    #adaptGeometry!(pv,100.0,false);   #random perbutation
-    #adaptGeometry!(pv,0.3,0.3,false); #sin perbutation
+    pv=femProblem(:quad, 300, 10, femType, boundaryCondition, xr=300000.0, yr=10000.0);
 
-    boundaryCondition = (:periodic,:constant); #(top/bottom, east/west)
 
-    method=:rk4;
+    method=:euler;
     dt=1.0;
     tend=3000.0;
 
-    solSaves=15.0:15:tend; #determines at which points of time the solution is saved
-    #solSaves=tend;
+    #solSaves=15.0:15:tend; #determines at which points of time the solution is saved
+    solSaves=tend;
 
     b0=0.01;
     H=10000;
     A=5000;
-    xM=0.5*(pv.mesh.geometry.l[1]+pv.mesh.geometry.r[1]);
-    yM=0.5*(pv.mesh.geometry.l[2]+pv.mesh.geometry.r[2]);
+    xM=0.75*(pv.mesh.geometry.l[1]+pv.mesh.geometry.r[1]);
+    #yM=0.5*(pv.mesh.geometry.l[2]+pv.mesh.geometry.r[2]);
+
     fb(x,y)=b0*sin(pi*y/H)/(1+((x-xM)/A)^2);
     f=Dict(:b=>fb);
 
-    assembFEM!(pv, boundaryCondition);
+    assembMass!(pv);
+    assembStiff!(pv);
     applyStartValues!(pv,f)
 
     Fp=pv.massM[pv.femType[:p][1]];

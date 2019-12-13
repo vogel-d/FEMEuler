@@ -8,10 +8,10 @@ function testBoussinesqAdvection()
 
   taskRecovery=true;
 
-  p=femProblem(:quad, 300, 10, femType, taskRecovery=taskRecovery,  xr=300000.0, yr=10000.0);
-  #adaptGeometry!(p,0.3,0.3,false); #sin perbutation
-
   boundaryCondition = (:periodic, :constant)
+
+  p=femProblem(:quad, 300, 10, femType, boundaryCondition, taskRecovery=taskRecovery,  xr=300000.0, yr=10000.0);
+  #adaptGeometry!(p,0.3,0.3,false); #sin perbutation
 
   gamma=0.5;
   UMax=20.0 #UMax determines the advection in x direction
@@ -29,7 +29,8 @@ function testBoussinesqAdvection()
   fb(x,y)=b0*sin(pi*y/H)/(1+((x-xM)/A)^2);
   f=Dict(:b=>fb)
 
-  assembFEM!(p, boundaryCondition);
+  assembMass!(p);
+  assembStiff!(p);
   applyStartValues!(p, f);
 
   v1(x,y)=UMax
@@ -58,7 +59,7 @@ function testBoussinesqAdvection()
   #Speichern des Endzeitpunktes als vtu-Datei:
   unstructured_vtk(p, EndTime, [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesqAdvection/"*filename)
   #Speichern aller berechneten Zwischenwerte als vtz-Datei:
-  unstructured_vtk(p, sort(collect(keys(p.solution))), [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesqAdvection/"*filename)
+  #unstructured_vtk(p, sort(collect(keys(p.solution))), [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesqAdvection/"*filename)
 
   return p
 end
