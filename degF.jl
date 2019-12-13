@@ -1,25 +1,20 @@
-mutable struct degF{N}
+struct degF{N}
     # size: in assembLoad, assembMassRho, advectionStiff, assembStiff, applyStartValues, embed, testFunctions, projectPressure, projectRecovery
     # in generateBoundary.jl, plotFEM.jl
     numB::Int;
     num::Int;
 
-    #edgeBoundaryIncidence::SparseVector{Array{Int,1},Int}; #in generateBoundary.jl
-    #boundaryEdgeIncidence::Array{Array{Int,1},1}; #in generateBoundary.jl
-
     incidence::Array{Int,1}; # in l2g.jl, correctVelocity.jl, plotSolution.jl, plotSolutionGif.jl #notwendig
-    offset::Array{Int,1}; # in l2g.jl, correctVelocity.jl, plotSolution.jl, plotSolutionGif.jl #evtl. weglassen und Schrittweite speichern?
+    offset::Array{Int,1}; # in l2g.jl, correctVelocity.jl, plotSolution.jl, plotSolutionGif.jl #evtl. weglassen und Schrittweite speichern? ->Dann nicht für Gitter mit gemischten Elementen, z.B. Dreiecke und Rechtecke
 
-    #referenceBoundary::Array{Float64,2}; #in setEdgeData.jl ->setEdgeData in degF/femProblem, dann Speichern nicht notwendig oder extra Funktion, die es abhängig von FE-Raum aussucht
-    #-> cm in getElementProperties
-    phi::Array{Array{Float,2},N};
-    divphi::Array{Array{Float,2},1};
-    gradphi::Array{Array{Float,2},2};
+    phi::Array{Array{Float64,2},N};
+    divphi::Array{Array{Float64,2},1};
+    gradphi::Array{Array{Float64,2},2};
     components::Array{Int,1}; #in plotSolution.jl und vtk.jl
 end
 
 
-function degF(m::mesh, femType::Symbol, boundaryEdges::Set{Int}, boundaryVertices::Set{Int}, kubPoints::Array{Float64,2})
+function degF(m::mesh, femType::Symbol, ordEdgesB::Array{Int,1}, nebP::Int, nebC::Int, ordVerticesB::Array{Int,1}, nvbP::Int, nvbC::Int, kubPoints::Array{Float64,2})
     nf=m.topology.size[3];
     ne=m.topology.size[2];
     nv=m.topology.size[1];
@@ -39,36 +34,30 @@ function degF(m::mesh, femType::Symbol, boundaryEdges::Set{Int}, boundaryVertice
     ndegF=refFace+nef*refEdge+nvf*refVert
     inc=zeros(Int, nf*ndegF);
     off=collect(1:ndegF:nf*ndegF+1);
-
-    #nbe=length(boundaryEdges); #Anzahl äußerer Kanten
-    #nie=ne-nbe; #Anzahl innerer Kanten
-    indEint=Array{Int,1}();
-    indEbound=Array{Int,1}();
-    indVint=Array{Int,1}();
-    indVbound=Array{Int,1}();
+    setv=Set{Int}()
+    sete=Set{Int}()
     for f in 1:nf
         for d in 1:refFace
             inc[off[f]+d-1]=refFace*(f-1)+d;
         end
-
+        
         vert=incfv[offfv[f]:offfv[f+1]-1];
         zv=off[f]+refFace+nef*refEdge
         for v in vert
-            if !in(v,boundaryVertices)
+            if m.boundaryVertices[v]>=0
                 for d in 1:refVert
-                    inc[zv]=nf*refFace+ne*refEdge+refVert*(v-1)+d; #evtl in zwei Konstanten speichern
-                    push!(indVint,zv);
+                    inc[zv]=nf*refFace+ne*refEdge+refVert*(ordVerticesB[v]-1)+d; #evtl in zwei Konstanten speichern
                     zv+=1;
                 end
-            else
+            elseif m.boundaryVertices[v]<0
                 for d in 1:refVert
-                    inc[zv]=nf*refFace+ne*refEdge+refVert*(v-1)+d; #evtl in zwei Konstanten speichern
-                    push!(indVbound,zv);
+                    #inc[zv]=nf*refFace+ne*refEdge+refVert*(-m.boundaryVertices[v]-1)+d; #evtl in zwei Konstanten speichern
+                    inc[zv]=nf*refFace+ne*refEdge+refVert*(ordVerticesB[-m.boundaryVertices[v]]-1)+d; #evtl in zwei Konstanten speichern
+                    push!(setv,v)
                     zv+=1;
                 end
             end
         end
-        #Randbedingungen, bei Erstellen BoundaryEdges alle anliegenden Vert in anderes Set
 
         edges=incfe[offfe[f]:offfe[f+1]-1];
         #Sortieren von edges in  richtige Reigenforge nach Knoten
@@ -95,38 +84,22 @@ function degF(m::mesh, femType::Symbol, boundaryEdges::Set{Int}, boundaryVertice
         edges=edges[ind];
         ze=off[f]+refFace;
         for e in edges
-            if !in(e,boundaryEdges)
+            if m.boundaryEdges[e]>=0
                 for d in 1:refEdge
-                    inc[ze]=nf*refFace+refEdge*(e-1)+d; #evtl in zwei Konstanten speichern
-                    push!(indEint,ze)
+                    inc[ze]=nf*refFace+refEdge*(ordEdgesB[e]-1)+d; #evtl in zwei Konstanten speichern
                     ze+=1;
                 end
-            else
-                #Free Slip RB
+            elseif m.boundaryEdges[e]<0
                 for d in 1:refEdge
-                    inc[ze]=nf*refFace+refEdge*(e-1)+d; #evtl in zwei Konstanten speichern
-                    push!(indEbound,ze)
+                    #inc[ze]=nf*refFace+refEdge*(-m.boundaryEdges[e]-1)+d; #evtl in zwei Konstanten speichern
+                    inc[ze]=nf*refFace+refEdge*(ordEdgesB[-m.boundaryEdges[e]]-1)+d; #evtl in zwei Konstanten speichern
+                    push!(sete,e)
                     ze+=1;
                 end
             end
         end
     end
-
-    #Sortieren der Randfreiheitsgrade nach hinten
-    for i in 1:length(indEint)
-        inc[indEint[i]]=
-    end
-    for i in 1:length(indEbound)
-        inc[indEbound[i]]=
-    end
-    for i in 1:length(indVint)
-        inc[indVint[i]]=
-    end
-    for i in 1:length(indVbound)
-        inc[indVbound[i]]=
-    end
-
-    nb=nf*refFace+ne*refEdge+nv*refVert;
-    n=nb-length(boundaryEdges)*refEdge;
+    nb=nf*refFace+(ne-nebP)*refEdge+(nv-nvbP)*refVert;
+    n=nb-nebC*refEdge-nvbC*refVert;
     degF(nb,n, inc, off, phi, divphi, gradphi, comp);
 end

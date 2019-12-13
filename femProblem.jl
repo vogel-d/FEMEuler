@@ -1,6 +1,5 @@
 mutable struct femProblem
     mesh::mesh;
-    boundaryCondition::Tuple{Symbol,Symbol}; #Erster Wert für RB links& recht, zweiter Wert für RB oben&unten
     boundaryValues::Dict{Tuple{Symbol,Symbol}, Array{Float64,1}};
     degFBoundary::Dict{Symbol, degF};
     femType::Dict{Symbol, Array{Symbol,1}};
@@ -9,7 +8,7 @@ mutable struct femProblem
     massM::Dict{Symbol, SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64}};
     massMBoundary::Dict{Symbol, SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64}};
     stiffM::Dict{Symbol, SparseMatrixCSC{Float64,Int64}};
-    type::Symbol; #evtl. weglassen
+    type::Symbol;
     kubWeights::Array{Float64,2};
     kubPoints::Array{Float64,2};
     taskRecovery::Bool;
@@ -19,11 +18,13 @@ end
 
 #Konstruktoren
 
-function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}}, cond::Tuple{Symbol,Symbol};advection::Bool=true, taskRecovery::Bool=false, t::Symbol=:boussinesq, g::Int64=9)
+function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}};advection::Bool=true, taskRecovery::Bool=false, t::Symbol=:boussinesq, g::Int64=9)
     sol=Dict{Float64, solution}()
     kubPoints, kubWeights=getKub(g, m.meshType);
     dF=Dict{Symbol, degF}()
-    boundaryEdges, boundaryVertices=getBoundary(m);
+
+    ordEdgesB, nebP, nebC=getOrderBoundary(m.boundaryEdges);
+    ordVerticesB, nvbP, nvbC=getOrderBoundary(m.boundaryVertices);
 
     femElements=Set{Symbol}()
     for k in collect(keys(femType))
@@ -33,10 +34,9 @@ function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}}, cond::Tuple
     end
 
     for k in femElements
-        dF[k]=degF(m,k,boundaryEdges,boundaryVertices,kubPoints);
+        dF[k]=degF(m,k,ordEdgesB,nebP,nebC,ordVerticesB,nvbP,nvbC,kubPoints);
     end
     edgeData=Array{Array{Int64,1},1}();
-    equals=spzeros(Int64,0);
     massM=Dict();
     massMB=Dict();
     stiffM=Dict();
@@ -44,13 +44,13 @@ function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}}, cond::Tuple
     bV=Dict();
     s=Set{Symbol}([:poisson,:boussinesq,:combressible]);
     !in(t,s) && error("Die Methode $t ist keine zulässige Eingabe. Möglich sind $s");
-    femProblem(m,cond,bV,dF,femType,equals,edgeData,sol,massM,massMB,stiffM,t,kubWeights, kubPoints, taskRecovery, advection);
+    femProblem(m,bV,dF,femType,edgeData,sol,massM,massMB,stiffM,t,kubWeights, kubPoints, taskRecovery, advection);
 end
 
 function femProblem(meth::Symbol, nx::Int64, ny::Int64, femType::Dict{Symbol,Array{Symbol,1}}, cond::Tuple{Symbol,Symbol};advection::Bool=true,  taskRecovery::Bool=false,  t::Symbol=:boussinesq,
                     g::Int64=9, xl::Float64=0.0, yl::Float64=0.0,xr::Float64=Float64(nx), yr::Float64=Float64(ny))
     if meth==:quad
-        m=generateRectMesh(nx,ny,xl,yl,xr,yr);
+        m=generateRectMesh(nx,ny,cond[1],cond[2],xl,yl,xr,yr);
     elseif meth==:qtri
         m=generateTriMesh(nx,ny,xl,yl,xr,yr);
     elseif meth==:tri
@@ -64,7 +64,9 @@ function femProblem(meth::Symbol, nx::Int64, ny::Int64, femType::Dict{Symbol,Arr
     kubPoints, kubWeights=getKub(g, m.meshType);
     sol=Dict{Float64, solution}();
     dF=Dict{Symbol, degF}()
-    boundaryEdges, boundaryVertices=getBoundary(m);
+
+    ordEdgesB, nebP, nebC=getOrderBoundary(m.boundaryEdges);
+    ordVerticesB, nvbP, nvbC=getOrderBoundary(m.boundaryVertices);
 
     femElements=Set{Symbol}()
     for k in collect(keys(femType))
@@ -74,7 +76,7 @@ function femProblem(meth::Symbol, nx::Int64, ny::Int64, femType::Dict{Symbol,Arr
     end
 
     for k in femElements
-        dF[k]=degF(m,k,boundaryEdges,boundaryVertices,kubPoints);
+        dF[k]=degF(m,k,ordEdgesB,nebP,nebC,ordVerticesB,nvbP,nvbC,kubPoints);
     end
     #=
     femElements=collect(femElements)
@@ -86,7 +88,6 @@ function femProblem(meth::Symbol, nx::Int64, ny::Int64, femType::Dict{Symbol,Arr
     end
     =#
     edgeData=Array{Array{Int64,1},1}();
-    equals=spzeros(Int64,0);
     massM=Dict();
     massMB=Dict();
     stiffM=Dict();
@@ -94,5 +95,5 @@ function femProblem(meth::Symbol, nx::Int64, ny::Int64, femType::Dict{Symbol,Arr
     bV=Dict();
     s=Set{Symbol}([:poisson,:boussinesq,:compressible]);
     !in(t,s) && error("Die Methode $t ist keine zulässige Eingabe. Möglich sind $s");
-    femProblem(m,cond,bV,dF,femType,equals,edgeData,sol,massM,massMB,stiffM,t,kubWeights, kubPoints, taskRecovery, advection);
+    femProblem(m,bV,dF,femType,edgeData,sol,massM,massMB,stiffM,t,kubWeights, kubPoints, taskRecovery, advection);
 end
