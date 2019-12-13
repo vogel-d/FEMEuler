@@ -5,6 +5,13 @@ function symplektischerEuler!(y::solution,p::femProblem, w::solution,ns::Float64
   np=p.degFBoundary[p.femType[:p][1]].num
   nv=p.degFBoundary[p.femType[:v][1]].num
   nb=p.degFBoundary[p.femType[:b][1]].num
+  #=
+  for i in 1:ns
+    y.v[1:nv]=y.v[1:nv]+dtau*(w.v[1:nv]);
+    y.p[1:np]=y.p[1:np]+dtau*(w.p[1:np]);
+    y.b[1:nb]=y.b[1:nb]+dtau*(w.b[1:nb]);
+  end
+  =#
 
   for i in 1:ns
     velOld=copy(y.v);
@@ -13,7 +20,7 @@ function symplektischerEuler!(y::solution,p::femProblem, w::solution,ns::Float64
     y.p[1:np]=y.p[1:np]+dtau*(pS+w.p[1:np]);
     y.b[1:nb]=y.b[1:nb]+dtau*(bS+w.b[1:nb]);
   end
-
+  
   return nothing;
 end
 
