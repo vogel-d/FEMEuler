@@ -7,12 +7,12 @@ function getPhi(type::Symbol)
     elseif type==:P1
         phip1(x,y)=(1-x-y+x*y); #(0,0)
         phip2(x,y)=(x-x*y); #(1,0)
-        phip3(x,y)=(y-x*y); #(0,1)
-        phip4(x,y)=(x*y); #(1,1)
+        phip3(x,y)=(x*y); #(1,1)
+        phip4(x,y)=(y-x*y); #(0,1)
 
         phi=[phip1,phip2,phip3,phip4];
         psize=(1,4);
-
+    #=
     elseif type==:P1x || type==:DG1x
         phipx1(x,y)=(1-x);
         phipx2(x,y)=(x);
@@ -24,12 +24,12 @@ function getPhi(type::Symbol)
         phipy2(x,y)=(y);
         phi=[phipy1,phipy2];
         psize=(1,2);
-
+    =#
     elseif type==:DG1
         phid1(x,y)=(1-x-y+x*y); #(0,0)
         phid2(x,y)=(x-x*y); #(1,0)
-        phid3(x,y)=(y-x*y); #(0,1)
-        phid4(x,y)=(x*y); #(1,1)
+        phid3(x,y)=(x*y); #(1,1)
+        phid4(x,y)=(y-x*y); #(0,1)
 
         phi=[phid1,phid2,phid3,phid4];
         psize=(1,4);

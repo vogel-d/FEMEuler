@@ -29,18 +29,22 @@ function getQuadElementProperties(type::Symbol, kubPoints::Array{Float64,2})
         comp=[0];
 
     elseif type==:P1
-        phi=[fl,fxmxy,fymxy,fxy];
-        #c=[0.0 1.0 0.0 1.0 ;0.0 0.0 1.0 1.0];
+        phi=[fl,fxmxy,fxy,fymxy];
+        #c=[0.0 1.0 1.0 0.0 ;
+        #    0.0 0.0 1.0 1.0];
 
         divphi=[null null null null];
-        gradphi=[fym1 f1my fmy fy;
-                 fxm1 fmx f1mx fx];
+        gradphi=[fym1 f1my fy fmy;
+                 fxm1 fmx fx f1mx];
 
         nFace=0;
         nEdge=0;
         nVert=1;
 
-        #cm=[0.5 0.0 1.0 1.0 0.0 0.0; 1.0 0.5 0.0 1.0 0.0 1.0; 0.5 1.0 0.0 0.0 1.0 1.0; 0.0 0.5 1.0 0.0 1.0 0.0];
+        #cm=[0.5 0.0 1.0 1.0 0.0 0.0;
+        #   1.0 0.5 0.0 1.0 1.0 0.0;
+        #   0.5 1.0 0.0 0.0 1.0 1.0;
+        #   0.0 0.5 1.0 0.0 0.0 1.0];
         comp=[0, 0, 0, 0];
 
     #=
@@ -75,19 +79,23 @@ function getQuadElementProperties(type::Symbol, kubPoints::Array{Float64,2})
         comp=[0, 0];
     =#
     elseif type==:DG1
-        phi=[fl,fxmxy,fymxy,fxy];
-        #c=[0.0 1.0 0.0 1.0 ;0.0 0.0 1.0 1.0];
+        phi=[fl,fxmxy,fxy,fymxy];
+        #c=[0.0 1.0 1.0 0.0 ;
+        #   0.0 0.0 1.0 1.0];
 
         divphi=[null null null null];
-        gradphi=[fym1 f1my fmy fy;
-                 fxm1 fmx f1mx fx];
+        gradphi=[fym1 f1my fy fmy;
+                 fxm1 fmx fx f1mx];
 
 
         nFace=4;
         nEdge=0;
         nVert=0;
 
-        #cm=[0.5 0.0 0.0 0.0 0.0 0.0; 1.0 0.5 0.0 0.0 0.0 0.0; 0.5 1.0 0.0 0.0 0.0 0.0; 0.0 0.5 0.0 0.0 0.0 0.0];
+        #cm=[0.5 0.0 0.0 0.0 0.0 0.0;
+        #   1.0 0.5 0.0 0.0 0.0 0.0;
+        #   0.5 1.0 0.0 0.0 0.0 0.0;
+        #   0.0 0.5 0.0 0.0 0.0 0.0];
         comp=[0, 0, 0, 0];
     #=
     elseif type==:DG1x
