@@ -48,9 +48,11 @@ struct mesh
   meshType::Int64
   edgeLength::Array{Float64,1} #Kantenlängen
   normals::Array{Float64,2} #Normalen des Referenzelementes
+  boundaryEdges::SparseVector{Int,Int};
+  boundaryVertices::SparseVector{Int,Int};
 end
 
-function mesh(topology::meshTopology, geometry::meshGeometry)
+function mesh(topology::meshTopology, geometry::meshGeometry, bE::SparseVector{Int,Int}, bV::SparseVector{Int,Int})
   inc=topology.incidence["10"];
   coord=geometry.coordinates;
   ne=topology.size[2];
@@ -63,5 +65,5 @@ function mesh(topology::meshTopology, geometry::meshGeometry)
   end
   mt=topology.offset["20"][2]-topology.offset["20"][1];
   mt==4 ? n=[0.0 -1.0 0.0 1.0;-1.0 0.0 1.0 0.0] : n=[0.0 -1.0 0.7071067811865475244;-1.0 0.0 0.7071067811865475244];
-  mesh(topology, geometry, mt, l, n)
+  mesh(topology, geometry, mt, l, n, bE, bV)
 end
