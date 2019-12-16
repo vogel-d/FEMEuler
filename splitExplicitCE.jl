@@ -21,7 +21,7 @@ function splitExplicit(y0::solution,Y::Array{solution,1},FY::Array{solution,1},S
       Y[i+1]=MIS.alpha[i+1,j]*(Y[j]-y0)+Y[i+1];
     end
     #println("Advektion:")
-    @time FY[i], SthY[i]=advection(p,gamma,Y[i],nquadPoints,nquadPhi,MrT,MrV);
+    FY[i], SthY[i]=advection(p,gamma,Y[i],nquadPoints,nquadPhi,MrT,MrV);
     #println("MIS Zeug:")
     #@time begin
     fSlow=createSolution(length(y0.rho),length(y0.rhoV),length(y0.rhoTheta),length(y0.v),length(y0.theta));

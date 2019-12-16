@@ -1,7 +1,7 @@
 include("modulesCE.jl")
 
 function testWarmBubble()
-    filename = "warmBubble";
+    filename = "warmBubbleFineGridAdv";
 
     #order: comp, compHigh, compRec, compDG
     femType=Dict(:rho=>[:DG0, :P1, :DG1, :DG0],
@@ -18,12 +18,12 @@ function testWarmBubble()
 
     p=femProblem(:quad, 160, 80, femType, boundaryCondition, t=:compressible, advection=advection, taskRecovery=taskRecovery,
                  xl=-10000.0, xr=10000.0, yr=10000.0);
-    #p=femProblem(:quad, 80, 40, femType, t=:compressible, advection=advection, taskRecovery=taskRecovery,
+    #p=femProblem(:quad, 80, 40, femType, boundaryCondition, t=:compressible, advection=advection, taskRecovery=taskRecovery,
     #                          xl=-10000.0, xr=10000.0, yr=10000.0);
     #adaptGeometry!(pv,0.3,0.3,false); #sin perbutation
 
     gamma=0.5; #upwind
-    UMax=0.0; #UMax determines the advection in x direction
+    UMax=20.0; #UMax determines the advection in x direction
     MISMethod=MIS(:MIS2); #method of time integration
 
     dt=2.0;
