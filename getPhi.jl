@@ -65,10 +65,8 @@ function getPhi(type::Symbol)
         phiw3(x,y)=x*y;
         phiw4(x,y)=(1-x)*y;
 
-        phi=[phiw0 phiw0 phiw2 phiw3 phiw0 phiw0 phiw4 phiw1;
-             phiw1 phiw2 phiw0 phiw0 phiw3 phiw4 phiw0 phiw0];
-        #phi=[phiw0 phiw1; phiw0 phiw2; phiw2 phiw0; phiw3 phiw0; phiw0 phiw3; phiw0  phiw4; phiw4 phiw0;phiw1 phiw0]
-
+        phi=[phiw1 phiw0 phiw2 phiw0 phiw3 phiw0 phiw4 phiw0;
+             phiw0 phiw1 phiw0 phiw2 phiw0 phiw3 phiw0 phiw4];
         psize=(2,8);
 
     elseif type==:VecDG1
@@ -78,9 +76,8 @@ function getPhi(type::Symbol)
         phiw3d(x,y)=x*y;
         phiw4d(x,y)=(1-x)*y;
 
-        phi=[phiw0d phiw0d phiw2d phiw3d phiw0d phiw0d phiw4d phiw1d;
-             phiw1d phiw2d phiw0d phiw0d phiw3d phiw4d phiw0d phiw0d];
-        #phi=[phiw0d phiw1d; phiw0d phiw2d; phiw2d phiw0d; phiw3d phiw0d; phiw0d phiw3d; phiw0d  phiw4d; phiw4d phiw0d;phiw1d phiw0d]
+        phi=[phiw1d phiw0d phiw2d phiw0d phiw3d phiw0d phiw4d phiw0d;
+             phiw0d phiw1d phiw0d phiw2d phiw0d phiw3d phiw0d phiw4d];
 
         psize=(2,8);
     end

@@ -163,51 +163,52 @@ function getQuadElementProperties(type::Symbol, kubPoints::Array{Float64,2})
         comp=[2,1,2,1];
 
     elseif type==:VecP1
-        phi=[null null fxmxy fxy null null fymxy fl;
-             fl fxmxy null null fxy fymxy null null];
 
-        divphi=[fxm1, fmx, f1my, fy, fx, f1mx, fmy, fym1];
-        gradphi=[null null null null f1my fmx fy fx null null null null fmy f1mx fym1 fxm1;
-                fym1 fxm1 f1my fmx null null null null fy fx fmy f1mx null null null null];
+        phi=[fl null fxmxy null fxy null fymxy null;
+             null fl null fxmxy null fxy null fymxy];
+
+        divphi=[fym1, fxm1, f1my, fmx, fy, fx, fmy, f1mx];
+        gradphi=[fym1 fxm1 null null f1my fmx null null fy fx null null fmy f1mx null null ;
+                null null fym1 fxm1 null null f1my fmx null null fy fx null null fmy f1mx ];
+
+        #c=[0.0 0.0 1.0 1.0 1.0 1.0 0.0 0.0;
+        #   0.0 0.0 0.0 0.0 1.0 1.0 1.0 1.0];
+
+        #cm=[0.5 0.0 0.0 1.0 0.0 1.0 0.0 0.0 0.0 0.0;
+        #    1.0 0.5 0.0 0.0 1.0 0.0 1.0 0.0 0.0 0.0;
+        #    0.5 1.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0;
+        #    0.0 0.5 1.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0];
 
         nFace=0;
         nEdge=0;
         nVert=2;
 
-        #c=[0.0 1.0 1.0 1.0 1.0 0.0 0.0 0.0;
-        #   0.0 0.0 0.0 1.0 1.0 1.0 1.0 0.0];
-
-        #cm=[0.5 0.0 1.0 1.0 0.0 0.0 0.0 0.0 0.0 0.0;
-        #     1.0 0.5 0.0 0.0 1.0 1.0 0.0 0.0 0.0 0.0;
-        #     0.5 1.0 0.0 0.0 0.0 0.0 1.0 1.0 0.0 0.0;
-        #     0.0 0.5 0.0 0.0 0.0 0.0 0.0 0.0 1.0 1.0];
-
-        comp=[2, 2, 1, 1, 2, 2, 1, 1];
+        comp=[1, 2, 1, 2, 1, 2, 1, 2];
 
     elseif type==:VecDG1
 
-        phi=[null null fxmxy fxy null null fymxy fl;
-             fl fxmxy null null fxy fymxy null null];
+        phi=[fl null fxmxy null fxy null fymxy null;
+             null fl null fxmxy null fxy null fymxy];
 
-        divphi=[fxm1, fmx, f1my, fy, fx, f1mx, fmy, fym1];
-        gradphi=[null null null null f1my fmx fy fx null null null null fmy f1mx fym1 fxm1;
-                fym1 fxm1 f1my fmx null null null null fy fx fmy f1mx null null null null];
+        divphi=[fym1, fxm1, f1my, fmx, fy, fx, fmy, f1mx];
+        gradphi=[fym1 fxm1 null null f1my fmx null null fy fx null null fmy f1mx null null ;
+                null null fym1 fxm1 null null f1my fmx null null fy fx null null fmy f1mx ];
 
-        nFace=8;
-        nEdge=0;
-        nVert=0;
 
-        #c=[0.0 1.0 1.0 1.0 1.0 0.0 0.0 0.0;
-        #   0.0 0.0 0.0 1.0 1.0 1.0 1.0 0.0];
+        #c=[0.0 0.0 1.0 1.0 1.0 1.0 0.0 0.0;
+        #   0.0 0.0 0.0 0.0 1.0 1.0 1.0 1.0];
 
         #cm=[0.5 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0;
         #    1.0 0.5 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0;
         #    0.5 1.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0;
         #    0.0 0.5 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0];
 
-        comp=[2, 2, 1, 1, 2, 2, 1, 1];
+        comp=[1, 2, 1, 2, 1, 2, 1, 2];
 
-        discontType= true;
+        nFace=8;
+        nEdge=0;
+        nVert=0;
+
     else
         error("Unzulässiger finite-Elemente-Raum");
     end
