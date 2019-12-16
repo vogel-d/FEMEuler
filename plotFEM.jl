@@ -1,29 +1,13 @@
-#Funktion zum Plotten eines zweidimesnionalen Meshes
-#Input: p ist das FEM_Problem, in dem das zu plottende Mesh gespeichert ist,
-#       showann gibt an, ob die Nummerierung angezeigt werden soll.
-#Die restlichen Argumente sind keyword-Arguments, d.h. sie müssen, wenn sie
-#geändert werden sollen, angegeben werden mit karg=wert (z.B.: schowvertices=false)
-#Keyword Arguments: showver gibt an, ob die Knoten markiert werden sollen,
-#                   showdegf gibt an, ob die Freiheitsgrade mit der Nummerierung angezeigt werden sollen,
-#                   sizevertices bestimmt die Größe der Knotenpunkte,
-#                   linecolor bestimmt die Farbe der Linien,
-#                   colorann/positionann/sizeann ist jeweils ein Vektor, in dem
-#                   die Farbe/Position/Größe der Nummerierung festgelegt wird,
-#                   wobei die Anordnung [vertices, edges, facets,degrees of freedom] gilt.
 
-function plotFEM(p::femProblem, showann::Bool=true; showboundary::Bool=false,keys::Array{Symbol,1}=collect(keys(p.degF)), showvertices::Bool=showann, showdegf::Bool=showann,
-    sizevertices::Float64=2.5, linecolor::Symbol=:black,
+function plotFEM(m::mesh, key::Symbol, showann::Bool=true; showvertices::Bool=showann,
+    sizevertices::Float64=2.5, linecolor::Symbol=:blue,
     colorann::Array{Symbol,1}=[:grey, :darkgrey, :black],
-    positionann::Array{Symbol,1}=[:bottom, :bottom, :bottom,:top],
-    sizeann::Array{Int64,1}=[12,12,12,12])
+    positionann::Array{Symbol,1}=[:bottom, :bottom, :auto],
+    sizeann::Array{Int64,1}=[8,8,8])
 
-    m=p.mesh;
-
-    if showboundary
-        degF=p.degFBoundary
-    else
-        degF=p.degF
-    end
+    ordEdgesB, nebP, nebC=getOrderBoundary(m.boundaryEdges);
+    ordVerticesB, nvbP, nvbC=getOrderBoundary(m.boundaryVertices);
+    refFace, refEdge, refVert = getNdegF(key)
 
     ince=m.topology.incidence["10"];
 
@@ -34,8 +18,8 @@ function plotFEM(p::femProblem, showann::Bool=true; showboundary::Bool=false,key
     nv, ne, nf=m.topology.size[1:3];
     x=Array{Float64,2}(undef,2,ne);
     y=Array{Float64,2}(undef,2,ne);
-
     coorde=Array{Float64,2}(undef,2,ne);
+
     for k in 1:ne
         i=ince[[(2*k-1),2*k]];
         x[:,k]=coord[1,i];
@@ -44,20 +28,66 @@ function plotFEM(p::femProblem, showann::Bool=true; showboundary::Bool=false,key
         coorde[2,k]=0.5*sum(y[:,k]);
     end
 
-    pl=plot(x,y, c=linecolor, legend=false, xlabel="x-Achse", ylabel="z-Achse");
-    if showann
-        coordf=Array{Float64,2}(undef,2,nf);
-        ng=off[2]-off[1];
-        for k in 1:nf
-            i=incf[off[k]:(off[k+1]-1)];
-            coordf[1,k]=sum(coord[1,i])/ng;
-            coordf[2,k]=sum(coord[2,i])/ng;
-        end
+    coordf=Array{Float64,2}(undef,2,nf);
+    ng=off[2]-off[1];
 
-        a=[(coord[1,i], coord[2,i], text("$i", colorann[1], positionann[1], sizeann[1])) for i in 1:nv];
-        ae=[(coorde[1,i], coorde[2,i], text("$i", colorann[2], positionann[2], sizeann[2])) for i in 1:ne];
-        af=[(coordf[1,i], coordf[2,i], text("$i", colorann[3], positionann[3], sizeann[3])) for i in 1:nf];
-        append!(append!(a,ae),af);
+    for k in 1:nf
+        i=incf[off[k]:(off[k+1]-1)];
+        coordf[1,k]=sum(coord[1,i])/ng;
+        coordf[2,k]=sum(coord[2,i])/ng;
+    end
+
+    p=plot(x,y, c=linecolor, linewidth=0.5, legend=false, xlabel="x in m", ylabel="z in m");
+    if showann
+        t=[];
+        o=[1];
+        te=[];
+        oe=[1];
+        tf=[];
+        of=[1];
+        for v in 1:nv
+            if m.boundaryVertices[v]>=0
+                for d in 1:refVert
+                    push!(t,nf*refFace+ne*refEdge+refVert*(ordVerticesB[v]-1)+d)
+                end
+            elseif m.boundaryVertices[v]<0
+                for d in 1:refVert
+                    push!(t,nf*refFace+ne*refEdge+refVert*(ordVerticesB[-m.boundaryVertices[v]]-1)+d)
+                end
+            end
+            push!(o,length(t)+1);
+        end
+        for e in 1:ne
+            if m.boundaryEdges[e]>=0
+                for d in 1:refEdge
+                    push!(te,nf*refFace+refEdge*(ordEdgesB[e]-1)+d)
+                end
+            elseif m.boundaryEdges[e]<0
+                for d in 1:refEdge
+                    push!(te,nf*refFace+refEdge*(ordEdgesB[-m.boundaryEdges[e]]-1)+d)
+                end
+            end
+            push!(oe,length(te)+1);
+        end
+        for f in 1:nf
+            for d in 1:refFace
+                push!(tf, refFace*(f-1)+d)
+            end
+            push!(of,length(tf)+1);
+        end
+        if !isempty(t)
+            a=[(coord[1,i], coord[2,i], text("$(t[o[i]:o[i+1]-1])", colorann[1], positionann[1], sizeann[1])) for i in 1:nv];
+        else
+            a=[(coord[1,i], coord[2,i], text("$i", colorann[1], positionann[1], sizeann[1])) for i in 1:nv];
+        end
+        if !isempty(te)
+            ae=[(coorde[1,i], coorde[2,i], text("$(te[oe[i]:oe[i+1]-1])", colorann[2], positionann[2], sizeann[2])) for i in 1:ne];
+            append!(a,ae)
+        end
+        if !isempty(tf)
+            af=[(coordf[1,i], coordf[2,i], text("$(tf[of[i]:of[i+1]-1])", colorann[3], positionann[3], sizeann[3])) for i in 1:nf];
+            append!(a,af);
+        end
         annotate!(a);
     end
 
@@ -65,27 +95,81 @@ function plotFEM(p::femProblem, showann::Bool=true; showboundary::Bool=false,key
         plot!(coord[1,:], coord[2,:], seriestype=:scatter, c=:black, markersize=sizevertices);
     end
 
-    if showdegf
-        nc=0.8/length(keys);
-        nbc=0.8/length(keys);
-        z=0;
-        for k in keys
-            z+=1;
-            num=degF[k].num;
-            c=degF[k].coordinates[:,1:num];
-            plot!(c[1,:], c[2,:], seriestype=:scatter, c=:black, markersize=sizevertices);
-            #ad=[(c[1,i], c[2,i], text("$i", ColorGradient(:magma)[z*nc], positionann[4], sizeann[4])) for i in 1:size(c,2)];
-            #annotate!(ad);
+    return p
+end
 
-            bc=degF[k].coordinates[:,(num+1):end];
-            if !isempty(bc)
-                plot!(bc[1,:], bc[2,:], seriestype=:scatter, c=:black, markersize=sizevertices);
-                #ad=[(bc[1,i], bc[2,i], text("$i", ColorGradient(:viridis)[(length(keys)-z)*nbc], positionann[4], sizeann[4])) for i in 1:size(bc,2)];
-                #annotate!(ad);
-            end
+function getNdegF(type::Symbol)
 
-        end
+    if type==:DG0
+        nFace=1;
+        nEdge=0;
+        nVert=0;
+
+    elseif type==:P1
+        nFace=0;
+        nEdge=0;
+        nVert=1;
+
+    #=
+    elseif type==:P1x
+        nFace=0;
+        nEdge=1;
+        nVert=0;
+
+
+    elseif type==:P1y
+
+        nFace=0;
+        nEdge=1;
+        nVert=0;
+
+    =#
+    elseif type==:DG1
+
+        nFace=4;
+        nEdge=0;
+        nVert=0;
+
+    #=
+    elseif type==:DG1x
+
+        nFace=2;
+        nEdge=0;
+        nVert=0;
+
+    elseif type==:DG1y
+
+        nFace=2;
+        nEdge=0;
+        nVert=0;
+    =#
+    elseif type==:RT0
+
+        nFace=0;
+        nEdge=1;
+        nVert=0;
+
+    elseif type==:RT0B #Broken RT0
+
+        nFace=4;
+        nEdge=0;
+        nVert=0;
+
+    elseif type==:VecP1
+        nFace=0;
+        nEdge=0;
+        nVert=2;
+
+    elseif type==:VecDG1
+
+        nFace=8;
+        nEdge=0;
+        nVert=0;
+
+    else
+        error("Unzulässiger finite-Elemente-Raum");
     end
 
-    return pl
+
+    return nFace, nEdge, nVert
 end
