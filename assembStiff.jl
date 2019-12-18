@@ -48,8 +48,8 @@ end
 #skalare Größe mit Divergenz von vektorieller Größe
 function assembStiff(degFs::degF{1}, degFv::degF{2}, nf::Int64, kubWeights::Array{Float64,2})
 
-    nT=size(degFs.coordinates,2);
-    nF=size(degFv.coordinates,2);
+    nT=degFs.numB;
+    nF=degFv.numB;
     phiT=degFs.phi;
     divphiF=degFv.divphi;
 
@@ -90,8 +90,8 @@ end
 
 #skalare Größe mit vektorieller Größe
 function assembStiff(degFs::degF{1}, degFv::degF{2}, z::Array{Float64,1}, m::mesh, kubWeights::Array{Float64,2}, kubPoints::Array{Float64,2})
-    nT=size(degFs.coordinates,2);
-    nF=size(degFv.coordinates,2);
+    nT=degFs.numB;
+    nF=degFv.numB;
     phiT=degFs.phi;
     phiF=degFv.phi;
 
@@ -157,7 +157,7 @@ function assembStiff!(p::femProblem, comp::Symbol)
     dJ=Array{Float64,2}(undef,sk);
     coord=Array{Float64,2}(undef,2,m.meshType);
 
-    nDF=size(degF[comp].coordinates,2);
+    nDF=degF[comp].numB;
     S=spzeros(nDF,nDF);
     lS=zeros(size(dphiRef,2), size(dphiRef,2));
 

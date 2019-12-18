@@ -20,7 +20,7 @@ function advectionStiff(degFT::degF{1}, phiTtrans::Array{Array{Array{Float64,1},
     globalNumF2=Array{Int64,1}(undef,size(phiF,2));
     globalNumW2=Array{Int64,1}(undef,length(phiW));
 
-    M=zeros(size(degFT.coordinates,2),1);
+    M=zeros(degFT.numB,1);
 
     discGalerkinCells!(M,degFT,phiT, globalNumT1, degFF,phiF, dphiF, fval, globalNumF1,
                        degFW, phiW, gradphiW, wval, globalNumW1,
@@ -60,10 +60,11 @@ function advectionStiff(degFT::degF{2}, phiTtrans::Array{Array{Array{Float64,1},
     globalNumF2=Array{Int64,1}(undef,size(phiF,2));
     globalNumW2=Array{Int64,1}(undef,size(phiW,2));
 
-    M=zeros(size(degFT.coordinates,2),1);
+    M=zeros(degFT.numB,1);
     discGalerkinCells!(M,degFT,phiT, globalNumT1, degFF,phiF, dphiF, fval, globalNumF1,
                        degFW, phiW, gradphiW, wval, globalNumW1,
                        m, kubPoints, kubWeights, coord)
+
     discGalerkinEdges!(M,degFT,phiT, phiTtrans,globalNumT1, globalNumT2,
                        degFF,phiF, phiFtrans, fval, globalNumF1, globalNumF2,
                        degFW,phiW, phiWtrans, wval, globalNumW1,globalNumW2,

@@ -1,3 +1,11 @@
+function invert!(v::Array{N, 1} where N)
+    hv=copy(v);
+    for i in 1:length(v)
+        v[hv[i]]=i;
+    end
+    return nothing;
+end
+
 import Base.+
 function +(a::SparseVector{Float64,Int64}, b::Array{Float64,2})
     rows=collect(1:length(b));

@@ -1,14 +1,15 @@
 #Funktion zum Generieren von zweidimensionalen Rechteck-Gittern
 #Input: nx bzw. ny ist die Anzahl der Gitterelemente in x- bzw. y-Richtung, also die Feinheit des Meshes
 #       xl bzw. yl ist die Länge des Meshes in x- bzw. y-Richtung, als Default ist die Länge nx bzw. ny
-function generateRectMesh(nx::Int64, ny::Int64, xl::Float64=0.0, yl::Float64=0.0, xr::Float64=Float64(nx), yr::Float64=Float64(ny))
+function generateRectMesh(nx::Int64, ny::Int64, condEW::Symbol, condTB::Symbol, xl::Float64=0.0, yl::Float64=0.0, xr::Float64=Float64(nx), yr::Float64=Float64(ny))
 
     #Berechnen der Anzahl der Entitäten für die verschiedenen Dimensionen
     size=[(ny+1)*(nx+1), ny*(nx+1)+nx*(ny+1), nx*ny];
     nk=4;
 
     #Initialisieren des Offsets mit den Einträgen "20" und "10"
-    off=Dict("20"=>collect(1:nk:(nk*size[3]+1)),"10"=>collect(1:2:(2*size[2]+1)));
+    offe=collect(1:2:(2*size[2]+1));
+    off=Dict("20"=>collect(1:nk:(nk*size[3]+1)),"10"=>offe);
 
     #Berechnen der Koordinatenmatrix, basierend auf einem äquidistanten Gitter
     coord=Array{Float64}(undef,2,size[1]);
@@ -42,19 +43,77 @@ function generateRectMesh(nx::Int64, ny::Int64, xl::Float64=0.0, yl::Float64=0.0
     #Berechnen der Inzidenz 1->0
     ince=Int64[];
     z=1;
-    for k in 1:(ny+1)
-        for h in 1:nx
-            i=[z, z+1];
-            append!(ince,i);
-            z+=1;
-        end
-        z+=1;
-    end
-    z=1;
     for k in 1:(nx+1)*ny
         i=[z, z+nx+1];
         append!(ince,i);
         z+=1;
+    end
+    zh=1;
+    for h in 1:nx
+        z=zh;
+        for k in 1:(ny+1)
+            i=[z, z+1]
+            append!(ince,i);
+            z+=nx+1
+        end
+        zh+=1;
+    end
+
+    #Initialisieren des Boundaryvektoren mit Einträgen
+    #   0 für innere Kante/Knoten,
+    #   1 für RandKante/Knoten mit freeslip,
+    #   -x für periodische RandKante/Knoten mit x gegenüberliegende RandKante/Knoten
+    bE=spzeros(Int, size[2]);
+    bV=spzeros(Int, size[1]);
+    ordV=Int[];
+    corners=Set{Int}();
+    #Berechnen des Boundaryvektors für die Randknoten
+    for i in 1:size[1]
+        if (coord[1,i]==xl || coord[1,i]==xr) && (coord[2,i]==yl || coord[2,i]==yr)
+            push!(corners,i);
+            if condEW==:constant && condTB==:constant
+                bV[i]=1;
+            elseif condEW==:periodic && condTB==:periodic && !(coord[1,i]==xl && coord[2,i]==yl)
+                bV[i]=-1;
+            elseif condEW==:periodic && coord[1,i]==xr
+                bV[i]=-i+nx;
+            elseif condTB==:periodic && coord[2,i]==yr
+                bV[i]=-i+(nx+1)*ny;
+            end
+        elseif condEW==:constant && (coord[1,i]==xl || coord[1,i]==xr)
+            bV[i]=1;
+        elseif coord[1,i]==xr
+            #condEW==:periodic
+            bV[i]=-i+nx;
+        elseif condTB==:constant && (coord[2,i]==yl || coord[2,i]==yr)
+            bV[i]=1;
+        elseif coord[2,i]==yr
+            #condTB==:periodic
+            bV[i]=-i+(nx+1)*ny;
+        end
+    end
+
+    #Berechnen des Boundaryvektors für die Randkanten
+    for i in 1:size[2]
+        v1=ince[offe[i]];
+        v2=ince[offe[i]+1]
+        b1=bV[v1];
+        b2=bV[v2];
+        if b1==0 && b2==0
+            continue;
+        elseif (b1!=0 && b2!=0) || in(v1,corners) || in(v2,corners)
+            if b2==b1==1
+                bE[i]=1;
+            elseif (b1==1 && b2<=0) || (b1<=0 && b2==1)
+                bE[i]=1;
+            elseif b1<0 && b2<0
+                if coord[1,v1]==coord[1,v2]
+                    bE[i]=-i+nx;
+                elseif coord[2,v1]==coord[2,v2]
+                    bE[i]=-i+ny;
+                end
+            end
+        end
     end
 
     #Initialisieren der Inzidenz mit den Einträgen "20" und "10"
@@ -66,7 +125,7 @@ function generateRectMesh(nx::Int64, ny::Int64, xl::Float64=0.0, yl::Float64=0.0
     r=Float64[xr,yr];
     mT=meshTopology(inc,off,n);
     mG=meshGeometry(coord,l,r);
-    m=mesh(mT,mG);
+    m=mesh(mT,mG, bE, bV);
 
     return m
 end

@@ -38,7 +38,7 @@ function splitExplicit(y0::solution,Y::Array{solution,1},FY::Array{solution,1},S
     Y[i+1].rhoV[numRhoV+1:end]=y0.rhoV[numRhoV+1:end];
     Y[i+1].rho[numRho+1:end]=y0.rho[numRho+1:end];
     Y[i+1].rhoTheta[numRhoTheta+1:end]=y0.rhoTheta[numRhoTheta+1:end];
-    
+
     symplektischerEuler!(Y[i+1],p,fSlow,SthSlow,nsLoc,dtauLoc);
   end
   return Y[stage+1];

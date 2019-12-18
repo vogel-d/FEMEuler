@@ -14,7 +14,7 @@ function projectPressure(degFP::degF{1},massMP::SuiteSparse.UMFPACK.UmfpackLU{Fl
 
     cl=zeros(sk);
 
-    gbh=zeros(size(degFP.coordinates,2))
+    gbh=zeros(degFP.numB)
     for k in 1:m.topology.size[3]
         jacobi!(J,dJ,m,k,kubPoints,coord);
 

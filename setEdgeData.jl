@@ -1,9 +1,10 @@
 function setEdgeData!(p::femProblem, compVf::Symbol)
     m=p.mesh;
-    equals=p.equals;
     degFVf=p.degFBoundary[p.femType[compVf][1]];
     mt=m.meshType;
+    refBound=getReferenceBoundary(p.femType[compVf][1],mt);
     mt==4 ?  normal=[0.5 0.0 1.0 1.0 0.5 0.0 0.0 -1.0; 0.0 -1.0 0.5 0.0 1.0 1.0 0.5 0.0] : normal=[0.5 0.0 0.5 1/sqrt(2) 0.0 -1.0; 0.0 -1.0 0.5 1/sqrt(2) 0.5 0.0];
+    meshConnectivity!(m,1,2)
     offe=m.topology.offset["12"];
     ince=m.topology.incidence["12"];
     offv=m.topology.offset["10"];
@@ -21,8 +22,9 @@ function setEdgeData!(p::femProblem, compVf::Symbol)
         off2=offe[e+1];
         h1=false;
         if (off2-off1)==1
-            e1=equals[e];
-            if e1!=0
+            e1=m.boundaryEdges[e];
+            if e1<0
+                e1=-e1
                 inc=[ince[offe[e1]], ince[off1]];
                 h1=true;
             else
@@ -65,9 +67,9 @@ function setEdgeData!(p::femProblem, compVf::Symbol)
         end
         globalNumVf=l2g(degFVf,inc[1])
         for i in 1:mt
-            rb=t1(degFVf.referenceBoundary[i,1:2]);
+            rb=t1(refBound[i,1:2]);
             if isapprox(rb,mva)
-                d=degFVf.referenceBoundary[i,3:end];
+                d=refBound[i,3:end];
                 for j in 1:length(d)
                     if d[j]==1.0
                         push!(globv,globalNumVf[j]);

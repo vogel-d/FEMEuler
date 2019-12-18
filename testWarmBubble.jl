@@ -1,7 +1,7 @@
 include("modulesCE.jl")
 
 function testWarmBubble()
-    filename = "warmBubble";
+    filename = "warmBubbleFineGridAdv";
 
     #order: comp, compHigh, compRec, compDG
     femType=Dict(:rho=>[:DG0, :P1, :DG1, :DG0],
@@ -14,16 +14,16 @@ function testWarmBubble()
     taskRecovery=true;
     advection=true;
 
-    p=femProblem(:quad, 160, 80, femType, t=:compressible, advection=advection, taskRecovery=taskRecovery,
+    boundaryCondition = (:periodic, :constant); #(top/bottom, east/west)
+
+    p=femProblem(:quad, 160, 80, femType, boundaryCondition, t=:compressible, advection=advection, taskRecovery=taskRecovery,
                  xl=-10000.0, xr=10000.0, yr=10000.0);
-    #p=femProblem(:quad, 80, 40, femType, t=:compressible, advection=advection, taskRecovery=taskRecovery,
+    #p=femProblem(:quad, 80, 40, femType, boundaryCondition, t=:compressible, advection=advection, taskRecovery=taskRecovery,
     #                          xl=-10000.0, xr=10000.0, yr=10000.0);
     #adaptGeometry!(pv,0.3,0.3,false); #sin perbutation
 
-    boundaryCondition = (:periodic, :constant); #(top/bottom, east/west)
-
     gamma=0.5; #upwind
-    UMax=0.0; #UMax determines the advection in x direction
+    UMax=20.0; #UMax determines the advection in x direction
     MISMethod=MIS(:MIS2); #method of time integration
 
     dt=2.0;
@@ -53,8 +53,9 @@ function testWarmBubble()
     fvel=[fv1, fv2];
     f=Dict(:rho=>frho,:theta=>ftheta,:v=>fvel);
 
-    assembFEM!(p, boundaryCondition);
-    p.boundaryValues[(:theta,:P1)]=300*ones(size(p.degFBoundary[:P1].coordinates,2)-p.degFBoundary[:P1].num);
+    assembMass!(p);
+    assembStiff!(p);
+    p.boundaryValues[(:theta,:P1)]=300*ones(p.degFBoundary[:P1].numB-p.degFBoundary[:P1].num);
     applyStartValues!(p, f);
 
     rho0=p.solution[0.0].rho;
