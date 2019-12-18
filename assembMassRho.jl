@@ -59,7 +59,7 @@ function assembMassRho(degF::degF{2}, degFRho::degF{1}, valRho::Array{Float64,1}
     coord=Array{Float64,2}(undef,2,m.meshType);
 
     globalNum=Array{Int64,1}(undef,size(phi,2));
-    globalNumRho=Array{Int64,1}(undef,size(phiRho,2));
+    globalNumRho=Array{Int64,1}(undef,length(phiRho));
 
     cRho=zeros(sk);
 
