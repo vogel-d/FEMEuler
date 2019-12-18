@@ -1,9 +1,8 @@
-
 function plotFEM(m::mesh, key::Symbol, showann::Bool=true; showvertices::Bool=showann,
     sizevertices::Float64=2.5, linecolor::Symbol=:blue,
     colorann::Array{Symbol,1}=[:grey, :darkgrey, :black],
     positionann::Array{Symbol,1}=[:bottom, :bottom, :auto],
-    sizeann::Array{Int64,1}=[8,8,8])
+    sizeann::Array{Int64,1}=[5,5,5])
 
     ordEdgesB, nebP, nebC=getOrderBoundary(m.boundaryEdges);
     ordVerticesB, nvbP, nvbC=getOrderBoundary(m.boundaryVertices);

@@ -48,9 +48,9 @@ function getPhi(type::Symbol)
         psize=(1,1);
 
     elseif type==:P1 || type==:DG1
-        phi=[fl,fxmxy,fymxy,fxy];
+        phi=[fl,fxmxy,fxy,fymxy];
         psize=(1,4);
-
+    #=
     elseif type==:P1x || type==:DG1x
         phi=[f1mx,fx];
         psize=(1,2);
@@ -58,7 +58,7 @@ function getPhi(type::Symbol)
     elseif type==:P1y || type==:DG1y
         phi=[f1my,fy];
         psize=(1,2);
-
+    =#
     elseif type==:P2 || type==:DG2
         phi=[f1P2, f2P2, f3P2, f4P2, f5P2, f6P2, f7P2, f8P2, f9P2];
         psize=(1,9)
@@ -66,7 +66,7 @@ function getPhi(type::Symbol)
     elseif type==:RT0 || type==:RT0B
         phi=[null fx null f1mx;
              f1my null fy null];
-        #phi=[phiv0 phiv4; phiv1 phiv0; phiv0 phiv3; phiv2 phiv0];
+
         psize=(2,4);
 
     elseif type==:RT1 || type==:RT1B
@@ -75,9 +75,8 @@ function getPhi(type::Symbol)
         psize=(2,12);
 
     elseif type==:VecP1 || type==:VecDG1
-        phi=[null null fxmxy fxy null null fymxy fl;
-             fl fxmxy null null fxy fymxy null null];
-        #phi=[phiw0 phiw1; phiw0 phiw2; phiw2 phiw0; phiw3 phiw0; phiw0 phiw3; phiw0  phiw4; phiw4 phiw0;phiw1 phiw0]
+        phi=[fl null fxmxy null fxy null fymxy null;
+             null fl null fxmxy null fxy null fymxy];
 
         psize=(2,8);
     else

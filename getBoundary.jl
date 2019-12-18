@@ -1,24 +1,21 @@
 function getBoundary(m::mesh)
-  #boundary = alle Entitäten aus D-1, die nur zu einer Entität aus D inzident sind
-    dim=m.topology.D;
-    #"D-1D" wird erzeugt, um Nachbarn festzustellen
-    meshConnectivity!(m,dim-1,dim);
-    off=m.topology.offset["$(dim-1)$dim"];
-    inc=m.topology.incidence["$(dim-1)$dim"];
-
-    b=Dict{Int64, Array{Int64,1}}();
-    for i in 1:(length(off)-1)
-        if off[i+1]-off[i]==1
+  #boundary = alle Kanten, die nur zu einer Fläche inzident sind
+    meshConnectivity!(m,1,2);
+    off=m.topology.offset["12"];
+    inc=m.topology.incidence["12"];
+    offv=m.topology.offset["10"];
+    incv=m.topology.incidence["10"];
+    be=Set{Int}();
+    bv=Set{Int}();
+    for e in 1:m.topology.size[2]
+        if off[e+1]-off[e]==1
             #immer, wenn die Grenzen im Offset sich nur um 1 unterscheiden
             #wird die Entitäts-ID in boundary gespeichert
-            fi=inc[off[i]];
-            if haskey(b, fi)
-                push!(b[fi],i);
-            else
-                b[fi]=[i];
-            end
+            v=incv[offv[e]:offv[e+1]-1];
+            push!(be,e)
+            union!(bv,v)
         end
     end
 
-    return b
+    return be, bv
 end

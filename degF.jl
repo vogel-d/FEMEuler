@@ -1,196 +1,99 @@
-mutable struct degF{N}
-    coordinates::Array{Float64,2};
-    num::Int64;
-    edgeBoundaryIncidence::SparseVector{Array{Int64,1},Int64};
-    boundaryEdgeIncidence::Array{Array{Int64,1},1};
-    incidence::Array{Int64,1};
-    offset::Array{Int64,1};
-    referenceCoordinates::Array{Float64,2};
-    referenceBoundary::Array{Float64,2};
+struct degF{N}
+    # size: in assembLoad, assembMassRho, advectionStiff, assembStiff, applyStartValues, embed, testFunctions, projectPressure, projectRecovery
+    # in generateBoundary.jl, plotFEM.jl
+    numB::Int;
+    num::Int;
+
+    incidence::Array{Int,1}; # in l2g.jl, correctVelocity.jl, plotSolution.jl, plotSolutionGif.jl #notwendig
+    offset::Array{Int,1}; # in l2g.jl, correctVelocity.jl, plotSolution.jl, plotSolutionGif.jl #evtl. weglassen und Schrittweite speichern? ->Dann nicht für Gitter mit gemischten Elementen, z.B. Dreiecke und Rechtecke
+
     phi::Array{Array{Float64,2},N};
     divphi::Array{Array{Float64,2},1};
     gradphi::Array{Array{Float64,2},2};
-    discont::Bool;
-    components::Array{Int64,1};
+    components::Array{Int,1}; #in plotSolution.jl und vtk.jl
 end
 
 
-function degF(m::mesh, femType::Symbol, boundary::Dict{Int64, Array{Int64,1}}, fset::Set{Int64}, kubPoints::Array{Float64,2})
-    D=m.topology.D;
-    a=0;
-    nf=m.topology.size[D+1];
+function degF(m::mesh, femType::Symbol, ordEdgesB::Array{Int,1}, nebP::Int, nebC::Int, ordVerticesB::Array{Int,1}, nvbP::Int, nvbC::Int, kubPoints::Array{Float64,2})
+    nf=m.topology.size[3];
+    ne=m.topology.size[2];
+    nv=m.topology.size[1];
+    meshConnectivity!(m,2,1);
+    incfe=m.topology.incidence["21"];
+    offfe=m.topology.offset["21"];
+    incfv=m.topology.incidence["20"];
+    offfv=m.topology.offset["20"];
+    incev=m.topology.incidence["10"];
+    offev=m.topology.offset["10"];
+    #Gerade noch nur für gleichmäßige Meshes
+    #Verallgemeinern durch Rauskürzen von nef und nvf und variablen Erstellen von off & Erweitern von getElementProperties
+    nef=offfe[2]-offfe[1];
+    nvf=offfv[2]-offfv[1];
 
-    if m.topology.offset["$D$a"][2]-m.topology.offset["$D$a"][1]==4
-        phi, divphi,  gradphi, cref,ccenters, comp, discontType=getQuadElementProperties(femType, kubPoints)
-    else
-        phi, divphi,  gradphi, cref,ccenters, comp, discontType=getTriElementProperties(femType, kubPoints)
-    end
+    phi, divphi,  gradphi, comp,  refFace, refEdge, refVert=getQuadElementProperties(femType, kubPoints)
+    ndegF=refFace+nef*refEdge+nvf*refVert
+    inc=zeros(Int, nf*ndegF);
+    off=collect(1:ndegF:nf*ndegF+1);
+    for f in 1:nf
+        for d in 1:refFace
+            inc[off[f]+d-1]=refFace*(f-1)+d;
+        end
 
-    degComp=Int64[];
-    degCompB=Int64[];
-    trans(co,x,y)=transformation(m,co,x,y);
-    degFc=Array{Float64,2}(undef,2,0);
-    degFbc=Array{Float64,2}(undef,2,0);
-    degFi=Int64[];
-    degFo=Array{Int64}(1:size(cref,2):(size(cref,2)*nf+1));
-    degFbe=Array{Array{Int64,1},1}();
-    degFeb=spzeros(Array{Int64,1}, m.topology.size[2]);
-    h=Int64[];
-    z1=false;
-    z2=false;
-
-    if discontType
-        z3=false;
-        z4=false;
-    else
-        z3=true;
-        z4=true;
-    end
-    #Konzept: Herausfinden der am Rand liegenden Freiheitsgrade
-    #durch Zuordnung der Freiheitsgrade an Kanten im Referenzelement
-    #(Die Randkanten liefert boundary)
-    for k in 1:nf
-        rstart=m.topology.offset["$D$a"][k];
-        rend=m.topology.offset["$D$a"][k+1]-1;
-        vertices=m.topology.incidence["$D$a"][rstart:rend];
-        coord=m.geometry.coordinates[:,vertices];
-        if in(k,fset) #falls das Zelle ein Randfacet ist
-            incz=boundary[k]; #werden Randkanten der Zelle bestimmt
-            bdegF=Int64[];
-            bdegFh=Int64[];
-            offb=Int64[1];
-            zb=1;
-            for i in 1:length(incz) #und dann für jede Randkante
-                rstart=m.topology.offset["10"][incz[i]];
-                cz=m.geometry.coordinates[:,m.topology.incidence["10"][rstart:(rstart+1)]];
-                mz=(1/size(cz,2)).*[sum(cz[1,:]), sum(cz[2,:])]; #der Mittelpunkt bestimmt
-                for j in 1:size(ccenters,1)
-                    #danach wird geprüft welcher Referenzmittelpunkt nach der Transformation
-                    #diesen Mittelpunkt ergibt
-                    if isapprox(mz,trans(coord,ccenters[j,1],ccenters[j,2]))
-                        for l in 3:size(ccenters,2)
-                            if ccenters[j,l]==1.0
-                                push!(bdegF,l-2);
-                                push!(bdegFh,incz[i]);
-                                zb+=1;
-                                #dann werden alle Freiheitsgrade die diesem
-                                #Referenzmittelpunkt zugeordnet sind erfasst
-                            end
-                        end
-                    end
+        vert=incfv[offfv[f]:offfv[f+1]-1];
+        zv=off[f]+refFace+nef*refEdge
+        for v in vert
+            if m.boundaryVertices[v]>=0
+                for d in 1:refVert
+                    inc[zv]=nf*refFace+ne*refEdge+refVert*(ordVerticesB[v]-1)+d; #evtl in zwei Konstanten speichern
+                    zv+=1;
                 end
-                push!(offb,zb);
+            elseif m.boundaryVertices[v]<0
+                for d in 1:refVert
+                    inc[zv]=nf*refFace+ne*refEdge+refVert*(ordVerticesB[-m.boundaryVertices[v]]-1)+d; #evtl in zwei Konstanten speichern
+                    zv+=1;
+                end
             end
-            #dann werden alle untersucht
-            bdegFg=spzeros(Int64, length(bdegF));
-            for i in 1:size(cref,2)
-                if in(i,bdegF)
-                    #falls es ein Randfreiheitsgrad ist wird er mit höheren Werten markiert
-                    t=trans(coord,cref[1,i],cref[2,i]);
-                    tcomp=comp[i];
-                    if z1
-                        b=findall(t,degFbc);
-                        bh=true;
-                        if length(b)>0
-                            for ic in 1:length(b)
-                                if tcomp==degCompB[b[ic]]
-                                    push!(degFi,b[ic]);
-                                    push!(h, length(degFi));
-                                    ind=findall(i,bdegF);
-                                    append!(degFbe[b[ic]],bdegFh[ind]);
-                                    bdegFg[ind].=b[ic];
-                                    bh=false;
-                                    break;
-                                end
-                            end
-                        end
-                        if length(b)==0 || bh
-                            degFbc=hcat(degFbc,[t[1], t[2]]);
-                            push!(degFi, size(degFbc,2));
-                            push!(degCompB, tcomp);
-                            push!(h, length(degFi));
-                            ind=findall(i,bdegF);
-                            push!(degFbe,bdegFh[ind]);
-                            bdegFg[ind].=size(degFbc,2);
-                        end
+        end
+
+        edges=incfe[offfe[f]:offfe[f+1]-1];
+        #Sortieren von edges in  richtige Reigenforge nach Knoten
+        push!(vert,vert[1]);
+        ind=zeros(Int,length(edges)); #ALLOCATION
+        for i in 1:length(edges)
+            ve=incev[offev[edges[i]]:offev[edges[i]+1]-1];
+            for j in 1:length(vert)-1
+                if ve[1]==vert[j]
+                    if ve[2]==vert[j+1]
+                        ind[j]=i;
                     else
-                        degFbc=hcat(degFbc,[t[1], t[2]]);
-                        push!(degFi, size(degFbc,2));
-                        push!(degCompB, tcomp);
-                        push!(h, length(degFi));
-                        ind=findall(i,bdegF);
-                        push!(degFbe,bdegFh[ind]);
-                        bdegFg[ind].=size(degFbc,2);
-                        z1=z3;
+                        continue;
                     end
-                else
-                    #falls nicht findet die normale Erzeugung als Freiheitsgrad statt
-                    t=trans(coord,cref[1,i],cref[2,i]);
-                    tcomp=comp[i];
-                    if z2
-                        b=findall(t,degFc);
-                        bh=true;
-                        if length(b)>0
-                            for ic in 1:length(b)
-                                if tcomp==degComp[b[ic]]
-                                    push!(degFi,b[ic])
-                                    bh=false;
-                                    break;
-                                end
-                            end
-                        end
-                        if length(b)==0 || bh
-                            degFc=hcat(degFc, [t[1], t[2]]);
-                            push!(degFi, size(degFc,2));
-                            push!(degComp,tcomp)
-                        end
+                elseif ve[1]==vert[j+1]
+                    if ve[2]==vert[j]
+                        ind[j]=i;
                     else
-                        degFc=hcat(degFc, [t[1], t[2]]);
-                        push!(degFi, size(degFc,2));
-                        push!(degComp,tcomp)
-                        z2=z4;
+                        continue;
                     end
                 end
             end
-            for i in 1: length(incz)
-                degFeb[incz[i]]=bdegFg[offb[i]:(offb[i+1]-1)];
-            end
-        else
-            #falls das Facet nicht zum Rand gehört
-            #werden alle Freiheitsgrade normal erzeugt
-            for i in 1:size(cref,2)
-                t=trans(coord,cref[1,i],cref[2,i]);
-                tcomp=comp[i];
-                if z2
-                    b=findall(t,degFc);
-                    bh=true;
-                    if length(b)>0
-                        for ic in 1:length(b)
-                            if tcomp==degComp[b[ic]]
-                                push!(degFi,b[ic])
-                                bh=false;
-                                break;
-                            end
-                        end
-                    end
-                    if length(b)==0 || bh
-                        degFc=hcat(degFc, [t[1], t[2]]);
-                        push!(degFi, size(degFc,2));
-                        push!(degComp,tcomp)
-                    end
-                else
-                    degFc=hcat(degFc, [t[1], t[2]]);
-                    push!(degFi, size(degFc,2));
-                    push!(degComp,tcomp)
+        end
+        edges=edges[ind];
+        ze=off[f]+refFace;
+        for e in edges
+            if m.boundaryEdges[e]>=0
+                for d in 1:refEdge
+                    inc[ze]=nf*refFace+refEdge*(ordEdgesB[e]-1)+d; #evtl in zwei Konstanten speichern
+                    ze+=1;
+                end
+            elseif m.boundaryEdges[e]<0
+                for d in 1:refEdge
+                    inc[ze]=nf*refFace+refEdge*(ordEdgesB[-m.boundaryEdges[e]]-1)+d; #evtl in zwei Konstanten speichern
+                    ze+=1;
                 end
             end
         end
     end
-    s=size(degFc,2);
-    for i in 1:length(h)
-        degFi[h[i]]+=s;
-    end
-    lc=size(degFc,2);
-    degFc=hcat(degFc,degFbc)
-    degF(degFc, lc, degFeb, degFbe, degFi, degFo, cref, ccenters, phi, divphi, gradphi, discontType, comp);
+    nb=nf*refFace+(ne-nebP)*refEdge+(nv-nvbP)*refVert;
+    n=nb-nebC*refEdge-nvbC*refVert;
+    degF(nb,n, inc, off, phi, divphi, gradphi, comp);
 end

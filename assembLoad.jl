@@ -5,7 +5,7 @@ function assembLoad(degF::degF{1}, f, m::mesh, kubPoints::Array{Float64,2}, kubW
     J=initPhi((2,2),sk);
     dJ=Array{Float64,2}(undef,sk);
     jcoord=Array{Float64,2}(undef,2,m.meshType);
-    gb=zeros(size(degF.coordinates,2))
+    gb=zeros(degF.numB)
 
     iter=length(phiT);
     for k in 1:m.topology.size[m.topology.D+1]
@@ -38,7 +38,7 @@ function assembLoad(degF::degF{2}, f, m::mesh, kubPoints::Array{Float64,2}, kubW
     ddJ=Array{Float64,2}(undef,sk);
     jphiT=initPhi(size(phiT),sk);
     jcoord=Array{Float64,2}(undef,2,m.meshType);
-    gb=zeros(size(degF.coordinates,2));
+    gb=zeros(degF.numB);
 
     iter=size(phiT,2);
     for k in 1:m.topology.size[m.topology.D+1]

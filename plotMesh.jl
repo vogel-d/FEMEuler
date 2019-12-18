@@ -43,7 +43,7 @@ function plotMesh2D(m::mesh, showann::Bool=true; showvertices::Bool=showann,
         coordf[2,k]=sum(coord[2,i])/ng;
     end
 
-    p=plot(x,y, c=linecolor, legend=false, xlabel="x in m", ylabel="z in m");
+    p=plot(x,y, c=linecolor, linewidth=0.5, legend=false, xlabel="x in m", ylabel="z in m");
     if showann
         a=[(coord[1,i], coord[2,i], text("$i", colorann[1], positionann[1], sizeann[1])) for i in 1:nv];
         ae=[(coorde[1,i], coorde[2,i], text("$i", colorann[2], positionann[2], sizeann[2])) for i in 1:ne];

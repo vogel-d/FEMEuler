@@ -1,7 +1,7 @@
 function applyStartValues!(p::femProblem,f)
     sol=solution();
     for i in fieldnames(solution)
-        nc=size(p.degFBoundary[p.femType[i][1]].coordinates,2)
+        nc=p.degFBoundary[p.femType[i][1]].numB
         ni=p.degFBoundary[p.femType[i][1]].num
         nb=nc-ni;
         ti=p.femType[i][1];

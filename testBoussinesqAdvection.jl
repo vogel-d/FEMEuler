@@ -5,16 +5,17 @@ function testBoussinesqAdvection()
 
   #order: comp, compHigh, compRec, compDG
   femType=Dict(:p=>[:DG0, :P1, :DG1, :DG0], :v=>[:RT0, :VecP1, :VecDG1, :RT0B], :b=>[:DG0, :P1, :DG1, :DG0]);
+  #femType=Dict(:p=>[:DG0, :P1, :DG1, :DG0], :v=>[:RT0, :VecP1, :VecDG1, :RT0B], :b=>[:P1, :P1, :DG1, :DG1]);
   #femType=Dict(:p=>[:DG1, :P1, :DG1, :DG0], :v=>[:RT1, :VecP1, :VecDG1, :RT0B], :b=>[:DG1, :P1, :DG1, :DG0]);
   Vfcomp=:RT0
   #Vfcomp=:RT1
 
   taskRecovery=true;
 
-  p=femProblem(:quad, 300, 10, femType, taskRecovery=taskRecovery,  xr=300000.0, yr=10000.0);
-  #adaptGeometry!(p,0.3,0.3,false); #sin perbutation
-
   boundaryCondition = (:periodic, :constant)
+
+  p=femProblem(:quad, 300, 10, femType, boundaryCondition, taskRecovery=taskRecovery,  xr=300000.0, yr=10000.0);
+  #adaptGeometry!(p,0.3,0.3,false); #sin perbutation
 
   gamma=0.5;
   UMax=20.0 #UMax determines the advection in x direction
@@ -33,7 +34,8 @@ function testBoussinesqAdvection()
   fb(x,y)=b0*sin(pi*y/H)/(1+((x-xM)/A)^2);
   f=Dict(:b=>fb)
 
-  assembFEM!(p, boundaryCondition);
+  assembMass!(p);
+  assembStiff!(p);
   applyStartValues!(p, f);
 
   v1(x,y)=UMax

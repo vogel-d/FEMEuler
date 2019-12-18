@@ -1,11 +1,9 @@
-function generateEquals!(p::femProblem, cond::Tuple{Symbol,Symbol})
-    p.boundaryCondition=cond;
-    m=p.mesh;
+function generateEquals(m::mesh, cond::Tuple{Symbol,Symbol})
     type=m.meshType;
     nx=m.topology.n[1];
     ny=m.topology.n[2];
     ne=m.topology.size[2];
-    equals=spzeros(Int64, ne);
+    equals=spzeros(Int, ne);
     if type==4
         if cond==(:periodic, :periodic)
             for i in 1:nx
@@ -27,12 +25,12 @@ function generateEquals!(p::femProblem, cond::Tuple{Symbol,Symbol})
         if isodd(ny)
             ns==true && error("Für ein Dreiecksmesh mit ungerader Anzahl an Elementen in y-Richtung können die periodischen Ranbedingung
                                 nicht auf die oberen und unteren Kanten des Meshes angewendet werden, da die Anzahl der Randfreiheitsgrade nicht übereinstimmt.");
-            a=Int64(0.5*(ny+1)*(2*nx-1));
+            a=Int(0.5*(ny+1)*(2*nx-1));
             for i in 1:ny
                 equals[a+1+(i-1)*2*nx]=a+i*2*nx;
             end
         else
-            ny2=Int64(0.5*ny);
+            ny2=Int(0.5*ny);
             if cond==(:periodic, :periodic)
                 for i in 1:nx
                     equals[i]=i+ny2*(2*nx-1);
@@ -53,6 +51,5 @@ function generateEquals!(p::femProblem, cond::Tuple{Symbol,Symbol})
             end
         end
     end
-    p.equals=equals;
-    return nothing;
+    return equals;
 end
