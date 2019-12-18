@@ -1,7 +1,7 @@
 include("modulesB.jl")
 
 function testBoussinesq()
-    filename = "test";
+    filename = "testPeriodic";
 
     femType=Dict(:p=>[:DG0], :v=>[:RT0], :b=>[:P1]);
 
@@ -15,13 +15,13 @@ function testBoussinesq()
     dt=1.0;
     tend=3000.0;
 
-    solSaves=15.0:15:tend; #determines at which points of time the solution is saved
-    #solSaves=tend;
+    #solSaves=15.0:15:tend; #determines at which points of time the solution is saved
+    solSaves=tend;
 
     b0=0.01;
     H=10000;
     A=5000;
-    xM=0.5*(pv.mesh.geometry.l[1]+pv.mesh.geometry.r[1]);
+    xM=0.7*(pv.mesh.geometry.l[1]+pv.mesh.geometry.r[1]);
     yM=0.5*(pv.mesh.geometry.l[2]+pv.mesh.geometry.r[2]);
     fb(x,y)=b0*sin(pi*y/H)/(1+((x-xM)/A)^2);
     f=Dict(:b=>fb);

@@ -1,10 +1,13 @@
 include("modulesBA.jl")
 
 function testBoussinesqAdvection()
-  filename = "Boussinesq"
+  filename = "BoussinesqAdvNoRecovery"
 
   #order: comp, compHigh, compRec, compDG
   femType=Dict(:p=>[:DG0, :P1, :DG1, :DG0], :v=>[:RT0, :VecP1, :VecDG1, :RT0B], :b=>[:DG0, :P1, :DG1, :DG0]);
+  #femType=Dict(:p=>[:DG1, :P1, :DG1, :DG0], :v=>[:RT1, :VecP1, :VecDG1, :RT0B], :b=>[:DG1, :P1, :DG1, :DG0]);
+  Vfcomp=:RT0
+  #Vfcomp=:RT1
 
   taskRecovery=true;
 
@@ -18,6 +21,7 @@ function testBoussinesqAdvection()
   MISMethod=MIS(:MIS4_4);
 
   dt=20.0;
+  #dt=10.0;
   ns=19;
   EndTime=3000.0;
   nIter=Int64(EndTime/dt)
@@ -34,7 +38,6 @@ function testBoussinesqAdvection()
 
   v1(x,y)=UMax
   v2(x,y)=0
-  Vfcomp=:RT0
   V=[v1, v2];
   Vf=projectAdvection(p,V,Vfcomp);
 
@@ -52,13 +55,19 @@ function testBoussinesqAdvection()
     y=splitExplicit(p,gamma,Vfcomp,Vf,nquadPhi,nquadPoints,MISMethod,y,Time,dt,ns);
     Time=Time+dt
     p.solution[Time]=y;
+    #=
+    if mod(i,20)==0
+      p2=deepcopy(p);
+      unstructured_vtk(p2, sort(collect(keys(p2.solution))), [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesqAdvection/"*filename)
+    end
+    =#
     println(Time)
   end
 
   #Speichern des Endzeitpunktes als vtu-Datei:
   unstructured_vtk(p, EndTime, [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesqAdvection/"*filename)
   #Speichern aller berechneten Zwischenwerte als vtz-Datei:
-  unstructured_vtk(p, sort(collect(keys(p.solution))), [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesqAdvection/"*filename)
+  #unstructured_vtk(p, sort(collect(keys(p.solution))), [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesqAdvection/"*filename)
 
   return p
 end

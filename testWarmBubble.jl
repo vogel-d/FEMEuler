@@ -1,17 +1,26 @@
 include("modulesCE.jl")
 
 function testWarmBubble()
-    filename = "warmBubble";
+    filename = "warmBubbleHigh";
 
     #order: comp, compHigh, compRec, compDG
+#=
     femType=Dict(:rho=>[:DG0, :P1, :DG1, :DG0],
                  :rhoV=>[:RT0, :VecP1, :VecDG1, :RT0B],
                  :rhoTheta=>[:DG0, :P1, :DG1, :DG0],
                  :p=>[:DG0],
                  :v=>[:RT0],
                  :theta=>[:DG0]);
+=#
+#higher spaces
+    femType=Dict(:rho=>[:DG1, :P1, :DG1, :DG0],
+                 :rhoV=>[:RT1, :VecP1, :VecDG1, :RT0B],
+                 :rhoTheta=>[:DG1, :P1, :DG1, :DG0],
+                 :p=>[:DG1],
+                 :v=>[:RT1],
+                 :theta=>[:DG1]);
 
-    taskRecovery=true;
+    taskRecovery=false;
     advection=true;
 
     p=femProblem(:quad, 160, 80, femType, t=:compressible, advection=advection, taskRecovery=taskRecovery,
@@ -83,12 +92,12 @@ function testWarmBubble()
       p.solution[Time]=y;
       p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
-      #=
+
       if mod(i,50)==0
         p2=deepcopy(p);
-        unstructured_vtk(p2, sort(collect(keys(p2.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
+        unstructured_vtk(p2, maximum(collect(keys(p2.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
       end
-      =#
+
       println(Time)
     end
     correctVelocity!(p);
