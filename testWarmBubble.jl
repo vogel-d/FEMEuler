@@ -1,7 +1,7 @@
 include("modulesCE.jl")
 
 function testWarmBubble()
-    filename = "warmBubbleFineGridAdv";
+    filename = "warmBubbleCoarseGridHigh";
 
     #order: comp, compHigh, compRec, compDG
 #=
@@ -25,7 +25,7 @@ function testWarmBubble()
 
     boundaryCondition = (:periodic, :constant); #(top/bottom, east/west)
 
-    p=femProblem(:quad, 160, 80, femType, boundaryCondition, t=:compressible, advection=advection, taskRecovery=taskRecovery,
+    p=femProblem(:quad, 80, 40, femType, boundaryCondition, t=:compressible, advection=advection, taskRecovery=taskRecovery,
                  xl=-10000.0, xr=10000.0, yr=10000.0);
     #p=femProblem(:quad, 80, 40, femType, boundaryCondition, t=:compressible, advection=advection, taskRecovery=taskRecovery,
     #                          xl=-10000.0, xr=10000.0, yr=10000.0);

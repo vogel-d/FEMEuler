@@ -1,7 +1,7 @@
 include("modulesBA.jl")
 
 function testBoussinesqAdvection()
-  filename = "BoussinesqAdvNoRecovery"
+  filename = "BoussinesqAdvNoRecoveryHigh"
 
   #order: comp, compHigh, compRec, compDG
   femType=Dict(:p=>[:DG0, :P1, :DG1, :DG0], :v=>[:RT0, :VecP1, :VecDG1, :RT0B], :b=>[:DG0, :P1, :DG1, :DG0]);
@@ -10,7 +10,7 @@ function testBoussinesqAdvection()
   Vfcomp=:RT0
   #Vfcomp=:RT1
 
-  taskRecovery=true;
+  taskRecovery=false;
 
   boundaryCondition = (:periodic, :constant)
 
@@ -21,8 +21,8 @@ function testBoussinesqAdvection()
   UMax=20.0 #UMax determines the advection in x direction
   MISMethod=MIS(:MIS4_4);
 
+  #dt=20.0;
   dt=20.0;
-  #dt=10.0;
   ns=19;
   EndTime=3000.0;
   nIter=Int64(EndTime/dt)
