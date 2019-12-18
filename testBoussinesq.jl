@@ -1,12 +1,12 @@
 include("modulesB.jl")
 
 function testBoussinesq()
-    filename = "testPeriodic";
+    filename = "test";
 
     femType=Dict(:p=>[:DG0], :v=>[:RT0], :b=>[:P1]);
-    boundaryCondition = (:periodic,:constant); #(east/west, top/bottom)
 
-    pv=femProblem(:quad, 300, 10, femType, boundaryCondition, xr=300000.0, yr=10000.0);
+    m=generateRectMesh(300,10,:periodic,:constant,0.0,300000.0,0.0,10000.0); #(east/west, top/bottom)
+    pv=femProblem(m, femType);
 
 
     method=:euler;

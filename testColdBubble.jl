@@ -14,12 +14,8 @@ function testColdBubble()
     taskRecovery=true;
     advection=true;
 
-    boundaryCondition = (:periodic, :constant); #(top/bottom, east/west)
-
-    p=femProblem(:quad, 256, 64, femType, boundaryCondition, t=:compressible, advection=advection, taskRecovery=taskRecovery,
-                 xl=-25600.0, xr=25600.0, yr=6400.0);
-
-    #adaptGeometry!(pv,0.3,0.3,false); #sin perbutation
+    m=generateRectMesh(256,64,:periodic,:constant,-25600.0,25600.0,0.0,6400.0); #(east/west, top/bottom)
+    p=femProblem(m, femType, t=:compressible, advection=advection, taskRecovery=taskRecovery);
 
     gamma=0.5; #upwind
     UMax=0.0; #UMax determines the advection in x direction
@@ -75,11 +71,11 @@ function testColdBubble()
     for i in [:rho,:rhoTheta,:rhoV]
         append!(advectionTypes,femType[i][pos]);
     end
-    nquadPhi, nquadPoints=coordTrans(p.mesh.meshType, p.mesh.normals, collect(Set(advectionTypes)), size(p.kubWeights,2));
+    nquadPhi, nquadPoints=coordTrans(m.meshType, m.normals, collect(Set(advectionTypes)), size(p.kubWeights,2));
     setEdgeData!(p, :v);
 
-    MrT=assembMass(p.degFBoundary[femType[:rhoTheta][1]], p.mesh, p.kubPoints, p.kubWeights);
-    MrV=assembMass(p.degFBoundary[femType[:rhoV][1]], p.mesh, p.kubPoints, p.kubWeights);
+    MrT=assembMass(p.degFBoundary[femType[:rhoTheta][1]], m, p.kubPoints, p.kubWeights);
+    MrV=assembMass(p.degFBoundary[femType[:rhoV][1]], m, p.kubPoints, p.kubWeights);
 
     y=p.solution[0.0];
     Y=Array{solution,1}(undef,MISMethod.nStage+1);

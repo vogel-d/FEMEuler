@@ -17,61 +17,53 @@ function adaptGeometry!(m::mesh,vid::Array{Int64,1},c::Array{Float64,2})
     return nothing;
 end
 
-function adaptGeometry!(m::mesh,r::Float64)
+function adaptGeometry!(m::mesh,r::Float64,adaptBoundary::Bool=false)
     coord=m.geometry.coordinates;
-
-    for i in 1:size(coord,2)
-        x=r*rand([-1,1])*rand(1)[1];
-        y=rand([-1,1])*sqrt(r*r-x*x)*rand(1)[1];
-        coord[:,i]=[coord[1,i]+x, coord[2,i]+y];
-    end
-    return nothing;
-end
-
-function adaptGeometry!(m::mesh,r::Float64,bv::Set{Int64})
-    coord=m.geometry.coordinates;
-
-    for i in 1:size(coord,2)
-        if !in(i,bv)
+    xR=m.geometry.r[1]; xL=m.geometry.l[1]; yR=m.geometry.r[2]; yL=m.geometry.l[2]
+    if adaptBoundary
+        for i in 1:size(coord,2)
             x=r*rand([-1,1])*rand(1)[1];
             y=rand([-1,1])*sqrt(r*r-x*x)*rand(1)[1];
             coord[:,i]=[coord[1,i]+x, coord[2,i]+y];
+        end
+    else
+        for i in 1:size(coord,2)
+            if coord[1,i]!=xL && coord[1,i]!=xR && coord[2,i]!=yL && coord[2,i]!=yR
+                x=r*rand([-1,1])*rand(1)[1];
+                y=rand([-1,1])*sqrt(r*r-x*x)*rand(1)[1];
+                coord[:,i]=[coord[1,i]+x, coord[2,i]+y];
+            end
         end
     end
 
     return nothing;
 end
 
-function adaptGeometry!(m::mesh,pert::Tuple{Float64,Float64})
+function adaptGeometry!(m::mesh,pert::Tuple{Float64,Float64},adaptBoundary::Bool=false)
     coord=m.geometry.coordinates;
     xR=m.geometry.r[1]; xL=m.geometry.l[1]; yR=m.geometry.r[2]; yL=m.geometry.l[2]
     dx=(xR-xL)/m.topology.n[1];
     dy=(yR-yL)/m.topology.n[2];
 
-    for i in 1:size(coord,2)
-        x=(coord[1,i]);
-        y=(coord[2,i]);
-        hx=coord[1,i]+pert[1]*sin(2*pi*(y-yL)/(yR-yL))*dx;
-        hy=coord[2,i]+pert[2]*sin(2*pi*(x-xL)/(xR-xL))*dy;
-        coord[:,i]=[hx, hy];
-    end
-    return nothing;
-end
-
-function adaptGeometry!(m::mesh,pert::Tuple{Float64,Float64},bv::Set{Int64})
-    coord=m.geometry.coordinates;
-    xR=m.geometry.r[1]; xL=m.geometry.l[1]; yR=m.geometry.r[2]; yL=m.geometry.l[2]
-    dx=(xR-xL)/m.topology.n[1];
-    dy=(yR-yL)/m.topology.n[2];
-
-    for i in 1:size(coord,2)
-        if !in(i,bv)
+    if adaptBoundary
+        for i in 1:size(coord,2)
             x=(coord[1,i]);
             y=(coord[2,i]);
             hx=coord[1,i]+pert[1]*sin(2*pi*(y-yL)/(yR-yL))*dx;
             hy=coord[2,i]+pert[2]*sin(2*pi*(x-xL)/(xR-xL))*dy;
             coord[:,i]=[hx, hy];
         end
+    else
+        for i in 1:size(coord,2)
+            if coord[1,i]!=xL && coord[1,i]!=xR && coord[2,i]!=yL && coord[2,i]!=yR
+                x=(coord[1,i]);
+                y=(coord[2,i]);
+                hx=coord[1,i]+pert[1]*sin(2*pi*(y-yL)/(yR-yL))*dx;
+                hy=coord[2,i]+pert[2]*sin(2*pi*(x-xL)/(xR-xL))*dy;
+                coord[:,i]=[hx, hy];
+            end
+        end
     end
+
     return nothing;
 end

@@ -11,15 +11,14 @@ function testInertiaGravity()
                  :v=>[:RT0],
                  :theta=>[:DG0],
                  :pBar=>[:DG0],
-                 :rhoBar=>[:DG0]);
+                 :rhoBar=>[:DG0],
+                 :thBar=>[:DG0]);
 
     taskRecovery=true;
     advection=true;
 
-    p=femProblem(:quad, 300, 10, femType, t=:compressible, advection=advection, taskRecovery=taskRecovery,
-                 xr=300000.0, yr=10000.0);
-
-    boundaryCondition = (:periodic, :constant); #(top/bottom, east/west)
+    m=generateRectMesh(300,10,:periodic,:constant,0.0,300000.0,0.0,10000.0); #(east/west, top/bottom)
+    p=femProblem(m, femType, t=:compressible, advection=advection, taskRecovery=taskRecovery);
 
     gamma=0.5; #upwind
     UMax=20.0; #UMax determines the advection in x direction
@@ -57,6 +56,10 @@ function testInertiaGravity()
         S=N*N/Grav
         return p0*(1.0-Grav/(Cpd*th0*S)*(1.0-exp(-S*z)))^(Cpd/Rd)
     end
+    function fthBar(x::Float64,z::Float64)
+        S=N*N/Grav
+        return th0*exp(S*z)
+    end
     function ftheta(x::Float64,z::Float64)
         S=N*N/Grav
         return th0*exp(S*z)+DeltaTh1*sin(pi*z/H)/(1.0+((x-xC)/a)^2);
@@ -64,12 +67,14 @@ function testInertiaGravity()
     fv1(x, y)=UMax;
     fv2(x, y)=0;
     fvel=[fv1, fv2];
-    f=Dict(:rho=>frho,:theta=>ftheta,:v=>fvel,:rhoBar=>frhoBar,:pBar=>fpBar);
+    f=Dict(:rho=>frho,:theta=>ftheta,:v=>fvel,:rhoBar=>frhoBar,:pBar=>fpBar,:thBar=>fthBar);
 
-    assembFEM!(p, boundaryCondition);
+    assembMass!(p);
+    assembStiff!(p);
     p.boundaryValues[(:theta,:P1)]=300*ones(p.degFBoundary[:P1].numB-p.degFBoundary[:P1].num);
     applyStartValues!(p, f);
 
+    p.solution[0.0].theta-=p.diagnostic.thBar;
     rho0=p.solution[0.0].rho;
     p.solution[0.0].rhoTheta=projectChi(p,rho0,p.solution[0.0].theta,:rho,:theta);
     p.solution[0.0].rhoV=projectChi(p,rho0,p.solution[0.0].v,:rho,:v);
@@ -79,11 +84,11 @@ function testInertiaGravity()
     for i in [:rho,:rhoTheta,:rhoV]
         append!(advectionTypes,femType[i][pos]);
     end
-    nquadPhi, nquadPoints=coordTrans(p.mesh.meshType, p.mesh.normals, collect(Set(advectionTypes)), size(p.kubWeights,2));
+    nquadPhi, nquadPoints=coordTrans(m.meshType, m.normals, collect(Set(advectionTypes)), size(p.kubWeights,2));
     setEdgeData!(p, :v)
 
-    MrT=assembMass(p.degFBoundary[femType[:rhoTheta][1]], p.mesh, p.kubPoints, p.kubWeights);
-    MrV=assembMass(p.degFBoundary[femType[:rhoV][1]], p.mesh, p.kubPoints, p.kubWeights);
+    MrT=assembMass(p.degFBoundary[femType[:rhoTheta][1]], m, p.kubPoints, p.kubWeights);
+    MrV=assembMass(p.degFBoundary[femType[:rhoV][1]], m, p.kubPoints, p.kubWeights);
 
     y=p.solution[0.0];
     Y=Array{solution,1}(undef,MISMethod.nStage+1);
@@ -94,7 +99,7 @@ function testInertiaGravity()
       @time y=splitExplicit(y,Y,FY,SthY,p,gamma,nquadPhi,nquadPoints,MrT,MrV,MISMethod,Time,dt,ns);
       Time+=dt
       p.solution[Time]=y;
-      p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
+      p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT)-p.diagnostic.thBar;
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
       #=
       if mod(i,50)==0

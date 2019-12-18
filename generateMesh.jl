@@ -1,7 +1,7 @@
 #Funktion zum Generieren von zweidimensionalen Rechteck-Gittern
 #Input: nx bzw. ny ist die Anzahl der Gitterelemente in x- bzw. y-Richtung, also die Feinheit des Meshes
 #       xl bzw. yl ist die Länge des Meshes in x- bzw. y-Richtung, als Default ist die Länge nx bzw. ny
-function generateRectMesh(nx::Int64, ny::Int64, condEW::Symbol, condTB::Symbol, xl::Float64=0.0, yl::Float64=0.0, xr::Float64=Float64(nx), yr::Float64=Float64(ny))
+function generateRectMesh(nx::Int64, ny::Int64, condEW::Symbol, condTB::Symbol, xl::Float64=0.0, xr::Float64=Float64(nx), yl::Float64=0.0, yr::Float64=Float64(ny))
 
     #Berechnen der Anzahl der Entitäten für die verschiedenen Dimensionen
     size=[(ny+1)*(nx+1), ny*(nx+1)+nx*(ny+1), nx*ny];

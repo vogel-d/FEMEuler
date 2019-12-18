@@ -3,7 +3,7 @@ function assembMassRho(degF::degF{1}, degFRho::degF{1}, valRho::Array{Float64,1}
     phiRho=@views degFRho.phi;
     sk=size(kubWeights);
     iter=length(phi);
-    n=size(degF.coordinates,2);
+    n=degF.numB;
 
     J=initPhi((2,2),sk);
     dJ=Array{Float64,2}(undef,sk);
@@ -51,7 +51,7 @@ function assembMassRho(degF::degF{2}, degFRho::degF{1}, valRho::Array{Float64,1}
     phiRho=@views degFRho.phi;
     sk=size(kubWeights);
     iter=size(phi,2);
-    n=size(degF.coordinates,2);
+    n=degF.numB;
 
     J=initPhi((2,2),sk);
     ddJ=Array{Float64,2}(undef,sk);

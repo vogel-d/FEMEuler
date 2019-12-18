@@ -1,7 +1,7 @@
 include("modulesBA.jl")
 
 function testBoussinesqAdvection()
-  filename = "BoussinesqAdvNoRecoveryHigh"
+  filename = "Boussinesq"
 
   #order: comp, compHigh, compRec, compDG
   femType=Dict(:p=>[:DG0, :P1, :DG1, :DG0], :v=>[:RT0, :VecP1, :VecDG1, :RT0B], :b=>[:DG0, :P1, :DG1, :DG0]);
@@ -12,10 +12,9 @@ function testBoussinesqAdvection()
 
   taskRecovery=false;
 
-  boundaryCondition = (:periodic, :constant)
-
-  p=femProblem(:quad, 300, 10, femType, boundaryCondition, taskRecovery=taskRecovery,  xr=300000.0, yr=10000.0);
-  #adaptGeometry!(p,0.3,0.3,false); #sin perbutation
+  m=generateRectMesh(300,10,:periodic,:constant,0.0,300000.0,0.0,10000.0); #(east/west, top/bottom)
+  #adaptGeometry!(m,(0.3,0.3),false); #sin perbutation
+  p=femProblem(m, femType, taskRecovery=taskRecovery);
 
   gamma=0.5;
   UMax=20.0 #UMax determines the advection in x direction
@@ -28,7 +27,7 @@ function testBoussinesqAdvection()
   nIter=Int64(EndTime/dt)
 
   #start function
-  xR=p.mesh.geometry.r[1]; xL=p.mesh.geometry.l[1]; yR=p.mesh.geometry.r[2]; yL=p.mesh.geometry.l[2]
+  xR=m.geometry.r[1]; xL=m.geometry.l[1]; yR=m.geometry.r[2]; yL=m.geometry.l[2]
   b0=0.01; H=10000; A=5000;
   xM=0.5*(xL+xR);
   fb(x,y)=b0*sin(pi*y/H)/(1+((x-xM)/A)^2);
@@ -48,7 +47,7 @@ function testBoussinesqAdvection()
   for i in keys(femType)
       append!(advectionTypes,femType[i][pos]);
   end
-  nquadPhi, nquadPoints=coordTrans(p.mesh.meshType, p.mesh.normals, collect(Set(advectionTypes)), size(p.kubWeights,2));
+  nquadPhi, nquadPoints=coordTrans(m.meshType, m.normals, collect(Set(advectionTypes)), size(p.kubWeights,2));
   setEdgeData!(p, :v);
 
   y=p.solution[0.0];

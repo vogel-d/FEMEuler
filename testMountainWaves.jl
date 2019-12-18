@@ -14,14 +14,12 @@ function testMountainWaves()
     taskRecovery=true;
     advection=true;
 
-    #p=femProblem(:quad, 200, 156, femType, t=:compressible, advection=advection, taskRecovery=taskRecovery,
-    #            xl=-20000.0,xr=20000.0, yr=15600.0);
-    p=femProblem(:quad, 200, 90, femType, t=:compressible, advection=advection, taskRecovery=taskRecovery,
-                xl=-20000.0,xr=20000.0, yr=9000.0);
-    println("Problem erstellt")
-    adaptGeometry!(p,400.0,1000.0); #witch of agnesi with Gall-Chen and Sommerville transformation
-    println("Mesh verzogen")
-    boundaryCondition = (:periodic, :constant); #(top/bottom, east/west)
+    #m=generateRectMesh(200,156,:periodic,:constant,-20000.0,20000.0,0.0,15600.0); #(east/west, top/bottom)
+    m=generateRectMesh(200,90,:periodic,:constant,-20000.0,20000.0,0.0,9000.0); #(east/west, top/bottom)
+
+    adaptGeometry!(m,400.0,1000.0); #witch of agnesi with Gall-Chen and Sommerville transformation
+
+    p=femProblem(m, femType, t=:compressible, advection=advection, taskRecovery=taskRecovery);
 
     gamma=0.5; #upwind
     UMax=10.0; #UMax determines the advection in x direction
@@ -53,7 +51,8 @@ function testMountainWaves()
     fvel=[fv1, fv2];
     f=Dict(:rho=>frho,:theta=>ftheta,:v=>fvel);
 
-    assembFEM!(p, boundaryCondition);
+    assembMass!(p);
+    assembStiff!(p);
     println("Matrizen berechnet")
     p.boundaryValues[(:theta,:P1)]=300*ones(p.degFBoundary[:P1].numB-p.degFBoundary[:P1].num);
     applyStartValues!(p, f);
@@ -68,11 +67,11 @@ function testMountainWaves()
     for i in [:rho,:rhoTheta,:rhoV]
         append!(advectionTypes,femType[i][pos]);
     end
-    nquadPhi, nquadPoints=coordTrans(p.mesh.meshType, p.mesh.normals, collect(Set(advectionTypes)), size(p.kubWeights,2));
+    nquadPhi, nquadPoints=coordTrans(m.meshType, m.normals, collect(Set(advectionTypes)), size(p.kubWeights,2));
     setEdgeData!(p, :v)
 
-    MrT=assembMass(p.degFBoundary[femType[:rhoTheta][1]], p.mesh, p.kubPoints, p.kubWeights);
-    MrV=assembMass(p.degFBoundary[femType[:rhoV][1]], p.mesh, p.kubPoints, p.kubWeights);
+    MrT=assembMass(p.degFBoundary[femType[:rhoTheta][1]], m, p.kubPoints, p.kubWeights);
+    MrV=assembMass(p.degFBoundary[femType[:rhoV][1]], m, p.kubPoints, p.kubWeights);
 
     y=p.solution[0.0];
     Y=Array{solution,1}(undef,MISMethod.nStage+1);
@@ -85,12 +84,12 @@ function testMountainWaves()
       p.solution[Time]=y;
       p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
-      #=
+
       if mod(i,50)==0
         p2=deepcopy(p);
         unstructured_vtk(p2, sort(collect(keys(p2.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
       end
-      =#
+
       println(Time)
     end
     correctVelocity!(p);
