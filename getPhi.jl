@@ -60,7 +60,7 @@ function getPhi(type::Symbol)
         psize=(1,2);
     =#
     elseif type==:P2 || type==:DG2
-        phi=[f1P2, f2P2, f3P2, f4P2, f5P2, f6P2, f7P2, f8P2, f9P2];
+        phi=[f5P2, f2P2, f6P2, f8P2, f4P2, f1P2, f3P2, f9P2, f7P2];
         psize=(1,9)
 
     elseif type==:RT0 || type==:RT0B
@@ -70,8 +70,8 @@ function getPhi(type::Symbol)
         psize=(2,4);
 
     elseif type==:RT1 || type==:RT1B
-        phi=[null f2RT1 null f4RT1 null f6RT1 null f8RT1 null f10RT1 null f12RT1;
-             f1RT1 null f3RT1 null f5RT1 null f7RT1 null f9RT1 null f11RT1 null];
+        phi=[f2RT1 null f8RT1 null f1RT1 null f4RT1 null f7RT1 null f10RT1 null;
+             null f5RT1 null f11RT1 null f3RT1 null f6RT1 null f9RT1 null f12RT1];
         psize=(2,12);
 
     elseif type==:VecP1 || type==:VecDG1

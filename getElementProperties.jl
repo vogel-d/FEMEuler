@@ -216,34 +216,30 @@ function getQuadElementProperties(type::Symbol, kubPoints::Array{Float64,2})
     =#
 
     elseif type==:P2
-        phi=[f1P2, f2P2, f3P2, f4P2, f5P2, f6P2, f7P2, f8P2, f9P2];
-        #c=[0.0 0.5 1.0 0.0 0.5 1.0 0.0 0.5 1.0;
-        #   0.0 0.0 0.0 0.5 0.5 0.5 1.0 1.0 1.0];
+        #phi=[f1P2, f2P2, f3P2, f4P2, f5P2, f6P2, f7P2, f8P2, f9P2];
+        phi=[f5P2, f2P2, f6P2, f8P2, f4P2, f1P2, f3P2, f9P2, f7P2];
+
+        #c=[0.5 0.5 1.0 0.5 0.0 0.0 1.0 1.0 0.0;
+        #   0.5 0.0 0.5 1.0 0.5 0.0 0.0 1.0 1.0];
 
         divphi=[null null null null null null null null null];
-        gradphi=[fgrad11P2 fgrad21P2 fgrad31P2 fgrad41P2 fgrad51P2 fgrad61P2 fgrad71P2 fgrad81P2 fgrad91P2;
-                 fgrad12P2 fgrad22P2 fgrad32P2 fgrad42P2 fgrad52P2 fgrad62P2 fgrad72P2 fgrad82P2 fgrad92P2];
+        gradphi=[fgrad51P2 fgrad21P2 fgrad61P2 fgrad81P2 fgrad41P2 fgrad11P2 fgrad31P2 fgrad91P2 fgrad71P2;
+                 fgrad52P2 fgrad22P2 fgrad62P2 fgrad82P2 fgrad42P2 fgrad12P2 fgrad32P2 fgrad92P2 fgrad72P2];
 
-        #cm=[0.5 0.0 1.0 1.0 1.0 0.0 0.0 0.0 0.0 0.0 0.0;
-        #    1.0 0.5 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0;
-        #    0.5 1.0 0.0 0.0 0.0 0.0 0.0 0.0 1.0 1.0 1.0;
-        #    0.0 0.5 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0];
+        nFace=1;
+        nEdge=1;
+        nVert=1;
 
         comp=[0, 0, 0, 0, 0, 0, 0, 0, 0];
 
     elseif type==:DG2
-        phi=[f1P2, f2P2, f3P2, f4P2, f5P2, f6P2, f7P2, f8P2, f9P2];
-        #c=[0.0 0.5 1.0 0.0 0.5 1.0 0.0 0.5 1.0;
-        #   0.0 0.0 0.0 0.5 0.5 0.5 1.0 1.0 1.0];
+        phi=[f5P2, f2P2, f6P2, f8P2, f4P2, f1P2, f3P2, f9P2, f7P2];
+        #c=[0.5 0.5 1.0 0.5 0.0 0.0 1.0 1.0 0.0;
+        #   0.5 0.0 0.5 1.0 0.5 0.0 0.0 1.0 1.0];
 
         divphi=[null null null null null null null null null];
-        gradphi=[fgrad11P2 fgrad21P2 fgrad31P2 fgrad41P2 fgrad51P2 fgrad61P2 fgrad71P2 fgrad81P2 fgrad91P2;
-                 fgrad12P2 fgrad22P2 fgrad32P2 fgrad42P2 fgrad52P2 fgrad62P2 fgrad72P2 fgrad82P2 fgrad92P2];
-
-        #cm=[0.5 0.0 1.0 1.0 1.0 0.0 0.0 0.0 0.0 0.0 0.0;
-        #    1.0 0.5 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0 1.0;
-        #    0.5 1.0 0.0 0.0 0.0 0.0 0.0 0.0 1.0 1.0 1.0;
-        #    0.0 0.5 1.0 0.0 0.0 1.0 0.0 0.0 1.0 0.0 0.0];
+        gradphi=[fgrad51P2 fgrad21P2 fgrad61P2 fgrad81P2 fgrad41P2 fgrad11P2 fgrad31P2 fgrad91P2 fgrad71P2;
+                 fgrad52P2 fgrad22P2 fgrad62P2 fgrad82P2 fgrad42P2 fgrad12P2 fgrad32P2 fgrad92P2 fgrad72P2];
 
         comp=[0, 0, 0, 0, 0, 0, 0, 0, 0];
 
@@ -285,43 +281,40 @@ function getQuadElementProperties(type::Symbol, kubPoints::Array{Float64,2})
 
     elseif type==:RT1
 
-        phi=[null f2RT1 null f4RT1 null f6RT1 null f8RT1 null f10RT1 null f12RT1;
-             f1RT1 null f3RT1 null f5RT1 null f7RT1 null f9RT1 null f11RT1 null]
-        #c=[0.0 0.5 1.0 1.0 1.0 1.0 1.0 0.5 0.0 0.0 0.0 0.0;
-        #   0.0 0.0 0.0 0.0 0.5 1.0 1.0 1.0 1.0 1.0 0.5 0.0];
+        phi=[f2RT1 null f8RT1 null f1RT1 null f4RT1 null f7RT1 null f10RT1 null;
+             null f5RT1 null f11RT1 null f3RT1 null f6RT1 null f9RT1 null f12RT1];
+         #c=[0.5 1.0 0.5 0.0 0.0 1.0 1.0 1.0 1.0 0.0 0.0 0.0;
+         #   0.0 0.5 1.0 0.5 0.0 0.0 0.0 1.0 1.0 1.0 1.0 0.0];
 
-        divphi=[fdiv1RT1, fdiv2RT1, fdiv3RT1, fdiv4RT1, fdiv5RT1, fdiv6RT1,
-                fdiv7RT1, fdiv8RT1, fdiv9RT1, fdiv10RT1, fdiv11RT1, fdiv12RT1];
+        divphi=[fdiv2RT1, fdiv5RT1, fdiv8RT1, fdiv11RT1, fdiv1RT1, fdiv3RT1, fdiv4RT1, fdiv6RT1, fdiv7RT1, fdiv9RT1, fdiv10RT1, fdiv12RT1];
 
-        gradphi=[null null fgrad211RT1 fgrad212RT1 null null fgrad411RT1 fgrad412RT1 null null fgrad611RT1 fgrad612RT1 null null fgrad811RT1 fgrad812RT1 null null fgrad1011RT1 fgrad1012RT1 null null fgrad1211RT1 fgrad1212RT1;
-                 fgrad121RT1 fgrad122RT1 null null fgrad321RT1 fgrad322RT1 null null fgrad521RT1 fgrad522RT1 null null fgrad721RT1 fgrad722RT1 null null fgrad921RT1 fgrad922RT1 null null fgrad1121RT1 fgrad1122RT1 null null];
-        #=
-        cm=[0.5 0.0 1.0 0.0 1.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0;
-            1.0 0.5 0.0 0.0 0.0 1.0 0.0 1.0 0.0 0.0 0.0 0.0 0.0 0.0;
-            0.5 1.0 0.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0 0.0 0.0 0.0;
-            0.0 0.5 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0];
-        =#
-        comp=[2,1,2,1,2,1,2,1,2,1,2,1];
+        gradphi=[fgrad211RT1 fgrad212RT1 null null fgrad811RT1 fgrad812RT1 null null null null null null fgrad411RT1 fgrad412RT1 fgrad611RT1 fgrad612RT1 null null null null fgrad1011RT1 fgrad1012RT1 fgrad1211RT1 fgrad1212RT1;
+                 null null fgrad521RT1 fgrad522RT1 null null fgrad1121RT1 fgrad1122RT1 fgrad121RT1 fgrad122RT1 fgrad321RT1 fgrad322RT1 null null null null fgrad721RT1 fgrad722RT1 fgrad921RT1 fgrad922RT1 null null null null];
+
+
+        nFace=4;
+        nEdge=2;
+        nVert=0;
+
+        comp=[1,2,1,2,1,2,1,2,1,2,1,2];
 
     elseif type==:RT1B
 
-        phi=[null f2RT1 null f4RT1 null f6RT1 null f8RT1 null f10RT1 null f12RT1;
-             f1RT1 null f3RT1 null f5RT1 null f7RT1 null f9RT1 null f11RT1 null]
-        #c=[0.0 0.5 1.0 1.0 1.0 1.0 1.0 0.5 0.0 0.0 0.0 0.0;
-        #   0.0 0.0 0.0 0.0 0.5 1.0 1.0 1.0 1.0 1.0 0.5 0.0];
+        phi=[f2RT1 null f8RT1 null f1RT1 null f4RT1 null f7RT1 null f10RT1 null;
+             null f5RT1 null f11RT1 null f3RT1 null f6RT1 null f9RT1 null f12RT1]
+        #c=[0.5 1.0 0.5 0.0 0.0 1.0 1.0 1.0 1.0 0.0 0.0 0.0;
+        #   0.0 0.5 1.0 0.5 0.0 0.0 0.0 1.0 1.0 1.0 1.0 0.0];
 
-        divphi=[fdiv1RT1, fdiv2RT1, fdiv3RT1, fdiv4RT1, fdiv5RT1, fdiv6RT1,
-                fdiv7RT1, fdiv8RT1, fdiv9RT1, fdiv10RT1, fdiv11RT1, fdiv12RT1];
+        divphi=[fdiv2RT1, fdiv5RT1, fdiv8RT1, fdiv11RT1, fdiv1RT1, fdiv3RT1, fdiv4RT1, fdiv6RT1, fdiv7RT1, fdiv9RT1, fdiv10RT1, fdiv12RT1];
 
-        gradphi=[null null fgrad211RT1 fgrad212RT1 null null fgrad411RT1 fgrad412RT1 null null fgrad611RT1 fgrad612RT1 null null fgrad811RT1 fgrad812RT1 null null fgrad1011RT1 fgrad1012RT1 null null fgrad1211RT1 fgrad1212RT1;
-                 fgrad121RT1 fgrad122RT1 null null fgrad321RT1 fgrad322RT1 null null fgrad521RT1 fgrad522RT1 null null fgrad721RT1 fgrad722RT1 null null fgrad921RT1 fgrad922RT1 null null fgrad1121RT1 fgrad1122RT1 null null];
-        #=
-        cm=[0.5 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0;
-            1.0 0.5 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0;
-            0.5 1.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0;
-            0.0 0.5 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0];
-        =#
-        comp=[2,1,2,1,2,1,2,1,2,1,2,1];
+        gradphi=[fgrad211RT1 fgrad212RT1 null null fgrad811RT1 fgrad812RT1 null null null null null null fgrad411RT1 fgrad412RT1 fgrad611RT1 fgrad612RT1 null null null null fgrad1011RT1 fgrad1012RT1 fgrad1211RT1 fgrad1212RT1;
+                 null null fgrad521RT1 fgrad522RT1 null null fgrad1121RT1 fgrad1122RT1 fgrad121RT1 fgrad122RT1 fgrad321RT1 fgrad322RT1 null null null null fgrad721RT1 fgrad722RT1 fgrad921RT1 fgrad922RT1 null null null null];
+
+        nFace=12;
+        nEdge=0;
+        nVert=0;
+
+        comp=[1,2,1,2,1,2,1,2,1,2,1,2];
 
     elseif type==:VecP1
 
