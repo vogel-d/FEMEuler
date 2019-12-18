@@ -19,7 +19,6 @@ include("transformation.jl")
 
 include("getElementProperties.jl")
 include("degF.jl");
-include("getBoundary.jl")
 include("generateMesh.jl")
 include("femProblem.jl");
 
@@ -30,15 +29,10 @@ include("adaptGeometry.jl")
 include("additionalFunctions.jl")
 include("correctVelocity.jl")
 
-
-include("generateEquals.jl")
-include("generateMixedBoundary.jl")
-include("generatePeriodicBoundary.jl")
 include("assembMass.jl");
 include("assembMassRho.jl");
 include("assembLoad.jl");
 include("assembStiff.jl");
-include("assembFEM.jl");
 include("applyStartValues.jl");
 
 include("projectRecovery.jl")
