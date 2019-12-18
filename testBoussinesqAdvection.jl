@@ -14,7 +14,7 @@ function testBoussinesqAdvection()
 
   m=generateRectMesh(300,10,:periodic,:constant,0.0,300000.0,0.0,10000.0); #(east/west, top/bottom)
   #adaptGeometry!(m,(0.3,0.3),false); #sin perbutation
-  @time p=femProblem(m, femType, taskRecovery=taskRecovery);
+  p=femProblem(m, femType, taskRecovery=taskRecovery);
 
   gamma=0.5;
   UMax=20.0 #UMax determines the advection in x direction
