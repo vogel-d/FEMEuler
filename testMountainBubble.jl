@@ -14,13 +14,12 @@ function testMountainBubble()
     taskRecovery=true;
     advection=true;
 
-    #p=femProblem(:quad, 160, 80, femType, t=:compressible, advection=advection, taskRecovery=taskRecovery,
-    #             xl=-10000.0, xr=10000.0, yr=10000.0);
-    p=femProblem(:quad, 80, 40, femType, t=:compressible, advection=advection, taskRecovery=taskRecovery,
-                              xl=-10000.0, xr=10000.0, yr=10000.0);
-    adaptGeometry!(p,1000.0,10000.0); #witch of agnesi with Gall-Chen and Sommerville transformation
+    #m=generateRectMesh(160,80,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
+    m=generateRectMesh(80,40,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
 
-    boundaryCondition = (:periodic, :constant); #(top/bottom, east/west)
+    adaptGeometry!(m,1000.0,10000.0); #witch of agnesi with Gall-Chen and Sommerville transformation
+
+    p=femProblem(m, femType, t=:compressible, advection=advection, taskRecovery=taskRecovery);
 
     gamma=0.5; #upwind
     UMax=0.0; #UMax determines the advection in x direction
@@ -66,11 +65,11 @@ function testMountainBubble()
     for i in [:rho,:rhoTheta,:rhoV]
         append!(advectionTypes,femType[i][pos]);
     end
-    nquadPhi, nquadPoints=coordTrans(p.mesh.meshType, p.mesh.normals, collect(Set(advectionTypes)), size(p.kubWeights,2));
+    nquadPhi, nquadPoints=coordTrans(m.meshType, m.normals, collect(Set(advectionTypes)), size(p.kubWeights,2));
     setEdgeData!(p, :v)
 
-    MrT=assembMass(p.degFBoundary[femType[:rhoTheta][1]], p.mesh, p.kubPoints, p.kubWeights);
-    MrV=assembMass(p.degFBoundary[femType[:rhoV][1]], p.mesh, p.kubPoints, p.kubWeights);
+    MrT=assembMass(p.degFBoundary[femType[:rhoTheta][1]], m, p.kubPoints, p.kubWeights);
+    MrV=assembMass(p.degFBoundary[femType[:rhoV][1]], m, p.kubPoints, p.kubWeights);
 
     y=p.solution[0.0];
     Y=Array{solution,1}(undef,MISMethod.nStage+1);

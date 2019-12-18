@@ -46,11 +46,11 @@ function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}};advection::B
     !in(t,s) && error("Die Methode $t ist keine zulässige Eingabe. Möglich sind $s");
     femProblem(m,bV,dF,femType,edgeData,sol,massM,massMB,stiffM,t,kubWeights, kubPoints, taskRecovery, advection);
 end
-
+#=
 function femProblem(meth::Symbol, nx::Int64, ny::Int64, femType::Dict{Symbol,Array{Symbol,1}}, cond::Tuple{Symbol,Symbol};advection::Bool=true,  taskRecovery::Bool=false,  t::Symbol=:boussinesq,
                     g::Int64=9, xl::Float64=0.0, yl::Float64=0.0,xr::Float64=Float64(nx), yr::Float64=Float64(ny))
     if meth==:quad
-        m=generateRectMesh(nx,ny,cond[1],cond[2],xl,yl,xr,yr);
+        m=generateRectMesh(nx,ny,cond[1],cond[2],xl,xr,yl,yr);
     elseif meth==:qtri
         m=generateTriMesh(nx,ny,xl,yl,xr,yr);
     elseif meth==:tri
@@ -97,3 +97,4 @@ function femProblem(meth::Symbol, nx::Int64, ny::Int64, femType::Dict{Symbol,Arr
     !in(t,s) && error("Die Methode $t ist keine zulässige Eingabe. Möglich sind $s");
     femProblem(m,bV,dF,femType,edgeData,sol,massM,massMB,stiffM,t,kubWeights, kubPoints, taskRecovery, advection);
 end
+=#
