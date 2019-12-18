@@ -52,7 +52,8 @@ function testMountainBubble()
     fvel=[fv1, fv2];
     f=Dict(:rho=>frho,:theta=>ftheta,:v=>fvel);
 
-    assembFEM!(p, boundaryCondition);
+    assembMass!(p);
+    assembStiff!(p);
     p.boundaryValues[(:theta,:P1)]=300*ones(p.degFBoundary[:P1].numB-p.degFBoundary[:P1].num);
     applyStartValues!(p, f);
     plotSolution(p,:theta,0.0)
