@@ -7,17 +7,13 @@ function symplektischerEuler!(y::solution,p::femProblem, w::solution,ns::Float64
   nb=p.degFBoundary[p.femType[:b][1]].num
 
   for i in 1:ns
-    velOld=copy(y.v);
-    y.v[1:nv]=y.v[1:nv]+dtau*(w.v[1:nv]);
-    y.p[1:np]=y.p[1:np]+dtau*(w.p[1:np]);
-    y.b[1:nb]=y.b[1:nb]+dtau*(w.b[1:nb]);
-
+    
     velOld=copy(y.v);
     y.v[1:nv]=y.v[1:nv]+dtau*(velocity(p,y.p,y.b)+w.v[1:nv]);
     pS,bS=pressureBuoyancy(p,(1+gamma)*y.v-gamma*velOld);
     y.p[1:np]=y.p[1:np]+dtau*(pS+w.p[1:np]);
     y.b[1:nb]=y.b[1:nb]+dtau*(bS+w.b[1:nb]);
-    
+
   end
 
   return nothing;
