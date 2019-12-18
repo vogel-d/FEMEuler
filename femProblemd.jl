@@ -5,6 +5,7 @@ mutable struct femProblem
     femType::Dict{Symbol, Array{Symbol,1}};
     edgeData::Array{Array{Int64,1},1};
     solution::Dict{Float64, solution};
+    diagnostic::diagnostic;
     massM::Dict{Symbol, SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64}};
     massMBoundary::Dict{Symbol, SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64}};
     stiffM::Dict{Symbol, SparseMatrixCSC{Float64,Int64}};
@@ -20,6 +21,7 @@ end
 
 function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}};advection::Bool=true, taskRecovery::Bool=false, t::Symbol=:boussinesq, g::Int64=9)
     sol=Dict{Float64, solution}()
+    diag=diagnostic()
     kubPoints, kubWeights=getKub(g, m.meshType);
     dF=Dict{Symbol, degF}()
 
@@ -42,7 +44,7 @@ function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}};advection::B
     stiffM=Dict();
     loadV=Dict();
     bV=Dict();
-    s=Set{Symbol}([:poisson,:boussinesq,:combressible]);
+    s=Set{Symbol}([:poisson,:boussinesq,:compressible]);
     !in(t,s) && error("Die Methode $t ist keine zulässige Eingabe. Möglich sind $s");
-    femProblem(m,bV,dF,femType,edgeData,sol,massM,massMB,stiffM,t,kubWeights, kubPoints, taskRecovery, advection);
+    femProblem(m,bV,dF,femType,edgeData,sol,diag,massM,massMB,stiffM,t,kubWeights, kubPoints, taskRecovery, advection);
 end

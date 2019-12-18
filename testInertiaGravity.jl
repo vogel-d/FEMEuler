@@ -1,7 +1,7 @@
 include("modulesCEd.jl")
 
 function testInertiaGravity()
-    filename = "gravityWaves";
+    filename = "gravityWavesNoTR";
 
     #order: comp, compHigh, compRec, compDG
     femType=Dict(:rho=>[:DG0, :P1, :DG1, :DG0],
@@ -13,7 +13,7 @@ function testInertiaGravity()
                  :pBar=>[:DG0],
                  :rhoBar=>[:DG0]);
 
-    taskRecovery=true;
+    taskRecovery=false;
     advection=true;
 
     m=generateRectMesh(300,10,:periodic,:constant,0.0,300000.0,0.0,10000.0); #(east/west, top/bottom)
@@ -64,7 +64,8 @@ function testInertiaGravity()
     fvel=[fv1, fv2];
     f=Dict(:rho=>frho,:theta=>ftheta,:v=>fvel,:rhoBar=>frhoBar,:pBar=>fpBar);
 
-    assembFEM!(p, boundaryCondition);
+    assembMass!(p);
+    assembStiff!(p);
     p.boundaryValues[(:theta,:P1)]=300*ones(p.degFBoundary[:P1].numB-p.degFBoundary[:P1].num);
     applyStartValues!(p, f);
 
