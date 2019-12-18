@@ -1,7 +1,7 @@
 include("modulesCEd.jl")
 
 function testInertiaGravity()
-    filename = "gravityWavesNoTR";
+    filename = "gravityWaves";
 
     #order: comp, compHigh, compRec, compDG
     femType=Dict(:rho=>[:DG0, :P1, :DG1, :DG0],
@@ -11,9 +11,10 @@ function testInertiaGravity()
                  :v=>[:RT0],
                  :theta=>[:DG0],
                  :pBar=>[:DG0],
-                 :rhoBar=>[:DG0]);
+                 :rhoBar=>[:DG0],
+                 :thBar=>[:DG0]);
 
-    taskRecovery=false;
+    taskRecovery=true;
     advection=true;
 
     m=generateRectMesh(300,10,:periodic,:constant,0.0,300000.0,0.0,10000.0); #(east/west, top/bottom)
@@ -55,6 +56,10 @@ function testInertiaGravity()
         S=N*N/Grav
         return p0*(1.0-Grav/(Cpd*th0*S)*(1.0-exp(-S*z)))^(Cpd/Rd)
     end
+    function fthBar(x::Float64,z::Float64)
+        S=N*N/Grav
+        return th0*exp(S*z)
+    end
     function ftheta(x::Float64,z::Float64)
         S=N*N/Grav
         return th0*exp(S*z)+DeltaTh1*sin(pi*z/H)/(1.0+((x-xC)/a)^2);
@@ -62,13 +67,14 @@ function testInertiaGravity()
     fv1(x, y)=UMax;
     fv2(x, y)=0;
     fvel=[fv1, fv2];
-    f=Dict(:rho=>frho,:theta=>ftheta,:v=>fvel,:rhoBar=>frhoBar,:pBar=>fpBar);
+    f=Dict(:rho=>frho,:theta=>ftheta,:v=>fvel,:rhoBar=>frhoBar,:pBar=>fpBar,:thBar=>fthBar);
 
     assembMass!(p);
     assembStiff!(p);
     p.boundaryValues[(:theta,:P1)]=300*ones(p.degFBoundary[:P1].numB-p.degFBoundary[:P1].num);
     applyStartValues!(p, f);
 
+    p.solution[0.0].theta-=p.diagnostic.thBar;
     rho0=p.solution[0.0].rho;
     p.solution[0.0].rhoTheta=projectChi(p,rho0,p.solution[0.0].theta,:rho,:theta);
     p.solution[0.0].rhoV=projectChi(p,rho0,p.solution[0.0].v,:rho,:v);
@@ -93,7 +99,7 @@ function testInertiaGravity()
       @time y=splitExplicit(y,Y,FY,SthY,p,gamma,nquadPhi,nquadPoints,MrT,MrV,MISMethod,Time,dt,ns);
       Time+=dt
       p.solution[Time]=y;
-      p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
+      p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT)-p.diagnostic.thBar;
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
       #=
       if mod(i,50)==0
