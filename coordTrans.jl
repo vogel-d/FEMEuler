@@ -36,7 +36,7 @@ function coordTrans(mt::Int64, normals::Array{Float64,2}, type::Array{Symbol,1},
             for n in 1:length(phi)
                 quadVal=Array{Float64,1}(undef,sk);
                 for i=1:sk
-                    quadVal[i]=phi[n](nquadPoints[m][1,i], nquadPoints[m][2,i]);
+                    quadVal[i]=polynom(phi[n],nquadPoints[m][1,i], nquadPoints[m][2,i]);
                 end
                 quadPhi[n]=quadVal;
             end
