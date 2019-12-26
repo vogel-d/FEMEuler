@@ -110,39 +110,23 @@ function getNdegF(type::Symbol)
         nEdge=0;
         nVert=1;
 
-    #=
-    elseif type==:P1x
-        nFace=0;
-        nEdge=1;
-        nVert=0;
-
-
-    elseif type==:P1y
-
-        nFace=0;
-        nEdge=1;
-        nVert=0;
-
-    =#
     elseif type==:DG1
 
         nFace=4;
         nEdge=0;
         nVert=0;
 
-    #=
-    elseif type==:DG1x
+    elseif type==:P2
 
-        nFace=2;
+        nFace=1;
+        nEdge=1;
+        nVert=1;
+
+    elseif type==:DG2
+        nFace=9;
         nEdge=0;
         nVert=0;
 
-    elseif type==:DG1y
-
-        nFace=2;
-        nEdge=0;
-        nVert=0;
-    =#
     elseif type==:RT0
 
         nFace=0;
@@ -154,6 +138,20 @@ function getNdegF(type::Symbol)
         nFace=4;
         nEdge=0;
         nVert=0;
+
+
+    elseif type==:RT1
+
+        nFace=4;
+        nEdge=2;
+        nVert=0;
+
+    elseif type==:RT1B
+
+        nFace=12;
+        nEdge=0;
+        nVert=0;
+
 
     elseif type==:VecP1
         nFace=0;
