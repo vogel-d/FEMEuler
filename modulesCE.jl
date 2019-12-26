@@ -14,6 +14,7 @@ include("meshTypes.jl");
 include("meshFunctions.jl");
 include("findall.jl");
 include("transformation.jl")
+include("polynom.jl")
 
 include("getOrderBoundary.jl")
 include("getElementProperties.jl")
