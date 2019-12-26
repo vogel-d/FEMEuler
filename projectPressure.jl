@@ -23,7 +23,7 @@ function projectPressure(degFP::degF{1},massMP::SuiteSparse.UMFPACK.UmfpackLU{Fl
 
         fill!(cl,0.0);
         for i in 1:length(globalNumRT)
-            @. cl+=valRT[globalNumRT[i]]*phiRT[1,i];
+            @. cl+=valRT[globalNumRT[i]]*phiRT[i];
         end
 
         Cpd=1004.0;
@@ -36,7 +36,7 @@ function projectPressure(degFP::degF{1},massMP::SuiteSparse.UMFPACK.UmfpackLU{Fl
         for j in 1:length(phiP)
             for r in 1:sk[2]
                 for l in 1:sk[1]
-                    gbh[globalNumP[j]]+=kubWeights[l,r]*cl[l,r]*phiP[1,j][l,r]*dJ[l,r];
+                    gbh[globalNumP[j]]+=kubWeights[l,r]*cl[l,r]*phiP[j][l,r]*dJ[l,r];
                 end
             end
         end
