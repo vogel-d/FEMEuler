@@ -1,7 +1,7 @@
 include("modulesCEd.jl")
 
 function testInertiaGravity()
-    filename = "gravityWaves";
+    filename = "gravityWavesNoAdv";
 
     #order: comp, compHigh, compRec, compDG
     femType=Dict(:rho=>[:DG0, :P1, :DG1, :DG0],
@@ -14,8 +14,8 @@ function testInertiaGravity()
                  :rhoBar=>[:DG0],
                  :thBar=>[:DG0]);
 
-    taskRecovery=true;
-    advection=true;
+    taskRecovery=false;
+    advection=false;
 
     m=generateRectMesh(300,10,:periodic,:constant,0.0,300000.0,0.0,10000.0); #(east/west, top/bottom)
     p=femProblem(m, femType, t=:compressible, advection=advection, taskRecovery=taskRecovery);
@@ -99,14 +99,14 @@ function testInertiaGravity()
       @time y=splitExplicit(y,Y,FY,SthY,p,gamma,nquadPhi,nquadPoints,MrT,MrV,MISMethod,Time,dt,ns);
       Time+=dt
       p.solution[Time]=y;
-      p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT)-p.diagnostic.thBar;
+      p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT)#-p.diagnostic.thBar;
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
-      #=
+
       if mod(i,50)==0
         p2=deepcopy(p);
         unstructured_vtk(p2, Time, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
       end
-      =#
+
       println(Time)
     end
     correctVelocity!(p);
@@ -119,53 +119,3 @@ function testInertiaGravity()
     #unstructured_vtk(p, 0.0, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename*"Start")
     return p
 end
-
-
-#Startbedingungen ohne Background
-#=
-#start functions
-xW=500.0; zW=300.0; xC=560.0; zC=640.0;
-rW0=150.0; rC0=0.0;
-th0=300.0; p0=100000.0;
-DeltaThW=0.5; DeltaThC=-0.15;
-sW=50; sC=50;
-Grav=9.81;
-Cpd=1004.0; Cvd=717.0; Cpv=1885.0;
-Rd=Cpd-Cvd; Gamma=Cpd/Cvd; kappa=Rd/Cpd;
-function frho(x::Float64,z::Float64)
-    pLoc=p0*(1-kappa*Grav*z/(Rd*th0))^(Cpd/Rd);
-    #Rad=sqrt((x-xCM)^2+(z-zCM)^2);
-    #ThLoc=th0+(Rad>r0)*(DeltaTh1*exp(-(Rad-r0)^2/s^2));
-    radW=sqrt((x-xW)^2+(z-zW)^2);
-    radC=sqrt((x-xC)^2+(z-zC)^2);
-    ThLoc=th0;
-    if radW>rW0
-        ThLoc+=DeltaThW*exp(-(radW-rW0)^2/sW^2)
-    else
-        ThLoc+=DeltaThW
-    end
-    if radW>rC0
-        ThLoc+=DeltaThC*exp(-(radC-rC0)^2/sC^2)
-    else
-        ThLoc+=DeltaThC
-    end
-    return pLoc/((pLoc/p0)^kappa*Rd*ThLoc);
-end
-function ftheta(x::Float64,z::Float64)
-    radW=sqrt((x-xW)^2+(z-zW)^2);
-    radC=sqrt((x-xC)^2+(z-zC)^2);
-    th=th0;
-    if radW>rW0
-        th+=DeltaThW*exp(-(radW-rW0)^2/sW^2)
-    else
-        th+=DeltaThW
-    end
-    if radW>rC0
-        th+=DeltaThC*exp(-(radC-rC0)^2/sC^2)
-    else
-        th+=DeltaThC
-    end
-    return th;
-    #return th0+(radW>r0)*(DeltaTh1*exp(-(rad-r0)^2/s^2))+(radC>r0)*(DeltaTh1*exp(-(rad-r0)^2/s^2));
-end
-=#

@@ -14,8 +14,8 @@ function testMountainBubble()
     taskRecovery=true;
     advection=true;
 
-    #m=generateRectMesh(160,80,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
-    m=generateRectMesh(80,40,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
+    m=generateRectMesh(160,80,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
+    #m=generateRectMesh(80,40,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
 
     adaptGeometry!(m,1000.0,10000.0); #witch of agnesi with Gall-Chen and Sommerville transformation
 
@@ -31,7 +31,7 @@ function testMountainBubble()
     nIter=Int64(EndTime/dt);
 
     #start functions
-    xCM=0.0; zCM=5000.0;
+    xCM=0.0; zCM=3000.0;
     r0=2000.0; th0=300.0; p0=100000.0;
     DeltaTh1=2;
     Grav=9.81;
@@ -56,7 +56,7 @@ function testMountainBubble()
     assembStiff!(p);
     p.boundaryValues[(:theta,:P1)]=300*ones(p.degFBoundary[:P1].numB-p.degFBoundary[:P1].num);
     applyStartValues!(p, f);
-    
+
     rho0=p.solution[0.0].rho;
     p.solution[0.0].rhoTheta=projectChi(p,rho0,p.solution[0.0].theta,:rho,:theta);
     p.solution[0.0].rhoV=projectChi(p,rho0,p.solution[0.0].v,:rho,:v);
