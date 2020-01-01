@@ -4,7 +4,7 @@ using SuiteSparse;
 using Plots;
 using Distributed;
 
-pyplot()
+gr()
 
 include("solution.jl");
 @solution(v,p,b);
