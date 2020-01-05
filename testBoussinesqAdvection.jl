@@ -25,7 +25,7 @@ function testBoussinesqAdvection()
   #dt=10.0;
   ns=19;
   EndTime=3000.0;
-  #EndTime=30*dt;
+  EndTime=60*dt;
   nIter=Int64(EndTime/dt);
 
   #start function

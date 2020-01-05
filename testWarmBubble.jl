@@ -1,30 +1,31 @@
 include("modulesCE.jl")
 
 function testWarmBubble()
-    filename = "warmBubbleCoarseGridHigh";
+    filename = "warmBubbleCoarseGridNoTR";
 
     #order: comp, compHigh, compRec, compDG
-#=
+
     femType=Dict(:rho=>[:DG0, :P1, :DG1, :DG0],
                  :rhoV=>[:RT0, :VecP1, :VecDG1, :RT0B],
                  :rhoTheta=>[:DG0, :P1, :DG1, :DG0],
                  :p=>[:DG0],
                  :v=>[:RT0],
                  :theta=>[:DG0]);
-=#
+
 #higher spaces
+    #=
     femType=Dict(:rho=>[:DG1, :P1, :DG1, :DG0],
                  :rhoV=>[:RT1, :VecP1, :VecDG1, :RT0B],
                  :rhoTheta=>[:DG1, :P1, :DG1, :DG0],
                  :p=>[:DG1],
                  :v=>[:RT1],
                  :theta=>[:DG1]);
-
+                 =#
     taskRecovery=false;
     advection=true;
 
-    m=generateRectMesh(160,80,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
-    #m=generateRectMesh(80,40,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
+    #m=generateRectMesh(160,80,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
+    m=generateRectMesh(80,40,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
 
     #adaptGeometry!(m,(0.3,0.3),false); #sin perbutation
 
