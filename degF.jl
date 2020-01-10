@@ -30,7 +30,7 @@ function degF(m::mesh, femType::Symbol, ordEdgesB::Array{Int,1}, nebP::Int, nebC
     nef=offfe[2]-offfe[1];
     nvf=offfv[2]-offfv[1];
 
-    phi, divphi,  gradphi, comp,  refFace, refEdge, refVert=getQuadElementProperties(femType, kubPoints)
+    phi, divphi,  gradphi, comp,  refFace, refEdge, refVert=getElementProperties(femType, kubPoints, m.meshType)
     ndegF=refFace+nef*refEdge+nvf*refVert
     inc=zeros(Int, nf*ndegF);
     off=collect(1:ndegF:nf*ndegF+1);
