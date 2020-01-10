@@ -1,7 +1,7 @@
 include("modulesCE.jl")
 
-function testMountainWaves()
-    filename = "mountainWaves";
+function testInertiaGravity2()
+    filename = "gravityWavesNoAdvNoBackground";
 
     #order: comp, compHigh, compRec, compDG
     femType=Dict(:rho=>[:DG0, :P1, :DG1, :DG0],
@@ -14,52 +14,53 @@ function testMountainWaves()
     taskRecovery=false;
     advection=true;
 
-    m=generateRectMesh(200,156,:periodic,:constant,-20000.0,20000.0,0.0,15600.0); #(east/west, top/bottom)
-    #m=generateRectMesh(200,90,:periodic,:constant,-20000.0,20000.0,0.0,9000.0); #(east/west, top/bottom)
-
-    adaptGeometry!(m,400.0,1000.0); #witch of agnesi with Gall-Chen and Sommerville transformation
-
+    m=generateRectMesh(300,10,:periodic,:constant,0.0,300000.0,0.0,10000.0); #(east/west, top/bottom)
     p=femProblem(m, femType, t=:compressible, advection=advection, taskRecovery=taskRecovery);
 
     gamma=0.5; #upwind
-    UMax=10.0; #UMax determines the advection in x direction
-    MISMethod=MIS(:MIS2); #method of time integration
+    UMax=20.0; #UMax determines the advection in x direction
+    MISMethod=MIS(:MIS4_4); #method of time integration
 
-    dt=3.0; #10.0;
-    ns=20;
-    EndTime=2160.0;
-    nIter=Int64(EndTime/dt);
+    dt=10.0;
+    ns=10;
+    EndTime=3000.0;
+    nIter=div(EndTime,dt);
 
     #start functions
-    th0=300.0; p0=100000.0;
-    Grav=9.81; N=0.01
+    xCM=0.0; zCM=2000.0;
+    r0=2000.0; th0=300.0; p0=100000.0;
+    DeltaTh1=.01;
+    Grav=9.81;
     Cpd=1004.0; Cvd=717.0; Cpv=1885.0;
+    N=1.e-2;
     Rd=Cpd-Cvd; Gamma=Cpd/Cvd; kappa=Rd/Cpd;
+    H=10000;
+    a=5000;
+    xC=150000;
     function frho(x::Float64,z::Float64)
-        s=N*N/Grav
-        ThLoc=th0*exp(z*s)
-        pLoc=p0*(1-Grav/(Cpd*th0*s)*(1-exp(-s*z)))^(Cpd/Rd)
+        S=N*N/Grav
+        ThLoc=th0*exp(S*z)+DeltaTh1*sin(pi*z/H)/(1.0+((x-xC)/a)^2);
+        pLoc=p0*(1.0-Grav/(Cpd*th0*S)*(1.0-exp(-S*z)))^(Cpd/Rd)
         return pLoc/((pLoc/p0)^kappa*Rd*ThLoc);
     end
-    function ftheta(x::Float64,z::Float64)
-        return th0*exp(z*N*N/Grav)
-    end
 
-    fv1(x::Float64, y::Float64)=UMax;
-    fv2(x::Float64, y::Float64)=0.0;
+    function ftheta(x::Float64,z::Float64)
+        S=N*N/Grav
+        return th0*exp(S*z)+DeltaTh1*sin(pi*z/H)/(1.0+((x-xC)/a)^2);
+    end
+    fv1(x, y)=UMax;
+    fv2(x, y)=0;
     fvel=[fv1, fv2];
     f=Dict(:rho=>frho,:theta=>ftheta,:v=>fvel);
 
     assembMass!(p);
     assembStiff!(p);
-    println("Matrizen berechnet")
     p.boundaryValues[(:theta,:P1)]=300*ones(p.degFBoundary[:P1].numB-p.degFBoundary[:P1].num);
     applyStartValues!(p, f);
 
     rho0=p.solution[0.0].rho;
     p.solution[0.0].rhoTheta=projectChi(p,rho0,p.solution[0.0].theta,:rho,:theta);
     p.solution[0.0].rhoV=projectChi(p,rho0,p.solution[0.0].v,:rho,:v);
-    println("Startwerte proijziert")
 
     taskRecovery ? pos=[1,3] : pos=[1];
     advectionTypes=Symbol[];
@@ -78,41 +79,71 @@ function testMountainWaves()
     SthY=Array{SparseMatrixCSC{Float64,Int64},1}(undef,MISMethod.nStage);
     Time=0.0;
     for i=1:nIter
-      y=splitExplicit(y,Y,FY,SthY,p,gamma,nquadPhi,nquadPoints,MrT,MrV,MISMethod,Time,dt,ns);
+      @time y=splitExplicit(y,Y,FY,SthY,p,gamma,nquadPhi,nquadPoints,MrT,MrV,MISMethod,Time,dt,ns);
       Time+=dt
       p.solution[Time]=y;
       p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
-      #=
-      if mod(i,50)==0
-        p2=deepcopy(p);
-        unstructured_vtk(p2, maximum(collect(keys(p2.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
-      end
-      =#
+
       println(Time)
     end
     correctVelocity!(p);
+
     #Speichern des Endzeitpunktes als vtu-Datei:
     #unstructured_vtk(p, EndTime, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
     #Speichern aller berechneten Zwischenwerte als vtz-Datei:
     unstructured_vtk(p, sort(collect(keys(p.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
 
+    #unstructured_vtk(p, 0.0, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename*"Start")
     return p
 end
 
-function adapt!(m::mesh,hm, a)
-    H=m.geometry.r[2];
-    #hm=1.5
-    #a=5
-    h(x)=(hm*a^2)/(x^2+a^2);
-    coord=m.geometry.coordinates;
-    for i in 1:(m.topology.n[1]+1)
-        coord[:,i]=[coord[1,i], h(coord[1,i])];
-    end
-    for i in (m.topology.n[1]+2):size(coord,2)
-        z0=h(coord[1,i])
-        coord[:,i]=[coord[1,i], H*(coord[2,i]+z0)/(H+z0)];
-    end
 
-    return nothing;
+#Startbedingungen ohne Background
+#=
+#start functions
+xW=500.0; zW=300.0; xC=560.0; zC=640.0;
+rW0=150.0; rC0=0.0;
+th0=300.0; p0=100000.0;
+DeltaThW=0.5; DeltaThC=-0.15;
+sW=50; sC=50;
+Grav=9.81;
+Cpd=1004.0; Cvd=717.0; Cpv=1885.0;
+Rd=Cpd-Cvd; Gamma=Cpd/Cvd; kappa=Rd/Cpd;
+function frho(x::Float64,z::Float64)
+    pLoc=p0*(1-kappa*Grav*z/(Rd*th0))^(Cpd/Rd);
+    #Rad=sqrt((x-xCM)^2+(z-zCM)^2);
+    #ThLoc=th0+(Rad>r0)*(DeltaTh1*exp(-(Rad-r0)^2/s^2));
+    radW=sqrt((x-xW)^2+(z-zW)^2);
+    radC=sqrt((x-xC)^2+(z-zC)^2);
+    ThLoc=th0;
+    if radW>rW0
+        ThLoc+=DeltaThW*exp(-(radW-rW0)^2/sW^2)
+    else
+        ThLoc+=DeltaThW
+    end
+    if radW>rC0
+        ThLoc+=DeltaThC*exp(-(radC-rC0)^2/sC^2)
+    else
+        ThLoc+=DeltaThC
+    end
+    return pLoc/((pLoc/p0)^kappa*Rd*ThLoc);
 end
+function ftheta(x::Float64,z::Float64)
+    radW=sqrt((x-xW)^2+(z-zW)^2);
+    radC=sqrt((x-xC)^2+(z-zC)^2);
+    th=th0;
+    if radW>rW0
+        th+=DeltaThW*exp(-(radW-rW0)^2/sW^2)
+    else
+        th+=DeltaThW
+    end
+    if radW>rC0
+        th+=DeltaThC*exp(-(radC-rC0)^2/sC^2)
+    else
+        th+=DeltaThC
+    end
+    return th;
+    #return th0+(radW>r0)*(DeltaTh1*exp(-(rad-r0)^2/s^2))+(radC>r0)*(DeltaTh1*exp(-(rad-r0)^2/s^2));
+end
+=#

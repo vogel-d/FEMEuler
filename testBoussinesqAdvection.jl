@@ -1,7 +1,7 @@
 include("modulesBA.jl")
 
 function testBoussinesqAdvection()
-  filename = "Boussinesq"
+  filename = "BoussinesqTR"
 
   #order: comp, compHigh, compRec, compDG
   femType=Dict(:p=>[:DG0, :P1, :DG1, :DG0], :v=>[:RT0, :VecP1, :VecDG1, :RT0B], :b=>[:DG0, :P1, :DG1, :DG0]);
@@ -10,7 +10,7 @@ function testBoussinesqAdvection()
   Vfcomp=:RT0
   #Vfcomp=:RT1
 
-  taskRecovery=false;
+  taskRecovery=true;
 
   m=generateRectMesh(300,10,:periodic,:constant,0.0,300000.0,0.0,10000.0); #(east/west, top/bottom)
   #adaptGeometry!(m,(0.3,0.3),false); #sin perbutation
