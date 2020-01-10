@@ -113,7 +113,6 @@ function testCollidingBubbles()
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
       println(Time)
     end
-    correctVelocity!(p);
     #Speichern des Endzeitpunktes als vtu-Datei:
     #unstructured_vtk(p, EndTime, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
     #Speichern aller berechneten Zwischenwerte als vtz-Datei:

@@ -96,7 +96,6 @@ function testColdBubble()
       =#
       println(Time)
     end
-    correctVelocity!(p);
     #Speichern des Endzeitpunktes als vtu-Datei:
     unstructured_vtk(p, EndTime, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
     #Speichern aller berechneten Zwischenwerte als vtz-Datei:

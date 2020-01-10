@@ -91,28 +91,10 @@ function testMountainWaves()
       =#
       println(Time)
     end
-    correctVelocity!(p);
     #Speichern des Endzeitpunktes als vtu-Datei:
     #unstructured_vtk(p, EndTime, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
     #Speichern aller berechneten Zwischenwerte als vtz-Datei:
     unstructured_vtk(p, sort(collect(keys(p.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
 
     return p
-end
-
-function adapt!(m::mesh,hm, a)
-    H=m.geometry.r[2];
-    #hm=1.5
-    #a=5
-    h(x)=(hm*a^2)/(x^2+a^2);
-    coord=m.geometry.coordinates;
-    for i in 1:(m.topology.n[1]+1)
-        coord[:,i]=[coord[1,i], h(coord[1,i])];
-    end
-    for i in (m.topology.n[1]+2):size(coord,2)
-        z0=h(coord[1,i])
-        coord[:,i]=[coord[1,i], H*(coord[2,i]+z0)/(H+z0)];
-    end
-
-    return nothing;
 end
