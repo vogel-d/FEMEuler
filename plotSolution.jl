@@ -3,12 +3,8 @@ function plotSolution(p::femProblem, key::Symbol, t::Float64, c::Symbol=:plasma)
     sol=getfield(p.solution[t],key);
     smin=minimum(sol);
     smax=maximum(sol);
-    trans(x)=(x-smin)/(smax-smin);
-    i=p.degFBoundary[p.femType[key][1]].incidence;
-    o=p.degFBoundary[p.femType[key][1]].offset;
     off=p.mesh.topology.offset["20"];
     inc=p.mesh.topology.incidence["20"];
-    comp=p.degFBoundary[p.femType[key][1]].components;
 
     pc=plot();
     for i in 0:0.001:1
@@ -22,38 +18,34 @@ function plotSolution(p::femProblem, key::Symbol, t::Float64, c::Symbol=:plasma)
     a=[(0.0,1.0,text("$(round(smin,digits=3))",:bottom, 6)),(0.25,1.0,text("$(round(ml,digits=3))",:bottom,6)),(0.5,1.0,text("$(round(mw,digits=3))",:bottom,6)),(0.75,1.0,text("$(round(mr,digits=3))",:bottom,6)),(1.0,1.0,text("$(round(smax,digits=3))",:bottom,6))];
     annotate!(a)
 
-    if comp[1]==0
+    fComp=getElementProperties(p.femType[key][1],p.mesh.meshType,0.5,0.5);
+
+    if typeof(p.degFBoundary[p.femType[key][1]])==degF{1}
         pl=plot();
 
         for k in 1:nf
-            rstart1=o[k];
-            rend1=o[k+1]-1;
-            h=collect(rstart1:rend1);
-            sk=sol[i[h]];
-            skm=sum(sk)/length(sk);
-            rstart2=off[k];
-            rend2=off[k+1]-1;
-            coord=p.mesh.geometry.coordinates[:,inc[rstart2:rend2]];
-            fillPoly(coord, ColorGradient(c)[trans(skm)]);
+            sk=sol[l2g(p.degFBoundary[p.femType[key][1]], k)];
+            skm=dot(fComp,sk);
+            coord=p.mesh.geometry.coordinates[:,inc[off[k]:off[k+1]-1]];
+            fillPoly(coord, ColorGradient(c)[(skm-smin)/(smax-smin)]);
         end
 
         pf=plot(pl,pc,layout=grid(2,1,heights=[0.98,0.02]))
         display(pf);
     else
+        J=Array{Float64,2}(undef,2,2);
+        dJ=0.0;
+        coord=Array{Float64,2}(undef,2,p.mesh.meshType);
         for j in 1:2
-            sc=findall(comp.==j);
             pl=plot();
 
             for k in 1:nf
-                rstart1=o[k];
-                rend1=o[k+1]-1;
-                h=collect(rstart1:rend1)[sc];
-                sk=sol[i[h]];
-                skm=sum(sk)/length(sk);
-                rstart2=off[k];
-                rend2=off[k+1]-1;
-                coord=p.mesh.geometry.coordinates[:,inc[rstart2:rend2]];
-                fillPoly(coord, ColorGradient(c)[trans(skm)]);
+                sk=sol[l2g(p.degFBoundary[p.femType[key][1]], k)];
+                dJ=jacobi!(J,dJ,p.mesh,k,0.5,0.5,coord);
+                fLoc=(1/dJ)*J*fComp
+                skm=fLoc*sk;
+                coord=p.mesh.geometry.coordinates[:,inc[off[k]:off[k+1]-1]];
+                fillPoly(coord, ColorGradient(c)[(skm[j]-smin)/(smax-smin)]);
             end
 
             pf=plot(pl,pc,layout=grid(2,1,heights=[0.98,0.02]))
@@ -69,14 +61,10 @@ function plotSolution(p::femProblem, key::Symbol, t::Float64, filename::String, 
     sol=getfield(p.solution[t],key);
     smin=minimum(sol);
     smax=maximum(sol);
-    trans(x)=(x-smin)/(smax-smin);
-    i=p.degFBoundary[p.femType[key][1]].incidence;
-    o=p.degFBoundary[p.femType[key][1]].offset;
     off=p.mesh.topology.offset["20"];
-    inc=p.mesh.topology.incidence["20"]
-    comp=p.degFBoundary[p.femType[key][1]].components;
+    inc=p.mesh.topology.incidence["20"];
 
-    pc=plot()
+    pc=plot();
     for i in 0:0.001:1
         color=ColorGradient(c)[i];
         plot!([i,i],[0,1],linecolor=color, legend=false, yaxis=nothing, xaxis=nothing, foreground_color=:white)
@@ -88,38 +76,34 @@ function plotSolution(p::femProblem, key::Symbol, t::Float64, filename::String, 
     a=[(0.0,1.0,text("$(round(smin,digits=3))",:bottom, 6)),(0.25,1.0,text("$(round(ml,digits=3))",:bottom,6)),(0.5,1.0,text("$(round(mw,digits=3))",:bottom,6)),(0.75,1.0,text("$(round(mr,digits=3))",:bottom,6)),(1.0,1.0,text("$(round(smax,digits=3))",:bottom,6))];
     annotate!(a)
 
-    if comp[1]==0
+    fComp=getElementProperties(p.femType[key][1],p.mesh.meshType,0.5,0.5);
+
+    if typeof(p.degFBoundary[p.femType[key][1]])==degF{1}
         pl=plot();
 
         for k in 1:nf
-            rstart1=o[k];
-            rend1=o[k+1]-1;
-            h=collect(rstart1:rend1);
-            sk=sol[i[h]];
-            skm=sum(sk)/length(sk);
-            rstart2=off[k];
-            rend2=off[k+1]-1;
-            coord=p.mesh.geometry.coordinates[:,inc[rstart2:rend2]];
-            fillPoly(coord, ColorGradient(c)[trans(skm)]);
+            sk=sol[l2g(p.degFBoundary[p.femType[key][1]], k)];
+            skm=dot(fComp,sk);
+            coord=p.mesh.geometry.coordinates[:,inc[off[k]:off[k+1]-1]];
+            fillPoly(coord, ColorGradient(c)[(skm-smin)/(smax-smin)]);
         end
 
         pf=plot(pl,pc,layout=grid(2,1,heights=[0.98,0.02]))
         savefig(pf, filename);
     else
+        J=Array{Float64,2}(undef,2,2);
+        dJ=0.0;
+        coord=Array{Float64,2}(undef,2,p.mesh.meshType);
         for j in 1:2
-            sc=findall(comp.==j);
             pl=plot();
 
             for k in 1:nf
-                rstart1=o[k];
-                rend1=o[k+1]-1;
-                h=collect(rstart1:rend1)[sc];
-                sk=sol[i[h]];
-                skm=sum(sk)/length(sk);
-                rstart2=off[k];
-                rend2=off[k+1]-1;
-                coord=p.mesh.geometry.coordinates[:,inc[rstart2:rend2]];
-                fillPoly(coord, ColorGradient(c)[trans(skm)]);
+                sk=sol[l2g(p.degFBoundary[p.femType[key][1]], k)];
+                dJ=jacobi!(J,dJ,p.mesh,k,0.5,0.5,coord);
+                fLoc=(1/dJ)*J*fComp
+                skm=fLoc*sk;
+                coord=p.mesh.geometry.coordinates[:,inc[off[k]:off[k+1]-1]];
+                fillPoly(coord, ColorGradient(c)[(skm[j]-smin)/(smax-smin)]);
             end
 
             pf=plot(pl,pc,layout=grid(2,1,heights=[0.98,0.02]))

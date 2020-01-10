@@ -1,3 +1,4 @@
+#Nur für skalare Variablen
 function plotSolutionGif(p::femProblem, key::Symbol, t::Array{T,1} where T=sort(collect(keys(p.solution))); fps::Int64=25, filename::String="testgif.gif")
     (smax,smin)=calculateScale(p,key);
     anim = @gif for i in t
