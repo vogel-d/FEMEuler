@@ -49,6 +49,7 @@ function unstructured_vtk(p::femProblem, tend::Float64, comp::Array{Symbol,1}, n
             vtk_cell_data(vtk, cvtk[1,:], name[l]*" x")
             vtk_cell_data(vtk, cvtk[2,:], name[l]*" z")
             vtk_cell_data(vtk, (cvtk[1,:],cvtk[2,:],zeros(Float64,nf)), name[l])
+        end
     end
 
     outfiles=vtk_save(vtk);
