@@ -7,7 +7,11 @@ function plotFEM(m::mesh, key::Symbol, showann::Bool=true; showvertices::Bool=sh
 
     ordEdgesB, nebP, nebC=getOrderBoundary(m.boundaryEdges);
     ordVerticesB, nvbP, nvbC=getOrderBoundary(m.boundaryVertices);
-    refFace, refEdge, refVert = getNdegF(key)
+    if mt==4
+        phi, divphi, gradphi, cm, nFace, nEdge, nVert=getQuadElementProperties(type);
+    elseif mt==3
+        phi, divphi, gradphi, cm, nFace, nEdge, nVert=getTriElementProperties(type);
+    end
 
     ince=m.topology.incidence["10"];
 
@@ -48,11 +52,11 @@ function plotFEM(m::mesh, key::Symbol, showann::Bool=true; showvertices::Bool=sh
         for v in 1:nv
             if m.boundaryVertices[v]>=0
                 for d in 1:refVert
-                    push!(t,nf*refFace+ne*refEdge+refVert*(ordVerticesB[v]-1)+d)
+                    push!(t,nf*refFace+(ne-nebP)*refEdge+refVert*(ordVerticesB[v]-1)+d)
                 end
             elseif m.boundaryVertices[v]<0
                 for d in 1:refVert
-                    push!(t,nf*refFace+ne*refEdge+refVert*(ordVerticesB[-m.boundaryVertices[v]]-1)+d)
+                    push!(t,nf*refFace+(ne-nebP)*refEdge+refVert*(ordVerticesB[-m.boundaryVertices[v]]-1)+d)
                 end
             end
             push!(o,length(t)+1);
@@ -96,78 +100,4 @@ function plotFEM(m::mesh, key::Symbol, showann::Bool=true; showvertices::Bool=sh
     end
 
     return p
-end
-
-function getNdegF(type::Symbol)
-
-    if type==:DG0
-        nFace=1;
-        nEdge=0;
-        nVert=0;
-
-    elseif type==:P1
-        nFace=0;
-        nEdge=0;
-        nVert=1;
-
-    elseif type==:DG1
-
-        nFace=4;
-        nEdge=0;
-        nVert=0;
-
-    elseif type==:P2
-
-        nFace=1;
-        nEdge=1;
-        nVert=1;
-
-    elseif type==:DG2
-        nFace=9;
-        nEdge=0;
-        nVert=0;
-
-    elseif type==:RT0
-
-        nFace=0;
-        nEdge=1;
-        nVert=0;
-
-    elseif type==:RT0B #Broken RT0
-
-        nFace=4;
-        nEdge=0;
-        nVert=0;
-
-
-    elseif type==:RT1
-
-        nFace=4;
-        nEdge=2;
-        nVert=0;
-
-    elseif type==:RT1B
-
-        nFace=12;
-        nEdge=0;
-        nVert=0;
-
-
-    elseif type==:VecP1
-        nFace=0;
-        nEdge=0;
-        nVert=2;
-
-    elseif type==:VecDG1
-
-        nFace=8;
-        nEdge=0;
-        nVert=0;
-
-    else
-        error("Unzulässiger finite-Elemente-Raum");
-    end
-
-
-    return nFace, nEdge, nVert
 end

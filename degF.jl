@@ -43,12 +43,12 @@ function degF(m::mesh, femType::Symbol, ordEdgesB::Array{Int,1}, nebP::Int, nebC
         for v in vert
             if m.boundaryVertices[v]>=0
                 for d in 1:refVert
-                    inc[zv]=nf*refFace+ne*refEdge+refVert*(ordVerticesB[v]-1)+d; #evtl in zwei Konstanten speichern
+                    inc[zv]=nf*refFace+(ne-nebP)*refEdge+refVert*(ordVerticesB[v]-1)+d; #evtl in zwei Konstanten speichern
                     zv+=1;
                 end
             elseif m.boundaryVertices[v]<0
                 for d in 1:refVert
-                    inc[zv]=nf*refFace+ne*refEdge+refVert*(ordVerticesB[-m.boundaryVertices[v]]-1)+d; #evtl in zwei Konstanten speichern
+                    inc[zv]=nf*refFace+(ne-nebP)*refEdge+refVert*(ordVerticesB[-m.boundaryVertices[v]]-1)+d; #evtl in zwei Konstanten speichern
                     zv+=1;
                 end
             end

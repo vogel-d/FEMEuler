@@ -1,7 +1,7 @@
 #Nur für skalare Variablen
 function plotSolutionGif(p::femProblem, key::Symbol, t::Array{T,1} where T=sort(collect(keys(p.solution))); fps::Int64=25, filename::String="testgif.gif")
     (smax,smin)=calculateScale(p,key);
-    anim = @gif for i in t
+    anim = @animate for i in t
                         plotGif(p,key,i,smax,smin);
                     end
         gif(anim,filename,fps=fps);
@@ -29,21 +29,15 @@ function plotGif(p::femProblem, key::Symbol, t::Float64, smax::Float64, smin::Fl
     sol=getfield(p.solution[t],key);
     smin=minimum(sol);
     smax=maximum(sol);
-    trans(x)=(x-smin)/(smax-smin);
-    i=p.degFBoundary[p.femType[key][1]].incidence;
-    o=p.degFBoundary[p.femType[key][1]].offset;
     off=p.mesh.topology.offset["20"];
     inc=p.mesh.topology.incidence["20"]
+    fComp=getElementProperties(p.femType[key][1],p.mesh.meshType,0.5,0.5);
     pl=plot();
     for k in 1:nf
-        rstart1=o[k];
-        rend1=o[k+1]-1;
-        sk=sol[i[rstart1:rend1]];
-        skm=sum(sk)/length(sk);
-        rstart2=off[k];
-        rend2=off[k+1]-1;
-        coord=p.mesh.geometry.coordinates[:,inc[rstart2:rend2]];
-        fillPoly(coord, ColorGradient(c)[trans(skm)]);
+        sk=sol[l2g(p.degFBoundary[p.femType[key][1]], k)];
+        skm=dot(fComp,sk);
+        coord=p.mesh.geometry.coordinates[:,inc[off[k]:off[k+1]-1]];
+        fillPoly(coord, ColorGradient(c)[(skm-smin)/(smax-smin)]);
     end
     pc=plot();
     for i in 0:0.001:1

@@ -130,7 +130,7 @@ function getQuadElementProperties(type::Symbol)
     elseif type==:P1
         phi=[h10_10,h11_10,h11_11,h10_11];
 
-        divphi=[null null null null];
+        divphi=[null, null, null, null];
         gradphi=[Dxh10_10 Dxh11_10 Dxh11_11 Dxh10_11;
                  Dyh10_10 Dyh11_10 Dyh11_11 Dyh10_11];
         nFace=0;
@@ -145,7 +145,7 @@ function getQuadElementProperties(type::Symbol)
     elseif type==:DG1
         phi=[h10_10,h11_10,h11_11,h10_11];
 
-        divphi=[null null null null];
+        divphi=[null, null, null, null];
         gradphi=[Dxh10_10 Dxh11_10 Dxh11_11 Dxh10_11;
                  Dyh10_10 Dyh11_10 Dyh11_11 Dyh10_11];
 
@@ -161,9 +161,9 @@ function getQuadElementProperties(type::Symbol)
 
 
     elseif type==:P2
-        phi=[h21_21 h21_20 h22_21 h21_22 h20_21 h20_20 h22_20 h22_22 h20_22]
+        phi=[h21_21, h21_20, h22_21, h21_22, h20_21, h20_20, h22_20, h22_22, h20_22]
 
-        divphi=[null null null null null null null null null];
+        divphi=[null, null, null, null, null, null, null, null, null];
         gradphi=[Dxh21_21 Dxh21_20 Dxh22_21 Dxh21_22 Dxh20_21 Dxh20_20 Dxh22_20 Dxh22_22 Dxh20_22;
                  Dyh21_21 Dyh21_20 Dyh22_21 Dyh21_22 Dyh20_21 Dyh20_20 Dyh22_20 Dyh22_22 Dyh20_22]
 
@@ -179,9 +179,9 @@ function getQuadElementProperties(type::Symbol)
 
 
     elseif type==:DG2
-        phi=[h20_20 h22_20 h22_22 h20_22 h21_20 h22_21 h21_22 h20_21 h21_21]
+        phi=[h20_20, h22_20, h22_22, h20_22, h21_20, h22_21, h21_22, h20_21, h21_21]
 
-        divphi=[null null null null null null null null null];
+        divphi=[null, null, null, null, null, null, null, null, null];
         gradphi=[Dxh20_20 Dxh22_20 Dxh22_22 Dxh20_22 Dxh21_20 Dxh22_21 Dxh21_22 Dxh20_21 Dxh21_21;
                  Dyh20_20 Dyh22_20 Dyh22_22 Dyh20_22 Dyh21_20 Dyh22_21 Dyh21_22 Dyh20_21 Dyh21_21]
 
