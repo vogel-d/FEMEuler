@@ -3,7 +3,7 @@ include("getTriElementProperties.jl")
 
 function getElementProperties(type::Symbol, kubPoints::Array{Float64,2}, mt::Int)
     if mt==4
-        phi, divphi, gradphi, cm, nFace, nEdge, nVert, comp=getQuadElementProperties(type);
+        phi, divphi, gradphi, cm, nFace, nEdge, nVert=getQuadElementProperties(type);
     elseif mt==3
         phi, divphi, gradphi, cm, nFace, nEdge, nVert=getTriElementProperties(type);
     end
@@ -35,12 +35,12 @@ function getElementProperties(type::Symbol, kubPoints::Array{Float64,2}, mt::Int
         kubGrad[ki,kj]=kubVal;
     end
 
-    return kubPhi, kubDiv,  kubGrad, comp, nFace, nEdge, nVert
+    return kubPhi, kubDiv,  kubGrad, nFace, nEdge, nVert
 end
 
 function getElementProperties(type::Symbol, mt::Int)
     if mt==4
-        phi, divphi, gradphi, cm, nFace, nEdge, nVert, comp=getQuadElementProperties(type);
+        phi, divphi, gradphi, cm, nFace, nEdge, nVert=getQuadElementProperties(type);
     elseif mt==3
         phi, divphi, gradphi, cm, nFace, nEdge, nVert=getTriElementProperties(type);
     end
@@ -50,7 +50,7 @@ end
 
 function getElementProperties(mt::Int, type::Symbol)
     if mt==4
-        phi, divphi, gradphi, cm, nFace, nEdge, nVert, comp=getQuadElementProperties(type);
+        phi, divphi, gradphi, cm, nFace, nEdge, nVert=getQuadElementProperties(type);
     elseif mt==3
         phi, divphi, gradphi, cm, nFace, nEdge, nVert=getTriElementProperties(type);
     end
@@ -59,7 +59,7 @@ end
 
 function getElementProperties(type::Symbol, mt::Int, x, y)
     if mt==4
-        phi, divphi, gradphi, cm, nFace, nEdge, nVert, comp=getQuadElementProperties(type);
+        phi, divphi, gradphi, cm, nFace, nEdge, nVert=getQuadElementProperties(type);
     elseif mt==3
         phi, divphi, gradphi, cm, nFace, nEdge, nVert=getTriElementProperties(type);
     end

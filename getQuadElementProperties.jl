@@ -126,7 +126,6 @@ function getQuadElementProperties(type::Symbol)
         nEdge=0;
         nVert=0;
         cm=[0.5 0.0 0.0; 1.0 0.5 0.0; 0.5 1.0 0.0; 0.0 0.5 0.0];
-        comp=[0];
 
     elseif type==:P1
         phi=[h10_10,h11_10,h11_11,h10_11];
@@ -141,7 +140,7 @@ function getQuadElementProperties(type::Symbol)
            1.0 0.5 0.0 1.0 1.0 0.0;
            0.5 1.0 0.0 0.0 1.0 1.0;
            0.0 0.5 1.0 0.0 0.0 1.0];
-        comp=[0, 0, 0, 0];
+
 
     elseif type==:DG1
         phi=[h10_10,h11_10,h11_11,h10_11];
@@ -159,7 +158,7 @@ function getQuadElementProperties(type::Symbol)
            0.5 1.0 0.0 0.0 0.0 0.0;
            0.0 0.5 0.0 0.0 0.0 0.0];
 
-        comp=[0, 0, 0, 0];
+
 
     elseif type==:P2
         phi=[h21_21 h21_20 h22_21 h21_22 h20_21 h20_20 h22_20 h22_22 h20_22]
@@ -177,7 +176,7 @@ function getQuadElementProperties(type::Symbol)
             0.5 1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0 1.0;
             0.0 0.5 0.0 0.0 0.0 0.0 1.0 1.0 0.0 0.0 1.0];
 
-        comp=[0, 0, 0, 0, 0, 0, 0, 0, 0];
+
 
     elseif type==:DG2
         phi=[h20_20 h22_20 h22_22 h20_22 h21_20 h22_21 h21_22 h20_21 h21_21]
@@ -195,7 +194,7 @@ function getQuadElementProperties(type::Symbol)
             0.5 1.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0;
             0.0 0.5 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0];
 
-        comp=[0, 0, 0, 0, 0, 0, 0, 0, 0];
+
 
     elseif type==:RT0
 
@@ -215,7 +214,7 @@ function getQuadElementProperties(type::Symbol)
             0.5 1.0 0.0 0.0 1.0 0.0;
             0.0 0.5 0.0 0.0 0.0 1.0];
 
-        comp=[2,1,2,1];
+
 
     elseif type==:RT0B #Broken RT0
 
@@ -235,7 +234,7 @@ function getQuadElementProperties(type::Symbol)
             0.5 1.0 0.0 0.0 0.0 0.0;
             0.0 0.5 0.0 0.0 0.0 0.0];
 
-        comp=[2,1,2,1];
+
 
     elseif type==:RT1
 
@@ -277,7 +276,7 @@ function getQuadElementProperties(type::Symbol)
             0.5 1.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 1.0 1.0 0.0 0.0;
             0.0 0.5 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 1.0 1.0];
 
-        comp=[1,2,1,2,2,2,1,1,2,2,1,1];
+
 
     elseif type==:RT1B
 
@@ -318,7 +317,7 @@ function getQuadElementProperties(type::Symbol)
             0.5 1.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0;
             0.0 0.5 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0];
 
-        comp=[1,2,1,2,2,2,1,1,2,2,1,1];
+
 
     elseif type==:VecP1
 
@@ -352,7 +351,7 @@ function getQuadElementProperties(type::Symbol)
             0.5 1.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0 1.0;
             0.0 0.5 1.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0];
 
-        comp=[1, 2, 1, 2, 1, 2, 1, 2];
+
 
     elseif type==:VecDG1
 
@@ -386,7 +385,7 @@ function getQuadElementProperties(type::Symbol)
             0.5 1.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0;
             0.0 0.5 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0];
 
-        comp=[1, 2, 1, 2, 1, 2, 1, 2];
+
 
     elseif type==:VecP2
 
@@ -441,7 +440,7 @@ function getQuadElementProperties(type::Symbol)
             0.5 1.0 0.0 0.0 0.0 0.0 0.0 0.0 1.0 1.0 0.0 0.0 0.0 0.0 0.0 0.0 1.0 1.0 1.0 1.0;
             0.0 0.5 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 1.0 1.0 1.0 1.0 0.0 0.0 0.0 0.0 1.0 1.0];
 
-        comp=[1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2];
+
 
     elseif type==:VecDG2
 
@@ -496,10 +495,10 @@ function getQuadElementProperties(type::Symbol)
             0.5 1.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0;
             0.0 0.5 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0];
 
-        comp=[1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2];
+
 
     else
         error("Unzulässiger finite-Elemente-Raum");
     end
-    return phi, divphi, gradphi, cm, nFace, nEdge, nVert, comp;
+    return phi, divphi, gradphi, cm, nFace, nEdge, nVert;
 end

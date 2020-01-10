@@ -27,7 +27,7 @@ function getTriElementProperties(type::Symbol)
         nVert=0;
 
         cm=[0.5 0.0 0.0; 0.5 0.5 0.0; 0.0 0.5 0.0];
-        #comp=[0];
+
 
     elseif type==:RT0
 
@@ -44,7 +44,7 @@ function getTriElementProperties(type::Symbol)
         cm=[0.5 0.0 0.0 1.0 0.0;
             0.5 0.5 0.0 0.0 1.0;
             0.0 0.5 1.0 0.0 0.0];
-        #comp=[0];
+
 
 
     elseif type==:P1
@@ -64,7 +64,7 @@ function getTriElementProperties(type::Symbol)
             0.5 0.5 0.0 1.0 1.0;
             0.0 0.5 1.0 0.0 1.0];
 
-        #comp=[0, 0, 0];
+
     end
     return phi, divphi, gradphi, cm, nFace, nEdge, nVert;
 end

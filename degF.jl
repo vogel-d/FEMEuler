@@ -10,7 +10,6 @@ struct degF{N}
     phi::Array{Array{Float64,2},N};
     divphi::Array{Array{Float64,2},1};
     gradphi::Array{Array{Float64,2},2};
-    components::Array{Int,1}; #in plotSolution.jl und vtk.jl
 end
 
 
@@ -30,7 +29,7 @@ function degF(m::mesh, femType::Symbol, ordEdgesB::Array{Int,1}, nebP::Int, nebC
     nef=offfe[2]-offfe[1];
     nvf=offfv[2]-offfv[1];
 
-    phi, divphi,  gradphi, comp,  refFace, refEdge, refVert=getElementProperties(femType, kubPoints, m.meshType)
+    phi, divphi,  gradphi, refFace, refEdge, refVert=getElementProperties(femType, kubPoints, m.meshType)
     ndegF=refFace+nef*refEdge+nvf*refVert
     inc=zeros(Int, nf*ndegF);
     off=collect(1:ndegF:nf*ndegF+1);
@@ -95,5 +94,5 @@ function degF(m::mesh, femType::Symbol, ordEdgesB::Array{Int,1}, nebP::Int, nebC
     end
     nb=nf*refFace+(ne-nebP)*refEdge+(nv-nvbP)*refVert;
     n=nb-nebC*refEdge-nvbC*refVert;
-    degF(nb,n, inc, off, phi, divphi, gradphi, comp);
+    degF(nb,n, inc, off, phi, divphi, gradphi);
 end

@@ -1,11 +1,7 @@
 include("modulesCE.jl")
 
 function testWarmBubble()
-<<<<<<< HEAD
-    filename = "warmBubbleHigherFinedt0.5";
-=======
     filename = "warmBubbleNoTR";
->>>>>>> 29f6b288d9772bb669dc361339e9a5420965060f
 
     #order: comp, compHigh, compRec, compDG
     #=
@@ -37,11 +33,7 @@ function testWarmBubble()
 
     gamma=0.5; #upwind
     UMax=0.0; #UMax determines the advection in x direction
-<<<<<<< HEAD
     MISMethod=MIS(:MIS2); #method of time integration
-=======
-    MISMethod=MIS(:MIS4_4); #method of time integration
->>>>>>> 29f6b288d9772bb669dc361339e9a5420965060f
 
     dt=0.5;
     ns=15;
