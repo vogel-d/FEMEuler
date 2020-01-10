@@ -1,41 +1,41 @@
 include("modulesCE.jl")
 
 function testWarmBubble()
-    filename = "warmBubbleCoarseGridNoTR";
+    filename = "warmBubbleHigherFinedt0.5";
 
     #order: comp, compHigh, compRec, compDG
-
+    #=
     femType=Dict(:rho=>[:DG0, :P1, :DG1, :DG0],
                  :rhoV=>[:RT0, :VecP1, :VecDG1, :RT0B],
                  :rhoTheta=>[:DG0, :P1, :DG1, :DG0],
                  :p=>[:DG0],
                  :v=>[:RT0],
                  :theta=>[:DG0]);
-
+                 =#
 #higher spaces
-    #=
+
     femType=Dict(:rho=>[:DG1, :P1, :DG1, :DG0],
                  :rhoV=>[:RT1, :VecP1, :VecDG1, :RT0B],
                  :rhoTheta=>[:DG1, :P1, :DG1, :DG0],
                  :p=>[:DG1],
                  :v=>[:RT1],
                  :theta=>[:DG1]);
-                 =#
+
     taskRecovery=false;
     advection=true;
 
-    #m=generateRectMesh(160,80,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
-    m=generateRectMesh(80,40,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
+    m=generateRectMesh(160,80,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
+    #m=generateRectMesh(80,40,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
 
     #adaptGeometry!(m,(0.3,0.3),false); #sin perbutation
 
     p=femProblem(m, femType,t=:compressible, advection=advection, taskRecovery=taskRecovery);
 
     gamma=0.5; #upwind
-    UMax=20.0; #UMax determines the advection in x direction
+    UMax=0.0; #UMax determines the advection in x direction
     MISMethod=MIS(:MIS2); #method of time integration
 
-    dt=2.0;
+    dt=0.5;
     ns=15;
     EndTime=1000.0;
     nIter=Int64(EndTime/dt);
@@ -94,18 +94,21 @@ function testWarmBubble()
       p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
 
-      if mod(i,50)==0
+      if mod(i,20)==0
         p2=deepcopy(p);
         unstructured_vtk(p2, maximum(collect(keys(p2.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
       end
 
       println(Time)
     end
-    correctVelocity!(p);
+
+    println("ACHTUNG, correctVelocity noch nicht auf p angewendet")
+    return p;
+
     #Speichern des Endzeitpunktes als vtu-Datei:
     unstructured_vtk(p, EndTime, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
     #Speichern aller berechneten Zwischenwerte als vtz-Datei:
-    #unstructured_vtk(p, sort(collect(keys(p.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
+    unstructured_vtk(p, sort(collect(keys(p.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
 
     return p
 end
