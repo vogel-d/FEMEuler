@@ -28,7 +28,6 @@ include("jacobi.jl");
 include("initPhi.jl")
 include("adaptGeometry.jl")
 include("additionalFunctions.jl")
-include("correctVelocity.jl")
 
 include("assembMass.jl");
 include("assembMassRho.jl");
@@ -45,8 +44,6 @@ include("discGalerkinCells.jl")
 include("discGalerkinEdges.jl")
 include("MIS.jl")
 include("coordTrans.jl")
-include("getPhi.jl")
-include("getReferenceBoundary.jl")
 include("getEdgeType.jl")
 include("setEdgeData.jl")
 include("advectionCE.jl")
