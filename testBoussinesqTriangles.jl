@@ -1,13 +1,13 @@
 include("modulesB.jl")
 
-function testBoussinesq()
+function testBoussinesqTri()
     filename = "testTri";
 
     femType=Dict(:p=>[:DG0], :v=>[:RT0], :b=>[:P1]);
     #femType=Dict(:p=>[:DG1], :v=>[:RT1], :b=>[:DG1]);
 
-    m=generateTriMesh(300,10,:periodic,:constant,0.0,300000.0,0.0,10000.0); #(east/west, top/bottom)
-    pv=femProblem(m, femType);
+    m=generateTriMesh(2,1,:periodic,:constant,0.0,300000.0,0.0,10000.0); #(east/west, top/bottom)
+    pv=femProblem(m, femType, g=5);
 
 
     method=:euler;
