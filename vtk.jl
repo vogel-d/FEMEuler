@@ -42,9 +42,9 @@ function unstructured_vtk(p::femProblem, tend::Float64, comp::Array{Symbol,1}, n
             cvtk=zeros(Float64, 2, nf)
             for k in 1:nf
                 cLoc=solc[l2g(p.degFBoundary[p.femType[comp[l]][1]], k)]
-                jacobi!(J,dJ,m,k,0.5,0.5,coord);
+                dJ=jacobi!(J,dJ,m,k,0.5,0.5,coord);
                 fLoc=(1/dJ)*J*fComp[l]
-                cvtk[:,k]=fComp[l]*cLoc;
+                cvtk[:,k]=fLoc*cLoc;
             end
             vtk_cell_data(vtk, cvtk[1,:], name[l]*" x")
             vtk_cell_data(vtk, cvtk[2,:], name[l]*" z")
@@ -100,9 +100,9 @@ function unstructured_vtk(p::femProblem, t::Array{Float64,1}, comp::Array{Symbol
                     cvtk=zeros(Float64, 2, nf)
                     for k in 1:nf
                         cLoc=solc[l2g(p.degFBoundary[p.femType[comp[l]][1]], k)]
-                        jacobi!(J,dJ,m,k,0.5,0.5,coord);
+                        dJ=jacobi!(J,dJ,m,k,0.5,0.5,coord);
                         fLoc=(1/dJ)*J*fComp[l]
-                        cvtk[:,k]=fComp[l]*cLoc;
+                        cvtk[:,k]=fLoc*cLoc;
                     end
                     vtk_cell_data(vtk, cvtk[1,:], name[l]*" x")
                     vtk_cell_data(vtk, cvtk[2,:], name[l]*" z")

@@ -69,7 +69,7 @@ function jacobi!(J::Array{Float64,2},dJ::Float64,m::mesh, fid::Int64, x::Float64
         J[2,2]=(coord[2,4]-coord[2,1])+(coord[2,3]-coord[2,4]-coord[2,2]+coord[2,1])*0.5;
         dJ=abs(J[1,1]*J[2,2]-J[2,1]*J[1,2]);
     end
-    return nothing;
+    return dJ;
 end
 
 function jacobi!(J::Array{Array{Float64,2},2},ddJ::Array{Float64,2},jphi::Array{Array{Float64,2},2},m::mesh, fid::Int64, kubPoints::Array{Float64,2}, phi::Array{Array{Float64,2},2}, coord::Array{Float64,2})
