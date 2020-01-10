@@ -8,9 +8,9 @@ function plotFEM(m::mesh, key::Symbol, showann::Bool=true; showvertices::Bool=sh
     ordEdgesB, nebP, nebC=getOrderBoundary(m.boundaryEdges);
     ordVerticesB, nvbP, nvbC=getOrderBoundary(m.boundaryVertices);
     if mt==4
-        phi, divphi, gradphi, cm, nFace, nEdge, nVert=getQuadElementProperties(type);
+        phi, divphi, gradphi, cm, refFace, refEdge, refVert=getQuadElementProperties(key);
     elseif mt==3
-        phi, divphi, gradphi, cm, nFace, nEdge, nVert=getTriElementProperties(type);
+        phi, divphi, gradphi, cm, refFace, refEdge, refVert=getTriElementProperties(key);
     end
 
     ince=m.topology.incidence["10"];
