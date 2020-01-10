@@ -1,7 +1,7 @@
-include("modulesCE.jl")
+include("modulesCEd.jl")
 
 function testMountainWaves()
-    filename = "mountainWaves";
+    filename = "mountainWavesd";
 
     #order: comp, compHigh, compRec, compDG
     femType=Dict(:rho=>[:DG0, :P1, :DG1, :DG0],
@@ -9,13 +9,16 @@ function testMountainWaves()
                  :rhoTheta=>[:DG0, :P1, :DG1, :DG0],
                  :p=>[:DG0],
                  :v=>[:RT0],
-                 :theta=>[:DG0]);
+                 :theta=>[:DG0],
+                 :pBar=>[:DG0],
+                 :rhoBar=>[:DG0],
+                 :thBar=>[:DG0]);
 
     taskRecovery=false;
     advection=true;
 
-    m=generateRectMesh(200,156,:periodic,:constant,-20000.0,20000.0,0.0,15600.0); #(east/west, top/bottom)
-    #m=generateRectMesh(200,90,:periodic,:constant,-20000.0,20000.0,0.0,9000.0); #(east/west, top/bottom)
+    #m=generateRectMesh(200,156,:periodic,:constant,-20000.0,20000.0,0.0,15600.0); #(east/west, top/bottom)
+    m=generateRectMesh(200,90,:periodic,:constant,-20000.0,20000.0,0.0,9000.0); #(east/west, top/bottom)
 
     adaptGeometry!(m,400.0,1000.0); #witch of agnesi with Gall-Chen and Sommerville transformation
 
@@ -29,6 +32,8 @@ function testMountainWaves()
     ns=20;
     EndTime=2160.0;
     nIter=Int64(EndTime/dt);
+    nIter=5;
+    EndTime=nIter*dt;
 
     #start functions
     th0=300.0; p0=100000.0;
@@ -38,8 +43,12 @@ function testMountainWaves()
     function frho(x::Float64,z::Float64)
         s=N*N/Grav
         ThLoc=th0*exp(z*s)
-        pLoc=p0*(1-Grav/(Cpd*th0*s)*(1-exp(-s*z)))^(Cpd/Rd)
+        pLoc=p0*(1.0-Grav/(Cpd*th0*s)*(1.0-exp(-s*z)))^(Cpd/Rd)
         return pLoc/((pLoc/p0)^kappa*Rd*ThLoc);
+    end
+    function fpBar(x::Float64,z::Float64)
+        s=N*N/Grav
+        return p0*(1.0-Grav/(Cpd*th0*s)*(1.0-exp(-s*z)))^(Cpd/Rd)
     end
     function ftheta(x::Float64,z::Float64)
         return th0*exp(z*N*N/Grav)
@@ -48,7 +57,7 @@ function testMountainWaves()
     fv1(x::Float64, y::Float64)=UMax;
     fv2(x::Float64, y::Float64)=0.0;
     fvel=[fv1, fv2];
-    f=Dict(:rho=>frho,:theta=>ftheta,:v=>fvel);
+    f=Dict(:rho=>frho,:theta=>ftheta,:v=>fvel,:rhoBar=>frho,:pBar=>fpBar,:thBar=>ftheta);
 
     assembMass!(p);
     assembStiff!(p);
@@ -78,41 +87,24 @@ function testMountainWaves()
     SthY=Array{SparseMatrixCSC{Float64,Int64},1}(undef,MISMethod.nStage);
     Time=0.0;
     for i=1:nIter
-      y=splitExplicit(y,Y,FY,SthY,p,gamma,nquadPhi,nquadPoints,MrT,MrV,MISMethod,Time,dt,ns);
+      @time y=splitExplicit(y,Y,FY,SthY,p,gamma,nquadPhi,nquadPoints,MrT,MrV,MISMethod,Time,dt,ns);
       Time+=dt
       p.solution[Time]=y;
       p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
-      #=
+
       if mod(i,50)==0
         p2=deepcopy(p);
         unstructured_vtk(p2, maximum(collect(keys(p2.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
       end
-      =#
+
       println(Time)
     end
     correctVelocity!(p);
     #Speichern des Endzeitpunktes als vtu-Datei:
-    #unstructured_vtk(p, EndTime, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
+    unstructured_vtk(p, EndTime, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
     #Speichern aller berechneten Zwischenwerte als vtz-Datei:
-    unstructured_vtk(p, sort(collect(keys(p.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
+    #unstructured_vtk(p, sort(collect(keys(p.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
 
     return p
-end
-
-function adapt!(m::mesh,hm, a)
-    H=m.geometry.r[2];
-    #hm=1.5
-    #a=5
-    h(x)=(hm*a^2)/(x^2+a^2);
-    coord=m.geometry.coordinates;
-    for i in 1:(m.topology.n[1]+1)
-        coord[:,i]=[coord[1,i], h(coord[1,i])];
-    end
-    for i in (m.topology.n[1]+2):size(coord,2)
-        z0=h(coord[1,i])
-        coord[:,i]=[coord[1,i], H*(coord[2,i]+z0)/(H+z0)];
-    end
-
-    return nothing;
 end

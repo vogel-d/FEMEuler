@@ -1,7 +1,11 @@
 include("modulesCE.jl")
 
 function testWarmBubble()
+<<<<<<< HEAD
     filename = "warmBubbleHigherFinedt0.5";
+=======
+    filename = "warmBubbleNoTR";
+>>>>>>> 29f6b288d9772bb669dc361339e9a5420965060f
 
     #order: comp, compHigh, compRec, compDG
     #=
@@ -33,12 +37,17 @@ function testWarmBubble()
 
     gamma=0.5; #upwind
     UMax=0.0; #UMax determines the advection in x direction
+<<<<<<< HEAD
     MISMethod=MIS(:MIS2); #method of time integration
+=======
+    MISMethod=MIS(:MIS4_4); #method of time integration
+>>>>>>> 29f6b288d9772bb669dc361339e9a5420965060f
 
     dt=0.5;
     ns=15;
     EndTime=1000.0;
     nIter=Int64(EndTime/dt);
+    #nIter=1;
 
     #start functions
     xCM=0.0; zCM=2000.0;
@@ -64,7 +73,7 @@ function testWarmBubble()
 
     assembMass!(p);
     assembStiff!(p);
-    p.boundaryValues[(:theta,:P1)]=300*ones(p.degFBoundary[:P1].numB-p.degFBoundary[:P1].num);
+    p.boundaryValues[(:theta,:P1)]=300.0*ones(p.degFBoundary[:P1].numB-p.degFBoundary[:P1].num);
     applyStartValues!(p, f);
 
     rho0=p.solution[0.0].rho;

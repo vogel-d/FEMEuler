@@ -41,6 +41,37 @@ function jacobi!(J::Array{Array{Float64,2},2},dJ::Array{Float64,2},m::mesh, fid:
     return nothing;
 end
 
+function jacobi!(J::Array{Float64,2},dJ::Float64,m::mesh, fid::Int64, x::Float64, y::Float64, coord::Array{Float64,2})
+    key="20";
+    mt=m.meshType;
+    rstart=m.topology.offset[key][fid];
+    z=1;
+    for j in rstart:rstart+mt-1
+        for i in 1:2
+            coord[i,z]=m.geometry.coordinates[i,m.topology.incidence[key][j]];
+        end
+        z+=1;
+    end
+
+    if mt==3
+        a=coord[:,2]-coord[:,1];
+        b=coord[:,3]-coord[:,1];
+        ones=ones(sk,sk);
+        dJ=abs(a[1]*b[2]-b[1]*a[2])*ones;
+        J[1,1]=a[1]*ones;
+        J[1,2]=b[1]*ones;
+        J[2,1]=a[2]*ones;
+        J[2,2]=b[2]*ones;
+    elseif mt==4
+        J[1,1]=(coord[1,2]-coord[1,1])+(coord[1,3]-coord[1,4]-coord[1,2]+coord[1,1])*0.5;
+        J[2,1]=(coord[2,2]-coord[2,1])+(coord[2,3]-coord[2,4]-coord[2,2]+coord[2,1])*0.5;
+        J[1,2]=(coord[1,4]-coord[1,1])+(coord[1,3]-coord[1,4]-coord[1,2]+coord[1,1])*0.5;
+        J[2,2]=(coord[2,4]-coord[2,1])+(coord[2,3]-coord[2,4]-coord[2,2]+coord[2,1])*0.5;
+        dJ=abs(J[1,1]*J[2,2]-J[2,1]*J[1,2]);
+    end
+    return nothing;
+end
+
 function jacobi!(J::Array{Array{Float64,2},2},ddJ::Array{Float64,2},jphi::Array{Array{Float64,2},2},m::mesh, fid::Int64, kubPoints::Array{Float64,2}, phi::Array{Array{Float64,2},2}, coord::Array{Float64,2})
     key="20";
     mt=m.meshType;

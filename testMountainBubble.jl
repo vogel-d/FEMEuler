@@ -1,7 +1,7 @@
 include("modulesCE.jl")
 
 function testMountainBubble()
-    filename = "mountainBubble";
+    filename = "mountainBubbleSteep";
 
     #order: comp, compHigh, compRec, compDG
     femType=Dict(:rho=>[:DG0, :P1, :DG1, :DG0],
@@ -14,10 +14,10 @@ function testMountainBubble()
     taskRecovery=true;
     advection=true;
 
-    m=generateRectMesh(160,80,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
-    #m=generateRectMesh(80,40,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
+    #m=generateRectMesh(160,80,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
+    m=generateRectMesh(80,40,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
 
-    adaptGeometry!(m,1000.0,10000.0); #witch of agnesi with Gall-Chen and Sommerville transformation
+    adaptGeometry!(m,1000.0,2500.0); #witch of agnesi with Gall-Chen and Sommerville transformation
 
     p=femProblem(m, femType, t=:compressible, advection=advection, taskRecovery=taskRecovery);
 
@@ -28,6 +28,7 @@ function testMountainBubble()
     dt=2.0;
     ns=15;
     EndTime=1000.0;
+    EndTime=6.0;
     nIter=Int64(EndTime/dt);
 
     #start functions
@@ -85,10 +86,11 @@ function testMountainBubble()
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
       if mod(i,50)==0
         p2=deepcopy(p);
-        unstructured_vtk(p2, sort(collect(keys(p2.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
+        unstructured_vtk(p2, maximum(collect(keys(p2.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
       end
       println(Time)
     end
+    return p;
     correctVelocity!(p);
     #Speichern des Endzeitpunktes als vtu-Datei:
     unstructured_vtk(p, EndTime, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)

@@ -1,7 +1,8 @@
+#https://journals.ametsoc.org/doi/pdf/10.1175/MWR-D-15-0398.1 S.4362 f.
 include("modulesCE.jl")
 
 function testCollidingBubbles()
-    filename = "collidingBubbles";
+    filename = "collidingBubblesTR";
 
     #order: comp, compHigh, compRec, compDG
     femType=Dict(:rho=>[:DG0, :P1, :DG1, :DG0],
@@ -11,12 +12,12 @@ function testCollidingBubbles()
                  :v=>[:RT0],
                  :theta=>[:DG0]);
 
-    taskRecovery=false;
-    advection=false;
+    taskRecovery=true;
+    advection=true;
 
-    m=generateRectMesh(160,80,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
-    m=generateRectMesh(160,80,:periodic,:constant,0.0,1000.0,0.0,1500.0); #(east/west, top/bottom)
-    #Resolution: 10m, 5m
+    m=generateRectMesh(50,75,:periodic,:constant,0.0,1000.0,0.0,1500.0); #(east/west, top/bottom)
+    #m=generateRectMesh(100,150,:periodic,:constant,0.0,1000.0,0.0,1500.0); #(east/west, top/bottom)
+    #Resolution: 20m, 10m
 
     p=femProblem(m, femType, t=:compressible, advection=advection, taskRecovery=taskRecovery);
 
@@ -25,34 +26,13 @@ function testCollidingBubbles()
     UMax=0.0; #UMax determines the advection in x direction
     MISMethod=MIS(:MIS2); #method of time integration
 
-    dt=2.0;
+    dt=0.32
+    #dt=0.16;
     ns=15;
-    EndTime=1000.0;
+    EndTime=600.0;
     nIter=Int64(EndTime/dt);
 
     #start functions
-    xW=500.0; zW=300.0; xC=560.0; zC=640.0;
-    #xW=0.0; zW=2000.0; xC=60.0; zC=6000.0;
-    rW0=200.0; rC0=50.0;
-    th0=300.0; p0=100000.0;
-    DeltaThW=0.5; DeltaThC=-0.15;
-    Grav=9.81;
-    Cpd=1004.0; Cvd=717.0; Cpv=1885.0;
-    Rd=Cpd-Cvd; Gamma=Cpd/Cvd; kappa=Rd/Cpd;
-    function frho(x::Float64,z::Float64)
-        pLoc=p0*(1-kappa*Grav*z/(Rd*th0))^(Cpd/Rd);
-        radW=sqrt((x-xW)^2+(z-zW)^2);
-        radC=sqrt((x-xC)^2+(z-zC)^2);
-        ThLoc=th0+(radW<rW0)*(DeltaThW*cos(0.5*pi*radW/rW0)^2)+(radC<rC0)*(DeltaThC*cos(0.5*pi*radC/rC0)^2);
-        return pLoc/((pLoc/p0)^kappa*Rd*ThLoc);
-    end
-    function ftheta(x::Float64,z::Float64)
-        radW=sqrt((x-xW)^2+(z-zW)^2);
-        radC=sqrt((x-xC)^2+(z-zC)^2);
-        return th0+(radW<rW0)*(DeltaThW*cos(0.5*pi*radW/rW0)^2)+(radC<rC0)*(DeltaThC*cos(0.5*pi*radC/rC0)^2);
-    end
-
-    #=
     xW=500.0; zW=300.0; xC=560.0; zC=640.0;
     rW0=150.0; rC0=0.0;
     th0=300.0; p0=100000.0;
@@ -63,8 +43,6 @@ function testCollidingBubbles()
     Rd=Cpd-Cvd; Gamma=Cpd/Cvd; kappa=Rd/Cpd;
     function frho(x::Float64,z::Float64)
         pLoc=p0*(1-kappa*Grav*z/(Rd*th0))^(Cpd/Rd);
-        #Rad=sqrt((x-xCM)^2+(z-zCM)^2);
-        #ThLoc=th0+(Rad>r0)*(DeltaTh1*exp(-(Rad-r0)^2/s^2));
         radW=sqrt((x-xW)^2+(z-zW)^2);
         radC=sqrt((x-xC)^2+(z-zC)^2);
         ThLoc=th0;
@@ -95,9 +73,8 @@ function testCollidingBubbles()
             th+=DeltaThC
         end
         return th;
-        #return th0+(radW>r0)*(DeltaTh1*exp(-(rad-r0)^2/s^2))+(radC>r0)*(DeltaTh1*exp(-(rad-r0)^2/s^2));
     end
-    =#
+
     fv1(x::Float64, y::Float64)=UMax;
     fv2(x::Float64, y::Float64)=0.0;
     fvel=[fv1, fv2];
@@ -111,7 +88,6 @@ function testCollidingBubbles()
     rho0=p.solution[0.0].rho;
     p.solution[0.0].rhoTheta=projectChi(p,rho0,p.solution[0.0].theta,:rho,:theta);
     p.solution[0.0].rhoV=projectChi(p,rho0,p.solution[0.0].v,:rho,:v);
-    plotSolution(p,:theta,0.0)
 
     taskRecovery ? pos=[1,3] : pos=[1];
     advectionTypes=Symbol[];
@@ -130,15 +106,11 @@ function testCollidingBubbles()
     SthY=Array{SparseMatrixCSC{Float64,Int64},1}(undef,MISMethod.nStage);
     Time=0.0;
     for i=1:nIter
-      @time y=splitExplicit(y,Y,FY,SthY,p,gamma,nquadPhi,nquadPoints,MrT,MrV,MISMethod,Time,dt,ns);
+      y=splitExplicit(y,Y,FY,SthY,p,gamma,nquadPhi,nquadPoints,MrT,MrV,MISMethod,Time,dt,ns);
       Time+=dt
       p.solution[Time]=y;
       p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
-      if mod(i,50)==0
-        p2=deepcopy(p);
-        unstructured_vtk(p2, sort(collect(keys(p.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
-      end
       println(Time)
     end
     correctVelocity!(p);
