@@ -48,11 +48,11 @@ function plotFEM(m::mesh, key::Symbol, showann::Bool=true; showvertices::Bool=sh
         for v in 1:nv
             if m.boundaryVertices[v]>=0
                 for d in 1:refVert
-                    push!(t,nf*refFace+ne*refEdge+refVert*(ordVerticesB[v]-1)+d)
+                    push!(t,nf*refFace+(ne-nebP)*refEdge+refVert*(ordVerticesB[v]-1)+d)
                 end
             elseif m.boundaryVertices[v]<0
                 for d in 1:refVert
-                    push!(t,nf*refFace+ne*refEdge+refVert*(ordVerticesB[-m.boundaryVertices[v]]-1)+d)
+                    push!(t,nf*refFace+(ne-nebP)*refEdge+refVert*(ordVerticesB[-m.boundaryVertices[v]]-1)+d)
                 end
             end
             push!(o,length(t)+1);
