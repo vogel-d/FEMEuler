@@ -17,26 +17,38 @@ function unstructured_vtk(p::femProblem, tend::Float64, comp::Array{Symbol,1}, n
         inds=inc[off[k]:off[k+1]-1];
         push!(cells, MeshCell(celltype, inds))
     end
+    fComp=Array{Array{Float64},1}(undef, length(comp))
+    for l in 1:length(comp)
+        fComp[l]=getElementProperties(p.femType[comp[l]][1],m.meshType,0.5,0.5);
+    end
+    J=Array{Float64,2}(undef,2,2);
+    dJ=0.0;
+    coord=Array{Float64,2}(undef,2,m.meshType);
+
     vtk_filename_noext = (@__DIR__)*"/VTK/"*filename;
     vtk = vtk_grid(vtk_filename_noext, pts, cells,compress=3)
 
     sol=p.solution[tend];
     for l in 1:length(comp)
         solc=getfield(sol,comp[l]);
-        c=p.degFBoundary[p.femType[comp[l]][1]].components;
-        if c[1]==0
-            cvtk=Float64[mean(solc[l2g(p.degFBoundary[p.femType[comp[l]][1]], k)]) for k in 1:nf]
+        if typeof(p.degFBoundary[p.femType[comp[l]][1]])==degF{1}
+            cvtk=zeros(Float64, nf)
+            for k in 1:nf
+                cLoc=solc[l2g(p.degFBoundary[p.femType[comp[l]][1]], k)]
+                cvtk[k]=dot(fComp[l],cLoc);
+            end
             vtk_cell_data(vtk, cvtk, name[l])
         else
-            xi=findall(c.==1)
-            yi=findall(c.==2)
-            cvtk1=Float64[mean(solc[l2g(p.degFBoundary[p.femType[comp[l]][1]], k)[xi]]) for k in 1:nf]
-            cvtk2=Float64[mean(solc[l2g(p.degFBoundary[p.femType[comp[l]][1]], k)[yi]]) for k in 1:nf]
-            cvtk3=zeros(Float64,nf)
-            vtk_cell_data(vtk, cvtk1, name[l]*" x")
-            vtk_cell_data(vtk, cvtk2, name[l]*" z")
-            vtk_cell_data(vtk, (cvtk1,cvtk2,cvtk3), name[l])
-        end
+            cvtk=zeros(Float64, 2, nf)
+            for k in 1:nf
+                cLoc=solc[l2g(p.degFBoundary[p.femType[comp[l]][1]], k)]
+                jacobi!(J,dJ,m,k,0.5,0.5,coord);
+                fLoc=(1/dJ)*J*fComp[l]
+                cvtk[:,k]=fComp[l]*cLoc;
+            end
+            vtk_cell_data(vtk, cvtk[1,:], name[l]*" x")
+            vtk_cell_data(vtk, cvtk[2,:], name[l]*" z")
+            vtk_cell_data(vtk, (cvtk[1,:],cvtk[2,:],zeros(Float64,nf)), name[l])
     end
 
     outfiles=vtk_save(vtk);
@@ -60,6 +72,14 @@ function unstructured_vtk(p::femProblem, t::Array{Float64,1}, comp::Array{Symbol
         push!(cells, MeshCell(celltype, inds))
     end
 
+    fComp=Array{Array{Float64},1}(undef, length(comp))
+    for l in 1:length(comp)
+        fComp[l]=getElementProperties(p.femType[comp[l]][1],m.meshType,0.5,0.5);
+    end
+    J=Array{Float64,2}(undef,2,2);
+    dJ=0.0;
+    coord=Array{Float64,2}(undef,2,m.meshType);
+
     vtk_filename_noext = (@__DIR__)*"/VTK/"*filename;
 
     outfiles = paraview_collection(vtk_filename_noext) do pvd
@@ -68,19 +88,24 @@ function unstructured_vtk(p::femProblem, t::Array{Float64,1}, comp::Array{Symbol
             sol=p.solution[t[it]];
             for l in 1:length(comp)
                 solc=getfield(sol,comp[l]);
-                c=p.degFBoundary[p.femType[comp[l]][1]].components;
-                if c[1]==0
-                    cvtk=Float64[mean(solc[l2g(p.degFBoundary[p.femType[comp[l]][1]], k)]) for k in 1:nf]
+                if typeof(p.degFBoundary[p.femType[comp[l]][1]])==degF{1}
+                    cvtk=zeros(Float64, nf)
+                    for k in 1:nf
+                        cLoc=solc[l2g(p.degFBoundary[p.femType[comp[l]][1]], k)]
+                        cvtk[k]=dot(fComp[l],cLoc);
+                    end
                     vtk_cell_data(vtk, cvtk, name[l])
                 else
-                    xi=findall(c.==1)
-                    yi=findall(c.==2)
-                    cvtk1=Float64[mean(solc[l2g(p.degFBoundary[p.femType[comp[l]][1]], k)[xi]]) for k in 1:nf]
-                    cvtk2=Float64[mean(solc[l2g(p.degFBoundary[p.femType[comp[l]][1]], k)[yi]]) for k in 1:nf]
-                    cvtk3=zeros(Float64,nf)
-                    vtk_cell_data(vtk, cvtk1, name[l]*" x")
-                    vtk_cell_data(vtk, cvtk2, name[l]*" z")
-                    vtk_cell_data(vtk, (cvtk1,cvtk2,cvtk3), name[l])
+                    cvtk=zeros(Float64, 2, nf)
+                    for k in 1:nf
+                        cLoc=solc[l2g(p.degFBoundary[p.femType[comp[l]][1]], k)]
+                        jacobi!(J,dJ,m,k,0.5,0.5,coord);
+                        fLoc=(1/dJ)*J*fComp[l]
+                        cvtk[:,k]=fComp[l]*cLoc;
+                    end
+                    vtk_cell_data(vtk, cvtk[1,:], name[l]*" x")
+                    vtk_cell_data(vtk, cvtk[2,:], name[l]*" z")
+                    vtk_cell_data(vtk, (cvtk[1,:],cvtk[2,:],zeros(Float64,nf)), name[l])
                 end
             end
             vtk_save(vtk)
