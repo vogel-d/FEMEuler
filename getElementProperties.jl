@@ -1,106 +1,18 @@
-include("polynom.jl")
-include("transp.jl")
-function getQuadElementProperties(type::Symbol, kubPoints::Array{Float64,2})
+include("getQuadElementProperties.jl")
+include("getTriElementProperties.jl")
 
-    if type==:DG0
-        phi=[[1.0]];
-        #c=reshape([0.5; 0.5],2,1);
-        divphi=[[0.0]];
-        gradphi=reshape([[0.0],[0.0]],2,1);
-        nFace=1; nEdge=0; nVert=0;
-        comp=[0];
-
-    elseif type==:P1 || type==:DG1
-        phi=[[1.0 -1.0; -1.0 1.0],[0.0 1.0; 0.0 -1.0],[0.0 0.0; 0.0 1.0],[0.0 0.0; 1.0 -1.0]];
-        #c=[0.0 1.0 1.0 0.0 ;
-        #    0.0 0.0 1.0 1.0];
-        divphi=[[0.0], [0.0], [0.0], [0.0]];
-        gradphi=[[-1.0 0.0; 1.0 0.0], [1.0 0.0; -1.0 0.0], [0.0 0.0; 1.0 0.0], [0.0 0.0; -1.0 0.0],
-                 [-1.0 1.0; 0.0 0.0], [0.0 -1.0; 0.0 0.0], [0.0 1.0; 0.0 0.0], [1.0 -1.0; 0.0 0.0]];
-        gradphi=transp(reshape(gradphi,(4,2)));
-        comp=[0, 0, 0, 0];
-        if type==:P1
-            nFace=0; nEdge=0; nVert=1;
-        elseif type==:DG1
-            nFace=4; nEdge=0; nVert=0;
-        end
-
-    elseif type==:P2 || type==:DG2
-        #phi=[[1.0 -3.0 2.0; -3.0 9.0 -6.0; 2.0 -6.0 4.0], [0.0 4.0 -4.0; 0.0 -12.0 12.0; 0.0 8.0 -8.0], [0.0 -1.0 2.0; 0.0 3.0 -6.0; 0.0 -2.0 4.0], [0.0 0.0 0.0; 4.0 -12.0 8.0; -4.0 12.0 -8.0], [0.0 0.0 0.0; 0.0 16.0 -16.0; 0.0 -16.0 16.0], [0.0 0.0 0.0; 0.0 -4.0 8.0; 0.0 4.0 -8.0], [0.0 0.0 0.0; -1.0 3.0 -2.0; 2.0 -6.0 4.0], [0.0 0.0 0.0; 0.0 -4.0 4.0; 0.0 8.0 -8.0], [0.0 0.0 0.0; 0.0 1.0 -2.0; 0.0 -2.0 4.0]];
-        phi=[[0.0 0.0 0.0; 0.0 16.0 -16.0; 0.0 -16.0 16.0], [0.0 4.0 -4.0; 0.0 -12.0 12.0; 0.0 8.0 -8.0], [0.0 0.0 0.0; 0.0 -4.0 8.0; 0.0 4.0 -8.0], [0.0 0.0 0.0; 0.0 -4.0 4.0; 0.0 8.0 -8.0], [0.0 0.0 0.0; 4.0 -12.0 8.0; -4.0 12.0 -8.0], [1.0 -3.0 2.0; -3.0 9.0 -6.0; 2.0 -6.0 4.0], [0.0 -1.0 2.0; 0.0 3.0 -6.0; 0.0 -2.0 4.0], [0.0 0.0 0.0; 0.0 1.0 -2.0; 0.0 -2.0 4.0], [0.0 0.0 0.0; -1.0 3.0 -2.0; 2.0 -6.0 4.0]];
-        #c=[0.5 0.5 1.0 0.5 0.0 0.0 1.0 1.0 0.0;
-        #   0.5 0.0 0.5 1.0 0.5 0.0 0.0 1.0 1.0];
-        divphi=[[0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0]];
-        gradphi=[[0.0 0.0 0.0; 16.0 -32.0 0.0; -16.0 32.0 0.0], [4.0 -8.0 0.0; -12.0 24.0 0.0; 8.0 -16.0 0.0], [0.0 0.0 0.0; -4.0 16.0 0.0; 4.0 -16.0 0.0], [0.0 0.0 0.0; -4.0 8.0 0.0; 8.0 -16.0 0.0], [0.0 0.0 0.0; -12.0 16.0 0.0; 12.0 -16.0 0.0], [-3.0 4.0 0.0; 9.0 -12.0 0.0; -6.0 8.0 0.0], [-1.0 4.0 0.0; 3.0 -12.0 0.0; -2.0 8.0 0.0], [0.0 0.0 0.0; 1.0 -4.0 0.0; -2.0 8.0 0.0], [0.0 0.0 0.0; 3.0 -4.0 0.0; -6.0 8.0 0.0],
-                 [0.0 16.0 -16.0; 0.0 -32.0 32.0; 0.0 0.0 0.0], [0.0 -12.0 12.0; 0.0 16.0 -16.0; 0.0 0.0 0.0], [0.0 -4.0 8.0; 0.0 8.0 -16.0; 0.0 0.0 0.0], [0.0 -4.0 4.0; 0.0 16.0 -16.0; 0.0 0.0 0.0], [4.0 -12.0 8.0; -8.0 24.0 -16.0; 0.0 0.0 0.0], [-3.0 9.0 -6.0; 4.0 -12.0 8.0; 0.0 0.0 0.0], [0.0 3.0 -6.0; 0.0 -4.0 8.0; 0.0 0.0 0.0], [0.0 1.0 -2.0; 0.0 -4.0 8.0; 0.0 0.0 0.0], [-1.0 3.0 -2.0; 4.0 -12.0 8.0; 0.0 0.0 0.0]];
-        gradphi=transp(reshape(gradphi,(9,2)));
-        comp=[0, 0, 0, 0, 0, 0, 0, 0, 0];
-        if type==:P2
-            nFace=1; nEdge=1; nVert=1;
-        elseif type==:DG2
-            nFace=9; nEdge=0; nVert=0;
-        end
-
-    elseif type==:RT0 || type==:RT0B #Broken RT0
-        phi=[[0.0], [0.0 1.0; 0.0 0.0], [0.0], [1.0 -1.0; 0.0 0.0],
-             [1.0 0.0; -1.0 0.0], [0.0], [0.0 0.0; 1.0 0.0], [0.0]];
-        phi=transp(reshape(phi,(4,2)));
-        #c=[0.5 1.0 0.5 0.0;
-        #   0.0 0.5 1.0 0.5];
-        divphi=[[-1.0], [1.0], [1.0], [-1.0]];
-        gradphi=[[0.0], [0.0], [1.0], [0.0], [0.0], [0.0], [-1.0], [0.0],
-                 [0.0], [-1.0], [0.0], [0.0], [0.0], [1.0], [0.0], [0.0]];
-        gradphi=transp(reshape(gradphi,(8,2)));
-        comp=[2,1,2,1];
-        if type==:RT0
-            nFace=0; nEdge=1; nVert=0;
-        elseif type==:RT0B
-            nFace=4; nEdge=0; nVert=0;
-        end
-
-    elseif type==:RT1 || type==:RT1B
-        phi=[[0.0 4.0 -4.0; 0.0 -4.0 4.0; 0.0 0.0 0.0], [0.0], [0.0 0.0 0.0; 0.0 4.0 -4.0; 0.0 0.0 0.0], [0.0], [0.0], [0.0], [0.0 -1.0 2.0; 0.0 1.0 -2.0; 0.0 0.0 0.0], [0.0 0.0 0.0; 0.0 -1.0 2.0; 0.0 0.0 0.0], [0.0], [0.0], [1.0 -3.0 2.0; -1.0 3.0 -2.0; 0.0 0.0 0.0], [0.0 0.0 0.0; 1.0 -3.0 2.0; 0.0 0.0 0.0],
-             [0.0], [0.0 0.0 0.0; 0.0 4.0 0.0; 0.0 -4.0 0.0], [0.0], [0.0 0.0 0.0; 4.0 -4.0 0.0; -4.0 4.0 0.0], [1.0 -1.0 0.0; -3.0 3.0 0.0; 2.0 -2.0 0.0], [0.0 1.0 0.0; 0.0 -3.0 0.0; 0.0 2.0 0.0], [0.0], [0.0], [0.0 0.0 0.0; -1.0 1.0 0.0; 2.0 -2.0 0.0], [0.0 0.0 0.0; 0.0 -1.0 0.0; 0.0 2.0 0.0], [0.0], [0.0]];
-        phi=transp(reshape(phi,(12,2)));
-         #c=[0.5 1.0 0.5 0.0 0.0 1.0 1.0 1.0 1.0 0.0 0.0 0.0;
-         #   0.0 0.5 1.0 0.5 0.0 0.0 0.0 1.0 1.0 1.0 1.0 0.0];
-        divphi=[[4.0 -8.0; -4.0 8.0], [0.0 4.0; 0.0 -8.0], [0.0 0.0; 4.0 -8.0], [4.0 -4.0; -8.0 8.0], [-3.0 3.0; 4.0 -4.0], [0.0 -3.0; 0.0 4.0], [-1.0 4.0; 1.0 -4.0], [0.0 0.0; -1.0 4.0], [-1.0 1.0; 4.0 -4.0], [0.0 -1.0; 0.0 4.0], [-3.0 4.0; 3.0 -4.0], [0.0 0.0; -3.0 4.0]];
-        gradphi=[[4.0 -8.0; -4.0 8.0], [0.0 -4.0 4.0; 0.0 0.0 0.0; 0.0 0.0 0.0], [0.0], [0.0], [0.0 0.0; 4.0 -8.0], [0.0 4.0 -4.0; 0.0 0.0 0.0; 0.0 0.0 0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [0.0], [-1.0 4.0; 1.0 -4.0], [0.0 1.0 -2.0; 0.0 0.0 0.0; 0.0 0.0 0.0], [0.0 0.0; -1.0 4.0], [0.0 -1.0 2.0; 0.0 0.0 0.0; 0.0 0.0 0.0], [0.0], [0.0], [0.0], [0.0], [-3.0 4.0; 3.0 -4.0], [-1.0 3.0 -2.0; 0.0 0.0 0.0; 0.0 0.0 0.0], [0.0 0.0; -3.0 4.0], [1.0 -3.0 2.0; 0.0 0.0 0.0; 0.0 0.0 0.0],
-                 [0.0], [0.0], [0.0 0.0 0.0; 4.0 0.0 0.0; -4.0 0.0 0.0], [0.0 4.0; 0.0 -8.0], [0.0], [0.0], [0.0 0.0 0.0; -4.0 0.0 0.0; 4.0 0.0 0.0], [4.0 -4.0; -8.0 8.0], [-1.0 0.0 0.0; 3.0 0.0 0.0; -2.0 0.0 0.0], [-3.0 3.0; 4.0 -4.0], [1.0 0.0 0.0; -3.0 0.0 0.0; 2.0 0.0 0.0], [0.0 -3.0; 0.0 4.0], [0.0], [0.0], [0.0], [0.0], [0.0 0.0 0.0; 1.0 0.0 0.0; -2.0 0.0 0.0], [-1.0 1.0; 4.0 -4.0], [0.0 0.0 0.0; -1.0 0.0 0.0; 2.0 0.0 0.0], [0.0 -1.0; 0.0 4.0], [0.0], [0.0], [0.0], [0.0]];
-        gradphi=transp(reshape(gradphi,(24,2)));
-        comp=[1,2,1,2,2,2,1,1,2,2,1,1];
-        if type==:RT1
-            nFace=4; nEdge=2; nVert=0;
-        elseif type==:RT1B
-            nFace=12; nEdge=0; nVert=0;
-        end
-
-    elseif type==:VecP1 || type==:VecDG1
-        phi=[[1.0 -1.0; -1.0 1.0], [0.0], [0.0 1.0; 0.0 -1.0], [0.0], [0.0 0.0; 0.0 1.0], [0.0], [0.0 0.0; 1.0 -1.0], [0.0],
-             [0.0], [1.0 -1.0; -1.0 1.0], [0.0], [0.0 1.0; 0.0 -1.0], [0.0], [0.0 0.0; 0.0 1.0], [0.0], [0.0 0.0; 1.0 -1.0]];
-        phi=transp(reshape(phi,(8,2)));
-        divphi=[[-1.0 0.0; 1.0 0.0], [-1.0 1.0; 0.0 0.0], [1.0 0.0; -1.0 0.0], [0.0 -1.0; 0.0 0.0], [0.0 0.0; 1.0 0.0], [0.0 1.0; 0.0 0.0], [0.0 0.0; -1.0 0.0], [1.0 -1.0; 0.0 0.0]];
-        gradphi=[[-1.0 0.0; 1.0 0.0], [-1.0 1.0; 0.0 0.0], [0.0], [0.0], [1.0 0.0; -1.0 0.0], [0.0 -1.0; 0.0 0.0], [0.0], [0.0], [0.0 0.0; 1.0 0.0], [0.0 1.0; 0.0 0.0], [0.0], [0.0], [0.0 0.0; -1.0 0.0], [1.0 -1.0; 0.0 0.0], [0.0], [0.0],
-                [0.0], [0.0], [-1.0 0.0; 1.0 0.0], [-1.0 1.0; 0.0 0.0], [0.0], [0.0], [1.0 0.0; -1.0 0.0], [0.0 -1.0; 0.0 0.0], [0.0], [0.0], [0.0 0.0; 1.0 0.0], [0.0 1.0; 0.0 0.0], [0.0], [0.0], [0.0 0.0; -1.0 0.0], [1.0 -1.0; 0.0 0.0] ];
-        gradphi=transp(reshape(gradphi,(16,2)));
-        #c=[0.0 0.0 1.0 1.0 1.0 1.0 0.0 0.0;
-        #   0.0 0.0 0.0 0.0 1.0 1.0 1.0 1.0];
-        comp=[1, 2, 1, 2, 1, 2, 1, 2];
-        if type==:VecP1
-            nFace=0; nEdge=0; nVert=2;
-        elseif type==:VecDG1
-            nFace=8; nEdge=0; nVert=0;
-        end
-    else
-        error("Unzulässiger finite-Elemente-Raum");
+function getElementProperties(type::Symbol, kubPoints::Array{Float64,2}, mt::Int)
+    if mt==4
+        phi, divphi, gradphi, cm, nFace, nEdge, nVert, comp=getQuadElementProperties(type);
+    elseif mt==3
+        phi, divphi, gradphi, cm, nFace, nEdge, nVert=getTriElementProperties(type);
     end
-
     sk=size(kubPoints,2);
     kubPhi=Array{Array{Float64,2},ndims(phi)}(undef,size(phi));
-    for k in 1:length(phi)
+    for k=1:length(phi)
         kubVal=Array{Float64,2}(undef,sk,sk);
         for i=1:sk, j=1:sk
-            kubVal[i,j]=polynom(phi[k], kubPoints[1,i], kubPoints[2,j]);
+            kubVal[i,j]=phi[k](kubPoints[1,i], kubPoints[2,j]);
         end
         kubPhi[k]=kubVal;
     end
@@ -109,7 +21,7 @@ function getQuadElementProperties(type::Symbol, kubPoints::Array{Float64,2})
     for k in 1:length(divphi)
         kubVal=Array{Float64,2}(undef,sk,sk);
         for i=1:sk, j=1:sk
-            kubVal[i,j]=polynom(divphi[k], kubPoints[1,i], kubPoints[2,j]);
+            kubVal[i,j]=divphi[k](kubPoints[1,i], kubPoints[2,j]);
         end
         kubDiv[k]=kubVal;
     end
@@ -118,7 +30,7 @@ function getQuadElementProperties(type::Symbol, kubPoints::Array{Float64,2})
     for ki=1:size(gradphi,1), kj=1:size(gradphi,2)
         kubVal=Array{Float64,2}(undef,sk,sk);
         for i=1:sk, j=1:sk
-            kubVal[i,j]=polynom(gradphi[ki,kj], kubPoints[1,i], kubPoints[2,j]);
+            kubVal[i,j]=gradphi[ki,kj](kubPoints[1,i], kubPoints[2,j]);
         end
         kubGrad[ki,kj]=kubVal;
     end
@@ -126,87 +38,34 @@ function getQuadElementProperties(type::Symbol, kubPoints::Array{Float64,2})
     return kubPhi, kubDiv,  kubGrad, comp, nFace, nEdge, nVert
 end
 
-
-function getTriElementProperties(type::Symbol, kubPoints::Array{Float64,2})
-    if type==:DG0
-        phi=[[1.0]];
-        #c=[1/3 0.0; 1/3 0.0];
-        #c=c[:,1:1];
-        divphi=[[0.0]];
-        gradphi=reshape([[0.0],[0.0]],2,1);
-
-        nFace=1;
-        nEdge=0;
-        nVert=0;
-
-        #cm=[0.5 0.0 0.0; 0.5 0.5 0.0; 0.0 0.5 0.0];
-        comp=[0];
-
-    elseif type==:RT0
-
-        phi=[[-1.0 1.0; 0.0 0.0], [0.0 1.0; 0.0 0.0], [0.0 0.7071067811865475244; 0.0 0.0], [0.0 0.0; 1.0 0.0], [-1.0 0.0; 1.0 0.0], [0.0 0.0; 0.7071067811865475244 0.0]];
-        #c=[0.5 0.0 0.5; 0.0 0.5 0.5];
-        phi=transp(reshape(phi,(3,2)));
-        divphi=[[2.0], [2.0], [2.0/sqrt(2)]];
-        gradphi=[[1.0], [0.0], [1.0], [0.0], [1.0/sqrt(2)], [0.0], [0.0], [1.0], [0.0], [1.0], [0.0], [1.0/sqrt(2)]];
-        gradphi=transp(reshape(gradphi,(6,2)));
-        nFace=0;
-        nEdge=1;
-        nVert=0;
-
-        #cm=[0.5 0.0 0.0 1.0 0.0;
-        #    0.5 0.5 0.0 0.0 1.0;
-        #    0.0 0.5 1.0 0.0 0.0];
-        comp=[0];
-
-
-    elseif type==:P1
-        phi=[[1.0 0.0; 0.0 -1.0], [0.0 1.0; 0.0 0.0], [0.0 0.0; 1.0 0.0]];
-        #c=[0.0 1.0 0.0; 0.0 0.0 1.0];
-
-        divphi=[[0.0], [0.0], [0.0]];
-
-        gradphi=[[0.0 0.0; -1.0 0.0], [1.0], [0.0],
-                 [0.0 -1.0; 0.0 0.0], [0.0], [1.0]];
-        phi=transp(reshape(phi,(3,2)));
-        nFace=0;
-        nEdge=0;
-        nVert=1;
-
-        #cm=[0.5 0.0 1.0 1.0 0.0;
-        #    0.5 0.5 0.0 1.0 1.0;
-        #    0.0 0.5 1.0 0.0 1.0];
-
-        comp=[0, 0, 0];
+function getElementProperties(type::Symbol, mt::Int)
+    if mt==4
+        phi, divphi, gradphi, cm, nFace, nEdge, nVert, comp=getQuadElementProperties(type);
+    elseif mt==3
+        phi, divphi, gradphi, cm, nFace, nEdge, nVert=getTriElementProperties(type);
     end
+    ndims(phi)==1 ? s=size(phi') : s=size(phi);
+    return phi, s
+end
 
-    sk=size(kubPoints,2);
-    kubPhi=Array{Array{Float64,2},ndims(phi)}(undef,size(phi));
+function getElementProperties(mt::Int, type::Symbol)
+    if mt==4
+        phi, divphi, gradphi, cm, nFace, nEdge, nVert, comp=getQuadElementProperties(type);
+    elseif mt==3
+        phi, divphi, gradphi, cm, nFace, nEdge, nVert=getTriElementProperties(type);
+    end
+    return cm
+end
+
+function getElementProperties(type::Symbol, mt::Int, x, y)
+    if mt==4
+        phi, divphi, gradphi, cm, nFace, nEdge, nVert, comp=getQuadElementProperties(type);
+    elseif mt==3
+        phi, divphi, gradphi, cm, nFace, nEdge, nVert=getTriElementProperties(type);
+    end
+    valPhi=similar(phi,Float64);
     for k=1:length(phi)
-        kubVal=Array{Float64,2}(undef,sk,sk);
-        for i=1:sk, j=1:sk
-            kubVal[i,j]=polynom(phi[k], kubPoints[1,i], kubPoints[2,j]);
-        end
-        kubPhi[k]=kubVal;
+        valPhi[k]=phi[k](x,y);
     end
-
-    kubDiv=Array{Array{Float64,2},1}(undef,length(divphi));
-    for k in 1:length(divphi)
-        kubVal=Array{Float64,2}(undef,sk,sk);
-        for i=1:sk, j=1:sk
-            kubVal[i,j]=polynom(divphi[k], kubPoints[1,i], kubPoints[2,j]);
-        end
-        kubDiv[k]=kubVal;
-    end
-
-    kubGrad=Array{Array{Float64,2},2}(undef,size(gradphi));
-    for ki=1:size(gradphi,1), kj=1:size(gradphi,2)
-        kubVal=Array{Float64,2}(undef,sk,sk);
-        for i=1:sk, j=1:sk
-            kubVal[i,j]=polynom(gradphi[ki,kj], kubPoints[1,i], kubPoints[2,j]);
-        end
-        kubGrad[ki,kj]=kubVal;
-    end
-
-    return kubPhi, kubDiv,  comp, nFace, nEdge, nVert
+    return valPhi
 end

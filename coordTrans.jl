@@ -30,13 +30,13 @@ function coordTrans(mt::Int64, normals::Array{Float64,2}, type::Array{Symbol,1},
 
     for k in type
         nquadPhi[k]=Array{Array{Array{Float64,1},2},1}(undef, size(normals,2));
-        phi, psize =getPhi(k);
+        phi, psize =getElementProperties(k,mt);
         for m in 1:size(normals,2)
             quadPhi=Array{Array{Float64,1},2}(undef,psize[1], psize[2]);
             for n in 1:length(phi)
                 quadVal=Array{Float64,1}(undef,sk);
                 for i=1:sk
-                    quadVal[i]=polynom(phi[n],nquadPoints[m][1,i], nquadPoints[m][2,i]);
+                    quadVal[i]=phi[n](nquadPoints[m][1,i], nquadPoints[m][2,i]);
                 end
                 quadPhi[n]=quadVal;
             end
