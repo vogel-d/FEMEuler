@@ -19,12 +19,12 @@ function jacobi!(J::Array{Array{Float64,2},2},dJ::Array{Float64,2},m::mesh, fid:
     if mt==3
         a=coord[:,2]-coord[:,1];
         b=coord[:,3]-coord[:,1];
-        ones=ones(sk,sk);
-        dJ=abs(a[1]*b[2]-b[1]*a[2])*ones;
-        J[1,1]=a[1]*ones;
-        J[1,2]=b[1]*ones;
-        J[2,1]=a[2]*ones;
-        J[2,2]=b[2]*ones;
+        one=ones(sk,sk);
+        dJ=abs(a[1]*b[2]-b[1]*a[2])*one;
+        J[1,1]=a[1]*one;
+        J[1,2]=b[1]*one;
+        J[2,1]=a[2]*one;
+        J[2,2]=b[2]*one;
     elseif mt==4
          #J[1,1]=Array{Float64,2}(undef,sk,sk);
          #J[1,2]=Array{Float64,2}(undef,sk,sk);
