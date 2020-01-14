@@ -48,10 +48,10 @@ function getTriElementProperties(type::Symbol)
 
 
     elseif type==:P1
-        phi=[f1mxy fx fy];
+        phi=[f1mxy, fx, fy];
         #c=[0.0 1.0 0.0; 0.0 0.0 1.0];
 
-        divphi=[null null null];
+        divphi=[null, null, null];
 
         gradphi=[fmy f1 null;
                  fmx null f1];
