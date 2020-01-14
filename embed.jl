@@ -3,7 +3,8 @@ function embed(comp::Symbol,degF::degF{1},cval::Array{Float64,1},compRec::Symbol
 
     globalNum=Array{Int64,1}(undef,length(degF.phi));
     globalNumRec=Array{Int64,1}(undef,length(degFRec.phi));
-    if comp==:DG0 && compRec==:DG1
+    println(" S: comp ",comp," compRec ",compRec)
+    if (comp==:DG0 && compRec==:DG1) || (comp==:DG1 && compRec==:DG2)
         for i in 1:n
             l2g!(globalNum,degF,i);
             l2g!(globalNumRec,degFRec,i);
@@ -14,7 +15,7 @@ function embed(comp::Symbol,degF::degF{1},cval::Array{Float64,1},compRec::Symbol
                 end
             end
         end
-    elseif ((comp==:P1 || comp==:DG1) && compRec==:DG1)
+    elseif ((comp==:P1 || comp==:DG1) && compRec==:DG1) || ((comp==:P2 || comp==:DG2) && compRec==:DG2)
         for i in 1:n
             l2g!(globalNum,degF,i);
             l2g!(globalNumRec,degFRec,i);
@@ -22,7 +23,7 @@ function embed(comp::Symbol,degF::degF{1},cval::Array{Float64,1},compRec::Symbol
                 cEmbed[globalNumRec[j]]+=cval[globalNum[j]];
             end
         end
-    elseif comp==:DG1 && compRec==:P1
+    elseif (comp==:DG1 && compRec==:P1) || (comp==:DG2 && compRec==:P2)
         z=zeros(degFRec.numB);
         for i in 1:n
             l2g!(globalNum,degF,i);
@@ -68,11 +69,20 @@ function embed(comp::Symbol,degF::degF{2},cval::Array{Float64,1},compRec::Symbol
     globalNum=Array{Int64,1}(undef,size(degF.phi,2));
     globalNumRec=Array{Int64,1}(undef,size(degFRec.phi,2));
 
+    println(" V: comp ",comp," compRec ",compRec)
     if comp==:VecP1 && compRec==:VecDG1
         for i in 1:n
             l2g!(globalNum,degF,i);
             l2g!(globalNumRec,degFRec,i);
             for j in 1:8
+                cEmbed[globalNumRec[j]]+=cval[globalNum[j]];
+            end
+        end
+    elseif comp==:VecP2 && compRec==:VecDG2
+        for i in 1:n
+            l2g!(globalNum,degF,i);
+            l2g!(globalNumRec,degFRec,i);
+            for j in 1:18
                 cEmbed[globalNumRec[j]]+=cval[globalNum[j]];
             end
         end
@@ -84,6 +94,29 @@ function embed(comp::Symbol,degF::degF{2},cval::Array{Float64,1},compRec::Symbol
             for j in 1:8
                 cEmbed[globalNumRec[j]]+=cval[globalNum[h[j]]];
             end
+        end
+    elseif (comp==:RT1 || comp==:RT1B) && compRec==:VecDG2
+        for i in 1:n
+            l2g!(globalNum,degF,i);
+            l2g!(globalNumRec,degFRec,i);
+            cEmbed[globalNumRec[ 1]]=0.5*(cval[globalNum[1]]+cval[globalNum[3]])
+            cEmbed[globalNumRec[ 2]]=0.5*(cval[globalNum[2]]+cval[globalNum[4]])
+            cEmbed[globalNumRec[ 3]]=cval[globalNum[1]]
+            cEmbed[globalNumRec[ 4]]=0.5*(cval[globalNum[5]]+cval[globalNum[6]])
+            cEmbed[globalNumRec[ 5]]=0.5*(cval[globalNum[7]]+cval[globalNum[8]])
+            cEmbed[globalNumRec[ 6]]=cval[globalNum[2]]
+            cEmbed[globalNumRec[ 7]]=cval[globalNum[3]]
+            cEmbed[globalNumRec[ 8]]=0.5*(cval[globalNum[9]]+cval[globalNum[10]])
+            cEmbed[globalNumRec[ 9]]=0.5*(cval[globalNum[11]]+cval[globalNum[2]])
+            cEmbed[globalNumRec[10]]=cval[globalNum[4]]
+            cEmbed[globalNumRec[11]]=cval[globalNum[11]]
+            cEmbed[globalNumRec[12]]=cval[globalNum[5]]
+            cEmbed[globalNumRec[13]]=cval[globalNum[7]]
+            cEmbed[globalNumRec[14]]=cval[globalNum[6]]
+            cEmbed[globalNumRec[15]]=cval[globalNum[8]]
+            cEmbed[globalNumRec[16]]=cval[globalNum[10]]
+            cEmbed[globalNumRec[17]]=cval[globalNum[12]]
+            cEmbed[globalNumRec[18]]=cval[globalNum[9]]
         end
     else
         error("Entsprechende embed-Funktion fehlt.")
