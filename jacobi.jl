@@ -56,12 +56,12 @@ function jacobi!(J::Array{Float64,2},dJ::Float64,m::mesh, fid::Int64, x::Float64
     if mt==3
         a=coord[:,2]-coord[:,1];
         b=coord[:,3]-coord[:,1];
-        ones=ones(sk,sk);
-        dJ=abs(a[1]*b[2]-b[1]*a[2])*ones;
-        J[1,1]=a[1]*ones;
-        J[1,2]=b[1]*ones;
-        J[2,1]=a[2]*ones;
-        J[2,2]=b[2]*ones;
+        one=ones(sk,sk);
+        dJ=abs(a[1]*b[2]-b[1]*a[2])*one;
+        J[1,1]=a[1]*one;
+        J[1,2]=b[1]*one;
+        J[2,1]=a[2]*one;
+        J[2,2]=b[2]*one;
     elseif mt==4
         J[1,1]=(coord[1,2]-coord[1,1])+(coord[1,3]-coord[1,4]-coord[1,2]+coord[1,1])*0.5;
         J[2,1]=(coord[2,2]-coord[2,1])+(coord[2,3]-coord[2,4]-coord[2,2]+coord[2,1])*0.5;
@@ -89,12 +89,12 @@ function jacobi!(J::Array{Array{Float64,2},2},ddJ::Array{Float64,2},jphi::Array{
     if mt==3
         a=coord[:,2]-coord[:,1];
         b=coord[:,3]-coord[:,1];
-        ones=ones(sk,sk);
-        ddJ=1/abs(a[1]*b[2]-b[1]*a[2])*ones;
-        J[1,1]=a[1]*ones;
-        J[1,2]=b[1]*ones;
-        J[2,1]=a[2]*ones;
-        J[2,2]=b[2]*ones;
+        one=ones(sk,sk);
+        ddJ=1/abs(a[1]*b[2]-b[1]*a[2])*one;
+        J[1,1]=a[1]*one;
+        J[1,2]=b[1]*one;
+        J[2,1]=a[2]*one;
+        J[2,2]=b[2]*one;
     elseif mt==4
         #J[1,1]=Array{Float64,2}(undef,sk,sk);
         #J[1,2]=Array{Float64,2}(undef,sk,sk);
@@ -133,12 +133,12 @@ function jacobi!(ddJ::Array{Float64,2}, jphi::Array{Array{Float64,2},2}, m::mesh
     if mt==3
         a=coord[:,2]-coord[:,1];
         b=coord[:,3]-coord[:,1];
-        ones=ones(sk,sk)
-        ddJ=1/abs(a[1]*b[2]-b[1]*a[2])*ones;
-        JtJ11=(a[1]^2+a[2]^2)*ones;
-        JtJ12=(a[1]*b[1]+a[2]*b[2])*ones;
-        JtJ2=(a[1]*b[1]+a[2]*b[2])*ones;
-        JtJ22=(b[1]^2+b[2]^2)*ones;
+        one=ones(sk,sk)
+        ddJ=1/abs(a[1]*b[2]-b[1]*a[2])*one;
+        JtJ11=(a[1]^2+a[2]^2)*one;
+        JtJ12=(a[1]*b[1]+a[2]*b[2])*one;
+        JtJ2=(a[1]*b[1]+a[2]*b[2])*one;
+        JtJ22=(b[1]^2+b[2]^2)*one;
         for k in 1:size(phi,2)
             jphi[1,k][i,j]=(JtJ11*phi[1,k][i,j]+JtJ12*phi[2,k][i,j]);
             jphi[2,k][i,j]=(JtJ21*phi[1,k][i,j]+JtJ22*phi[2,k][i,j]);
@@ -182,12 +182,12 @@ function jacobi!(J::Array{Array{Float64,2},2},ddJ::Array{Float64,2},jphi::Array{
     if mt==3
         a=coord[:,2]-coord[:,1];
         b=coord[:,3]-coord[:,1];
-        ones=ones(sk,sk);
-        ddJ=1/abs(a[1]*b[2]-b[1]*a[2])*ones;
-        J[1,1]=a[1]*ones;
-        J[1,2]=b[1]*ones;
-        J[2,1]=a[2]*ones;
-        J[2,2]=b[2]*ones;
+        one=ones(sk,sk);
+        ddJ=1/abs(a[1]*b[2]-b[1]*a[2])*one;
+        J[1,1]=a[1]*one;
+        J[1,2]=b[1]*one;
+        J[2,1]=a[2]*one;
+        J[2,2]=b[2]*one;
     elseif mt==4
         #J[1,1]=Array{Float64,2}(undef,sk,sk);
         #J[1,2]=Array{Float64,2}(undef,sk,sk);
@@ -230,12 +230,12 @@ function jacobi!(J::Array{Array{Float64,1},2},dJ::Array{Float64,1},m::mesh, fid:
     if mt==3
         a=coord[:,2]-coord[:,1];
         b=coord[:,3]-coord[:,1];
-        ones=ones(sk,sk);
-        dJ=abs(a[1]*b[2]-b[1]*a[2])*ones;
-        J[1,1]=a[1]*ones;
-        J[1,2]=b[1]*ones;
-        J[2,1]=a[2]*ones;
-        J[2,2]=b[2]*ones;
+        one=ones(sk,sk);
+        dJ=abs(a[1]*b[2]-b[1]*a[2])*one;
+        J[1,1]=a[1]*one;
+        J[1,2]=b[1]*one;
+        J[2,1]=a[2]*one;
+        J[2,2]=b[2]*one;
     elseif mt==4
          #J[1,1]=Array{Float64,1}(undef,sk);
          #J[1,2]=Array{Float64,1}(undef,sk);
@@ -269,12 +269,12 @@ function jacobi!(J::Array{Array{Float64,1},2},ddJ::Array{Float64,1},jphi::Array{
     if mt==3
         a=coord[:,2]-coord[:,1];
         b=coord[:,3]-coord[:,1];
-        ones=ones(sk);
-        ddJ=1/abs(a[1]*b[2]-b[1]*a[2])*ones;
-        J[1,1]=a[1]*ones;
-        J[1,2]=b[1]*ones;
-        J[2,1]=a[2]*ones;
-        J[2,2]=b[2]*ones;
+        one=ones(sk);
+        ddJ=1/abs(a[1]*b[2]-b[1]*a[2])*one;
+        J[1,1]=a[1]*one;
+        J[1,2]=b[1]*one;
+        J[2,1]=a[2]*one;
+        J[2,2]=b[2]*one;
     elseif mt==4
         #J[1,1]=Array{Float64,1}(undef,sk);
         #J[1,2]=Array{Float64,1}(undef,sk);
