@@ -1,6 +1,5 @@
 function getQuadElementProperties(type::Symbol)
 
-    println("FEMType ",type)
     null(x,y)=0.0;
 
     g0(x)=1.0;
