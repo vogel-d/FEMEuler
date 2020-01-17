@@ -52,3 +52,4 @@ include("plotSolutionGif.jl");
 include("plotMesh.jl");
 include("plotFEM.jl")
 include("vtk.jl");
+include("jld.jl");
