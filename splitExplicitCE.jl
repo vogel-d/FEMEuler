@@ -12,6 +12,11 @@ function splitExplicit(y0::solution,Y::Array{solution,1},FY::Array{solution,1},S
   numRhoV=p.degFBoundary[p.femType[:rhoV][1]].num
   numRhoTheta=p.degFBoundary[p.femType[:rhoTheta][1]].num
 
+  velOld=Array{Float64,1}(undef,numRhoV)
+  rhoVS=Array{Float64,1}(undef,numRhoV)
+  rhoS=Array{Float64,1}(undef,numRho)
+  rhoThetaS=Array{Float64,1}(undef,numRhoTheta)
+
   for i in 1:(stage+1)
     Y[i]=y0;
   end
@@ -39,7 +44,7 @@ function splitExplicit(y0::solution,Y::Array{solution,1},FY::Array{solution,1},S
     Y[i+1].rho[numRho+1:end]=y0.rho[numRho+1:end];
     Y[i+1].rhoTheta[numRhoTheta+1:end]=y0.rhoTheta[numRhoTheta+1:end];
 
-    symplektischerEuler!(Y[i+1],p,fSlow,SthSlow,nsLoc,dtauLoc);
+    symplektischerEuler!(Y[i+1],p,fSlow,SthSlow,nsLoc,dtauLoc,velOld,rhoVS,rhoS,rhoThetaS);
   end
   return Y[stage+1];
 end
