@@ -31,11 +31,13 @@ function getTriElementProperties(type::Symbol)
 
     elseif type==:RT0
 
-        phi=[fxm1 fx fsx; fy fym1 fsy];
+        phi=[fxm1 fx fsx;
+             fy fym1 fsy];
         #c=[0.5 0.0 0.5; 0.0 0.5 0.5];
 
         divphi=[f2, f2, f2s];
-        gradphi=[f1 null f1 null f1s null; null f1 null f1 null f1s];
+        gradphi=[f1 null f1 null f1s null;
+                 null f1 null f1 null f1s];
 
         nFace=0;
         nEdge=1;

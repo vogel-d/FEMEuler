@@ -1,48 +1,49 @@
 include("modulesB.jl")
 
 function testBoussinesqTri()
-    filename = "testTri";
+    filename = "test";
 
     femType=Dict(:p=>[:DG0], :v=>[:RT0], :b=>[:P1]);
     #femType=Dict(:p=>[:DG1], :v=>[:RT1], :b=>[:DG1]);
 
-    m=generateTriMesh(2,1,:periodic,:constant,0.0,300000.0,0.0,10000.0); #(east/west, top/bottom)
-    pv=femProblem(m, femType, g=5);
+    m=generateTriMesh(300,10,:periodic,:constant,0.0,300000.0,0.0,10000.0); #(east/west, top/bottom)
+    #m=generateRectMesh(6,5,:periodic,:constant,0.0,1.0,0.0,1.0); #(east/west, top/bottom)
+    p=femProblem(m, femType, g=5);
 
 
     method=:euler;
     dt=1.0;
     tend=3000.0;
 
-    #solSaves=15.0:15:tend; #determines at which points of time the solution is saved
-    solSaves=tend;
+    solSaves=15.0:15:tend; #determines at which points of time the solution is saved
+    #solSaves=tend;
 
     b0=0.01;
     H=10000;
     A=5000;
-    xM=0.5*(pv.mesh.geometry.l[1]+pv.mesh.geometry.r[1]);
-    #yM=0.5*(pv.mesh.geometry.l[2]+pv.mesh.geometry.r[2]);
+    xM=0.5*(p.mesh.geometry.l[1]+p.mesh.geometry.r[1]);
+    #yM=0.5*(p.mesh.geometry.l[2]+p.mesh.geometry.r[2]);
 
     fb(x,y)=b0*sin(pi*y/H)/(1+((x-xM)/A)^2);
     f=Dict(:b=>fb);
 
-    assembMass!(pv);
-    assembStiff!(pv);
-    applyStartValues!(pv,f)
+    assembMass!(p);
+    assembStiff!(p);
+    applyStartValues!(p,f)
 
-    Fp=pv.massM[pv.femType[:p][1]];
-    Fv=pv.massM[pv.femType[:v][1]];
-    Fb=pv.massM[pv.femType[:b][1]];
+    Fp=p.massM[p.femType[:p][1]];
+    Fv=p.massM[p.femType[:v][1]];
+    Fb=p.massM[p.femType[:b][1]];
 
     for i in collect(solSaves)
-        solveB!(pv,Fp,Fv,Fb,dt,i,method);
+        solveB!(p,Fp,Fv,Fb,dt,i,method);
         println(i);
     end
 
     #Speichern des Endzeitpunktes als vtu-Datei:
-    unstructured_vtk(pv, tend, [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesq/"*filename)
+    unstructured_vtk(p, tend, [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesqTriangles/"*filename)
     #Speichern aller berechneten Zwischenwerte als vtz-Datei:
-    #unstructured_vtk(pv, sort(collect(keys(pv.solution))), [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesq/"*filename)
+    unstructured_vtk(p, sort(collect(keys(p.solution))), [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesqTriangles/"*filename)
 
-    return pv
+    return p
 end

@@ -8,7 +8,18 @@ function unstructured_vtk(p::femProblem, tend::Float64, comp::Array{Symbol,1}, n
 
     Npts=size(pts,2);
 
-    m.meshType==4 ? celltype = VTKCellTypes.VTK_QUAD : celltype = VTKCellTypes.VTK_TRIANGLE;
+    #m.meshType==4 ? celltype = VTKCellTypes.VTK_QUAD : celltype = VTKCellTypes.VTK_TRIANGLE;
+    if m.meshType==4
+        celltype = VTKCellTypes.VTK_QUAD;
+        mx=0.5;
+        my=0.5;
+    elseif m.meshType==3
+        celltype = VTKCellTypes.VTK_TRIANGLE;
+        mx=0.3333333333333333;
+        my=0.3333333333333333;
+    else
+        error("Ungültiger Mesh-Typ")
+    end
     cells = MeshCell[]
     inc=m.topology.incidence["20"];
     off=m.topology.offset["20"];
@@ -19,7 +30,7 @@ function unstructured_vtk(p::femProblem, tend::Float64, comp::Array{Symbol,1}, n
     end
     fComp=Array{Array{Float64},1}(undef, length(comp))
     for l in 1:length(comp)
-        fComp[l]=getElementProperties(p.femType[comp[l]][1],m.meshType,0.5,0.5);
+        fComp[l]=getElementProperties(p.femType[comp[l]][1],m.meshType,mx,my);
     end
     J=Array{Float64,2}(undef,2,2);
     dJ=0.0;
@@ -42,7 +53,7 @@ function unstructured_vtk(p::femProblem, tend::Float64, comp::Array{Symbol,1}, n
             cvtk=zeros(Float64, 2, nf)
             for k in 1:nf
                 cLoc=solc[l2g(p.degFBoundary[p.femType[comp[l]][1]], k)]
-                dJ=jacobi!(J,dJ,m,k,0.5,0.5,coord);
+                dJ=jacobi!(J,dJ,m,k,mx,my,coord);
                 fLoc=(1/dJ)*J*fComp[l]
                 cvtk[:,k]=fLoc*cLoc;
             end
@@ -63,7 +74,19 @@ function unstructured_vtk(p::femProblem, t::Array{Float64,1}, comp::Array{Symbol
 
     Npts=size(pts,2);
 
-    m.meshType==4 ? celltype = VTKCellTypes.VTK_QUAD : celltype = VTKCellTypes.VTK_TRIANGLE;
+    #m.meshType==4 ? celltype = VTKCellTypes.VTK_QUAD : celltype = VTKCellTypes.VTK_TRIANGLE;
+    if m.meshType==4
+        celltype = VTKCellTypes.VTK_QUAD;
+        mx=0.5;
+        my=0.5;
+    elseif m.meshType==3
+        celltype = VTKCellTypes.VTK_TRIANGLE;
+        mx=0.3333333333333333;
+        my=0.3333333333333333;
+    else
+        error("Ungültiger Mesh-Typ")
+    end
+
     cells = MeshCell[]
     inc=m.topology.incidence["20"];
     off=m.topology.offset["20"];
@@ -75,7 +98,7 @@ function unstructured_vtk(p::femProblem, t::Array{Float64,1}, comp::Array{Symbol
 
     fComp=Array{Array{Float64},1}(undef, length(comp))
     for l in 1:length(comp)
-        fComp[l]=getElementProperties(p.femType[comp[l]][1],m.meshType,0.5,0.5);
+        fComp[l]=getElementProperties(p.femType[comp[l]][1],m.meshType,mx,my);
     end
     J=Array{Float64,2}(undef,2,2);
     dJ=0.0;
@@ -100,7 +123,7 @@ function unstructured_vtk(p::femProblem, t::Array{Float64,1}, comp::Array{Symbol
                     cvtk=zeros(Float64, 2, nf)
                     for k in 1:nf
                         cLoc=solc[l2g(p.degFBoundary[p.femType[comp[l]][1]], k)]
-                        dJ=jacobi!(J,dJ,m,k,0.5,0.5,coord);
+                        dJ=jacobi!(J,dJ,m,k,mx,my,coord);
                         fLoc=(1/dJ)*J*fComp[l]
                         cvtk[:,k]=fLoc*cLoc;
                     end

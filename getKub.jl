@@ -76,50 +76,43 @@ function getKub(g::Int64, mt::Int64)
         sx=(x[2]+x[1])/2;
         sy=(y[2]+y[1])/2;
 
-        kubpoints=Array{Float64,2}(undef,2,n);
+        kubPoints=Array{Float64,2}(undef,2,n);
         for k in 1:n
-            kubpoints[1,k]=hx*gdots[k]+sx;
-            kubpoints[2,k]=hy*gdots[k]+sy;
+            kubPoints[1,k]=hx*gdots[k]+sx;
+            kubPoints[2,k]=hy*gdots[k]+sy;
         end
 
-        return kubpoints, hx*hy*W
+        return kubPoints, hx*hy*W
     elseif mt==3
-        vert=[0.0 0.0; 1.0 0.0; 0.0 1.0];
-        a=(vert[2,1]-vert[1,1])*(vert[3,2]-vert[1,2])-(vert[3,1]-vert[1,1])*(vert[2,2]-vert[1,2]);
-        L=Array{Float64,2};
-        w=Array{Float64,2};
+        if g<3
+            n=3;
+        elseif g>=3
+            n=7;
+        end
+        kubPoints=Array{Float64,2}(undef,2,n);
+        W=Array{Float64,1};
 
         if g<=2
-            L=[0.5 0.5 0; 0 0.5 0.5; 0.5 0 0.5];
-            w=[1/6 1/6 1/6];
-        elseif g<=5
-            L=[1/3 1/3 1/3;
-               0.79742699 0.10128651 0.10128651;
-               0.10128651 0.79742699 0.10128651;
-               0.10128651 0.10128651 0.79742699;
-               0.47014206 0.47014206 0.05961587;
-               0.05961587 0.47014206 0.47014206;
-               0.47014206 0.05961587 0.47014206];
-            w=1/2*[0.225 0.12593918 0.12593918 0.12593918 0.13239415 0.13239415 0.13239415];
-        elseif g>5
-            @warn "Der eingegebene Genauigkeitsgrad ist nicht erreichbar. Dies ist eine Approximation vom Genauigkeitsgrad 5."
-            L=[1/3 1/3 1/3;
-               0.79742699 0.10128651 0.10128651;
-               0.10128651 0.79742699 0.10128651;
-               0.10128651 0.10128651 0.79742699;
-               0.47014206 0.47014206 0.05961587;
-               0.05961587 0.47014206 0.47014206;
-               0.47014206 0.05961587 0.47014206];
-            w=1/2*[0.225 0.12593918 0.12593918 0.12593918 0.13239415 0.13239415 0.13239415];
+            kubPoints=[0.5 0.5 0.0;
+                       0.0 0.5 0.5];
 
+            W=[0.16666666666666666 0.16666666666666666 0.16666666666666666];
+        elseif g>2
+            kubPoints=[0.0 1.0 0.0 0.5 0.5 0.0 0.3333333333333333;
+                       0.0 0.0 1.0 0.0 0.5 0.5 0.3333333333333333];
+
+            a=0.06666666666666667;
+            W=[0.025 0.025 0.025 a a a 0.225]
+
+        elseif g>3
+            @warn "Der eingegebene Genauigkeitsgrad ist nicht erreichbar. Dies ist eine Approximation vom Genauigkeitsgrad 3."
+            kubPoints=[0.0 1.0 0.0 0.5 0.5 0.0 0.3333333333333333;
+                       0.0 0.0 1.0 0.0 0.5 0.5 0.3333333333333333];
+
+           a=0.06666666666666667;
+           W=[0.025, 0.025, 0.025, a, a, a, 0.225]
         end
 
-        kubpoints=Array{Float64,2}(undef,2,length(w));
-        for k in 1:length(w)
-            kubpoints[1,k]=sum(L[k,:].*vert[:,1]);
-            kubpoints[2,k]=sum(L[k,:].*vert[:,2]);
-        end
-        
-        return kubpoints, a*w;
+        return kubPoints, W;
     end
 end

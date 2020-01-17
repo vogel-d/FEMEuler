@@ -19,7 +19,7 @@ function jacobi!(J::Array{Array{Float64,2},2},dJ::Array{Float64,2},m::mesh, fid:
     if mt==3
         a=coord[:,2]-coord[:,1];
         b=coord[:,3]-coord[:,1];
-        one=ones(sk,sk);
+        one=ones(1,sk);
         dJ=abs(a[1]*b[2]-b[1]*a[2])*one;
         J[1,1]=a[1]*one;
         J[1,2]=b[1]*one;
@@ -56,17 +56,16 @@ function jacobi!(J::Array{Float64,2},dJ::Float64,m::mesh, fid::Int64, x::Float64
     if mt==3
         a=coord[:,2]-coord[:,1];
         b=coord[:,3]-coord[:,1];
-        one=ones(sk,sk);
-        dJ=abs(a[1]*b[2]-b[1]*a[2])*one;
-        J[1,1]=a[1]*one;
-        J[1,2]=b[1]*one;
-        J[2,1]=a[2]*one;
-        J[2,2]=b[2]*one;
+        dJ=abs(a[1]*b[2]-b[1]*a[2]);
+        J[1,1]=a[1];
+        J[1,2]=b[1];
+        J[2,1]=a[2];
+        J[2,2]=b[2];
     elseif mt==4
-        J[1,1]=(coord[1,2]-coord[1,1])+(coord[1,3]-coord[1,4]-coord[1,2]+coord[1,1])*0.5;
-        J[2,1]=(coord[2,2]-coord[2,1])+(coord[2,3]-coord[2,4]-coord[2,2]+coord[2,1])*0.5;
-        J[1,2]=(coord[1,4]-coord[1,1])+(coord[1,3]-coord[1,4]-coord[1,2]+coord[1,1])*0.5;
-        J[2,2]=(coord[2,4]-coord[2,1])+(coord[2,3]-coord[2,4]-coord[2,2]+coord[2,1])*0.5;
+        J[1,1]=(coord[1,2]-coord[1,1])+(coord[1,3]-coord[1,4]-coord[1,2]+coord[1,1])*x;
+        J[2,1]=(coord[2,2]-coord[2,1])+(coord[2,3]-coord[2,4]-coord[2,2]+coord[2,1])*x;
+        J[1,2]=(coord[1,4]-coord[1,1])+(coord[1,3]-coord[1,4]-coord[1,2]+coord[1,1])*y;
+        J[2,2]=(coord[2,4]-coord[2,1])+(coord[2,3]-coord[2,4]-coord[2,2]+coord[2,1])*y;
         dJ=abs(J[1,1]*J[2,2]-J[2,1]*J[1,2]);
     end
     return dJ;
@@ -89,12 +88,27 @@ function jacobi!(J::Array{Array{Float64,2},2},ddJ::Array{Float64,2},jphi::Array{
     if mt==3
         a=coord[:,2]-coord[:,1];
         b=coord[:,3]-coord[:,1];
+        one=ones(1,sk);
+        dJ=(1/abs(a[1]*b[2]-b[1]*a[2]))*one;
+        J[1,1]=a[1]*one;
+        J[1,2]=b[1]*one;
+        J[2,1]=a[2]*one;
+        J[2,2]=b[2]*one;
+        #= alt
         one=ones(sk,sk);
         ddJ=1/abs(a[1]*b[2]-b[1]*a[2])*one;
         J[1,1]=a[1]*one;
         J[1,2]=b[1]*one;
         J[2,1]=a[2]*one;
         J[2,2]=b[2]*one;
+        =#
+
+        for i=1:sk
+            for k in 1:size(phi,2)
+                jphi[1,k][1,i]=(J[1,1][1,i]*phi[1,k][1,i]+J[1,2][1,i]*phi[2,k][1,i]);
+                jphi[2,k][1,i]=(J[2,1][1,i]*phi[1,k][1,i]+J[2,2][1,i]*phi[2,k][1,i]);
+            end
+        end
     elseif mt==4
         #J[1,1]=Array{Float64,2}(undef,sk,sk);
         #J[1,2]=Array{Float64,2}(undef,sk,sk);
@@ -112,7 +126,6 @@ function jacobi!(J::Array{Array{Float64,2},2},ddJ::Array{Float64,2},jphi::Array{
             end
         end
     end
-
     return nothing;
 end
 
