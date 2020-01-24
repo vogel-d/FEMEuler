@@ -5,8 +5,8 @@ mutable struct femProblem
     femType::Dict{Symbol, Array{Symbol,1}};
     edgeData::Array{Array{Int,1},1};
     solution::Dict{AbstractFloat, solution};
-    massM::Dict{Symbol, SuiteSparse.UMFPACK.UmfpackLU{AbstractFloat,Int}};
-    massMBoundary::Dict{Symbol, SuiteSparse.UMFPACK.UmfpackLU{AbstractFloat,Int}};
+    massM::Dict{Symbol, SuiteSparse.UMFPACK.UmfpackLU{Float64,Int}};
+    massMBoundary::Dict{Symbol, SuiteSparse.UMFPACK.UmfpackLU{Float64,Int}};
     stiffM::Dict{Symbol, SparseMatrixCSC{AbstractFloat,Int}};
     type::Symbol;
     kubWeights::Array{AbstractFloat,2};

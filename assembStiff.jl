@@ -5,7 +5,7 @@ function assembStiff!(p::femProblem)
         bkey=p.femType[:b][1];
         vkey=p.femType[:v][1];
 
-        z=[0.0, 1.0];
+        z=AbstractFloat[0.0, 1.0];
 
         Spv=assembStiff(degF[pkey], degF[vkey], p.mesh.topology.size[3], p.kubWeights);
         Svp = copy(-Spv');
@@ -23,7 +23,7 @@ function assembStiff!(p::femProblem)
         vkey=p.femType[:rhoV][1];
         pkey=p.femType[:p][1];
 
-        z=[0.0, 1.0];
+        z=AbstractFloat[0.0, 1.0];
 
         Spv=assembStiff(degF[pkey], degF[vkey], p.mesh.topology.size[3], p.kubWeights);
         Svp = copy(-Spv');

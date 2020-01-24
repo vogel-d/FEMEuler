@@ -25,7 +25,7 @@ end
 function assembMass(degF::degF{1}, m::mesh, kubPoints::Array{AbstractFloat,2}, kubWeights::Array{AbstractFloat,2})
     rows=Int[];
     cols=Int[];
-    vals=AbstractFloat[];
+    vals=Float64[];
     phiRef=degF.phi;
     iter=length(phiRef);
     sk=size(kubWeights)
@@ -58,7 +58,7 @@ end
 function assembMass(degF::degF{2}, m::mesh, kubPoints::Array{AbstractFloat,2}, kubWeights::Array{AbstractFloat,2})
     rows=Int[];
     cols=Int[];
-    vals=AbstractFloat[];
+    vals=Float64[];
     phiRef=degF.phi;
     iter=size(phiRef,2);
     sk=size(kubWeights)
