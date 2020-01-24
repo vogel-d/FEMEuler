@@ -35,7 +35,7 @@ function assembMass(degF::degF{1}, m::mesh, kubPoints::Array{Float64,2}, kubWeig
     phiRef=degF.phi;
     iter=length(phiRef);
     sk=size(kubWeights)
-    J=initPhi((2,2),sk);
+    J=initJacobi((2,2),sk);
     dJ=Array{Float64,2}(undef,sk);
     coord=Array{Float64,2}(undef,2,m.meshType);
     for k in 1:m.topology.size[m.topology.D+1]
@@ -68,9 +68,9 @@ function assembMass(degF::degF{2}, m::mesh, kubPoints::Array{Float64,2}, kubWeig
     phiRef=degF.phi;
     iter=size(phiRef,2);
     sk=size(kubWeights)
-    J=initPhi((2,2),sk);
+    J=initJacobi((2,2),sk);
     ddJ=Array{Float64,2}(undef,sk);
-    jphiRef=initPhi(size(phiRef),sk);
+    jphiRef=initJacobi(size(phiRef),sk);
     coord=Array{Float64,2}(undef,2,m.meshType);
     for k in 1:m.topology.size[m.topology.D+1]
         jacobi!(J,ddJ,jphiRef,m,k,kubPoints, phiRef,coord);

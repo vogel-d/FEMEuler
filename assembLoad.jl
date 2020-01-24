@@ -2,7 +2,7 @@ function assembLoad(degF::degF{1}, f, m::mesh, kubPoints::Array{Float64,2}, kubW
     phiT=degF.phi;
     sk=size(kubWeights);
 
-    J=initPhi((2,2),sk);
+    J=initJacobi((2,2),sk);
     dJ=Array{Float64,2}(undef,sk);
     jcoord=Array{Float64,2}(undef,2,m.meshType);
     gb=zeros(degF.numB)
@@ -34,9 +34,9 @@ function assembLoad(degF::degF{2}, f, m::mesh, kubPoints::Array{Float64,2}, kubW
     phiT=degF.phi;
     sk=size(kubWeights);
 
-    J=initPhi((2,2),sk);
+    J=initJacobi((2,2),sk);
     ddJ=Array{Float64,2}(undef,sk);
-    jphiT=initPhi(size(phiT),sk);
+    jphiT=initJacobi(size(phiT),sk);
     jcoord=Array{Float64,2}(undef,2,m.meshType);
     gb=zeros(degF.numB);
 

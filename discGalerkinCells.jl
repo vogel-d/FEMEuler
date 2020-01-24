@@ -117,7 +117,7 @@ function discGalerkinCells!(M::Array{Float64,2},
     sk=size(kubWeights);
 
     ddJ=Array{Float64,2}(undef,sk);
-    jphiT=initPhi(size(phiT),sk);
+    jphiT=initJacobi(size(phiT),sk);
 
     w1=zeros(sk);
     w2=zeros(sk);

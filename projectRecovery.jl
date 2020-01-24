@@ -4,7 +4,7 @@ function projectRecovery(degFH::degF{1},degF::degF{1},cval::Array{Float64,1},mas
     sph=length(phiH)
     sk=size(kubWeights);
 
-    J=initPhi((2,2),sk);
+    J=initJacobi((2,2),sk);
     dJ=Array{Float64,2}(undef,sk);
     coord=Array{Float64,2}(undef,2,m.meshType);
 
@@ -42,10 +42,10 @@ function projectRecovery(degFH::degF{2},degF::degF{2},cval::Array{Float64,1},mas
     sph=size(phiH,2);
     sk=size(kubWeights);
 
-    J=initPhi((2,2),sk);
+    J=initJacobi((2,2),sk);
     ddJ=Array{Float64,2}(undef,sk);
-    jphi=initPhi(size(phi),sk);
-    jphiH=initPhi(size(phiH),sk);
+    jphi=initJacobi(size(phi),sk);
+    jphiH=initJacobi(size(phiH),sk);
     coord=Array{Float64,2}(undef,2,m.meshType);
 
     cl1=zeros(sk);
