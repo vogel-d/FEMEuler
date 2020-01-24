@@ -4,5 +4,5 @@ function saveProblem(p::femProblem, filename::String)
     return nothing;
 end
 function loadProblem(filename::String)
-    return load((@__DIR__)*"/VTK/"*filename*".jld")["femProblem"];
+    return load((@__DIR__)*"/JLD/"*filename*".jld")["femProblem"];
 end

@@ -6,6 +6,15 @@ function splitExplicit(p::femProblem, gamma::Float64,Vfcomp::Symbol,
   Y=Array{solution,1}(undef,stage+1);
   FY=Array{solution,1}(undef,stage);
 
+  numV=p.degFBoundary[p.femType[:v][1]].num
+  numP=p.degFBoundary[p.femType[:p][1]].num
+  numB=p.degFBoundary[p.femType[:b][1]].num
+
+  velOld=Array{Float64,1}(undef,numV)
+  vS=Array{Float64,1}(undef,numV)
+  pS=Array{Float64,1}(undef,numP)
+  bS=Array{Float64,1}(undef,numB)
+
   for i in 1:(stage+1)
     Y[i]=y0;
   end
@@ -26,11 +35,11 @@ function splitExplicit(p::femProblem, gamma::Float64,Vfcomp::Symbol,
     dtLoc=dt*MIS.d[i+1];
     dtauLoc=dtLoc/nsLoc;
 
-    Y[i+1].p[p.degFBoundary[p.femType[:p][1]].num+1:end]=y0.p[p.degFBoundary[p.femType[:p][1]].num+1:end];
-    Y[i+1].b[p.degFBoundary[p.femType[:b][1]].num+1:end]=y0.b[p.degFBoundary[p.femType[:b][1]].num+1:end];
-    Y[i+1].v[p.degFBoundary[p.femType[:v][1]].num+1:end]=y0.v[p.degFBoundary[p.femType[:v][1]].num+1:end];
+    Y[i+1].p[numP+1:end]=y0.p[numP+1:end];
+    Y[i+1].b[numB+1:end]=y0.b[numB+1:end];
+    Y[i+1].v[numV+1:end]=y0.v[numV+1:end];
 
-    symplektischerEuler!(Y[i+1],p,fSlow,nsLoc,dtauLoc);
+    symplektischerEuler!(Y[i+1],p,fSlow,nsLoc,dtauLoc,velOld,vS,pS,bS);
   end
 
   return Y[stage+1];
