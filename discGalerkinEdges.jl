@@ -203,15 +203,15 @@ function discGalerkinEdges!(M::Array{Float64,2},
     nF=size(phiF,2);
     sk=length(quadWeights)
 
-    J1=initPhi((2,2),sk);
+    J1=initJacobi((2,2),sk);
     ddJ1=Array{Float64,1}(undef,sk);
-    jphiWn1=initPhi(size(phiW),sk)
-    jphiTn1=initPhi(size(phiT),sk)
+    jphiWn1=initJacobi(size(phiW),sk)
+    jphiTn1=initJacobi(size(phiT),sk)
 
-    J2=initPhi((2,2),sk);
+    J2=initJacobi((2,2),sk);
     ddJ2=Array{Float64,1}(undef,sk);
-    jphiWn2=initPhi(size(phiW),sk)
-    jphiTn2=initPhi(size(phiT),sk);
+    jphiWn2=initJacobi(size(phiW),sk)
+    jphiTn2=initJacobi(size(phiT),sk);
 
     w11=zeros(sk);
     w12=zeros(sk);

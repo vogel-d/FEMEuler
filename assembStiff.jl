@@ -101,9 +101,9 @@ function assembStiff(degFs::degF{1}, degFv::degF{2}, z::Array{Float64,1}, m::mes
 
     sk=size(kubWeights)
 
-    J=initPhi((2,2),sk);
+    J=initJacobi((2,2),sk);
     ddJ=Array{Float64,2}(undef,sk);
-    jphiF=initPhi(size(phiF),sk);
+    jphiF=initJacobi(size(phiF),sk);
     coord=Array{Float64,2}(undef,2,m.meshType);
 
     lS=zeros(length(phiT), size(phiF,2));
@@ -153,7 +153,7 @@ function assembStiff!(p::femProblem, comp::Symbol)
     kubWeights=p.kubWeights;
     sk=size(kubWeights)
 
-    J=initPhi((2,2),sk);
+    J=initJacobi((2,2),sk);
     dJ=Array{Float64,2}(undef,sk);
     coord=Array{Float64,2}(undef,2,m.meshType);
 

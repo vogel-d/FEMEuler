@@ -5,7 +5,7 @@ function assembMassRho(degF::degF{1}, degFRho::degF{1}, valRho::Array{Float64,1}
     iter=length(phi);
     n=degF.numB;
 
-    J=initPhi((2,2),sk);
+    J=initJacobi((2,2),sk);
     dJ=Array{Float64,2}(undef,sk);
     coord=Array{Float64,2}(undef,2,m.meshType);
 
@@ -53,9 +53,9 @@ function assembMassRho(degF::degF{2}, degFRho::degF{1}, valRho::Array{Float64,1}
     iter=size(phi,2);
     n=degF.numB;
 
-    J=initPhi((2,2),sk);
+    J=initJacobi((2,2),sk);
     ddJ=Array{Float64,2}(undef,sk);
-    jphi=initPhi(size(phi),sk);
+    jphi=initJacobi(size(phi),sk);
     coord=Array{Float64,2}(undef,2,m.meshType);
 
     globalNum=Array{Int64,1}(undef,size(phi,2));
