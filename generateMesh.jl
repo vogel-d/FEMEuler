@@ -148,17 +148,12 @@ function generateTriMesh(nx::Int64, ny::Int64, condEW::Symbol, condTB::Symbol, x
     coord=Array{Float64}(undef,2,size[1]);
     ax=(xr-xl)/nx;
     ay=(yr-yl)/ny;
-    zx=xl;
-    zy=yl;
     z=1;
     for k in 1:(ny+1)
         for l in 1:(nx+1)
-            coord[:,z]=[zx, zy];
-            zx+=ax;
+            coord[:,z]=[xl+(l-1)*ax,yl+(k-1)*ay]
             z+=1;
         end
-        zx=xl;
-        zy+=ay; #Evtl. hier um Zacken am Rand o.ä. zu bewirken if isodd(k) zy+=0.5*ay else zy+=ay end
     end
 
     #Berechnen der Inzidenz 2->0
@@ -205,6 +200,7 @@ function generateTriMesh(nx::Int64, ny::Int64, condEW::Symbol, condTB::Symbol, x
     #Initialisieren der Inzidenz mit den Einträgen "20" und "10"
     inc=Dict("20"=>incf,"10"=>ince);
 
+
     corners=Set{Int}();
     bE=spzeros(Int, size[2]);
     bV=spzeros(Int, size[1]);
@@ -214,8 +210,10 @@ function generateTriMesh(nx::Int64, ny::Int64, condEW::Symbol, condTB::Symbol, x
             push!(corners,i);
             if condEW==:constant && condTB==:constant
                 bV[i]=1;
-            elseif condEW==:periodic && condTB==:periodic && !(coord[1,i]==xl && coord[2,i]==yl)
-                bV[i]=-1;
+            elseif condEW==:periodic && condTB==:periodic
+                if !(coord[1,i]==xl && coord[2,i]==yl)
+                    bV[i]=-1;
+                end
             elseif condEW==:periodic && coord[1,i]==xl
                 bV[i]=-i-nx;
             elseif condTB==:periodic && coord[2,i]==yl
@@ -246,7 +244,9 @@ function generateTriMesh(nx::Int64, ny::Int64, condEW::Symbol, condTB::Symbol, x
             if b2==b1==1
                 bE[i]=1;
             elseif (b1==1 && b2<=0) || (b1<=0 && b2==1)
-                bE[i]=1;
+                if !(coord[1,v1]!=coord[1,v2] && coord[2,v1]!=coord[2,v2])
+                    bE[i]=1;
+                end
             elseif b1<0 && b2<0
                 if coord[1,v1]==coord[1,v2]
                     bE[i]=-i-nx;
