@@ -1,7 +1,7 @@
 include("modulesCE.jl")
 
 function testColdMountainBubble()
-    filename = "coldMountainBubble";
+    filename = "coldMountainBubbleFlat";
 
     #order: comp, compHigh, compRec, compDG
     femType=Dict(:rho=>[:DG0, :P1, :DG1, :DG0],
@@ -18,7 +18,7 @@ function testColdMountainBubble()
     m=generateRectMesh(128,32,:periodic,:constant,-25600.0,25600.0,0.0,6400.0); #(east/west, top/bottom)
     p=femProblem(m, femType, t=:compressible, advection=advection, taskRecovery=taskRecovery);
 
-    adaptGeometry!(m,640.0,25600.0); #witch of agnesi with Gall-Chen and Sommerville transformation
+    adaptGeometry!(m,320.0,6400.0); #witch of agnesi with Gall-Chen and Sommerville transformation
 
     gamma=0.5; #upwind
     UMax=0.0; #UMax determines the advection in x direction
@@ -27,17 +27,17 @@ function testColdMountainBubble()
     dt=1.0;
     ns=6;
     EndTime=900.0;
-    nIter=Int64(EndTime/dt)
+    nIter=Int(EndTime/dt)
 
     #start functions
-    xCM=0.0; zCM=3640.0;
+    xCM=0.0; zCM=33200.0;
     xCR=4000.0; zCR=2000.0;
     r0=2000.0; th0=300.0; p0=100000.0;
     DeltaTh1=-15;
     Grav=9.81;
     Cpd=1004.0; Cvd=717.0; Cpv=1885.0;
     Rd=Cpd-Cvd; Gamma=Cpd/Cvd; kappa=Rd/Cpd;
-    function frho(x::Float64,z::Float64)
+    function frho(x::AbstractFloat,z::AbstractFloat)
         TLoc=th0-z/Cpd*Grav;
         pLoc=p0*(TLoc/th0)^(Cpd/Rd);
         Rad=sqrt(((x-xCM)/xCR)^2+((z-zCM)/zCR)^2);
@@ -46,7 +46,7 @@ function testColdMountainBubble()
         end
         return pLoc/(Rd*TLoc);
     end
-    function ftheta(x::Float64,z::Float64)
+    function ftheta(x::AbstractFloat,z::AbstractFloat)
         TLoc=th0-z/Cpd*Grav;
         pLoc=p0*(TLoc/th0)^(Cpd/Rd);
         Rad=sqrt(((x-xCM)/xCR)^2+((z-zCM)/zCR)^2);
@@ -55,8 +55,8 @@ function testColdMountainBubble()
         end
         return TLoc*(p0/pLoc)^(Rd/Cpd);
     end
-    fv1(x::Float64, y::Float64)=UMax;
-    fv2(x::Float64, y::Float64)=0.0;
+    fv1(x::AbstractFloat, y::AbstractFloat)=UMax;
+    fv2(x::AbstractFloat, y::AbstractFloat)=0.0;
     fvel=[fv1, fv2];
     f=Dict(:rho=>frho,:theta=>ftheta,:v=>fvel);
 
@@ -83,7 +83,7 @@ function testColdMountainBubble()
     y=p.solution[0.0];
     Y=Array{solution,1}(undef,MISMethod.nStage+1);
     FY=Array{solution,1}(undef,MISMethod.nStage);
-    SthY=Array{SparseMatrixCSC{Float64,Int64},1}(undef,MISMethod.nStage);
+    SthY=Array{SparseMatrixCSC{AbstractFloat,Int},1}(undef,MISMethod.nStage);
     Time=0.0;
     for i=1:nIter
       y=splitExplicit(y,Y,FY,SthY,p,gamma,nquadPhi,nquadPoints,MrT,MrV,MISMethod,Time,dt,ns);
@@ -92,7 +92,7 @@ function testColdMountainBubble()
       p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
 
-      if mod(i,50)==0
+      if mod(i,50)==0 || Time==271.0
         p2=deepcopy(p);
         unstructured_vtk(p2, maximum(collect(keys(p2.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
       end

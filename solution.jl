@@ -1,5 +1,5 @@
 macro solution(fieldname...)
-           fields = [:($(Symbol(fieldname[i]))::Array{Float64,1}) for i=1:length(fieldname)]
+           fields = [:($(Symbol(fieldname[i]))::Array{AbstractFloat,1}) for i=1:length(fieldname)]
 
            if isdefined(Main,:solution)
              if sort(collect(fieldname))!=sort(collect(fieldnames(solution)))
@@ -15,7 +15,7 @@ macro solution(fieldname...)
                    solution()=new()
                end
 
-               function createSolution(n::Int64...)
+               function createSolution(n::Int...)
                  s=solution();
                  k=fieldnames(solution);
                  length(k)!=length(n) && error("Die Anzahl der eingegebenen Längen müssen mit der Anzahl der Komponenten von solution übereinstimmen!")
@@ -25,7 +25,7 @@ macro solution(fieldname...)
                  return s;
                end
 
-               function createSolution(v::Array{Float64,1}...)
+               function createSolution(v::Array{AbstractFloat,1}...)
                    s=solution();
                    k=fieldnames(solution);
                    length(k)!=length(v) && error("Die Anzahl der eingegebenen Matrizen müssen mit der Anzahl der Komponenten von solution übereinstimmen!")
@@ -58,7 +58,7 @@ macro solution(fieldname...)
                end
 
                import Base.*
-               function *(val::Float64, s::solution)
+               function *(val::AbstractFloat, s::solution)
                  r=solution();
                  k=fieldnames(solution);
                  for i in 1:length(k)

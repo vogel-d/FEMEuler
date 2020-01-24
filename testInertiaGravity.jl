@@ -40,27 +40,27 @@ function testInertiaGravity()
     H=10000;
     a=5000;
     xC=150000;
-    function frho(x::Float64,z::Float64)
+    function frho(x::AbstractFloat,z::AbstractFloat)
         S=N*N/Grav
         ThLoc=th0*exp(S*z)+DeltaTh1*sin(pi*z/H)/(1.0+((x-xC)/a)^2);
         pLoc=p0*(1.0-Grav/(Cpd*th0*S)*(1.0-exp(-S*z)))^(Cpd/Rd)
         return pLoc/((pLoc/p0)^kappa*Rd*ThLoc);
     end
-    function frhoBar(x::Float64,z::Float64)
+    function frhoBar(x::AbstractFloat,z::AbstractFloat)
         S=N*N/Grav
         ThLoc=th0*exp(S*z)
         pLoc=p0*(1.0-Grav/(Cpd*th0*S)*(1.0-exp(-S*z)))^(Cpd/Rd)
         return pLoc/((pLoc/p0)^kappa*Rd*ThLoc);
     end
-    function fpBar(x::Float64,z::Float64)
+    function fpBar(x::AbstractFloat,z::AbstractFloat)
         S=N*N/Grav
         return p0*(1.0-Grav/(Cpd*th0*S)*(1.0-exp(-S*z)))^(Cpd/Rd)
     end
-    function fthBar(x::Float64,z::Float64)
+    function fthBar(x::AbstractFloat,z::AbstractFloat)
         S=N*N/Grav
         return th0*exp(S*z)
     end
-    function ftheta(x::Float64,z::Float64)
+    function ftheta(x::AbstractFloat,z::AbstractFloat)
         S=N*N/Grav
         return th0*exp(S*z)+DeltaTh1*sin(pi*z/H)/(1.0+((x-xC)/a)^2);
     end
@@ -93,7 +93,7 @@ function testInertiaGravity()
     y=p.solution[0.0];
     Y=Array{solution,1}(undef,MISMethod.nStage+1);
     FY=Array{solution,1}(undef,MISMethod.nStage);
-    SthY=Array{SparseMatrixCSC{Float64,Int64},1}(undef,MISMethod.nStage);
+    SthY=Array{SparseMatrixCSC{AbstractFloat,Int},1}(undef,MISMethod.nStage);
     Time=0.0;
     for i=1:nIter
       @time y=splitExplicit(y,Y,FY,SthY,p,gamma,nquadPhi,nquadPoints,MrT,MrV,MISMethod,Time,dt,ns);

@@ -1,16 +1,16 @@
-function projectPressure(degFP::degF{1},massMP::SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64},
-                        degFRT::degF{1},valRT::Array{Float64,1},
-                        m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
+function projectPressure(degFP::degF{1},massMP::SuiteSparse.UMFPACK.UmfpackLU{AbstractFloat,Int},
+                        degFRT::degF{1},valRT::Array{AbstractFloat,1},
+                        m::mesh, kubPoints::Array{AbstractFloat,2}, kubWeights::Array{AbstractFloat,2})
     phiRT=@views degFRT.phi;
     phiP=@views degFP.phi;
     sk=size(kubWeights);
 
-    J=initPhi((2,2),sk);
-    dJ=Array{Float64,2}(undef,sk);
-    coord=Array{Float64,2}(undef,2,m.meshType);
+    J=initJacobi((2,2),sk);
+    dJ=Array{AbstractFloat,2}(undef,sk);
+    coord=Array{AbstractFloat,2}(undef,2,m.meshType);
 
-    globalNumRT=Array{Int64,1}(undef,length(phiRT));
-    globalNumP=Array{Int64,1}(undef,length(phiP));
+    globalNumRT=Array{Int,1}(undef,length(phiRT));
+    globalNumP=Array{Int,1}(undef,length(phiP));
 
     Cpd=1004.0;
     Rd=Cpd-717.0; kappa=Rd/Cpd;

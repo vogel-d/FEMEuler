@@ -1,4 +1,4 @@
-function getEdgeType(n::Array{Float64,1})
+function getEdgeType(n::Array{AbstractFloat,1})
     if n==[0.0,-1.0]
         edgeType=1;
     elseif n==[-1.0,0.0]
@@ -12,6 +12,6 @@ function getEdgeType(n::Array{Float64,1})
     else
         error("Kein zulässiger Normalenvektor!");
     end
-    
+
     return edgeType
 end

@@ -1,4 +1,4 @@
-function adaptGeometry!(m::mesh,hm::Float64,a::Float64)
+function adaptGeometry!(m::mesh,hm::AbstractFloat,a::AbstractFloat)
     H=m.geometry.r[2];
     h(x)=(hm*a^2)/(x^2+a^2); #Witch of Agnesi
     coord=m.geometry.coordinates;
@@ -12,12 +12,12 @@ function adaptGeometry!(m::mesh,hm::Float64,a::Float64)
     return nothing;
 end
 
-function adaptGeometry!(m::mesh,vid::Array{Int64,1},c::Array{Float64,2})
+function adaptGeometry!(m::mesh,vid::Array{Int,1},c::Array{AbstractFloat,2})
     m.geometry.coordinates[:,vid]=c;
     return nothing;
 end
 
-function adaptGeometry!(m::mesh,r::Float64,adaptBoundary::Bool=false)
+function adaptGeometry!(m::mesh,r::AbstractFloat,adaptBoundary::Bool=false)
     coord=m.geometry.coordinates;
     xR=m.geometry.r[1]; xL=m.geometry.l[1]; yR=m.geometry.r[2]; yL=m.geometry.l[2]
     if adaptBoundary
@@ -39,7 +39,7 @@ function adaptGeometry!(m::mesh,r::Float64,adaptBoundary::Bool=false)
     return nothing;
 end
 
-function adaptGeometry!(m::mesh,pert::Tuple{Float64,Float64},adaptBoundary::Bool=false)
+function adaptGeometry!(m::mesh,pert::Tuple{AbstractFloat,AbstractFloat},adaptBoundary::Bool=false)
     coord=m.geometry.coordinates;
     xR=m.geometry.r[1]; xL=m.geometry.l[1]; yR=m.geometry.r[2]; yL=m.geometry.l[2]
     dx=(xR-xL)/m.topology.n[1];

@@ -9,7 +9,7 @@ function testBoussinesqAdvection()
   #Vfcomp=:RT0
   Vfcomp=:RT1
 
-  taskRecovery=true;
+  taskRecovery=false;
 
   m=generateRectMesh(300,10,:periodic,:constant,0.0,300000.0,0.0,10000.0); #(east/west, top/bottom)
   #adaptGeometry!(m,(0.3,0.3),false); #sin perbutation
@@ -25,7 +25,7 @@ function testBoussinesqAdvection()
   ns=19;
   EndTime=3000.0;
   #EndTime=60*dt;
-  nIter=Int64(EndTime/dt);
+  nIter=Int(EndTime/dt);
 
   #start function
   xR=m.geometry.r[1]; xL=m.geometry.l[1]; yR=m.geometry.r[2]; yL=m.geometry.l[2]

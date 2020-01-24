@@ -24,7 +24,7 @@ include("femProblem.jl");
 
 include("l2g.jl")
 include("jacobi.jl");
-include("initPhi.jl")
+include("initJacobi.jl")
 include("adaptGeometry.jl")
 include("additionalFunctions.jl")
 

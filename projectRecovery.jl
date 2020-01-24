@@ -1,17 +1,17 @@
-function projectRecovery(degFH::degF{1},degF::degF{1},cval::Array{Float64,1},massMH::SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64},m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
+function projectRecovery(degFH::degF{1},degF::degF{1},cval::Array{AbstractFloat,1},massMH::SuiteSparse.UMFPACK.UmfpackLU{AbstractFloat,Int},m::mesh, kubPoints::Array{AbstractFloat,2}, kubWeights::Array{AbstractFloat,2})
     phi=@views degF.phi;
     phiH=@views degFH.phi;
     sph=length(phiH)
     sk=size(kubWeights);
 
-    J=initPhi((2,2),sk);
-    dJ=Array{Float64,2}(undef,sk);
-    coord=Array{Float64,2}(undef,2,m.meshType);
+    J=initJacobi((2,2),sk);
+    dJ=Array{AbstractFloat,2}(undef,sk);
+    coord=Array{AbstractFloat,2}(undef,2,m.meshType);
 
     cl=zeros(sk);
 
-    globalNum=Array{Int64,1}(undef,length(phi));
-    globalNumH=Array{Int64,1}(undef,length(phiH));
+    globalNum=Array{Int,1}(undef,length(phi));
+    globalNumH=Array{Int,1}(undef,length(phiH));
 
     gbh=zeros(degFH.numB)
     for k in 1:m.topology.size[m.topology.D+1]
@@ -36,23 +36,23 @@ function projectRecovery(degFH::degF{1},degF::degF{1},cval::Array{Float64,1},mas
     return massMH\gbh;
 end
 
-function projectRecovery(degFH::degF{2},degF::degF{2},cval::Array{Float64,1},massMH::SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64},m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
+function projectRecovery(degFH::degF{2},degF::degF{2},cval::Array{AbstractFloat,1},massMH::SuiteSparse.UMFPACK.UmfpackLU{AbstractFloat,Int},m::mesh, kubPoints::Array{AbstractFloat,2}, kubWeights::Array{AbstractFloat,2})
     phi=@views degF.phi;
     phiH=@views degFH.phi;
     sph=size(phiH,2);
     sk=size(kubWeights);
 
-    J=initPhi((2,2),sk);
-    ddJ=Array{Float64,2}(undef,sk);
-    jphi=initPhi(size(phi),sk);
-    jphiH=initPhi(size(phiH),sk);
-    coord=Array{Float64,2}(undef,2,m.meshType);
+    J=initJacobi((2,2),sk);
+    ddJ=Array{AbstractFloat,2}(undef,sk);
+    jphi=initJacobi(size(phi),sk);
+    jphiH=initJacobi(size(phiH),sk);
+    coord=Array{AbstractFloat,2}(undef,2,m.meshType);
 
     cl1=zeros(sk);
     cl2=zeros(sk);
 
-    globalNum=Array{Int64,1}(undef,size(phi,2));
-    globalNumH=Array{Int64,1}(undef,size(phiH,2));
+    globalNum=Array{Int,1}(undef,size(phi,2));
+    globalNumH=Array{Int,1}(undef,size(phiH,2));
 
     gbh=zeros(degFH.numB)
     for k in 1:m.topology.size[m.topology.D+1]

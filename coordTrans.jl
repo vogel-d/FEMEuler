@@ -1,10 +1,10 @@
-function coordTrans(mt::Int64, normals::Array{Float64,2}, type::Array{Symbol,1}, n::Int64)
+function coordTrans(mt::Int, normals::Array{AbstractFloat,2}, type::Array{Symbol,1}, n::Int)
     g=2*n-1;
     quadPoints, quadWeights=getQuad(g);
     sk=length(quadPoints);
 
-    nquadPhi=Dict{Symbol, Array{Array{Array{Float64,1},2},1}}();
-    nquadPoints=Array{Array{Float64,2},1}(undef, size(normals,2));
+    nquadPhi=Dict{Symbol, Array{Array{Array{AbstractFloat,1},2},1}}();
+    nquadPoints=Array{Array{AbstractFloat,2},1}(undef, size(normals,2));
 
     for i in 1:size(normals,2)
         n=normals[:,i];
@@ -29,12 +29,12 @@ function coordTrans(mt::Int64, normals::Array{Float64,2}, type::Array{Symbol,1},
     end
 
     for k in type
-        nquadPhi[k]=Array{Array{Array{Float64,1},2},1}(undef, size(normals,2));
+        nquadPhi[k]=Array{Array{Array{AbstractFloat,1},2},1}(undef, size(normals,2));
         phi, psize =getElementProperties(k,mt);
         for m in 1:size(normals,2)
-            quadPhi=Array{Array{Float64,1},2}(undef,psize[1], psize[2]);
+            quadPhi=Array{Array{AbstractFloat,1},2}(undef,psize[1], psize[2]);
             for n in 1:length(phi)
-                quadVal=Array{Float64,1}(undef,sk);
+                quadVal=Array{AbstractFloat,1}(undef,sk);
                 for i=1:sk
                     quadVal[i]=phi[n](nquadPoints[m][1,i], nquadPoints[m][2,i]);
                 end

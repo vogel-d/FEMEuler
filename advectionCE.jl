@@ -1,6 +1,6 @@
-function advection(p::femProblem, gamma::Float64, y::solution,
-                  nquadPoints::Array{Array{Float64,2},1}, nquadPhi::Dict{Symbol, Array{Array{Array{Float64,1},2},1}},
-                  MrT::SparseMatrixCSC{Float64,Int64}, MrV::SparseMatrixCSC{Float64,Int64})
+function advection(p::femProblem, gamma::AbstractFloat, y::solution,
+                  nquadPoints::Array{Array{AbstractFloat,2},1}, nquadPhi::Dict{Symbol, Array{Array{Array{AbstractFloat,1},2},1}},
+                  MrT::SparseMatrixCSC{AbstractFloat,Int}, MrV::SparseMatrixCSC{AbstractFloat,Int})
 
   fTtheta=p.femType[:rhoTheta]; fTv=p.femType[:rhoV];
   Fv=@views p.massM[fTv[1]];

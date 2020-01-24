@@ -1,8 +1,8 @@
-function discGalerkinEdges!(M::Array{Float64,2},
-                            degFT::degF{1},phiT::Array{Array{Float64,2},1}, phiTtrans::Array{Array{Array{Float64,1},2},1}, globalNumT1::Array{Int64,1}, globalNumT2::Array{Int64,1},
-                            degFF::degF{2},phiF::Array{Array{Float64,2},2}, phiFtrans::Array{Array{Array{Float64,1},2},1}, fval::SparseVector{Float64,Int64}, globalNumF1::Array{Int64,1}, globalNumF2::Array{Int64,1},
-                            degFW::degF{1},phiW::Array{Array{Float64,2},1}, phiWtrans::Array{Array{Array{Float64,1},2},1}, wval::Array{Float64,1}, globalNumW1::Array{Int64,1}, globalNumW2::Array{Int64,1},
-                            m::mesh, quadWeights::Array{Float64,1}, nquadPoints::Array{Array{Float64,2},1}, edgeData::Array{Array{Int64,1},1},gamma::Float64)
+function discGalerkinEdges!(M::Array{AbstractFloat,2},
+                            degFT::degF{1},phiT::Array{Array{AbstractFloat,2},1}, phiTtrans::Array{Array{Array{AbstractFloat,1},2},1}, globalNumT1::Array{Int,1}, globalNumT2::Array{Int,1},
+                            degFF::degF{2},phiF::Array{Array{AbstractFloat,2},2}, phiFtrans::Array{Array{Array{AbstractFloat,1},2},1}, fval::SparseVector{AbstractFloat,Int}, globalNumF1::Array{Int,1}, globalNumF2::Array{Int,1},
+                            degFW::degF{1},phiW::Array{Array{AbstractFloat,2},1}, phiWtrans::Array{Array{Array{AbstractFloat,1},2},1}, wval::Array{AbstractFloat,1}, globalNumW1::Array{Int,1}, globalNumW2::Array{Int,1},
+                            m::mesh, quadWeights::Array{AbstractFloat,1}, nquadPoints::Array{Array{AbstractFloat,2},1}, edgeData::Array{Array{Int,1},1},gamma::AbstractFloat)
 
 
 
@@ -88,11 +88,11 @@ function discGalerkinEdges!(M::Array{Float64,2},
     return nothing;
 end
 
-function discGalerkinEdges!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Array{Float64,1},
-                            degFT::degF{1},phiT::Array{Array{Float64,2},1}, phiTtrans::Array{Array{Array{Float64,1},2},1}, globalNumT1::Array{Int64,1}, globalNumT2::Array{Int64,1},
-                            degFF::degF{2},phiF::Array{Array{Float64,2},2}, phiFtrans::Array{Array{Array{Float64,1},2},1}, fval::Array{Float64,1}, globalNumF1::Array{Int64,1}, globalNumF2::Array{Int64,1},
-                            degFW::degF{1},phiW::Array{Array{Float64,2},1}, phiWtrans::Array{Array{Array{Float64,1},2},1}, wval::Array{Float64,1}, globalNumW1::Array{Int64,1}, globalNumW2::Array{Int64,1},
-                            m::mesh, quadWeights::Array{Float64,1}, nquadPoints::Array{Array{Float64,2},1}, edgeData::Array{Array{Int64,1},1},gamma::Float64)
+function discGalerkinEdges!(rows::Array{Int,1}, cols::Array{Int,1}, vals::Array{AbstractFloat,1},
+                            degFT::degF{1},phiT::Array{Array{AbstractFloat,2},1}, phiTtrans::Array{Array{Array{AbstractFloat,1},2},1}, globalNumT1::Array{Int,1}, globalNumT2::Array{Int,1},
+                            degFF::degF{2},phiF::Array{Array{AbstractFloat,2},2}, phiFtrans::Array{Array{Array{AbstractFloat,1},2},1}, fval::Array{AbstractFloat,1}, globalNumF1::Array{Int,1}, globalNumF2::Array{Int,1},
+                            degFW::degF{1},phiW::Array{Array{AbstractFloat,2},1}, phiWtrans::Array{Array{Array{AbstractFloat,1},2},1}, wval::Array{AbstractFloat,1}, globalNumW1::Array{Int,1}, globalNumW2::Array{Int,1},
+                            m::mesh, quadWeights::Array{AbstractFloat,1}, nquadPoints::Array{Array{AbstractFloat,2},1}, edgeData::Array{Array{Int,1},1},gamma::AbstractFloat)
 
 
 
@@ -191,11 +191,11 @@ function discGalerkinEdges!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
     return nothing;
 end
 
-function discGalerkinEdges!(M::Array{Float64,2},
-                            degFT::degF{2},phiT::Array{Array{Float64,2},2}, phiTtrans::Array{Array{Array{Float64,1},2},1}, globalNumT1::Array{Int64,1}, globalNumT2::Array{Int64,1},
-                            degFF::degF{2},phiF::Array{Array{Float64,2},2}, phiFtrans::Array{Array{Array{Float64,1},2},1}, fval::SparseVector{Float64,Int64}, globalNumF1::Array{Int64,1}, globalNumF2::Array{Int64,1},
-                            degFW::degF{2},phiW::Array{Array{Float64,2},2}, phiWtrans::Array{Array{Array{Float64,1},2},1}, wval::Array{Float64,1}, globalNumW1::Array{Int64,1}, globalNumW2::Array{Int64,1},
-                            m::mesh, quadWeights::Array{Float64,1}, nquadPoints::Array{Array{Float64,2},1}, edgeData::Array{Array{Int64,1},1},gamma::Float64, coord::Array{Float64,2})
+function discGalerkinEdges!(M::Array{AbstractFloat,2},
+                            degFT::degF{2},phiT::Array{Array{AbstractFloat,2},2}, phiTtrans::Array{Array{Array{AbstractFloat,1},2},1}, globalNumT1::Array{Int,1}, globalNumT2::Array{Int,1},
+                            degFF::degF{2},phiF::Array{Array{AbstractFloat,2},2}, phiFtrans::Array{Array{Array{AbstractFloat,1},2},1}, fval::SparseVector{AbstractFloat,Int}, globalNumF1::Array{Int,1}, globalNumF2::Array{Int,1},
+                            degFW::degF{2},phiW::Array{Array{AbstractFloat,2},2}, phiWtrans::Array{Array{Array{AbstractFloat,1},2},1}, wval::Array{AbstractFloat,1}, globalNumW1::Array{Int,1}, globalNumW2::Array{Int,1},
+                            m::mesh, quadWeights::Array{AbstractFloat,1}, nquadPoints::Array{Array{AbstractFloat,2},1}, edgeData::Array{Array{Int,1},1},gamma::AbstractFloat, coord::Array{AbstractFloat,2})
 
 
 
@@ -203,15 +203,15 @@ function discGalerkinEdges!(M::Array{Float64,2},
     nF=size(phiF,2);
     sk=length(quadWeights)
 
-    J1=initPhi((2,2),sk);
-    ddJ1=Array{Float64,1}(undef,sk);
-    jphiWn1=initPhi(size(phiW),sk)
-    jphiTn1=initPhi(size(phiT),sk)
+    J1=initJacobi((2,2),sk);
+    ddJ1=Array{AbstractFloat,1}(undef,sk);
+    jphiWn1=initJacobi(size(phiW),sk)
+    jphiTn1=initJacobi(size(phiT),sk)
 
-    J2=initPhi((2,2),sk);
-    ddJ2=Array{Float64,1}(undef,sk);
-    jphiWn2=initPhi(size(phiW),sk)
-    jphiTn2=initPhi(size(phiT),sk);
+    J2=initJacobi((2,2),sk);
+    ddJ2=Array{AbstractFloat,1}(undef,sk);
+    jphiWn2=initJacobi(size(phiW),sk)
+    jphiTn2=initJacobi(size(phiT),sk);
 
     w11=zeros(sk);
     w12=zeros(sk);

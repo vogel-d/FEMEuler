@@ -1,7 +1,7 @@
-function getQuad(g::Int64)
-    n=Int64(ceil((g+1)/2));
-    gdots=Array{Float64,1};
-    W=Array{Float64,1};
+function getQuad(g::Int)
+    n=Int(ceil((g+1)/2));
+    gdots=Array{AbstractFloat,1};
+    W=Array{AbstractFloat,1};
 
     if g>9
         a1=0.538469310105683;
@@ -48,6 +48,6 @@ function getQuad(g::Int64)
     for k in 1:n
         gdots[k]=hx*gdots[k]+sx;
     end
-    
+
     return gdots, hx*W;
 end

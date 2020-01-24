@@ -1,6 +1,6 @@
 include("polynom.jl")
 include("transp.jl")
-function getQuadElementProperties(type::Symbol, kubPoints::Array{Float64,2})
+function getQuadElementProperties(type::Symbol, kubPoints::Array{AbstractFloat,2})
 
     if type==:DG0
         phi=[[1.0]];
@@ -96,27 +96,27 @@ function getQuadElementProperties(type::Symbol, kubPoints::Array{Float64,2})
     end
 
     sk=size(kubPoints,2);
-    kubPhi=Array{Array{Float64,2},ndims(phi)}(undef,size(phi));
+    kubPhi=Array{Array{AbstractFloat,2},ndims(phi)}(undef,size(phi));
     for k in 1:length(phi)
-        kubVal=Array{Float64,2}(undef,sk,sk);
+        kubVal=Array{AbstractFloat,2}(undef,sk,sk);
         for i=1:sk, j=1:sk
             kubVal[i,j]=polynom(phi[k], kubPoints[1,i], kubPoints[2,j]);
         end
         kubPhi[k]=kubVal;
     end
 
-    kubDiv=Array{Array{Float64,2},1}(undef,length(divphi));
+    kubDiv=Array{Array{AbstractFloat,2},1}(undef,length(divphi));
     for k in 1:length(divphi)
-        kubVal=Array{Float64,2}(undef,sk,sk);
+        kubVal=Array{AbstractFloat,2}(undef,sk,sk);
         for i=1:sk, j=1:sk
             kubVal[i,j]=polynom(divphi[k], kubPoints[1,i], kubPoints[2,j]);
         end
         kubDiv[k]=kubVal;
     end
 
-    kubGrad=Array{Array{Float64,2},2}(undef,size(gradphi));
+    kubGrad=Array{Array{AbstractFloat,2},2}(undef,size(gradphi));
     for ki=1:size(gradphi,1), kj=1:size(gradphi,2)
-        kubVal=Array{Float64,2}(undef,sk,sk);
+        kubVal=Array{AbstractFloat,2}(undef,sk,sk);
         for i=1:sk, j=1:sk
             kubVal[i,j]=polynom(gradphi[ki,kj], kubPoints[1,i], kubPoints[2,j]);
         end
@@ -127,7 +127,7 @@ function getQuadElementProperties(type::Symbol, kubPoints::Array{Float64,2})
 end
 
 
-function getTriElementProperties(type::Symbol, kubPoints::Array{Float64,2})
+function getTriElementProperties(type::Symbol, kubPoints::Array{AbstractFloat,2})
     if type==:DG0
         phi=[[1.0]];
         #c=[1/3 0.0; 1/3 0.0];
@@ -181,27 +181,27 @@ function getTriElementProperties(type::Symbol, kubPoints::Array{Float64,2})
     end
 
     sk=size(kubPoints,2);
-    kubPhi=Array{Array{Float64,2},ndims(phi)}(undef,size(phi));
+    kubPhi=Array{Array{AbstractFloat,2},ndims(phi)}(undef,size(phi));
     for k=1:length(phi)
-        kubVal=Array{Float64,2}(undef,sk,sk);
+        kubVal=Array{AbstractFloat,2}(undef,sk,sk);
         for i=1:sk, j=1:sk
             kubVal[i,j]=polynom(phi[k], kubPoints[1,i], kubPoints[2,j]);
         end
         kubPhi[k]=kubVal;
     end
 
-    kubDiv=Array{Array{Float64,2},1}(undef,length(divphi));
+    kubDiv=Array{Array{AbstractFloat,2},1}(undef,length(divphi));
     for k in 1:length(divphi)
-        kubVal=Array{Float64,2}(undef,sk,sk);
+        kubVal=Array{AbstractFloat,2}(undef,sk,sk);
         for i=1:sk, j=1:sk
             kubVal[i,j]=polynom(divphi[k], kubPoints[1,i], kubPoints[2,j]);
         end
         kubDiv[k]=kubVal;
     end
 
-    kubGrad=Array{Array{Float64,2},2}(undef,size(gradphi));
+    kubGrad=Array{Array{AbstractFloat,2},2}(undef,size(gradphi));
     for ki=1:size(gradphi,1), kj=1:size(gradphi,2)
-        kubVal=Array{Float64,2}(undef,sk,sk);
+        kubVal=Array{AbstractFloat,2}(undef,sk,sk);
         for i=1:sk, j=1:sk
             kubVal[i,j]=polynom(gradphi[ki,kj], kubPoints[1,i], kubPoints[2,j]);
         end

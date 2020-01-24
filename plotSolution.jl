@@ -1,4 +1,4 @@
-function plotSolution(p::femProblem, key::Symbol, t::Float64, c::Symbol=:plasma)
+function plotSolution(p::femProblem, key::Symbol, t::AbstractFloat, c::Symbol=:plasma)
     nf=p.mesh.topology.size[3];
     sol=getfield(p.solution[t],key);
     smin=minimum(sol);
@@ -33,9 +33,9 @@ function plotSolution(p::femProblem, key::Symbol, t::Float64, c::Symbol=:plasma)
         pf=plot(pl,pc,layout=grid(2,1,heights=[0.98,0.02]))
         display(pf);
     else
-        J=Array{Float64,2}(undef,2,2);
+        J=Array{AbstractFloat,2}(undef,2,2);
         dJ=0.0;
-        coord=Array{Float64,2}(undef,2,p.mesh.meshType);
+        coord=Array{AbstractFloat,2}(undef,2,p.mesh.meshType);
         for j in 1:2
             pl=plot();
 
@@ -56,7 +56,7 @@ end
 
 #Funktion zum Plotten des Ergebnisses der Akkustikgleichung, dass den Plot nicht in
 #der GUI anzeigt, sondern nur unter dem Dateinamen filename (z.B. acoustic.png) im momentanen Directionary speichert
-function plotSolution(p::femProblem, key::Symbol, t::Float64, filename::String, c::Symbol=:plasma)
+function plotSolution(p::femProblem, key::Symbol, t::AbstractFloat, filename::String, c::Symbol=:plasma)
     nf=p.mesh.topology.size[3];
     sol=getfield(p.solution[t],key);
     smin=minimum(sol);
@@ -91,9 +91,9 @@ function plotSolution(p::femProblem, key::Symbol, t::Float64, filename::String, 
         pf=plot(pl,pc,layout=grid(2,1,heights=[0.98,0.02]))
         savefig(pf, filename);
     else
-        J=Array{Float64,2}(undef,2,2);
+        J=Array{AbstractFloat,2}(undef,2,2);
         dJ=0.0;
-        coord=Array{Float64,2}(undef,2,p.mesh.meshType);
+        coord=Array{AbstractFloat,2}(undef,2,p.mesh.meshType);
         for j in 1:2
             pl=plot();
 
@@ -112,7 +112,7 @@ function plotSolution(p::femProblem, key::Symbol, t::Float64, filename::String, 
     end
 end
 
-function fillPoly(c::Array{Float64,2}, fc::RGBA{Float64}; fillrange::Int64=0, fillalpha::Float64=1.0)
+function fillPoly(c::Array{AbstractFloat,2}, fc::RGBA{AbstractFloat}; fillrange::Int=0, fillalpha::AbstractFloat=1.0)
     x=push!(c[1,:],c[1,1]);
     y=push!(c[2,:],c[2,1]);
     p=Plots.plot!(x,y,fill=(fillrange,fillalpha,fc),legend=false, linecolor=fc, linewidth=0.0);

@@ -11,11 +11,11 @@ function setEdgeData!(p::femProblem, compVf::Symbol)
     incv=m.topology.incidence["10"];
     offf=m.topology.offset["20"];
     incf=m.topology.incidence["20"];
-    edgeNum=Int64[];
-    edgeType=Int64[];
-    cells=Int64[];
-    globv=Int64[];
-    off=Int64[1];
+    edgeNum=Int[];
+    edgeType=Int[];
+    cells=Int[];
+    globv=Int[];
+    off=Int[1];
     zo=1;
     for e in 1:m.topology.size[m.topology.D]
         off1=offe[e];
@@ -37,13 +37,13 @@ function setEdgeData!(p::femProblem, compVf::Symbol)
         coord1= @views m.geometry.coordinates[:,incf[offf[inc[1]]:(offf[inc[1]]+mt-1)]];
         coord2= @views m.geometry.coordinates[:,incf[offf[inc[2]]:(offf[inc[2]]+mt-1)]];
 
-        t1(v::Array{Float64,1})=transformation(m,coord1,v[1],v[2]);
-        t2(v::Array{Float64,1})=transformation(m,coord2,v[1],v[2]);
+        t1(v::Array{AbstractFloat,1})=transformation(m,coord1,v[1],v[2]);
+        t2(v::Array{AbstractFloat,1})=transformation(m,coord2,v[1],v[2]);
 
         coordv= @views m.geometry.coordinates[:,incv[offv[e]:(offv[e]+1)]];
         mv=(1/size(coordv,2)).*[sum(coordv[1,:]), sum(coordv[2,:])];
-        n1=Array{Float64,1}();
-        n2=Array{Float64,1}();
+        n1=Array{AbstractFloat,1}();
+        n2=Array{AbstractFloat,1}();
 
         if h1 #Fall periodische Randkante
             coordve= @views m.geometry.coordinates[:,incv[offv[e1]:(offv[e1]+1)]];

@@ -1,4 +1,4 @@
-function transformation(m::mesh, coord::Array{Float64,2}, x::Float64, y::Float64)
+function transformation(m::mesh, coord::Array{AbstractFloat,2}, x::AbstractFloat, y::AbstractFloat)
     #es wird von einem Gitter mit einheitlichen Elementen ausgegangen
     #davon ausgehend lässt sich n allgemein durch die ersten beiden Offset-Einträge feststellen
     n=m.meshType;
@@ -13,7 +13,7 @@ function transformation(m::mesh, coord::Array{Float64,2}, x::Float64, y::Float64
     end
 end
 
-function transformation(m::mesh, coord::SubArray{Float64,2,Array{Float64,2},Tuple{Base.Slice{Base.OneTo{Int64}},SubArray{Int64,1,Array{Int64,1},Tuple{UnitRange{Int64}},true}},false}, x::Float64, y::Float64)
+function transformation(m::mesh, coord::SubArray{AbstractFloat,2,Array{AbstractFloat,2},Tuple{Base.Slice{Base.OneTo{Int}},SubArray{Int,1,Array{Int,1},Tuple{UnitRange{Int}},true}},false}, x::AbstractFloat, y::AbstractFloat)
     #es wird von einem Gitter mit einheitlichen Elementen ausgegangen
     #davon ausgehend lässt sich n allgemein durch die ersten beiden Offset-Einträge feststellen
     n=m.meshType;
@@ -28,7 +28,7 @@ function transformation(m::mesh, coord::SubArray{Float64,2,Array{Float64,2},Tupl
     end
 end
 #=
-function transformation(m::mesh, coord::SubArray{Float64,2,Array{Float64,2},Tuple{Base.Slice{Base.OneTo{Int64}},Array{Int64,1}},false}, x::Float64, y::Float64)
+function transformation(m::mesh, coord::SubArray{AbstractFloat,2,Array{AbstractFloat,2},Tuple{Base.Slice{Base.OneTo{Int}},Array{Int,1}},false}, x::AbstractFloat, y::AbstractFloat)
     #es wird von einem Gitter mit einheitlichen Elementen ausgegangen
     #davon ausgehend lässt sich n allgemein durch die ersten beiden Offset-Einträge feststellen
     n=m.meshType;

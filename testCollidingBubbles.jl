@@ -30,7 +30,7 @@ function testCollidingBubbles()
     #dt=0.16;
     ns=15;
     EndTime=600.0;
-    nIter=Int64(EndTime/dt);
+    nIter=Int(EndTime/dt);
 
     #start functions
     xW=500.0; zW=300.0; xC=560.0; zC=640.0;
@@ -41,7 +41,7 @@ function testCollidingBubbles()
     Grav=9.81;
     Cpd=1004.0; Cvd=717.0; Cpv=1885.0;
     Rd=Cpd-Cvd; Gamma=Cpd/Cvd; kappa=Rd/Cpd;
-    function frho(x::Float64,z::Float64)
+    function frho(x::AbstractFloat,z::AbstractFloat)
         pLoc=p0*(1-kappa*Grav*z/(Rd*th0))^(Cpd/Rd);
         radW=sqrt((x-xW)^2+(z-zW)^2);
         radC=sqrt((x-xC)^2+(z-zC)^2);
@@ -58,7 +58,7 @@ function testCollidingBubbles()
         end
         return pLoc/((pLoc/p0)^kappa*Rd*ThLoc);
     end
-    function ftheta(x::Float64,z::Float64)
+    function ftheta(x::AbstractFloat,z::AbstractFloat)
         radW=sqrt((x-xW)^2+(z-zW)^2);
         radC=sqrt((x-xC)^2+(z-zC)^2);
         th=th0;
@@ -75,8 +75,8 @@ function testCollidingBubbles()
         return th;
     end
 
-    fv1(x::Float64, y::Float64)=UMax;
-    fv2(x::Float64, y::Float64)=0.0;
+    fv1(x::AbstractFloat, y::AbstractFloat)=UMax;
+    fv2(x::AbstractFloat, y::AbstractFloat)=0.0;
     fvel=[fv1, fv2];
     f=Dict(:rho=>frho,:theta=>ftheta,:v=>fvel);
 
@@ -103,7 +103,7 @@ function testCollidingBubbles()
     y=p.solution[0.0];
     Y=Array{solution,1}(undef,MISMethod.nStage+1);
     FY=Array{solution,1}(undef,MISMethod.nStage);
-    SthY=Array{SparseMatrixCSC{Float64,Int64},1}(undef,MISMethod.nStage);
+    SthY=Array{SparseMatrixCSC{AbstractFloat,Int},1}(undef,MISMethod.nStage);
     Time=0.0;
     for i=1:nIter
       y=splitExplicit(y,Y,FY,SthY,p,gamma,nquadPhi,nquadPoints,MrT,MrV,MISMethod,Time,dt,ns);

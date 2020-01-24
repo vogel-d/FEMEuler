@@ -7,15 +7,15 @@ function invert!(v::Array{N, 1} where N)
 end
 
 import Base.+
-function +(a::SparseVector{Float64,Int64}, b::Array{Float64,2})
+function +(a::SparseVector{AbstractFloat,Int}, b::Array{AbstractFloat,2})
     rows=collect(1:length(b));
-    vals=Float64[a[i]+b[i] for i in 1:length(b)];
+    vals=AbstractFloat[a[i]+b[i] for i in 1:length(b)];
     return sparsevec(rows,vals)
 end
 
 #Funktion zum Testen, ob die int Elemente des Arrays k
 #im Array g enthalten sind
-function subsetint(k::Array{Int64,1},g::Array{Int64,1})
+function subsetint(k::Array{Int,1},g::Array{Int,1})
   t=true;
   for h in 1:length(k)
     if !any(isequal(k[h]), g)
@@ -47,6 +47,6 @@ function printMatrix(m::Array)
     end
 end
 
-function mean(v::Array{Float64, 1})
+function mean(v::Array{AbstractFloat, 1})
     return 1/length(v)*sum(v);
 end

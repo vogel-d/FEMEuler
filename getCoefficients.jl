@@ -5,7 +5,7 @@ function getCoefficients(p::Function)
     f=expand(p(x,y));
     coeff=f.as_coefficients_dict();
     n=real(maximum([degree(f,x),degree(f,y)]));
-    res=zeros(Float64,n+1,n+1)
+    res=zeros(AbstractFloat,n+1,n+1)
     for k in keys(coeff)
         nx=real(degree(k,x));
         ny=real(degree(k,y));

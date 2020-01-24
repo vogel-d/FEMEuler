@@ -1,33 +1,33 @@
 struct MIS #Multirate Inﬁnitesimal Step method
-    nStage::Int64;
+    nStage::Int;
 
     #Die Koeffizientenmarizen von alpha, beta, gamma haben jeweils die Dimension nStage+1 x nStage
-    alpha::Array{Float64,2};
-    beta::Array{Float64,2};
-    gamma::Array{Float64,2};
+    alpha::Array{AbstractFloat,2};
+    beta::Array{AbstractFloat,2};
+    gamma::Array{AbstractFloat,2};
 
     #c und d haben die Länge nStage+1
-    c::Array{Float64,1};
-    d::Array{Float64,1};
+    c::Array{AbstractFloat,1};
+    d::Array{AbstractFloat,1};
 
-    betaS::Array{Float64,2};
-    gammaS::Array{Float64,2};
-    nPhiStage::Array{Int64,1};
-    nPhi::Int64
-    nPhiStageBeta::Array{Int64,1};
-    nPhiStageGamma::Array{Int64,1};
+    betaS::Array{AbstractFloat,2};
+    gammaS::Array{AbstractFloat,2};
+    nPhiStage::Array{Int,1};
+    nPhi::Int
+    nPhiStageBeta::Array{Int,1};
+    nPhiStageGamma::Array{Int,1};
 end
 
 function MIS(s::Symbol)
     if s==:MIS5_4
       nStage=5;
-      nPhiStage=zeros(Int64,nStage+1);
+      nPhiStage=zeros(Int,nStage+1);
       nPhi=1;
 
-      nPhiStageBeta=ones(Int64,nStage+1);
+      nPhiStageBeta=ones(Int,nStage+1);
       nPhiStageBeta[1]= 0;
 
-      nPhiStageGamma=ones(Int64,nStage+1);
+      nPhiStageGamma=ones(Int,nStage+1);
       nPhiStageGamma[1]= 0;
 
       beta=zeros(nStage+1, nStage);
@@ -87,13 +87,13 @@ function MIS(s::Symbol)
 
    elseif s==:MIS4_4
       nStage=4;
-      nPhiStage=zeros(Int64,nStage+1);
+      nPhiStage=zeros(Int,nStage+1);
       nPhi=1;
 
-      nPhiStageBeta=ones(Int64,nStage+1);
+      nPhiStageBeta=ones(Int,nStage+1);
       nPhiStageBeta[1]= 0;
 
-      nPhiStageGamma=ones(Int64,nStage+1);
+      nPhiStageGamma=ones(Int,nStage+1);
       nPhiStageGamma[1]= 0;
 
       beta=zeros(nStage+1, nStage);
@@ -139,13 +139,13 @@ function MIS(s::Symbol)
 
    elseif s==:MIS4
       nStage=4;
-      nPhiStage=zeros(Int64,nStage+1);
+      nPhiStage=zeros(Int,nStage+1);
       nPhi=1;
 
-      nPhiStageBeta=ones(Int64,nStage+1);
+      nPhiStageBeta=ones(Int,nStage+1);
       nPhiStageBeta[1]= 0;
 
-      nPhiStageGamma=ones(Int64,nStage+1);
+      nPhiStageGamma=ones(Int,nStage+1);
       nPhiStageGamma[1]= 0;
 
       beta=zeros(nStage+1, nStage);
@@ -195,10 +195,10 @@ function MIS(s::Symbol)
        nPhiStage=zeros(nStage+1);
        nPhi=1;
 
-       nPhiStageBeta=ones(Int64,nStage+1);
+       nPhiStageBeta=ones(Int,nStage+1);
        nPhiStageBeta[1]= 0;
 
-       nPhiStageGamma=ones(Int64,nStage+1);
+       nPhiStageGamma=ones(Int,nStage+1);
        nPhiStageGamma[1]= 0;
 
        beta=zeros(nStage+1, nStage);

@@ -1,21 +1,21 @@
-function splitExplicit(y0::solution,Y::Array{solution,1},FY::Array{solution,1},SthY::Array{SparseMatrixCSC{Float64,Int64},1},
-                      p::femProblem, gamma::Float64,
-                      nquadPhi::Dict{Symbol, Array{Array{Array{Float64,1},2},1}},
-                      nquadPoints::Array{Array{Float64,2},1},MrT::SparseMatrixCSC{Float64,Int64}, MrV::SparseMatrixCSC{Float64,Int64},
-                      MIS::MIS,t0::Float64,dt::Float64,ns::Int64)
+function splitExplicit(y0::solution,Y::Array{solution,1},FY::Array{solution,1},SthY::Array{SparseMatrixCSC{AbstractFloat,Int},1},
+                      p::femProblem, gamma::AbstractFloat,
+                      nquadPhi::Dict{Symbol, Array{Array{Array{AbstractFloat,1},2},1}},
+                      nquadPoints::Array{Array{AbstractFloat,2},1},MrT::SparseMatrixCSC{AbstractFloat,Int}, MrV::SparseMatrixCSC{AbstractFloat,Int},
+                      MIS::MIS,t0::AbstractFloat,dt::AbstractFloat,ns::Int)
   stage=MIS.nStage;
   #Y=Array{solution,1}(undef,stage+1);
   #FY=Array{solution,1}(undef,stage);
-  #SthY=Array{SparseMatrixCSC{Float64,Int64},1}(undef,stage);
+  #SthY=Array{SparseMatrixCSC{AbstractFloat,Int},1}(undef,stage);
 
   numRho=p.degFBoundary[p.femType[:rho][1]].num
   numRhoV=p.degFBoundary[p.femType[:rhoV][1]].num
   numRhoTheta=p.degFBoundary[p.femType[:rhoTheta][1]].num
 
-  velOld=Array{Float64,1}(undef,numRhoV)
-  rhoVS=Array{Float64,1}(undef,numRhoV)
-  rhoS=Array{Float64,1}(undef,numRho)
-  rhoThetaS=Array{Float64,1}(undef,numRhoTheta)
+  velOld=Array{AbstractFloat,1}(undef,numRhoV)
+  rhoVS=Array{AbstractFloat,1}(undef,numRhoV)
+  rhoS=Array{AbstractFloat,1}(undef,numRho)
+  rhoThetaS=Array{AbstractFloat,1}(undef,numRhoTheta)
 
   for i in 1:(stage+1)
     Y[i]=y0;
@@ -36,7 +36,7 @@ function splitExplicit(y0::solution,Y::Array{solution,1},FY::Array{solution,1},S
       SthSlow=SthSlow+MIS.beta[i+1,j]*SthY[j];
     end
 
-    nsLoc=ceil(Int64,ns*MIS.d[i+1]);
+    nsLoc=ceil(Int,ns*MIS.d[i+1]);
     dtLoc=dt*MIS.d[i+1];
     dtauLoc=dtLoc/nsLoc;
 

@@ -1,7 +1,7 @@
 #Funktion zum Generieren von zweidimensionalen Rechteck-Gittern
 #Input: nx bzw. ny ist die Anzahl der Gitterelemente in x- bzw. y-Richtung, also die Feinheit des Meshes
 #       xl bzw. yl ist die Länge des Meshes in x- bzw. y-Richtung, als Default ist die Länge nx bzw. ny
-function generateRectMesh(nx::Int64, ny::Int64, condEW::Symbol, condTB::Symbol, xl::Float64=0.0, xr::Float64=Float64(nx), yl::Float64=0.0, yr::Float64=Float64(ny))
+function generateRectMesh(nx::Int, ny::Int, condEW::Symbol, condTB::Symbol, xl::AbstractFloat=0.0, xr::AbstractFloat=AbstractFloat(nx), yl::AbstractFloat=0.0, yr::AbstractFloat=AbstractFloat(ny))
 
     #Berechnen der Anzahl der Entitäten für die verschiedenen Dimensionen
     size=[(ny+1)*(nx+1), ny*(nx+1)+nx*(ny+1), nx*ny];
@@ -12,7 +12,7 @@ function generateRectMesh(nx::Int64, ny::Int64, condEW::Symbol, condTB::Symbol, 
     off=Dict("20"=>collect(1:nk:(nk*size[3]+1)),"10"=>offe);
 
     #Berechnen der Koordinatenmatrix, basierend auf einem äquidistanten Gitter
-    coord=Array{Float64}(undef,2,size[1]);
+    coord=Array{AbstractFloat}(undef,2,size[1]);
     ax=(xr-xl)/nx;
     ay=(yr-yl)/ny;
     zx=xl;
@@ -29,7 +29,7 @@ function generateRectMesh(nx::Int64, ny::Int64, condEW::Symbol, condTB::Symbol, 
     end
 
     #Berechnen der Inzidenz 2->0
-    incf=Int64[];
+    incf=Int[];
     z=1;
     for k in 1:ny
         for h in 1:nx
@@ -41,7 +41,7 @@ function generateRectMesh(nx::Int64, ny::Int64, condEW::Symbol, condTB::Symbol, 
     end
 
     #Berechnen der Inzidenz 1->0
-    ince=Int64[];
+    ince=Int[];
     z=1;
     for k in 1:(nx+1)*ny
         i=[z, z+nx+1];
@@ -126,9 +126,9 @@ function generateRectMesh(nx::Int64, ny::Int64, condEW::Symbol, condTB::Symbol, 
 
 
     #Initialisieren der Topologie, Geometrie und damit des Meshes
-    n=Int64[nx,ny];
-    l=Float64[xl,yl];
-    r=Float64[xr,yr];
+    n=Int[nx,ny];
+    l=AbstractFloat[xl,yl];
+    r=AbstractFloat[xr,yr];
     mT=meshTopology(inc,off,n);
     mG=meshGeometry(coord,l,r);
     m=mesh(mT,mG, bE, bV);
@@ -139,7 +139,7 @@ end
 #Funktion zum Generieren von zweidimensionalen Dreieck-Gitter im Rahmen eines Rechtecks
 #Input: nx bzw. ny ist die Anzahl der Gitterelemente in x- bzw. y-Richtung, also die Feinheit des Meshes
 #       xl bzw. yl ist die Länge des Meshes in x- bzw. y-Richtung, als Default ist die Länge nx bzw. ny
-function generateTriMesh(nx::Int64, ny::Int64, condEW::Symbol, condTB::Symbol, xl::Float64=0.0, xr::Float64=Float64(nx), yl::Float64=0.0, yr::Float64=Float64(ny))
+function generateTriMesh(nx::Int, ny::Int, condEW::Symbol, condTB::Symbol, xl::AbstractFloat=0.0, xr::AbstractFloat=AbstractFloat(nx), yl::AbstractFloat=0.0, yr::AbstractFloat=AbstractFloat(ny))
 
     #Berechnen der Anzahl der Entitäten für die verschiedenen Dimensionen
     size=[(ny+1)*(nx+1), ny*(nx+1)+nx*(ny+1)+nx*ny, 2*nx*ny];
@@ -150,7 +150,7 @@ function generateTriMesh(nx::Int64, ny::Int64, condEW::Symbol, condTB::Symbol, x
     off=Dict("20"=>collect(1:nk:(nk*size[3]+1)),"10"=>offe);
 
     #Berechnen der Koordinatenmatrix, basierend auf einem äquidistanten Gitter
-    coord=Array{Float64}(undef,2,size[1]);
+    coord=Array{AbstractFloat}(undef,2,size[1]);
     ax=(xr-xl)/nx;
     ay=(yr-yl)/ny;
     z=1;
@@ -162,7 +162,7 @@ function generateTriMesh(nx::Int64, ny::Int64, condEW::Symbol, condTB::Symbol, x
     end
 
     #Berechnen der Inzidenz 2->0
-    incf=Int64[];
+    incf=Int[];
     z=1;
     for k in 1:ny
         for h in 1:nx
@@ -177,7 +177,7 @@ function generateTriMesh(nx::Int64, ny::Int64, condEW::Symbol, condTB::Symbol, x
 
 
     #Berechnen der Inzidenz 1->0
-    ince=Int64[];
+    ince=Int[];
     z=1;
     for k in 1:(nx+1)*ny
         i=[z, z+nx+1];
@@ -264,9 +264,9 @@ function generateTriMesh(nx::Int64, ny::Int64, condEW::Symbol, condTB::Symbol, x
 
 
     #Initialisieren der Topologie, Geometrie und damit des Meshes
-    n=Int64[nx,ny];
-    l=Float64[xl,yl];
-    r=Float64[xr,yr];
+    n=Int[nx,ny];
+    l=AbstractFloat[xl,yl];
+    r=AbstractFloat[xr,yr];
     mT=meshTopology(inc,off,n);
     mG=meshGeometry(coord,l,r);
     m=mesh(mT,mG, bE, bV);
@@ -277,7 +277,7 @@ end
 #Funktion zum Generieren von zweidimensionalen, gleichschenkligen Dreieck-Gitter
 #Input: nx bzw. ny ist die Anzahl der Gitterelemente in x- bzw. y-Richtung, also die Feinheit des Meshes
 #       xl bzw. yl ist die Länge des Meshes in x- bzw. y-Richtung, als Default ist die Länge nx bzw. ny
-function generateTriMesh2(nx::Int64, ny::Int64, xl::Float64=0.0, yl::Float64=0.0, xr::Float64=Float64(nx), yr::Float64=Float64(ny))
+function generateTriMesh2(nx::Int, ny::Int, xl::AbstractFloat=0.0, yl::AbstractFloat=0.0, xr::AbstractFloat=AbstractFloat(nx), yr::AbstractFloat=AbstractFloat(ny))
     if iseven(ny)
         #Berechnen der Anzahl der Entitäten für die verschiedenen Dimensionen
         nf=ny*(2*nx-1);
@@ -289,14 +289,14 @@ function generateTriMesh2(nx::Int64, ny::Int64, xl::Float64=0.0, yl::Float64=0.0
         nv=(ny+1)/2*(nx+1)+(ny+1)/2*nx;
     end
 
-    size=[Int64(nv), Int64(ne), Int64(nf)];
+    size=[Int(nv), Int(ne), Int(nf)];
     nk=3;
 
     #Initialisieren des Offsets mit den Einträgen "20" und "10"
     off=Dict("20"=>collect(1:nk:(nk*size[3]+1)),"10"=>collect(1:2:(2*size[2]+1)));
 
     #Berechnen der Inzidenz 2->0
-    incf=Int64[];
+    incf=Int[];
     z=1;
     for k in 1:ny
         iseven(k) ? e=nx-1 : e=nx
@@ -328,7 +328,7 @@ function generateTriMesh2(nx::Int64, ny::Int64, xl::Float64=0.0, yl::Float64=0.0
 
 
     #Berechnen der Inzidenz 1->0
-    ince=Int64[];
+    ince=Int[];
     z=1;
     for k in 1:(ny+1)
         isodd(k) ? e=nx : e=nx-1;
@@ -366,7 +366,7 @@ function generateTriMesh2(nx::Int64, ny::Int64, xl::Float64=0.0, yl::Float64=0.0
     inc=Dict("20"=>incf,"10"=>ince);
 
     #Berechnen der Koordinatenmatrix, basierend auf einem äquidistanten Gitter
-    coord=Array{Float64}(undef,2,size[1]);
+    coord=Array{AbstractFloat}(undef,2,size[1]);
     ax=(xr-xl)/nx;
     ay=(yr-yl)/ny;
     zx=xl;
@@ -392,9 +392,9 @@ function generateTriMesh2(nx::Int64, ny::Int64, xl::Float64=0.0, yl::Float64=0.0
     end
 
     #Initialisieren der Topologie, Geometrie und damit des Meshes
-    n=Int64[nx,ny];
-    l=Float64[xl,yl];
-    r=Float64[xr,yr];
+    n=Int[nx,ny];
+    l=AbstractFloat[xl,yl];
+    r=AbstractFloat[xr,yr];
     mT=meshTopology(inc,off,n);
     mG=meshGeometry(coord,l,r);
     m=mesh(mT,mG);
@@ -406,21 +406,21 @@ end
 #Funktion zum Generieren von zweidimensionalen Sechseck-Gitter
 #Input: nx bzw. ny ist die Anzahl der Gitterelemente in x- bzw. y-Richtung, also die Feinheit des Meshes
 #       Die Länge jeder Seite jedes Sechseck ist hier konstant 1.
-function generateHexMesh(nx::Int64, ny::Int64)
+function generateHexMesh(nx::Int, ny::Int)
     if iseven(ny)
         #Berechnen der Anzahl der Entitäten für die verschiedenen Dimensionen
         nf=0.5*ny*(2*nx-1)
         ne=3*nx*ny+0.5*ny+2*(nx-1) # =2*nx*ny+0.5*ny*(nx+1)+0.5*ny*nx+nx
         nv=ny*(2*nx+1)+2*nx-1
 
-        size=[Int64(nv), Int64(ne), Int64(nf)];
+        size=[Int(nv), Int(ne), Int(nf)];
         nk=6;
 
         #Initialisieren des Offsets mit den Einträgen "20" und "10"
         off=Dict("20"=>Array(1:nk:(nk*size[3]+1)),"10"=>Array(1:2:(2*size[2]+1)));
 
         #Berechnen der Inzidenz 2->0
-        incf=Int64[];
+        incf=Int[];
         z=1;
         for k in 1:(ny-1)
             iseven(k) ? e=nx-1 : e=nx
@@ -439,7 +439,7 @@ function generateHexMesh(nx::Int64, ny::Int64)
         end
 
         #Berechnen der Inzidenz 1->0
-        ince=Int64[];
+        ince=Int[];
         z=1;
         for k in 1:ny
             for h in 1:2*nx
@@ -471,7 +471,7 @@ function generateHexMesh(nx::Int64, ny::Int64)
         inc=Dict("20"=>incf,"10"=>ince);
 
         #Berechnen der Koordinatenmatrix, basierend auf einem äquidistanten Gitter
-        coord=Array{Float64}(undef,2,size[1]);
+        coord=Array{AbstractFloat}(undef,2,size[1]);
         ax=1;
         ay=1;
         zx=0.0;
@@ -503,9 +503,9 @@ function generateHexMesh(nx::Int64, ny::Int64)
         end
 
         #Initialisieren der Topologie, Geometrie und damit des Meshes
-        n=Int64[nx,ny];
-        l=Float64[0.0,0.0];
-        r=Float64[Float64(nx),Float64(ny)];
+        n=Int[nx,ny];
+        l=AbstractFloat[0.0,0.0];
+        r=AbstractFloat[AbstractFloat(nx),AbstractFloat(ny)];
         mT=meshTopology(inc,off,n);
         mG=meshGeometry(coord,l,r);
         m=mesh(mT,mG);
@@ -517,14 +517,14 @@ function generateHexMesh(nx::Int64, ny::Int64)
         ne=2*nx*(ny+1)+(ny-1)*0.5*nx+(ny+1)*0.5*(nx+1)
         nv=(ny+1)*(2*nx+1)
 
-        size=[Int64(nv), Int64(ne), Int64(nf)];
+        size=[Int(nv), Int(ne), Int(nf)];
         nk=6;
 
         #Initialisieren des Offsets mit den Einträgen "20" und "10"
         off=Dict("20"=>Array(1:nk:(nk*size[3]+1)),"10"=>Array(1:2:(2*size[2]+1)));
 
         #Berechnen der Inzidenz 2->0
-        incf=Int64[];
+        incf=Int[];
         z=1;
         for k in 1:ny
             iseven(k) ? e=nx-1 : e=nx
@@ -537,7 +537,7 @@ function generateHexMesh(nx::Int64, ny::Int64)
         end
 
         #Berechnen der Inzidenz 1->0
-        ince=Int64[];
+        ince=Int[];
         z=1;
         for k in 1:(ny+1)
             for h in 1:2*nx
@@ -558,7 +558,7 @@ function generateHexMesh(nx::Int64, ny::Int64)
         inc=Dict("20"=>incf,"10"=>ince);
 
         #Berechnen der Koordinatenmatrix, basierend auf einem äquidistanten Gitter
-        coord=Array{Float64}(undef,2,size[1]);
+        coord=Array{AbstractFloat}(undef,2,size[1]);
         ax=1;
         ay=1;
         zx=0.0;
@@ -580,9 +580,9 @@ function generateHexMesh(nx::Int64, ny::Int64)
         end
 
         #Initialisieren der Topologie, Geometrie und damit des Meshes
-        n=Int64[nx,ny];
-        l=Float64[0.0,0.0];
-        r=Float64[Float64(nx),Float64(ny)];
+        n=Int[nx,ny];
+        l=AbstractFloat[0.0,0.0];
+        r=AbstractFloat[AbstractFloat(nx),AbstractFloat(ny)];
         mT=meshTopology(inc,off,n);
         mG=meshGeometry(coord,l,r);
         m=mesh(mT,mG);
@@ -591,7 +591,7 @@ function generateHexMesh(nx::Int64, ny::Int64)
     end
 end
 
-function generateCubMesh(nx::Int64, ny::Int64, nz::Int64, xl::Float64=0.0, yl::Float64=0.0, zl::Float64=0.0, xr::Float64=Float64(nx), yr::Float64=Float64(ny), zr::Float64=Float64(nz))
+function generateCubMesh(nx::Int, ny::Int, nz::Int, xl::AbstractFloat=0.0, yl::AbstractFloat=0.0, zl::AbstractFloat=0.0, xr::AbstractFloat=AbstractFloat(nx), yr::AbstractFloat=AbstractFloat(ny), zr::AbstractFloat=AbstractFloat(nz))
 
     #Berechnen der Anzahl der Entitäten für die verschiedenen Dimensionen
     size=[(nz+1)*(ny+1)*(nx+1), (ny*(nx+1)+nx*(ny+1))*(nz+1)+nz*(nx+1)*(ny+1), (nz+1)*nx*ny+nz*(ny*(nx+1)+nx*(ny+1)), nz*nx*ny];
@@ -601,7 +601,7 @@ function generateCubMesh(nx::Int64, ny::Int64, nz::Int64, xl::Float64=0.0, yl::F
     off=Dict("30"=>collect(1:8:(8*size[4]+1)),"20"=>collect(1:4:(4*size[3]+1)),"10"=>collect(1:2:(2*size[2]+1)));
 
     #Berechnen der Koordinatenmatrix, basierend auf einem äquidistanten Gitter
-    coord=Array{Float64,2}(undef,3,size[1]);
+    coord=Array{AbstractFloat,2}(undef,3,size[1]);
     ax=(xr-xl)/nx;
     ay=(yr-yl)/ny;
     az=(zr-zl)/nz;
@@ -624,7 +624,7 @@ function generateCubMesh(nx::Int64, ny::Int64, nz::Int64, xl::Float64=0.0, yl::F
     end
 
     #Berechnen der Inzidenz 3->0
-    incc=Int64[];
+    incc=Int[];
     hz=(nx+1)*(ny+1);
     z=1;
     for j in 1:nz
@@ -640,7 +640,7 @@ function generateCubMesh(nx::Int64, ny::Int64, nz::Int64, xl::Float64=0.0, yl::F
     end
 
     #Berechnen der Inzidenz 2->0
-    incf=Int64[];
+    incf=Int[];
     z=1;
     for j in 1:(nz+1)
         for k in 1:ny
@@ -677,7 +677,7 @@ function generateCubMesh(nx::Int64, ny::Int64, nz::Int64, xl::Float64=0.0, yl::F
     end
 
     #Berechnen der Inzidenz 1->0
-    ince=Int64[];
+    ince=Int[];
     z=1;
     for j in 1:(nz+1)
         wz=copy(z);
@@ -713,9 +713,9 @@ function generateCubMesh(nx::Int64, ny::Int64, nz::Int64, xl::Float64=0.0, yl::F
     inc=Dict("30"=>incc,"20"=>incf,"10"=>ince);
 
     #Initialisieren der Topologie, Geometrie und damit des Meshes
-    n=Int64[nx,ny,nz];
-    l=Float64[xl,yl,zl];
-    r=Float64[xr,yr,zr];
+    n=Int[nx,ny,nz];
+    l=AbstractFloat[xl,yl,zl];
+    r=AbstractFloat[xr,yr,zr];
     mT=meshTopology(inc,off,n);
     mG=meshGeometry(coord,l,r);
     m=mesh(mT,mG);

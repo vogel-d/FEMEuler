@@ -1,7 +1,7 @@
 include("modulesCE.jl")
 
 function testMountainWaves()
-    filename = "mountainWaves";
+    filename = "mountainWavesPC";
 
     #order: comp, compHigh, compRec, compDG
     femType=Dict(:rho=>[:DG0, :P1, :DG1, :DG0],
@@ -15,7 +15,7 @@ function testMountainWaves()
     advection=true;
 
     m=generateRectMesh(200,156,:periodic,:constant,-20000.0,20000.0,0.0,15600.0); #(east/west, top/bottom)
-    #m=generateRectMesh(200,90,:periodic,:constant,-20000.0,20000.0,0.0,9000.0); #(east/west, top/bottom)
+    #m=generateRectMesh(200,90,:constant,:constant,-20000.0,20000.0,0.0,9000.0); #(east/west, top/bottom)
 
     adaptGeometry!(m,400.0,1000.0); #witch of agnesi with Gall-Chen and Sommerville transformation
 
@@ -28,25 +28,25 @@ function testMountainWaves()
     dt=3.0; #10.0;
     ns=20;
     EndTime=2160.0;
-    nIter=Int64(EndTime/dt);
+    nIter=Int(EndTime/dt);
 
     #start functions
     th0=300.0; p0=100000.0;
     Grav=9.81; N=0.01
     Cpd=1004.0; Cvd=717.0; Cpv=1885.0;
     Rd=Cpd-Cvd; Gamma=Cpd/Cvd; kappa=Rd/Cpd;
-    function frho(x::Float64,z::Float64)
+    function frho(x::AbstractFloat,z::AbstractFloat)
         s=N*N/Grav
         ThLoc=th0*exp(z*s)
         pLoc=p0*(1-Grav/(Cpd*th0*s)*(1-exp(-s*z)))^(Cpd/Rd)
         return pLoc/((pLoc/p0)^kappa*Rd*ThLoc);
     end
-    function ftheta(x::Float64,z::Float64)
+    function ftheta(x::AbstractFloat,z::AbstractFloat)
         return th0*exp(z*N*N/Grav)
     end
 
-    fv1(x::Float64, y::Float64)=UMax;
-    fv2(x::Float64, y::Float64)=0.0;
+    fv1(x::AbstractFloat, y::AbstractFloat)=UMax;
+    fv2(x::AbstractFloat, y::AbstractFloat)=0.0;
     fvel=[fv1, fv2];
     f=Dict(:rho=>frho,:theta=>ftheta,:v=>fvel);
 
@@ -75,7 +75,7 @@ function testMountainWaves()
     y=p.solution[0.0];
     Y=Array{solution,1}(undef,MISMethod.nStage+1);
     FY=Array{solution,1}(undef,MISMethod.nStage);
-    SthY=Array{SparseMatrixCSC{Float64,Int64},1}(undef,MISMethod.nStage);
+    SthY=Array{SparseMatrixCSC{AbstractFloat,Int},1}(undef,MISMethod.nStage);
     Time=0.0;
     for i=1:nIter
       y=splitExplicit(y,Y,FY,SthY,p,gamma,nquadPhi,nquadPoints,MrT,MrV,MISMethod,Time,dt,ns);

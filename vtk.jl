@@ -1,7 +1,7 @@
 using WriteVTK
 using Printf
 
-function unstructured_vtk(p::femProblem, tend::Float64, comp::Array{Symbol,1}, name::Array{String,1}, filename::String)
+function unstructured_vtk(p::femProblem, tend::AbstractFloat, comp::Array{Symbol,1}, name::Array{String,1}, filename::String)
 
     m=p.mesh;
     pts=m.geometry.coordinates;
@@ -28,13 +28,13 @@ function unstructured_vtk(p::femProblem, tend::Float64, comp::Array{Symbol,1}, n
         inds=inc[off[k]:off[k+1]-1];
         push!(cells, MeshCell(celltype, inds))
     end
-    fComp=Array{Array{Float64},1}(undef, length(comp))
+    fComp=Array{Array{AbstractFloat},1}(undef, length(comp))
     for l in 1:length(comp)
         fComp[l]=getElementProperties(p.femType[comp[l]][1],m.meshType,mx,my);
     end
-    J=Array{Float64,2}(undef,2,2);
+    J=Array{AbstractFloat,2}(undef,2,2);
     dJ=0.0;
-    coord=Array{Float64,2}(undef,2,m.meshType);
+    coord=Array{AbstractFloat,2}(undef,2,m.meshType);
 
     vtk_filename_noext = (@__DIR__)*"/VTK/"*filename;
     vtk = vtk_grid(vtk_filename_noext, pts, cells,compress=3)
@@ -43,14 +43,14 @@ function unstructured_vtk(p::femProblem, tend::Float64, comp::Array{Symbol,1}, n
     for l in 1:length(comp)
         solc=getfield(sol,comp[l]);
         if isa(p.degFBoundary[p.femType[comp[l]][1]],degF{1})
-            cvtk=zeros(Float64, nf)
+            cvtk=zeros(AbstractFloat, nf)
             for k in 1:nf
                 cLoc=solc[l2g(p.degFBoundary[p.femType[comp[l]][1]], k)]
                 cvtk[k]=dot(fComp[l],cLoc);
             end
             vtk_cell_data(vtk, cvtk, name[l])
         else
-            cvtk=zeros(Float64, 2, nf)
+            cvtk=zeros(AbstractFloat, 2, nf)
             for k in 1:nf
                 cLoc=solc[l2g(p.degFBoundary[p.femType[comp[l]][1]], k)]
                 dJ=jacobi!(J,dJ,m,k,mx,my,coord);
@@ -59,7 +59,7 @@ function unstructured_vtk(p::femProblem, tend::Float64, comp::Array{Symbol,1}, n
             end
             vtk_cell_data(vtk, cvtk[1,:], name[l]*" x")
             vtk_cell_data(vtk, cvtk[2,:], name[l]*" z")
-            vtk_cell_data(vtk, (cvtk[1,:],cvtk[2,:],zeros(Float64,nf)), name[l])
+            vtk_cell_data(vtk, (cvtk[1,:],cvtk[2,:],zeros(AbstractFloat,nf)), name[l])
         end
     end
 
@@ -67,7 +67,7 @@ function unstructured_vtk(p::femProblem, tend::Float64, comp::Array{Symbol,1}, n
     return outfiles::Vector{String}
 end
 
-function unstructured_vtk(p::femProblem, t::Array{Float64,1}, comp::Array{Symbol,1}, name::Array{String,1}, filename::String)
+function unstructured_vtk(p::femProblem, t::Array{AbstractFloat,1}, comp::Array{Symbol,1}, name::Array{String,1}, filename::String)
 
     m=p.mesh;
     pts=m.geometry.coordinates;
@@ -96,13 +96,13 @@ function unstructured_vtk(p::femProblem, t::Array{Float64,1}, comp::Array{Symbol
         push!(cells, MeshCell(celltype, inds))
     end
 
-    fComp=Array{Array{Float64},1}(undef, length(comp))
+    fComp=Array{Array{AbstractFloat},1}(undef, length(comp))
     for l in 1:length(comp)
         fComp[l]=getElementProperties(p.femType[comp[l]][1],m.meshType,mx,my);
     end
-    J=Array{Float64,2}(undef,2,2);
+    J=Array{AbstractFloat,2}(undef,2,2);
     dJ=0.0;
-    coord=Array{Float64,2}(undef,2,m.meshType);
+    coord=Array{AbstractFloat,2}(undef,2,m.meshType);
 
     vtk_filename_noext = (@__DIR__)*"/VTK/"*filename;
 
@@ -113,14 +113,14 @@ function unstructured_vtk(p::femProblem, t::Array{Float64,1}, comp::Array{Symbol
             for l in 1:length(comp)
                 solc=getfield(sol,comp[l]);
                 if isa(p.degFBoundary[p.femType[comp[l]][1]],degF{1})
-                    cvtk=zeros(Float64, nf)
+                    cvtk=zeros(AbstractFloat, nf)
                     for k in 1:nf
                         cLoc=solc[l2g(p.degFBoundary[p.femType[comp[l]][1]], k)]
                         cvtk[k]=dot(fComp[l],cLoc);
                     end
                     vtk_cell_data(vtk, cvtk, name[l])
                 else
-                    cvtk=zeros(Float64, 2, nf)
+                    cvtk=zeros(AbstractFloat, 2, nf)
                     for k in 1:nf
                         cLoc=solc[l2g(p.degFBoundary[p.femType[comp[l]][1]], k)]
                         dJ=jacobi!(J,dJ,m,k,mx,my,coord);
@@ -129,7 +129,7 @@ function unstructured_vtk(p::femProblem, t::Array{Float64,1}, comp::Array{Symbol
                     end
                     vtk_cell_data(vtk, cvtk[1,:], name[l]*" x")
                     vtk_cell_data(vtk, cvtk[2,:], name[l]*" z")
-                    vtk_cell_data(vtk, (cvtk[1,:],cvtk[2,:],zeros(Float64,nf)), name[l])
+                    vtk_cell_data(vtk, (cvtk[1,:],cvtk[2,:],zeros(AbstractFloat,nf)), name[l])
                 end
             end
             vtk_save(vtk)

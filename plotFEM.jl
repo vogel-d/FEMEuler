@@ -1,9 +1,9 @@
 
 function plotFEM(m::mesh, key::Symbol, showann::Bool=true; showvertices::Bool=showann,
-    sizevertices::Float64=2.5, linecolor::Symbol=:blue,
+    sizevertices::AbstractFloat=2.5, linecolor::Symbol=:blue,
     colorann::Array{Symbol,1}=[:grey, :darkgrey, :black],
     positionann::Array{Symbol,1}=[:bottom, :bottom, :auto],
-    sizeann::Array{Int64,1}=[8,8,8])
+    sizeann::Array{Int,1}=[8,8,8])
 
     ordEdgesB, nebP, nebC=getOrderBoundary(m.boundaryEdges);
     ordVerticesB, nvbP, nvbC=getOrderBoundary(m.boundaryVertices);
@@ -20,9 +20,9 @@ function plotFEM(m::mesh, key::Symbol, showann::Bool=true; showvertices::Bool=sh
 
     coord=m.geometry.coordinates;
     nv, ne, nf=m.topology.size[1:3];
-    x=Array{Float64,2}(undef,2,ne);
-    y=Array{Float64,2}(undef,2,ne);
-    coorde=Array{Float64,2}(undef,2,ne);
+    x=Array{AbstractFloat,2}(undef,2,ne);
+    y=Array{AbstractFloat,2}(undef,2,ne);
+    coorde=Array{AbstractFloat,2}(undef,2,ne);
 
     for k in 1:ne
         i=ince[[(2*k-1),2*k]];
@@ -32,7 +32,7 @@ function plotFEM(m::mesh, key::Symbol, showann::Bool=true; showvertices::Bool=sh
         coorde[2,k]=0.5*sum(y[:,k]);
     end
 
-    coordf=Array{Float64,2}(undef,2,nf);
+    coordf=Array{AbstractFloat,2}(undef,2,nf);
     ng=off[2]-off[1];
 
     for k in 1:nf

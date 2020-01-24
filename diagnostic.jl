@@ -1,5 +1,5 @@
 macro diagnostic(fieldname...)
-           fields = [:($(Symbol(fieldname[i]))::Array{Float64,1}) for i=1:length(fieldname)]
+           fields = [:($(Symbol(fieldname[i]))::Array{AbstractFloat,1}) for i=1:length(fieldname)]
 
            if isdefined(Main,:diagnostic)
              if sort(collect(fieldname))!=sort(collect(fieldnames(diagnostic)))
@@ -15,7 +15,7 @@ macro diagnostic(fieldname...)
                    diagnostic()=new()
                end
 
-               function createDiagnostic(n::Int64...)
+               function createDiagnostic(n::Int...)
                  s=diagnostic();
                  k=fieldnames(diagnostic);
                  length(k)!=length(n) && error("Die Anzahl der eingegebenen Längen müssen mit der Anzahl der Komponenten von diagnostic übereinstimmen!")
@@ -25,7 +25,7 @@ macro diagnostic(fieldname...)
                  return s;
                end
 
-               function createDiagnostic(v::Array{Float64,1}...)
+               function createDiagnostic(v::Array{AbstractFloat,1}...)
                    s=diagnostic();
                    k=fieldnames(diagnostic);
                    length(k)!=length(v) && error("Die Anzahl der eingegebenen Matrizen müssen mit der Anzahl der Komponenten von diagnostic übereinstimmen!")
@@ -58,7 +58,7 @@ macro diagnostic(fieldname...)
                end
 
                import Base.*
-               function *(val::Float64, s::diagnostic)
+               function *(val::AbstractFloat, s::diagnostic)
                  r=diagnostic();
                  k=fieldnames(diagnostic);
                  for i in 1:length(k)

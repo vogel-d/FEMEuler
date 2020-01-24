@@ -1,5 +1,5 @@
-function advection(p::femProblem, gamma::Float64, Vfval::SparseVector{Float64,Int64}, Vfcomp::Symbol, cval::solution,
-                  nquadPoints::Array{Array{Float64,2},1}, nquadPhi::Dict{Symbol, Array{Array{Array{Float64,1},2},1}})
+function advection(p::femProblem, gamma::AbstractFloat, Vfval::SparseVector{AbstractFloat,Int}, Vfcomp::Symbol, cval::solution,
+                  nquadPoints::Array{Array{AbstractFloat,2},1}, nquadPhi::Dict{Symbol, Array{Array{Array{AbstractFloat,1},2},1}})
   fTp=p.femType[:p]; fTb=p.femType[:b]; fTv=p.femType[:v];
   Fp=p.massM[fTp[1]]; Fb=p.massM[fTb[1]]; Fv=p.massM[fTv[1]];
   np=p.degFBoundary[fTp[1]].num; nv=p.degFBoundary[fTv[1]].num; nb=p.degFBoundary[fTb[1]].num;

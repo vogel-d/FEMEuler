@@ -1,8 +1,8 @@
-function embed(comp::Symbol,degF::degF{1},cval::Array{Float64,1},compRec::Symbol,degFRec::degF{1},n::Int64)
+function embed(comp::Symbol,degF::degF{1},cval::Array{AbstractFloat,1},compRec::Symbol,degFRec::degF{1},n::Int)
     cEmbed=zeros(degFRec.numB);
 
-    globalNum=Array{Int64,1}(undef,length(degF.phi));
-    globalNumRec=Array{Int64,1}(undef,length(degFRec.phi));
+    globalNum=Array{Int,1}(undef,length(degF.phi));
+    globalNumRec=Array{Int,1}(undef,length(degFRec.phi));
     #println(" S: comp ",comp," compRec ",compRec)
     if (comp==:DG0 && compRec==:DG1) || (comp==:DG1 && compRec==:DG2)
         for i in 1:n
@@ -63,11 +63,11 @@ function embed(comp::Symbol,degF::degF{1},cval::Array{Float64,1},compRec::Symbol
     return cEmbed;
 end
 
-function embed(comp::Symbol,degF::degF{2},cval::Array{Float64,1},compRec::Symbol,degFRec::degF{2},n::Int64)
+function embed(comp::Symbol,degF::degF{2},cval::Array{AbstractFloat,1},compRec::Symbol,degFRec::degF{2},n::Int)
     cEmbed=zeros(degFRec.numB);
 
-    globalNum=Array{Int64,1}(undef,size(degF.phi,2));
-    globalNumRec=Array{Int64,1}(undef,size(degFRec.phi,2));
+    globalNum=Array{Int,1}(undef,size(degF.phi,2));
+    globalNumRec=Array{Int,1}(undef,size(degFRec.phi,2));
 
     #println(" V: comp ",comp," compRec ",compRec)
     if comp==:VecP1 && compRec==:VecDG1

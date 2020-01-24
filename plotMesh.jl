@@ -10,10 +10,10 @@
 #                   die Farbe/Position/Größe der Nummerierung festgelegt wird,
 #                   wobei die Anordnung [vertices, edges, facets] gilt.
 function plotMesh2D(m::mesh, showann::Bool=true; showvertices::Bool=showann,
-    sizevertices::Float64=2.5, linecolor::Symbol=:blue,
+    sizevertices::AbstractFloat=2.5, linecolor::Symbol=:blue,
     colorann::Array{Symbol,1}=[:grey, :darkgrey, :black],
     positionann::Array{Symbol,1}=[:bottom, :bottom, :auto],
-    sizeann::Array{Int64,1}=[12,12,12])
+    sizeann::Array{Int,1}=[12,12,12])
 
     ince=m.topology.incidence["10"];
 
@@ -22,9 +22,9 @@ function plotMesh2D(m::mesh, showann::Bool=true; showvertices::Bool=showann,
 
     coord=m.geometry.coordinates;
     nv, ne, nf=m.topology.size[1:3];
-    x=Array{Float64,2}(undef,2,ne);
-    y=Array{Float64,2}(undef,2,ne);
-    coorde=Array{Float64,2}(undef,2,ne);
+    x=Array{AbstractFloat,2}(undef,2,ne);
+    y=Array{AbstractFloat,2}(undef,2,ne);
+    coorde=Array{AbstractFloat,2}(undef,2,ne);
 
     for k in 1:ne
         i=ince[[(2*k-1),2*k]];
@@ -34,7 +34,7 @@ function plotMesh2D(m::mesh, showann::Bool=true; showvertices::Bool=showann,
         coorde[2,k]=0.5*sum(y[:,k]);
     end
 
-    coordf=Array{Float64,2}(undef,2,nf);
+    coordf=Array{AbstractFloat,2}(undef,2,nf);
     ng=off[2]-off[1];
 
     for k in 1:nf
@@ -61,10 +61,10 @@ end
 
 
 function plotMesh3D(m::mesh, showann::Bool=false; showvertices::Bool=showann,
-    sizevertices::Float64=2.5, linecolor::Symbol=:blue,
+    sizevertices::AbstractFloat=2.5, linecolor::Symbol=:blue,
     colorann::Array{Symbol,1}=[:grey, :darkgrey, :black],
     positionann::Array{Symbol,1}=[:bottom, :bottom, :auto],
-    sizeann::Array{Int64,1}=[12,12,12])
+    sizeann::Array{Int,1}=[12,12,12])
 
     ince=m.topology.incidence["10"];
 
@@ -79,10 +79,10 @@ function plotMesh3D(m::mesh, showann::Bool=false; showvertices::Bool=showann,
     coord=m.geometry.coordinates;
     #nv, ne, nf, nc=m.topology.size[1:4];
     ne=m.topology.size[2];
-    x=Array{Float64,2}(undef,2,ne);
-    y=Array{Float64,2}(undef,2,ne);
-    z=Array{Float64,2}(undef,2,ne);
-    coorde=Array{Float64,2}(undef,3,ne);
+    x=Array{AbstractFloat,2}(undef,2,ne);
+    y=Array{AbstractFloat,2}(undef,2,ne);
+    z=Array{AbstractFloat,2}(undef,2,ne);
+    coorde=Array{AbstractFloat,2}(undef,3,ne);
     for k in 1:ne
         i=ince[[(2*k-1),2*k]];
         x[:,k]=coord[1,i];
@@ -94,7 +94,7 @@ function plotMesh3D(m::mesh, showann::Bool=false; showvertices::Bool=showann,
     end
     p=plot(x,y,z, c=linecolor, legend=false);
     #=
-    coordf=Array{Float64,2}(undef,3,nf);
+    coordf=Array{AbstractFloat,2}(undef,3,nf);
     ng=offf[2]-offf[1];
     for k in 1:nf
         i=incf[offf[k]:(offf[k+1]-1)];
@@ -102,7 +102,7 @@ function plotMesh3D(m::mesh, showann::Bool=false; showvertices::Bool=showann,
         coordf[2,k]=sum(coord[2,i])/ng;
         coordf[3,k]=sum(coord[3,i])/ng;
     end
-    coordc=Array{Float64,2}(undef,3,nc);
+    coordc=Array{AbstractFloat,2}(undef,3,nc);
     ngc=offc[2]-offc[1];
     for k in 1:nc
         i=incc[offc[k]:(offc[k+1]-1)];

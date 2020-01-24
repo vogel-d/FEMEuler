@@ -37,14 +37,14 @@ function testInertiaGravity2()
     H=10000;
     a=5000;
     xC=150000;
-    function frho(x::Float64,z::Float64)
+    function frho(x::AbstractFloat,z::AbstractFloat)
         S=N*N/Grav
         ThLoc=th0*exp(S*z)+DeltaTh1*sin(pi*z/H)/(1.0+((x-xC)/a)^2);
         pLoc=p0*(1.0-Grav/(Cpd*th0*S)*(1.0-exp(-S*z)))^(Cpd/Rd)
         return pLoc/((pLoc/p0)^kappa*Rd*ThLoc);
     end
 
-    function ftheta(x::Float64,z::Float64)
+    function ftheta(x::AbstractFloat,z::AbstractFloat)
         S=N*N/Grav
         return th0*exp(S*z)+DeltaTh1*sin(pi*z/H)/(1.0+((x-xC)/a)^2);
     end
@@ -76,7 +76,7 @@ function testInertiaGravity2()
     y=p.solution[0.0];
     Y=Array{solution,1}(undef,MISMethod.nStage+1);
     FY=Array{solution,1}(undef,MISMethod.nStage);
-    SthY=Array{SparseMatrixCSC{Float64,Int64},1}(undef,MISMethod.nStage);
+    SthY=Array{SparseMatrixCSC{AbstractFloat,Int},1}(undef,MISMethod.nStage);
     Time=0.0;
     for i=1:nIter
       @time y=splitExplicit(y,Y,FY,SthY,p,gamma,nquadPhi,nquadPoints,MrT,MrV,MISMethod,Time,dt,ns);
@@ -109,7 +109,7 @@ sW=50; sC=50;
 Grav=9.81;
 Cpd=1004.0; Cvd=717.0; Cpv=1885.0;
 Rd=Cpd-Cvd; Gamma=Cpd/Cvd; kappa=Rd/Cpd;
-function frho(x::Float64,z::Float64)
+function frho(x::AbstractFloat,z::AbstractFloat)
     pLoc=p0*(1-kappa*Grav*z/(Rd*th0))^(Cpd/Rd);
     #Rad=sqrt((x-xCM)^2+(z-zCM)^2);
     #ThLoc=th0+(Rad>r0)*(DeltaTh1*exp(-(Rad-r0)^2/s^2));
@@ -128,7 +128,7 @@ function frho(x::Float64,z::Float64)
     end
     return pLoc/((pLoc/p0)^kappa*Rd*ThLoc);
 end
-function ftheta(x::Float64,z::Float64)
+function ftheta(x::AbstractFloat,z::AbstractFloat)
     radW=sqrt((x-xW)^2+(z-zW)^2);
     radC=sqrt((x-xC)^2+(z-zC)^2);
     th=th0;

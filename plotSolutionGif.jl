@@ -1,5 +1,5 @@
 #Nur für skalare Variablen
-function plotSolutionGif(p::femProblem, key::Symbol, t::Array{T,1} where T=sort(collect(keys(p.solution))); fps::Int64=25, filename::String="testgif.gif")
+function plotSolutionGif(p::femProblem, key::Symbol, t::Array{T,1} where T=sort(collect(keys(p.solution))); fps::Int=25, filename::String="testgif.gif")
     (smax,smin)=calculateScale(p,key);
     anim = @animate for i in t
                         plotGif(p,key,i,smax,smin);
@@ -24,7 +24,7 @@ function calculateScale(p::femProblem, key::Symbol)
     return (max, min)
 end
 
-function plotGif(p::femProblem, key::Symbol, t::Float64, smax::Float64, smin::Float64, c::Symbol=:plasma)
+function plotGif(p::femProblem, key::Symbol, t::AbstractFloat, smax::AbstractFloat, smin::AbstractFloat, c::Symbol=:plasma)
     nf=p.mesh.topology.size[3];
     sol=getfield(p.solution[t],key);
     smin=minimum(sol);

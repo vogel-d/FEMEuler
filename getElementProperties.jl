@@ -1,14 +1,14 @@
 include("getQuadElementProperties.jl")
 include("getTriElementProperties.jl")
 
-function getElementProperties(type::Symbol, kubPoints::Array{Float64,2}, mt::Int)
+function getElementProperties(type::Symbol, kubPoints::Array{AbstractFloat,2}, mt::Int)
     if mt==4
         phi, divphi, gradphi, cm, nFace, nEdge, nVert=getQuadElementProperties(type);
 
         sk=size(kubPoints,2);
-        kubPhi=Array{Array{Float64,2},ndims(phi)}(undef,size(phi));
+        kubPhi=Array{Array{AbstractFloat,2},ndims(phi)}(undef,size(phi));
         for k=1:length(phi)
-            kubVal=Array{Float64,2}(undef,sk,sk);
+            kubVal=Array{AbstractFloat,2}(undef,sk,sk);
             for i=1:sk, j=1:sk
                 kubVal[i,j]=phi[k](kubPoints[1,i], kubPoints[2,j]);
                 #für Dreiecke werden hier wesentlich mehr (mögl. redundante) Werte als nötig ausgerechnet,
@@ -18,18 +18,18 @@ function getElementProperties(type::Symbol, kubPoints::Array{Float64,2}, mt::Int
             kubPhi[k]=kubVal;
         end
 
-        kubDiv=Array{Array{Float64,2},1}(undef,length(divphi));
+        kubDiv=Array{Array{AbstractFloat,2},1}(undef,length(divphi));
         for k in 1:length(divphi)
-            kubVal=Array{Float64,2}(undef,sk,sk);
+            kubVal=Array{AbstractFloat,2}(undef,sk,sk);
             for i=1:sk, j=1:sk
                 kubVal[i,j]=divphi[k](kubPoints[1,i], kubPoints[2,j]);
             end
             kubDiv[k]=kubVal;
         end
 
-        kubGrad=Array{Array{Float64,2},2}(undef,size(gradphi));
+        kubGrad=Array{Array{AbstractFloat,2},2}(undef,size(gradphi));
         for ki=1:size(gradphi,1), kj=1:size(gradphi,2)
-            kubVal=Array{Float64,2}(undef,sk,sk);
+            kubVal=Array{AbstractFloat,2}(undef,sk,sk);
             for i=1:sk, j=1:sk
                 kubVal[i,j]=gradphi[ki,kj](kubPoints[1,i], kubPoints[2,j]);
             end
@@ -40,9 +40,9 @@ function getElementProperties(type::Symbol, kubPoints::Array{Float64,2}, mt::Int
         phi, divphi, gradphi, cm, nFace, nEdge, nVert=getTriElementProperties(type);
 
         sk=size(kubPoints,2);
-        kubPhi=Array{Array{Float64,2},ndims(phi)}(undef,size(phi));
+        kubPhi=Array{Array{AbstractFloat,2},ndims(phi)}(undef,size(phi));
         for k=1:length(phi)
-            kubVal=Array{Float64,2}(undef,1,sk);
+            kubVal=Array{AbstractFloat,2}(undef,1,sk);
             for i=1:sk
                 kubVal[1,i]=phi[k](kubPoints[1,i], kubPoints[2,i]);
                 #für Dreiecke werden hier wesentlich mehr (mögl. redundante) Werte als nötig ausgerechnet,
@@ -52,18 +52,18 @@ function getElementProperties(type::Symbol, kubPoints::Array{Float64,2}, mt::Int
             kubPhi[k]=kubVal;
         end
 
-        kubDiv=Array{Array{Float64,2},1}(undef,length(divphi));
+        kubDiv=Array{Array{AbstractFloat,2},1}(undef,length(divphi));
         for k in 1:length(divphi)
-            kubVal=Array{Float64,2}(undef,1,sk);
+            kubVal=Array{AbstractFloat,2}(undef,1,sk);
             for i=1:sk
                 kubVal[1,i]=divphi[k](kubPoints[1,i], kubPoints[2,i]);
             end
             kubDiv[k]=kubVal;
         end
 
-        kubGrad=Array{Array{Float64,2},2}(undef,size(gradphi));
+        kubGrad=Array{Array{AbstractFloat,2},2}(undef,size(gradphi));
         for ki=1:size(gradphi,1), kj=1:size(gradphi,2)
-            kubVal=Array{Float64,2}(undef,1,sk);
+            kubVal=Array{AbstractFloat,2}(undef,1,sk);
             for i=1:sk
                 kubVal[1,i]=gradphi[ki,kj](kubPoints[1,i], kubPoints[2,i]);
             end
@@ -100,7 +100,7 @@ function getElementProperties(type::Symbol, mt::Int, x, y)
     elseif mt==3
         phi, divphi, gradphi, cm, nFace, nEdge, nVert=getTriElementProperties(type);
     end
-    valPhi=similar(phi,Float64);
+    valPhi=similar(phi,AbstractFloat);
     for k=1:length(phi)
         valPhi[k]=phi[k](x,y);
     end

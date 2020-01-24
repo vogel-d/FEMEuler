@@ -1,7 +1,7 @@
 #Lösen der Akkustik-Gleichung mit Buoyancy
 function solveB!(p::femProblem,
-                        Fp::SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64}, Fv::SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64}, Fb::SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64},
-                        dt::Float64, nt::Float64, method::Symbol)
+                        Fp::SuiteSparse.UMFPACK.UmfpackLU{AbstractFloat,Int}, Fv::SuiteSparse.UMFPACK.UmfpackLU{AbstractFloat,Int}, Fb::SuiteSparse.UMFPACK.UmfpackLU{AbstractFloat,Int},
+                        dt::AbstractFloat, nt::AbstractFloat, method::Symbol)
 
   sol=collect(keys(p.solution));
   tstart=maximum(sol[sol.<nt]);

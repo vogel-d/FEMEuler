@@ -1,8 +1,8 @@
-function discGalerkinCells!(M::Array{Float64,2},
-                            degFT::degF{1},phiT::Array{Array{Float64,2},1}, globalNumT::Array{Int64,1},
-                            degFF::degF{2},phiF::Array{Array{Float64,2},2}, dphiF::Array{Array{Float64,2},1}, fval::SparseVector{Float64,Int64}, globalNumF::Array{Int64,1},
-                            degFW::degF{1},phiW::Array{Array{Float64,2},1}, gradphiW::Array{Array{Float64,2},2}, wval::Array{Float64,1}, globalNumW::Array{Int64,1},
-                            m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
+function discGalerkinCells!(M::Array{AbstractFloat,2},
+                            degFT::degF{1},phiT::Array{Array{AbstractFloat,2},1}, globalNumT::Array{Int,1},
+                            degFF::degF{2},phiF::Array{Array{AbstractFloat,2},2}, dphiF::Array{Array{AbstractFloat,2},1}, fval::SparseVector{AbstractFloat,Int}, globalNumF::Array{Int,1},
+                            degFW::degF{1},phiW::Array{Array{AbstractFloat,2},1}, gradphiW::Array{Array{AbstractFloat,2},2}, wval::Array{AbstractFloat,1}, globalNumW::Array{Int,1},
+                            m::mesh, kubPoints::Array{AbstractFloat,2}, kubWeights::Array{AbstractFloat,2})
 
 
     sk=size(kubWeights);
@@ -47,11 +47,11 @@ function discGalerkinCells!(M::Array{Float64,2},
     return nothing;
 end
 
-function discGalerkinCells!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Array{Float64,1},
-                            degFT::degF{1},phiT::Array{Array{Float64,2},1}, globalNumT::Array{Int64,1},
-                            degFF::degF{2},phiF::Array{Array{Float64,2},2}, dphiF::Array{Array{Float64,2},1}, fval::Array{Float64,1}, globalNumF::Array{Int64,1},
-                            degFW::degF{1},phiW::Array{Array{Float64,2},1}, gradphiW::Array{Array{Float64,2},2}, wval::Array{Float64,1}, globalNumW::Array{Int64,1},
-                            m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
+function discGalerkinCells!(rows::Array{Int,1}, cols::Array{Int,1}, vals::Array{AbstractFloat,1},
+                            degFT::degF{1},phiT::Array{Array{AbstractFloat,2},1}, globalNumT::Array{Int,1},
+                            degFF::degF{2},phiF::Array{Array{AbstractFloat,2},2}, dphiF::Array{Array{AbstractFloat,2},1}, fval::Array{AbstractFloat,1}, globalNumF::Array{Int,1},
+                            degFW::degF{1},phiW::Array{Array{AbstractFloat,2},1}, gradphiW::Array{Array{AbstractFloat,2},2}, wval::Array{AbstractFloat,1}, globalNumW::Array{Int,1},
+                            m::mesh, kubPoints::Array{AbstractFloat,2}, kubWeights::Array{AbstractFloat,2})
 
 
     sk=size(kubWeights);
@@ -107,17 +107,17 @@ function discGalerkinCells!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
 end
 
 
-function discGalerkinCells!(M::Array{Float64,2},
-                            degFT::degF{2},phiT::Array{Array{Float64,2},2}, globalNumT::Array{Int64,1},
-                            degFF::degF{2},phiF::Array{Array{Float64,2},2}, dphiF::Array{Array{Float64,2},1}, fval::SparseVector{Float64,Int64}, globalNumF::Array{Int64,1},
-                            degFW::degF{2},phiW::Array{Array{Float64,2},2}, gradphiW::Array{Array{Float64,2},2}, wval::Array{Float64,1}, globalNumW::Array{Int64,1},
-                            m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2}, coord::Array{Float64,2})
+function discGalerkinCells!(M::Array{AbstractFloat,2},
+                            degFT::degF{2},phiT::Array{Array{AbstractFloat,2},2}, globalNumT::Array{Int,1},
+                            degFF::degF{2},phiF::Array{Array{AbstractFloat,2},2}, dphiF::Array{Array{AbstractFloat,2},1}, fval::SparseVector{AbstractFloat,Int}, globalNumF::Array{Int,1},
+                            degFW::degF{2},phiW::Array{Array{AbstractFloat,2},2}, gradphiW::Array{Array{AbstractFloat,2},2}, wval::Array{AbstractFloat,1}, globalNumW::Array{Int,1},
+                            m::mesh, kubPoints::Array{AbstractFloat,2}, kubWeights::Array{AbstractFloat,2}, coord::Array{AbstractFloat,2})
 
 
     sk=size(kubWeights);
 
-    ddJ=Array{Float64,2}(undef,sk);
-    jphiT=initPhi(size(phiT),sk);
+    ddJ=Array{AbstractFloat,2}(undef,sk);
+    jphiT=initJacobi(size(phiT),sk);
 
     w1=zeros(sk);
     w2=zeros(sk);

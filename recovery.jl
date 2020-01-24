@@ -1,4 +1,4 @@
-function recovery(p::femProblem, comp::Array{Symbol,1}, cval::Array{Float64,1}) #,m::mesh,kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
+function recovery(p::femProblem, comp::Array{Symbol,1}, cval::Array{AbstractFloat,1}) #,m::mesh,kubPoints::Array{AbstractFloat,2}, kubWeights::Array{AbstractFloat,2})
     m=p.mesh;
     kubPoints=p.kubPoints;
     kubWeights=p.kubWeights;
@@ -11,11 +11,11 @@ function recovery(p::femProblem, comp::Array{Symbol,1}, cval::Array{Float64,1}) 
     cR=embed(comp[2],degF[comp[2]],cH,comp[3],degF[comp[3]],n);
     cEmbed=embed(comp[1],degF[comp[1]],cval,comp[3],degF[comp[3]],n);
     cHPEmbed=embed(comp[4],degF[comp[4]],cHP,comp[3],degF[comp[3]],n);
-    
+
     return cR+(cEmbed-cHPEmbed);
 end
 
-function recovery(p::femProblem, comp::Array{Symbol,1}, cval::Array{Float64,1}, bcomp::Symbol)
+function recovery(p::femProblem, comp::Array{Symbol,1}, cval::Array{AbstractFloat,1}, bcomp::Symbol)
     m=p.mesh;
     kubPoints=p.kubPoints;
     kubWeights=p.kubWeights;

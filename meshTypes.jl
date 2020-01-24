@@ -11,15 +11,15 @@
 #Beide werden allerdings nicht im Konstruktor angegeben, da sie aus incidence und
 #offset berechnet werden
 struct meshTopology
-  incidence::Dict{String, Array{Int64,1}}
-  offset::Dict{String, Array{Int64,1}}
-  size::Array{Int64,1}
-  D::Int64
-  n::Array{Int64,1}
+  incidence::Dict{String, Array{Int,1}}
+  offset::Dict{String, Array{Int,1}}
+  size::Array{Int,1}
+  D::Int
+  n::Array{Int,1}
 end
 
-function meshTopology(inc::Dict{String, Array{Int64,1}},off::Dict{String, Array{Int64,1}}, n::Array{Int64,1})
-  size=Int64[];
+function meshTopology(inc::Dict{String, Array{Int,1}},off::Dict{String, Array{Int,1}}, n::Array{Int,1})
+  size=Int[];
   push!(size,maximum(inc["10"]));
   a=0;
   for k in 2:(length(inc)+1)
@@ -35,9 +35,9 @@ end
 #die Koordinaten für den vertex i gespeichert sind
 #l und r speichern jeweils die äußersten Koordinaten für jede Dimension
 struct meshGeometry
-  coordinates::Array{Float64,2}
-  l::Array{Float64,1}
-  r::Array{Float64,1}
+  coordinates::Array{AbstractFloat,2}
+  l::Array{AbstractFloat,1}
+  r::Array{AbstractFloat,1}
 end
 
 #Struct-Objekt zum Speichern eines Meshes, durch Speichern der
@@ -45,9 +45,9 @@ end
 struct mesh
   topology::meshTopology
   geometry::meshGeometry
-  meshType::Int64
-  edgeLength::Array{Float64,1} #Kantenlängen
-  normals::Array{Float64,2} #Normalen des Referenzelementes
+  meshType::Int
+  edgeLength::Array{AbstractFloat,1} #Kantenlängen
+  normals::Array{AbstractFloat,2} #Normalen des Referenzelementes
   boundaryEdges::SparseVector{Int,Int};
   boundaryVertices::SparseVector{Int,Int};
 end
@@ -56,7 +56,7 @@ function mesh(topology::meshTopology, geometry::meshGeometry, bE::SparseVector{I
   inc=topology.incidence["10"];
   coord=geometry.coordinates;
   ne=topology.size[2];
-  l=Array{Float64,1}(undef,ne);
+  l=Array{AbstractFloat,1}(undef,ne);
   z=1;
   for i in 1:ne
       c=coord[:,inc[z:(z+1)]];

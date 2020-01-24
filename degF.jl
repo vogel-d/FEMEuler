@@ -7,13 +7,13 @@ struct degF{N}
     incidence::Array{Int,1}; # in l2g.jl, correctVelocity.jl, plotSolution.jl, plotSolutionGif.jl #notwendig
     offset::Array{Int,1}; # in l2g.jl, correctVelocity.jl, plotSolution.jl, plotSolutionGif.jl #evtl. weglassen und Schrittweite speichern? ->Dann nicht für Gitter mit gemischten Elementen, z.B. Dreiecke und Rechtecke
 
-    phi::Array{Array{Float64,2},N};
-    divphi::Array{Array{Float64,2},1};
-    gradphi::Array{Array{Float64,2},2};
+    phi::Array{Array{AbstractFloat,2},N};
+    divphi::Array{Array{AbstractFloat,2},1};
+    gradphi::Array{Array{AbstractFloat,2},2};
 end
 
 
-function degF(m::mesh, femType::Symbol, ordEdgesB::Array{Int,1}, nebP::Int, nebC::Int, ordVerticesB::Array{Int,1}, nvbP::Int, nvbC::Int, kubPoints::Array{Float64,2})
+function degF(m::mesh, femType::Symbol, ordEdgesB::Array{Int,1}, nebP::Int, nebC::Int, ordVerticesB::Array{Int,1}, nvbP::Int, nvbC::Int, kubPoints::Array{AbstractFloat,2})
     nf=m.topology.size[3];
     ne=m.topology.size[2];
     nv=m.topology.size[1];

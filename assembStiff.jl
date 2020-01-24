@@ -46,16 +46,16 @@ function assembStiff!(p::femProblem)
 end
 
 #skalare Größe mit Divergenz von vektorieller Größe
-function assembStiff(degFs::degF{1}, degFv::degF{2}, nf::Int64, kubWeights::Array{Float64,2})
+function assembStiff(degFs::degF{1}, degFv::degF{2}, nf::Int, kubWeights::Array{AbstractFloat,2})
 
     nT=degFs.numB;
     nF=degFv.numB;
     phiT=degFs.phi;
     divphiF=degFv.divphi;
 
-    rows=Int64[];
-    cols=Int64[];
-    vals=Float64[];
+    rows=Int[];
+    cols=Int[];
+    vals=AbstractFloat[];
 
     # hier ist Assemblieren nur einmal nötig, da sich die Determinanten der Jacobi-Matrix jeweils
     # wegkürzt, weshalb die lokale Steifigkeitsmatrix unabhängig von den Koordinaten der jeweiligen Fläche ist.
@@ -89,22 +89,22 @@ function assembStiff(degFs::degF{1}, degFv::degF{2}, nf::Int64, kubWeights::Arra
 end
 
 #skalare Größe mit vektorieller Größe
-function assembStiff(degFs::degF{1}, degFv::degF{2}, z::Array{Float64,1}, m::mesh, kubWeights::Array{Float64,2}, kubPoints::Array{Float64,2})
+function assembStiff(degFs::degF{1}, degFv::degF{2}, z::Array{AbstractFloat,1}, m::mesh, kubWeights::Array{AbstractFloat,2}, kubPoints::Array{AbstractFloat,2})
     nT=degFs.numB;
     nF=degFv.numB;
     phiT=degFs.phi;
     phiF=degFv.phi;
 
-    rows=Int64[];
-    cols=Int64[];
-    vals=Float64[];
+    rows=Int[];
+    cols=Int[];
+    vals=AbstractFloat[];
 
     sk=size(kubWeights)
 
-    J=initPhi((2,2),sk);
-    ddJ=Array{Float64,2}(undef,sk);
-    jphiF=initPhi(size(phiF),sk);
-    coord=Array{Float64,2}(undef,2,m.meshType);
+    J=initJacobi((2,2),sk);
+    ddJ=Array{AbstractFloat,2}(undef,sk);
+    jphiF=initJacobi(size(phiF),sk);
+    coord=Array{AbstractFloat,2}(undef,2,m.meshType);
 
     lS=zeros(length(phiT), size(phiF,2));
 
@@ -153,9 +153,9 @@ function assembStiff!(p::femProblem, comp::Symbol)
     kubWeights=p.kubWeights;
     sk=size(kubWeights)
 
-    J=initPhi((2,2),sk);
-    dJ=Array{Float64,2}(undef,sk);
-    coord=Array{Float64,2}(undef,2,m.meshType);
+    J=initJacobi((2,2),sk);
+    dJ=Array{AbstractFloat,2}(undef,sk);
+    coord=Array{AbstractFloat,2}(undef,2,m.meshType);
 
     nDF=degF[comp].numB;
     S=spzeros(nDF,nDF);

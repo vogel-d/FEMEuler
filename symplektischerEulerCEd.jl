@@ -1,5 +1,5 @@
-function symplektischerEuler!(y::solution,p::femProblem,w::solution,Sth::SparseMatrixCSC{Float64,Int64},ns::Int64,dtau::Float64,
-                              velOld::Array{Float64,1},rhoVS::Array{Float64,1},rhoS::Array{Float64,1},rhoThetaS::Array{Float64,1})
+function symplektischerEuler!(y::solution,p::femProblem,w::solution,Sth::SparseMatrixCSC{AbstractFloat,Int},ns::Int,dtau::AbstractFloat,
+                              velOld::Array{AbstractFloat,1},rhoVS::Array{AbstractFloat,1},rhoS::Array{AbstractFloat,1},rhoThetaS::Array{AbstractFloat,1})
   gamma=0.01;
   numRho=p.degFBoundary[p.femType[:rho][1]].num
   numRhoV=p.degFBoundary[p.femType[:rhoV][1]].num
@@ -17,12 +17,12 @@ function symplektischerEuler!(y::solution,p::femProblem,w::solution,Sth::SparseM
   return nothing;
 end
 
-function velocity!(rhoVS::Array{Float64,1},p::femProblem, yRho::Array{Float64,1},yRhoTheta::Array{Float64,1})
+function velocity!(rhoVS::Array{AbstractFloat,1},p::femProblem, yRho::Array{AbstractFloat,1},yRhoTheta::Array{AbstractFloat,1})
   pres=projectPressure(p.degFBoundary[p.femType[:p][1]],p.massMBoundary[p.femType[:p][1]],p.degFBoundary[p.femType[:rhoTheta][1]],yRhoTheta,p.mesh,p.kubPoints,p.kubWeights);
   return p.massM[p.femType[:rhoV][1]]\(-(p.stiffM[:vp]*(pres-p.diagnostic.pBar)+9.81*(p.stiffM[:vrho]*(yRho-p.diagnostic.rhoBar))));
 end
 
-function rhoTheta!(rhoS::Array{Float64,1},rhoThetaS::Array{Float64,1},p::femProblem, yRhoV::Array{Float64,1}, STh::SparseMatrixCSC{Float64,Int64})
+function rhoTheta!(rhoS::Array{AbstractFloat,1},rhoThetaS::Array{AbstractFloat,1},p::femProblem, yRhoV::Array{AbstractFloat,1}, STh::SparseMatrixCSC{AbstractFloat,Int})
   rhoS=p.massM[p.femType[:rho][1]]\(-p.stiffM[:rho]*yRhoV);
   rhoThetaS=p.massM[p.femType[:rhoTheta][1]]\(STh*yRhoV);
   return rhoS, rhoThetaS;

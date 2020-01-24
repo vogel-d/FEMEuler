@@ -1,5 +1,5 @@
 #Funktion zum Berechnen der Inzidenz d->d' aus d'->d mit d'>d
-function meshTranspose(m::mesh, d::Int64, ds::Int64)
+function meshTranspose(m::mesh, d::Int, ds::Int)
   if d<ds
     #Bestimmen der Anzahl an Entitäten von der Dimension d bzw. d'
     nd=m.topology.size[d+1];
@@ -10,8 +10,8 @@ function meshTranspose(m::mesh, d::Int64, ds::Int64)
     off=m.topology.offset["$ds$d"];
 
     z=1;
-    o=Int64[1];
-    i=Int64[];
+    o=Int[1];
+    i=Int[];
 
     for k in 1:nd
       for h in 1:nds
@@ -35,7 +35,7 @@ function meshTranspose(m::mesh, d::Int64, ds::Int64)
 end
 
 #Funktion zum Berchnen von d->d' aus d->d'' und d''->d' mit d>=d'
-function meshIntersection(m::mesh,d::Int64,ds::Int64,dss::Int64)
+function meshIntersection(m::mesh,d::Int,ds::Int,dss::Int)
   if d>=ds
     #Berechnen der Anzahl der Entitäten der Dim. d sowie der Inzidenz und Offsets
     #von d->d'' und d''->d
@@ -49,8 +49,8 @@ function meshIntersection(m::mesh,d::Int64,ds::Int64,dss::Int64)
 
     z=1;
     t=false;
-    o=Int64[1];
-    i=Int64[];
+    o=Int[1];
+    i=Int[];
 
     #Falls die Dim d und d' gleich sind, müssen nicht die gemeinsamen vertices der
     #Entitäten überprüft werden, weshalb dies gesondert betrachtet wird
@@ -58,8 +58,8 @@ function meshIntersection(m::mesh,d::Int64,ds::Int64,dss::Int64)
     #für d=d'=0 auf 0->0 zugegriffen werden müsste, was nicht Teil der Eingabe ist
     if d==ds
       for k in 1:nd
-        done=Int64[];
-        interim=Int64[];
+        done=Int[];
+        interim=Int[];
         #Bestimmen der Entitäten h der Dim d'', die inzident zu k der Dim d sind,
         #sowie der Entitäten j der Dim d', die inzident zu h sind
         for h in ind1[off1[k]:off1[k+1]-1]
@@ -98,8 +98,8 @@ function meshIntersection(m::mesh,d::Int64,ds::Int64,dss::Int64)
       off4=m.topology.offset["$ds$a"]
 
       for k in 1:nd
-        done=Int64[];
-        interim=Int64[];
+        done=Int[];
+        interim=Int[];
         kk=ind3[off3[k]:off3[k+1]-1]
 
         for h in ind1[off1[k]:off1[k+1]-1]
@@ -136,11 +136,11 @@ end
 
 #Funktion zum rekursiven Berechnen der Inzidenz d->d' durch Verwendung
 #von meshTranspose und meshIntersection
-function meshConnectivity!(m::mesh, d::Int64, ds::Int64)
+function meshConnectivity!(m::mesh, d::Int, ds::Int)
   #Überprüfen, ob d->d´bereits vorhanden ist
   if !haskey(m.topology.incidence,"$d$ds")
-    inc=Int64[];
-    off=Int64[];
+    inc=Int[];
+    off=Int[];
 
     #Durch Vergleich der Dimensionen miteinander, Bestimmen durch welche
     #Kombination von meshTranspose, meshIntersection und rekursiven Aufrufen von
@@ -174,11 +174,11 @@ function completeMesh!(m)
     end
 end
 
-function checkSurr(m::mesh, d::Int64, id::Int64)
+function checkSurr(m::mesh, d::Int, id::Int)
     #es müssen (fast) alle Verbindungen existieren, damit in jeder Dimension die Nachbarn
     #geprüft werden können
     completeMesh!(m)
-    surr = Dict{String, Array{Int64,1}}()
+    surr = Dict{String, Array{Int,1}}()
 
     for i in 0:(m.topology.D)
         #jede mögliche Dimension wird durchlaufen

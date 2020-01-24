@@ -1,5 +1,5 @@
-function symplektischerEuler!(y::solution,p::femProblem, w::solution,ns::Float64,dtau::Float64,
-                              velOld::Array{Float64,1},vS::Array{Float64,1},pS::Array{Float64,1},bS::Array{Float64,1})
+function symplektischerEuler!(y::solution,p::femProblem, w::solution,ns::AbstractFloat,dtau::AbstractFloat,
+                              velOld::Array{AbstractFloat,1},vS::Array{AbstractFloat,1},pS::Array{AbstractFloat,1},bS::Array{AbstractFloat,1})
 
   gamma=0.05;
 
@@ -20,7 +20,7 @@ function symplektischerEuler!(y::solution,p::femProblem, w::solution,ns::Float64
   return nothing;
 end
 
-function velocity!(vS::Array{Float64,1},p::femProblem, yP::Array{Float64,1},yB::Array{Float64,1})
+function velocity!(vS::Array{AbstractFloat,1},p::femProblem, yP::Array{AbstractFloat,1},yB::Array{AbstractFloat,1})
   Fv=p.massM[p.femType[:v][1]];
   Svp=p.stiffM[:vp];
   Svb=p.stiffM[:vb];
@@ -28,7 +28,7 @@ function velocity!(vS::Array{Float64,1},p::femProblem, yP::Array{Float64,1},yB::
   return nothing;
 end
 
-function pressureBuoyancy!(pS::Array{Float64,1},bS::Array{Float64,1},p::femProblem, yV::Array{Float64,1})
+function pressureBuoyancy!(pS::Array{AbstractFloat,1},bS::Array{AbstractFloat,1},p::femProblem, yV::Array{AbstractFloat,1})
   cs2=115600;
   N2=1.e-4;
 

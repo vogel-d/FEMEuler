@@ -1,6 +1,6 @@
-function splitExplicit(p::femProblem, gamma::Float64,Vfcomp::Symbol,
-                      Vfval::SparseVector{Float64,Int64}, nquadPhi::Dict{Symbol, Array{Array{Array{Float64,1},2},1}},
-                      nquadPoints::Array{Array{Float64,2},1}, MIS::MIS,y0::solution,t0::Float64,dt::Float64,ns::Int64)
+function splitExplicit(p::femProblem, gamma::AbstractFloat,Vfcomp::Symbol,
+                      Vfval::SparseVector{AbstractFloat,Int}, nquadPhi::Dict{Symbol, Array{Array{Array{AbstractFloat,1},2},1}},
+                      nquadPoints::Array{Array{AbstractFloat,2},1}, MIS::MIS,y0::solution,t0::AbstractFloat,dt::AbstractFloat,ns::Int)
   stage=MIS.nStage;
 
   Y=Array{solution,1}(undef,stage+1);
@@ -10,10 +10,10 @@ function splitExplicit(p::femProblem, gamma::Float64,Vfcomp::Symbol,
   numP=p.degFBoundary[p.femType[:p][1]].num
   numB=p.degFBoundary[p.femType[:b][1]].num
 
-  velOld=Array{Float64,1}(undef,numV)
-  vS=Array{Float64,1}(undef,numV)
-  pS=Array{Float64,1}(undef,numP)
-  bS=Array{Float64,1}(undef,numB)
+  velOld=Array{AbstractFloat,1}(undef,numV)
+  vS=Array{AbstractFloat,1}(undef,numV)
+  pS=Array{AbstractFloat,1}(undef,numP)
+  bS=Array{AbstractFloat,1}(undef,numB)
 
   for i in 1:(stage+1)
     Y[i]=y0;

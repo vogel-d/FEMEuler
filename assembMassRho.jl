@@ -1,22 +1,22 @@
-function assembMassRho(degF::degF{1}, degFRho::degF{1}, valRho::Array{Float64,1}, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
+function assembMassRho(degF::degF{1}, degFRho::degF{1}, valRho::Array{AbstractFloat,1}, m::mesh, kubPoints::Array{AbstractFloat,2}, kubWeights::Array{AbstractFloat,2})
     phi=@views degF.phi;
     phiRho=@views degFRho.phi;
     sk=size(kubWeights);
     iter=length(phi);
     n=degF.numB;
 
-    J=initPhi((2,2),sk);
-    dJ=Array{Float64,2}(undef,sk);
-    coord=Array{Float64,2}(undef,2,m.meshType);
+    J=initJacobi((2,2),sk);
+    dJ=Array{AbstractFloat,2}(undef,sk);
+    coord=Array{AbstractFloat,2}(undef,2,m.meshType);
 
-    globalNum=Array{Int64,1}(undef,length(phi));
-    globalNumRho=Array{Int64,1}(undef,length(phiRho));
+    globalNum=Array{Int,1}(undef,length(phi));
+    globalNumRho=Array{Int,1}(undef,length(phiRho));
 
     cRho=zeros(sk);
 
-    rows=Int64[];
-    cols=Int64[];
-    vals=Float64[];
+    rows=Int[];
+    cols=Int[];
+    vals=AbstractFloat[];
     for k in 1:m.topology.size[m.topology.D+1]
         jacobi!(J,dJ,m,k,kubPoints,coord);
         l2g!(globalNum,degF,k);
@@ -46,26 +46,26 @@ function assembMassRho(degF::degF{1}, degFRho::degF{1}, valRho::Array{Float64,1}
     return sparse(rows,cols,vals);
 end
 
-function assembMassRho(degF::degF{2}, degFRho::degF{1}, valRho::Array{Float64,1}, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
+function assembMassRho(degF::degF{2}, degFRho::degF{1}, valRho::Array{AbstractFloat,1}, m::mesh, kubPoints::Array{AbstractFloat,2}, kubWeights::Array{AbstractFloat,2})
     phi=@views degF.phi;
     phiRho=@views degFRho.phi;
     sk=size(kubWeights);
     iter=size(phi,2);
     n=degF.numB;
 
-    J=initPhi((2,2),sk);
-    ddJ=Array{Float64,2}(undef,sk);
-    jphi=initPhi(size(phi),sk);
-    coord=Array{Float64,2}(undef,2,m.meshType);
+    J=initJacobi((2,2),sk);
+    ddJ=Array{AbstractFloat,2}(undef,sk);
+    jphi=initJacobi(size(phi),sk);
+    coord=Array{AbstractFloat,2}(undef,2,m.meshType);
 
-    globalNum=Array{Int64,1}(undef,size(phi,2));
-    globalNumRho=Array{Int64,1}(undef,length(phiRho));
+    globalNum=Array{Int,1}(undef,size(phi,2));
+    globalNumRho=Array{Int,1}(undef,length(phiRho));
 
     cRho=zeros(sk);
 
-    rows=Int64[];
-    cols=Int64[];
-    vals=Float64[];
+    rows=Int[];
+    cols=Int[];
+    vals=AbstractFloat[];
     for k in 1:m.topology.size[m.topology.D+1]
         jacobi!(J,ddJ,jphi,m,k,kubPoints, phi,coord);
         l2g!(globalNum,degF,k);

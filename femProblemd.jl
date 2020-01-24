@@ -1,17 +1,17 @@
 mutable struct femProblem
     mesh::mesh;
-    boundaryValues::Dict{Tuple{Symbol,Symbol}, Array{Float64,1}};
+    boundaryValues::Dict{Tuple{Symbol,Symbol}, Array{AbstractFloat,1}};
     degFBoundary::Dict{Symbol, degF};
     femType::Dict{Symbol, Array{Symbol,1}};
-    edgeData::Array{Array{Int64,1},1};
-    solution::Dict{Float64, solution};
+    edgeData::Array{Array{Int,1},1};
+    solution::Dict{AbstractFloat, solution};
     diagnostic::diagnostic;
-    massM::Dict{Symbol, SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64}};
-    massMBoundary::Dict{Symbol, SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64}};
-    stiffM::Dict{Symbol, SparseMatrixCSC{Float64,Int64}};
+    massM::Dict{Symbol, SuiteSparse.UMFPACK.UmfpackLU{AbstractFloat,Int}};
+    massMBoundary::Dict{Symbol, SuiteSparse.UMFPACK.UmfpackLU{AbstractFloat,Int}};
+    stiffM::Dict{Symbol, SparseMatrixCSC{AbstractFloat,Int}};
     type::Symbol;
-    kubWeights::Array{Float64,2};
-    kubPoints::Array{Float64,2};
+    kubWeights::Array{AbstractFloat,2};
+    kubPoints::Array{AbstractFloat,2};
     taskRecovery::Bool;
     advection::Bool;
 end
@@ -19,8 +19,8 @@ end
 
 #Konstruktoren
 
-function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}};advection::Bool=true, taskRecovery::Bool=false, t::Symbol=:boussinesq, g::Int64=9)
-    sol=Dict{Float64, solution}()
+function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}};advection::Bool=true, taskRecovery::Bool=false, t::Symbol=:boussinesq, g::Int=9)
+    sol=Dict{AbstractFloat, solution}()
     diag=diagnostic()
     kubPoints, kubWeights=getKub(g, m.meshType);
     dF=Dict{Symbol, degF}()
@@ -38,7 +38,7 @@ function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}};advection::B
     for k in femElements
         dF[k]=degF(m,k,ordEdgesB,nebP,nebC,ordVerticesB,nvbP,nvbC,kubPoints);
     end
-    edgeData=Array{Array{Int64,1},1}();
+    edgeData=Array{Array{Int,1},1}();
     massM=Dict();
     massMB=Dict();
     stiffM=Dict();

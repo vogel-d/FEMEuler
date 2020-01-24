@@ -1,10 +1,10 @@
-function assembLoad(degF::degF{1}, f, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
+function assembLoad(degF::degF{1}, f, m::mesh, kubPoints::Array{AbstractFloat,2}, kubWeights::Array{AbstractFloat,2})
     phiT=degF.phi;
     sk=size(kubWeights);
 
-    J=initPhi((2,2),sk);
-    dJ=Array{Float64,2}(undef,sk);
-    jcoord=Array{Float64,2}(undef,2,m.meshType);
+    J=initJacobi((2,2),sk);
+    dJ=Array{AbstractFloat,2}(undef,sk);
+    jcoord=Array{AbstractFloat,2}(undef,2,m.meshType);
     gb=zeros(degF.numB)
 
     iter=length(phiT);
@@ -12,7 +12,7 @@ function assembLoad(degF::degF{1}, f, m::mesh, kubPoints::Array{Float64,2}, kubW
         coord=@views m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][k]:m.topology.offset["20"][k+1]-1]]
 
         jacobi!(J,dJ,m,k,kubPoints,jcoord);
-        ft=Array{Float64,2}(undef,sk);
+        ft=Array{AbstractFloat,2}(undef,sk);
         for i=1:sk[1], j=1:sk[2]
             xy=transformation(m,coord,kubPoints[1,i],kubPoints[2,j])
             ft[i,j]=f(xy[1],xy[2]);
@@ -30,14 +30,14 @@ function assembLoad(degF::degF{1}, f, m::mesh, kubPoints::Array{Float64,2}, kubW
     return gb;
 end
 
-function assembLoad(degF::degF{2}, f, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
+function assembLoad(degF::degF{2}, f, m::mesh, kubPoints::Array{AbstractFloat,2}, kubWeights::Array{AbstractFloat,2})
     phiT=degF.phi;
     sk=size(kubWeights);
 
-    J=initPhi((2,2),sk);
-    ddJ=Array{Float64,2}(undef,sk);
-    jphiT=initPhi(size(phiT),sk);
-    jcoord=Array{Float64,2}(undef,2,m.meshType);
+    J=initJacobi((2,2),sk);
+    ddJ=Array{AbstractFloat,2}(undef,sk);
+    jphiT=initJacobi(size(phiT),sk);
+    jcoord=Array{AbstractFloat,2}(undef,2,m.meshType);
     gb=zeros(degF.numB);
 
     iter=size(phiT,2);
@@ -45,8 +45,8 @@ function assembLoad(degF::degF{2}, f, m::mesh, kubPoints::Array{Float64,2}, kubW
         coord=@views m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][k]:m.topology.offset["20"][k+1]-1]]
 
         jacobi!(J,ddJ,jphiT,m,k,kubPoints,phiT,jcoord);
-        ft1=Array{Float64,2}(undef,sk);
-        ft2=Array{Float64,2}(undef,sk);
+        ft1=Array{AbstractFloat,2}(undef,sk);
+        ft2=Array{AbstractFloat,2}(undef,sk);
         for i=1:sk[1], j=1:sk[2]
             xy=transformation(m,coord,kubPoints[1,i],kubPoints[2,j])
             ft1[i,j]=f[1](xy[1],xy[2]);

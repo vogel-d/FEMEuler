@@ -1,7 +1,7 @@
 include("modulesCEd.jl")
 
 function testMountainWaves()
-    filename = "mountainWavesd";
+    filename = "mountainWavesdPC";
 
     #order: comp, compHigh, compRec, compDG
     femType=Dict(:rho=>[:DG0, :P1, :DG1, :DG0],
@@ -17,8 +17,8 @@ function testMountainWaves()
     taskRecovery=false;
     advection=true;
 
-    #m=generateRectMesh(200,156,:periodic,:constant,-20000.0,20000.0,0.0,15600.0); #(east/west, top/bottom)
-    m=generateRectMesh(200,90,:periodic,:constant,-20000.0,20000.0,0.0,9000.0); #(east/west, top/bottom)
+    m=generateRectMesh(200,156,:periodic,:constant,-20000.0,20000.0,0.0,15600.0); #(east/west, top/bottom)
+    #m=generateRectMesh(200,90,:constant,:constant,-20000.0,20000.0,0.0,9000.0); #(east/west, top/bottom)
 
     adaptGeometry!(m,400.0,1000.0); #witch of agnesi with Gall-Chen and Sommerville transformation
 
@@ -31,31 +31,29 @@ function testMountainWaves()
     dt=3.0; #10.0;
     ns=20;
     EndTime=2160.0;
-    nIter=Int64(EndTime/dt);
-    nIter=5;
-    EndTime=nIter*dt;
+    nIter=Int(EndTime/dt);
 
     #start functions
     th0=300.0; p0=100000.0;
     Grav=9.81; N=0.01
     Cpd=1004.0; Cvd=717.0; Cpv=1885.0;
     Rd=Cpd-Cvd; Gamma=Cpd/Cvd; kappa=Rd/Cpd;
-    function frho(x::Float64,z::Float64)
+    function frho(x::AbstractFloat,z::AbstractFloat)
         s=N*N/Grav
         ThLoc=th0*exp(z*s)
         pLoc=p0*(1.0-Grav/(Cpd*th0*s)*(1.0-exp(-s*z)))^(Cpd/Rd)
         return pLoc/((pLoc/p0)^kappa*Rd*ThLoc);
     end
-    function fpBar(x::Float64,z::Float64)
+    function fpBar(x::AbstractFloat,z::AbstractFloat)
         s=N*N/Grav
         return p0*(1.0-Grav/(Cpd*th0*s)*(1.0-exp(-s*z)))^(Cpd/Rd)
     end
-    function ftheta(x::Float64,z::Float64)
+    function ftheta(x::AbstractFloat,z::AbstractFloat)
         return th0*exp(z*N*N/Grav)
     end
 
-    fv1(x::Float64, y::Float64)=UMax;
-    fv2(x::Float64, y::Float64)=0.0;
+    fv1(x::AbstractFloat, y::AbstractFloat)=UMax;
+    fv2(x::AbstractFloat, y::AbstractFloat)=0.0;
     fvel=[fv1, fv2];
     f=Dict(:rho=>frho,:theta=>ftheta,:v=>fvel,:rhoBar=>frho,:pBar=>fpBar,:thBar=>ftheta);
 
@@ -84,7 +82,7 @@ function testMountainWaves()
     y=p.solution[0.0];
     Y=Array{solution,1}(undef,MISMethod.nStage+1);
     FY=Array{solution,1}(undef,MISMethod.nStage);
-    SthY=Array{SparseMatrixCSC{Float64,Int64},1}(undef,MISMethod.nStage);
+    SthY=Array{SparseMatrixCSC{AbstractFloat,Int},1}(undef,MISMethod.nStage);
     Time=0.0;
     for i=1:nIter
       @time y=splitExplicit(y,Y,FY,SthY,p,gamma,nquadPhi,nquadPoints,MrT,MrV,MISMethod,Time,dt,ns);
@@ -93,17 +91,12 @@ function testMountainWaves()
       p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
 
-      if mod(i,50)==0
-        p2=deepcopy(p);
-        unstructured_vtk(p2, maximum(collect(keys(p2.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
-      end
-
       println(Time)
     end
     #Speichern des Endzeitpunktes als vtu-Datei:
-    unstructured_vtk(p, EndTime, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
+    #unstructured_vtk(p, EndTime, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
     #Speichern aller berechneten Zwischenwerte als vtz-Datei:
-    #unstructured_vtk(p, sort(collect(keys(p.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
+    unstructured_vtk(p, sort(collect(keys(p.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
 
     return p
 end

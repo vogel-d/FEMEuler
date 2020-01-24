@@ -1,11 +1,11 @@
-function getKub(g::Int64, mt::Int64)
+function getKub(g::Int, mt::Int)
     if mt==4
         #Viereckseiten werden als parallel zu den Koordinatenachsen vorrausgesetzt
         x=[0.0,1.0];
         y=[0.0, 1.0];
-        n=Int64(ceil((g+1)/2));
-        gdots=Array{Float64,1};
-        W=Array{Float64,2};
+        n=Int(ceil((g+1)/2));
+        gdots=Array{AbstractFloat,1};
+        W=Array{AbstractFloat,2};
 
         if g>9
             #a1=1/3*sqrt(5-2*sqrt(10/7));
@@ -76,7 +76,7 @@ function getKub(g::Int64, mt::Int64)
         sx=(x[2]+x[1])/2;
         sy=(y[2]+y[1])/2;
 
-        kubPoints=Array{Float64,2}(undef,2,n);
+        kubPoints=Array{AbstractFloat,2}(undef,2,n);
         for k in 1:n
             kubPoints[1,k]=hx*gdots[k]+sx;
             kubPoints[2,k]=hy*gdots[k]+sy;
@@ -89,8 +89,8 @@ function getKub(g::Int64, mt::Int64)
         elseif g>=3
             n=7;
         end
-        kubPoints=Array{Float64,2}(undef,2,n);
-        W=Array{Float64,1};
+        kubPoints=Array{AbstractFloat,2}(undef,2,n);
+        W=Array{AbstractFloat,1};
 
         if g<=2
             kubPoints=[0.5 0.5 0.0;
