@@ -78,14 +78,10 @@ function generateRectMesh(nx::Int64, ny::Int64, condEW::Symbol, condTB::Symbol, 
                 bV[i]=1;
             elseif condEW==:periodic && condTB==:periodic && !(coord[1,i]==xl && coord[2,i]==yl)
                 bV[i]=-1;
-            #elseif condEW==:periodic && condTB==:constant && coord[1,i]==xl
-            #    bV[i]=-i-nx;
-            elseif condEW==:periodic && condTB==:constant
-                bV[i]=1;
-            #elseif condTB==:periodic && condEW==:constant && coord[2,i]==yl
-            #    bV[i]=-i-(nx+1)*ny;
-            elseif condTB==:periodic && condEW==:constant
-                bV[i]=1;
+            elseif condEW==:periodic && condTB==:constant && coord[1,i]==xl
+                bV[i]=-i-nx;
+            elseif condTB==:periodic && condEW==:constant && coord[2,i]==yl
+                bV[i]=-i-(nx+1)*ny;
             end
         elseif condEW==:constant && (coord[1,i]==xl || coord[1,i]==xr)
             bV[i]=1;
@@ -111,10 +107,9 @@ function generateRectMesh(nx::Int64, ny::Int64, condEW::Symbol, condTB::Symbol, 
         elseif (b1!=0 && b2!=0) || in(v1,corners) || in(v2,corners)
             if b2==b1==1
                 bE[i]=1;
-            #elseif (b1==1 && b2<=0) || (b1<=0 && b2==1)
-            #    bE[i]=1;
-            #elseif b1<0 && b2<0
-            elseif (b1<0 && b2<0) || (b1==1 && b2<0) || (b1<0 && b2==1)
+            elseif (b1==1 && b2<=0) || (b1<=0 && b2==1)
+                bE[i]=1;
+            elseif b1<0 && b2<0
                 if coord[1,v1]==coord[1,v2]
                     bE[i]=-i-nx;
                 elseif coord[2,v1]==coord[2,v2]
