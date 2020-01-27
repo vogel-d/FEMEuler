@@ -1,6 +1,6 @@
 using HDF5, JLD
 function saveProblem(p::femProblem, filename::String)
-    save((@__DIR__)*"/VTK/"*filename*".jld", "femProblem", p)
+    save((@__DIR__)*"/JLD/"*filename*".jld", "femProblem", p)
     return nothing;
 end
 function loadProblem(filename::String)
