@@ -1,7 +1,7 @@
 include("modulesBA.jl")
 
 function testBoussinesqAdvection()
-  filename = "BoussinesqHigherAdv"
+  filename = "testAdvh"
   #order: comp, compHigh, compRec, compDG
   #femType=Dict(:p=>[:DG0, :P1, :DG1, :DG0], :v=>[:RT0, :VecP1, :VecDG1, :RT0B], :b=>[:DG0, :P1, :DG1, :DG0]);
   #femType=Dict(:p=>[:DG0, :P1, :DG1, :DG0], :v=>[:RT0, :VecP1, :VecDG1, :RT0B], :b=>[:P1, :P1, :DG1, :DG1]);
@@ -9,7 +9,7 @@ function testBoussinesqAdvection()
   #Vfcomp=:RT0
   Vfcomp=:RT1
 
-  taskRecovery=true;
+  taskRecovery=false;
 
   m=generateRectMesh(300,10,:periodic,:constant,0.0,300000.0,0.0,10000.0); #(east/west, top/bottom)
   #adaptGeometry!(m,(0.3,0.3),false); #sin perbutation
@@ -30,7 +30,7 @@ function testBoussinesqAdvection()
   #start function
   xR=m.geometry.r[1]; xL=m.geometry.l[1]; yR=m.geometry.r[2]; yL=m.geometry.l[2]
   b0=0.01; H=10000; A=5000;
-  xM=0.8*(xL+xR);
+  xM=0.5*(xL+xR);
   fb(x,y)=b0*sin(pi*y/H)/(1+((x-xM)/A)^2);
   #fb(x,y)=0.0;
   f=Dict(:b=>fb)

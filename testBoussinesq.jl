@@ -1,12 +1,13 @@
 include("modulesB.jl")
 
 function testBoussinesq()
-    filename = "test";
+    filename = "testest";
 
     femType=Dict(:p=>[:DG0], :v=>[:RT0], :b=>[:P1]);
     #femType=Dict(:p=>[:DG1], :v=>[:RT1], :b=>[:DG1]);
 
     m=generateRectMesh(300,10,:periodic,:constant,0.0,300000.0,0.0,10000.0); #(east/west, top/bottom)
+    #m=generateRectMesh(2,2,:periodic,:constant,0.0,1.0,0.0,1.0); #(east/west, top/bottom)
     pv=femProblem(m, femType);
 
 
@@ -14,8 +15,8 @@ function testBoussinesq()
     dt=1.0;
     tend=3000.0;
 
-    #solSaves=15.0:15:tend; #determines at which points of time the solution is saved
-    solSaves=tend;
+    solSaves=15.0:15:tend; #determines at which points of time the solution is saved
+    #solSaves=tend;
 
     b0=0.01;
     H=10000;
@@ -36,9 +37,9 @@ function testBoussinesq()
 
     for i in collect(solSaves)
         solveB!(pv,Fp,Fv,Fb,dt,i,method);
-        println(i);
+        #println(i);
     end
-
+    println(tend)
     #Speichern des Endzeitpunktes als vtu-Datei:
     unstructured_vtk(pv, tend, [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesq/"*filename)
     #Speichern aller berechneten Zwischenwerte als vtz-Datei:
