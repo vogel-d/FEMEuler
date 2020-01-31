@@ -7,12 +7,12 @@ function testBoussinesqTri()
     #femType=Dict(:p=>[:DG1], :v=>[:RT1], :b=>[:DG1]);
 
     m=generateTriMesh(300,10,:periodic,:constant,0.0,300000.0,0.0,10000.0); #(east/west, top/bottom)
-    #m=generateRectMesh(6,5,:periodic,:constant,0.0,1.0,0.0,1.0); #(east/west, top/bottom)
+    #m=generateTriMesh(2,2,:periodic,:constant,0.0,1.0,0.0,1.0); #(east/west, top/bottom)
     p=femProblem(m, femType, g=5);
 
 
     method=:euler;
-    dt=1.0;
+    dt=0.5;
     tend=3000.0;
 
     solSaves=15.0:15:tend; #determines at which points of time the solution is saved
@@ -35,9 +35,11 @@ function testBoussinesqTri()
     Fv=p.massM[p.femType[:v][1]];
     Fb=p.massM[p.femType[:b][1]];
 
+    #return p;
+
     for i in collect(solSaves)
         solveB!(p,Fp,Fv,Fb,dt,i,method);
-        println(i);
+        #println(i);
     end
 
     #Speichern des Endzeitpunktes als vtu-Datei:
