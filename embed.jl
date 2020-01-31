@@ -8,7 +8,6 @@ function embed(comp::Symbol,degF::degF{1},cval::Array{Float64,1},compRec::Symbol
         for i in 1:n
             l2g!(globalNum,degF,i);
             l2g!(globalNumRec,degFRec,i);
-
             for j in 1:length(globalNumRec)
                 for k in 1:length(globalNum)
                     cEmbed[globalNumRec[j]]+=cval[globalNum[k]];
@@ -41,10 +40,10 @@ function embed(comp::Symbol,degF::degF{1},cval::Array{Float64,1},compRec::Symbol
         cEmbed=cEmbed./z;
     elseif (comp==:P1y || comp==:DG1y )&& compRec==:P1
         z=zeros(degFRec.numB);
+        h=[1,1,2,2];
         for i in 1:n
             l2g!(globalNum,degF,i);
             l2g!(globalNumRec,degFRec,i);
-            h=[1,1,2,2];
             for j in 1:length(globalNumRec)
                 cEmbed[globalNumRec[j]]+=cval[globalNum[h[j]]];
                 z[globalNumRec[j]]+=1;
@@ -87,7 +86,8 @@ function embed(comp::Symbol,degF::degF{2},cval::Array{Float64,1},compRec::Symbol
             end
         end
     elseif (comp==:RT0 || comp==:RT0B) && compRec==:VecDG1
-        h=[1,1,2,2,3,3,4,4];
+        #h=[1,1,2,2,3,3,4,4];
+        h=[4,1,2,1,2,3,4,3]
         for i in 1:n
             l2g!(globalNum,degF,i);
             l2g!(globalNumRec,degFRec,i);
