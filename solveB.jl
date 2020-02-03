@@ -1,11 +1,9 @@
 #Lösen der Akkustik-Gleichung mit Buoyancy
 function solveB!(p::femProblem,
-                        Fp::SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64}, Fv::SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64}, Fb::SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64},
-                        dt::Float64, nt::Float64, method::Symbol)
+                 Fp::SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64}, Fv::SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64}, Fb::SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64},
+                 tstart::Float64, dt::Float64, nt::Float64, method::Symbol)
 
-  sol=collect(keys(p.solution));
-  tstart=maximum(sol[sol.<nt]);
-  tend=nt-tstart;
+  tend=tstart+nt;
 
   cs2=115600;
   N2=1.e-4;
@@ -62,5 +60,5 @@ function solveB!(p::femProblem,
     error("Keine zulässige Methode! Mögliche Methoden sind :euler und :rk4.");
   end
 
-  p.solution[nt]=createSolution(yV,yP,yB);
+  p.solution[tend]=createSolution(yV,yP,yB);
 end

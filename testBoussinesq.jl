@@ -11,12 +11,13 @@ function testBoussinesq()
     pv=femProblem(m, femType);
 
     method=:rk4  #:euler;
-    dt=1.0;
+    dt=1.0; #Fine: 0.5
     tend=3000.0;
 
     #determines at which points of time the solution is saved
-    #solSaves=15.0:15:tend;
-    solSaves=tend;
+    solSaves=1;
+    #solSaves=15;
+    nIter=tend/solSaves;
 
     b0=0.01;
     H=10000;
@@ -34,10 +35,12 @@ function testBoussinesq()
     Fv=pv.massM[pv.femType[:v][1]];
     Fb=pv.massM[pv.femType[:b][1]];
 
-    for i in collect(solSaves)
-        solveB!(pv,Fp,Fv,Fb,dt,i,method);
+    time=0.0
+    for i in 1:solSaves
+        solveB!(pv,Fp,Fv,Fb,time,dt,nIter,method);
+        time+=nIter
+        println(time)
     end
-    println(tend)
     #Speichern des Endzeitpunktes als vtu-Datei:
     unstructured_vtk(pv, tend, [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesq/"*filename)
     #Speichern aller berechneten Zwischenwerte als vtz-Datei:
