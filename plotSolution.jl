@@ -41,7 +41,7 @@ function plotSolution(p::femProblem, key::Symbol, t::Float64, c::Symbol=:plasma)
 
             for k in 1:nf
                 sk=sol[l2g(p.degFBoundary[p.femType[key][1]], k)];
-                dJ=jacobi!(J,dJ,p.mesh,k,0.5,0.5,coord);
+                dJ=jacobi!(J,p.mesh,k,0.5,0.5,coord);
                 fLoc=(1/dJ)*J*fComp
                 skm=fLoc*sk;
                 coord=p.mesh.geometry.coordinates[:,inc[off[k]:off[k+1]-1]];
@@ -99,7 +99,7 @@ function plotSolution(p::femProblem, key::Symbol, t::Float64, filename::String, 
 
             for k in 1:nf
                 sk=sol[l2g(p.degFBoundary[p.femType[key][1]], k)];
-                dJ=jacobi!(J,dJ,p.mesh,k,0.5,0.5,coord);
+                dJ=jacobi!(J,p.mesh,k,0.5,0.5,coord);
                 fLoc=(1/dJ)*J*fComp
                 skm=fLoc*sk;
                 coord=p.mesh.geometry.coordinates[:,inc[off[k]:off[k+1]-1]];

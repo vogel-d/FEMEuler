@@ -43,7 +43,7 @@ function jacobi!(J::Array{Array{Float64,2},2},dJ::Array{Float64,2},m::mesh, fid:
     return nothing;
 end
 
-function jacobi!(J::Array{Float64,2},dJ::Float64,m::mesh, fid::Int64, x::Float64, y::Float64, coord::Array{Float64,2})
+function jacobi!(J::Array{Float64,2},m::mesh, fid::Int64, x::Float64, y::Float64, coord::Array{Float64,2})
     key="20";
     mt=m.meshType;
     rstart=m.topology.offset[key][fid];
@@ -84,7 +84,7 @@ function jacobi!(J::Array{Array{Float64,2},2},ddJ::Array{Float64,2},jphi::Array{
         end
         z+=1;
     end
-    
+
     sk=size(kubPoints,2);
 
     if mt==3
