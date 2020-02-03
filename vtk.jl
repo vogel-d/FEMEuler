@@ -242,6 +242,15 @@ function unstructured_vtk(p::femProblem, rx::Int, ry::Int, t::Array{Float64,1}, 
 
     fComp=Array{Array{Float64},1}(undef, rx*ry);
     rcoord=Array{Float64,2}(undef,2,rx*ry)
+    z=1;
+    for j in 1:2:(2*ry-1)
+        for i in 1:2:(2*rx-1)
+            rcoord[:,z]=[i/(2*rx),j/(2*ry)];
+            z+=1;
+        end
+    end
+    incm=mf.topology.incidence["CF"]
+    offm=mf.topology.offset["CF"]
 
     outfiles = paraview_collection(vtk_filename_noext) do pvd
         for it in 1:length(t)
