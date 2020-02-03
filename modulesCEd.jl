@@ -21,6 +21,7 @@ include("getOrderBoundary.jl")
 include("getElementProperties.jl")
 include("degF.jl");
 include("generateMesh.jl")
+include("refineMesh.jl")
 include("femProblemd.jl");
 
 include("l2g.jl")
