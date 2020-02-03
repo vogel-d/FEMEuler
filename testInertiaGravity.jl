@@ -1,7 +1,7 @@
-include("modulesCEd.jl")
+include("modulesCE.jl")
 
-function testInertiaGravity()
-    filename = "gravityWavesNoAdv";
+function testInertiaGravity2()
+    filename = "gravityWavesNoAdvNoBackground";
 
     #order: comp, compHigh, compRec, compDG
     femType=Dict(:rho=>[:DG0, :P1, :DG1, :DG0],
@@ -9,10 +9,7 @@ function testInertiaGravity()
                  :rhoTheta=>[:DG0, :P1, :DG1, :DG0],
                  :p=>[:DG0],
                  :v=>[:RT0],
-                 :theta=>[:DG0],
-                 :pBar=>[:DG0],
-                 :rhoBar=>[:DG0],
-                 :thBar=>[:DG0]);
+                 :theta=>[:DG0]);
 
     taskRecovery=false;
     advection=true;
@@ -46,20 +43,7 @@ function testInertiaGravity()
         pLoc=p0*(1.0-Grav/(Cpd*th0*S)*(1.0-exp(-S*z)))^(Cpd/Rd)
         return pLoc/((pLoc/p0)^kappa*Rd*ThLoc);
     end
-    function frhoBar(x::Float64,z::Float64)
-        S=N*N/Grav
-        ThLoc=th0*exp(S*z)
-        pLoc=p0*(1.0-Grav/(Cpd*th0*S)*(1.0-exp(-S*z)))^(Cpd/Rd)
-        return pLoc/((pLoc/p0)^kappa*Rd*ThLoc);
-    end
-    function fpBar(x::Float64,z::Float64)
-        S=N*N/Grav
-        return p0*(1.0-Grav/(Cpd*th0*S)*(1.0-exp(-S*z)))^(Cpd/Rd)
-    end
-    function fthBar(x::Float64,z::Float64)
-        S=N*N/Grav
-        return th0*exp(S*z)
-    end
+
     function ftheta(x::Float64,z::Float64)
         S=N*N/Grav
         return th0*exp(S*z)+DeltaTh1*sin(pi*z/H)/(1.0+((x-xC)/a)^2);
@@ -67,14 +51,13 @@ function testInertiaGravity()
     fv1(x, y)=UMax;
     fv2(x, y)=0;
     fvel=[fv1, fv2];
-    f=Dict(:rho=>frho,:theta=>ftheta,:v=>fvel,:rhoBar=>frhoBar,:pBar=>fpBar,:thBar=>fthBar);
+    f=Dict(:rho=>frho,:theta=>ftheta,:v=>fvel);
 
     assembMass!(p);
     assembStiff!(p);
     p.boundaryValues[(:theta,:P1)]=300*ones(p.degFBoundary[:P1].numB-p.degFBoundary[:P1].num);
     applyStartValues!(p, f);
 
-    p.solution[0.0].theta-=p.diagnostic.thBar;
     rho0=p.solution[0.0].rho;
     p.solution[0.0].rhoTheta=projectChi(p,rho0,p.solution[0.0].theta,:rho,:theta);
     p.solution[0.0].rhoV=projectChi(p,rho0,p.solution[0.0].v,:rho,:v);
@@ -99,13 +82,8 @@ function testInertiaGravity()
       @time y=splitExplicit(y,Y,FY,SthY,p,gamma,nquadPhi,nquadPoints,MrT,MrV,MISMethod,Time,dt,ns);
       Time+=dt
       p.solution[Time]=y;
-      p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT)#-p.diagnostic.thBar;
+      p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
-
-      if mod(i,50)==0
-        p2=deepcopy(p);
-        unstructured_vtk(p2, Time, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
-      end
 
       println(Time)
     end
@@ -118,3 +96,53 @@ function testInertiaGravity()
     #unstructured_vtk(p, 0.0, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename*"Start")
     return p
 end
+
+
+#Startbedingungen ohne Background
+#=
+#start functions
+xW=500.0; zW=300.0; xC=560.0; zC=640.0;
+rW0=150.0; rC0=0.0;
+th0=300.0; p0=100000.0;
+DeltaThW=0.5; DeltaThC=-0.15;
+sW=50; sC=50;
+Grav=9.81;
+Cpd=1004.0; Cvd=717.0; Cpv=1885.0;
+Rd=Cpd-Cvd; Gamma=Cpd/Cvd; kappa=Rd/Cpd;
+function frho(x::Float64,z::Float64)
+    pLoc=p0*(1-kappa*Grav*z/(Rd*th0))^(Cpd/Rd);
+    #Rad=sqrt((x-xCM)^2+(z-zCM)^2);
+    #ThLoc=th0+(Rad>r0)*(DeltaTh1*exp(-(Rad-r0)^2/s^2));
+    radW=sqrt((x-xW)^2+(z-zW)^2);
+    radC=sqrt((x-xC)^2+(z-zC)^2);
+    ThLoc=th0;
+    if radW>rW0
+        ThLoc+=DeltaThW*exp(-(radW-rW0)^2/sW^2)
+    else
+        ThLoc+=DeltaThW
+    end
+    if radW>rC0
+        ThLoc+=DeltaThC*exp(-(radC-rC0)^2/sC^2)
+    else
+        ThLoc+=DeltaThC
+    end
+    return pLoc/((pLoc/p0)^kappa*Rd*ThLoc);
+end
+function ftheta(x::Float64,z::Float64)
+    radW=sqrt((x-xW)^2+(z-zW)^2);
+    radC=sqrt((x-xC)^2+(z-zC)^2);
+    th=th0;
+    if radW>rW0
+        th+=DeltaThW*exp(-(radW-rW0)^2/sW^2)
+    else
+        th+=DeltaThW
+    end
+    if radW>rC0
+        th+=DeltaThC*exp(-(radC-rC0)^2/sC^2)
+    else
+        th+=DeltaThC
+    end
+    return th;
+    #return th0+(radW>r0)*(DeltaTh1*exp(-(rad-r0)^2/s^2))+(radC>r0)*(DeltaTh1*exp(-(rad-r0)^2/s^2));
+end
+=#

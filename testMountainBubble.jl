@@ -14,9 +14,10 @@ function testMountainBubble()
     taskRecovery=true;
     advection=true;
 
-    #m=generateRectMesh(160,80,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
-    m=generateRectMesh(80,40,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
+    m=generateRectMesh(160,80,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
+    #m=generateRectMesh(80,40,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
 
+    #adaptGeometry!(m,1000.0,10000.0); #witch of agnesi with Gall-Chen and Sommerville transformation
     adaptGeometry!(m,1000.0,2500.0); #witch of agnesi with Gall-Chen and Sommerville transformation
 
     p=femProblem(m, femType, t=:compressible, advection=advection, taskRecovery=taskRecovery);
@@ -25,10 +26,9 @@ function testMountainBubble()
     UMax=0.0; #UMax determines the advection in x direction
     MISMethod=MIS(:MIS2); #method of time integration
 
-    dt=2.0;
+    dt=1.0; #1.0/2.0 for steep & flat mountain for fine/coarse mesh
     ns=15;
     EndTime=1000.0;
-    EndTime=6.0;
     nIter=Int64(EndTime/dt);
 
     #start functions
@@ -84,10 +84,6 @@ function testMountainBubble()
       p.solution[Time]=y;
       p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
-      if mod(i,50)==0
-        p2=deepcopy(p);
-        unstructured_vtk(p2, maximum(collect(keys(p2.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
-      end
       println(Time)
     end
     return p;

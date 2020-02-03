@@ -1,13 +1,14 @@
 include("modulesBA.jl")
 
 function testBoussinesqAdvection()
-  filename = "testAdvh"
+  filename = "boussinesqAdvection"
+
   #order: comp, compHigh, compRec, compDG
-  #femType=Dict(:p=>[:DG0, :P1, :DG1, :DG0], :v=>[:RT0, :VecP1, :VecDG1, :RT0B], :b=>[:DG0, :P1, :DG1, :DG0]);
+  femType=Dict(:p=>[:DG0, :P1, :DG1, :DG0], :v=>[:RT0, :VecP1, :VecDG1, :RT0B], :b=>[:DG0, :P1, :DG1, :DG0]);
   #femType=Dict(:p=>[:DG0, :P1, :DG1, :DG0], :v=>[:RT0, :VecP1, :VecDG1, :RT0B], :b=>[:P1, :P1, :DG1, :DG1]);
-  femType=Dict(:p=>[:DG1, :P1, :DG1, :DG0], :v=>[:RT1, :VecP1, :VecDG1, :RT0B], :b=>[:DG1, :P1, :DG1, :DG0]);
-  #Vfcomp=:RT0
-  Vfcomp=:RT1
+  #femType=Dict(:p=>[:DG1, :P1, :DG1, :DG0], :v=>[:RT1, :VecP1, :VecDG1, :RT0B], :b=>[:DG1, :P1, :DG1, :DG0]);
+  Vfcomp=:RT0
+  #Vfcomp=:RT1
 
   taskRecovery=false;
 
@@ -20,11 +21,10 @@ function testBoussinesqAdvection()
   #UMax=0.0;
   MISMethod=MIS(:MIS4_4);
 
-  #dt=20.0;
-  dt=10.0;
+  dt=20.0;
+  #dt=10.0;
   ns=19;
   EndTime=3000.0;
-  #EndTime=60*dt;
   nIter=Int64(EndTime/dt);
 
   #start function
@@ -32,7 +32,6 @@ function testBoussinesqAdvection()
   b0=0.01; H=10000; A=5000;
   xM=0.5*(xL+xR);
   fb(x,y)=b0*sin(pi*y/H)/(1+((x-xM)/A)^2);
-  #fb(x,y)=0.0;
   f=Dict(:b=>fb)
 
   assembMass!(p);
@@ -58,12 +57,6 @@ function testBoussinesqAdvection()
     y=splitExplicit(p,gamma,Vfcomp,Vf,nquadPhi,nquadPoints,MISMethod,y,Time,dt,ns);
     Time=Time+dt
     p.solution[Time]=y;
-    #=
-    if mod(i,20)==0
-      p2=deepcopy(p);
-      unstructured_vtk(p2, sort(collect(keys(p2.solution))), [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesqAdvection/"*filename)
-    end
-    =#
     println(Time)
   end
 

@@ -14,23 +14,23 @@ function testColdMountainBubble()
     taskRecovery=true;
     advection=true;
 
-    #m=generateRectMesh(256,64,:periodic,:constant,-25600.0,25600.0,0.0,6400.0); #(east/west, top/bottom)
-    m=generateRectMesh(128,32,:periodic,:constant,-25600.0,25600.0,0.0,6400.0); #(east/west, top/bottom)
+    #m=generateRectMesh(360,64,:periodic,:constant,-18000.0,18000.0,0.0,6400.0); #(east/west, top/bottom)
+    m=generateRectMesh(180,32,:periodic,:constant,-18000.0,18000.0,0.0,6400.0); #(east/west, top/bottom)
     p=femProblem(m, femType, t=:compressible, advection=advection, taskRecovery=taskRecovery);
 
-    adaptGeometry!(m,640.0,25600.0); #witch of agnesi with Gall-Chen and Sommerville transformation
+    adaptGeometry!(m,1000.0,2000.0); #witch of agnesi with Gall-Chen and Sommerville transformation
 
     gamma=0.5; #upwind
     UMax=0.0; #UMax determines the advection in x direction
     MISMethod=MIS(:MIS4_4); #method of time integration
 
-    dt=1.0;
+    dt=1.0 #Fine: 0.5 ?
     ns=6;
     EndTime=900.0;
     nIter=Int64(EndTime/dt)
 
     #start functions
-    xCM=0.0; zCM=3640.0;
+    xCM=0.0; zCM=3000.0;
     xCR=4000.0; zCR=2000.0;
     r0=2000.0; th0=300.0; p0=100000.0;
     DeltaTh1=-15;
@@ -38,22 +38,22 @@ function testColdMountainBubble()
     Cpd=1004.0; Cvd=717.0; Cpv=1885.0;
     Rd=Cpd-Cvd; Gamma=Cpd/Cvd; kappa=Rd/Cpd;
     function frho(x::Float64,z::Float64)
-        TLoc=th0-z/Cpd*Grav;
-        pLoc=p0*(TLoc/th0)^(Cpd/Rd);
+        pLoc=p0*(1.0-kappa*Grav*z/(Rd*th0))^(Cpd/Rd)
         Rad=sqrt(((x-xCM)/xCR)^2+((z-zCM)/zCR)^2);
-        if Rad<=1
-          TLoc=TLoc+DeltaTh1*0.5*(cos(pi*Rad)+1);
+        ThStart=th0
+        if Rad<1.0
+            ThStart+=DeltaTh1*(cos(pi*Rad)+1.0)/2.0*(pLoc/p0)^(-kappa)
         end
-        return pLoc/(Rd*TLoc);
+        return pLoc/((pLoc/p0)^kappa*Rd*ThStart)
     end
     function ftheta(x::Float64,z::Float64)
-        TLoc=th0-z/Cpd*Grav;
-        pLoc=p0*(TLoc/th0)^(Cpd/Rd);
+        pLoc=p0*(1.0-kappa*Grav*z/(Rd*th0))^(Cpd/Rd)
         Rad=sqrt(((x-xCM)/xCR)^2+((z-zCM)/zCR)^2);
-        if Rad<=1
-          TLoc=TLoc+DeltaTh1*0.5*(cos(pi*Rad)+1);
+        ThStart=th0
+        if Rad<1.0
+            ThStart+=DeltaTh1*(cos(pi*Rad)+1.0)/2.0*(pLoc/p0)^(-kappa)
         end
-        return TLoc*(p0/pLoc)^(Rd/Cpd);
+        return ThStart
     end
     fv1(x::Float64, y::Float64)=UMax;
     fv2(x::Float64, y::Float64)=0.0;

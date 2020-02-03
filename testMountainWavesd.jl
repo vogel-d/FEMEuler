@@ -28,7 +28,7 @@ function testMountainWaves()
     UMax=10.0; #UMax determines the advection in x direction
     MISMethod=MIS(:MIS2); #method of time integration
 
-    dt=3.0; #10.0;
+    dt=3.0;
     ns=20;
     EndTime=2160.0;
     nIter=Int64(EndTime/dt);

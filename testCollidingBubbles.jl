@@ -15,8 +15,8 @@ function testCollidingBubbles()
     taskRecovery=true;
     advection=true;
 
-    m=generateRectMesh(50,75,:periodic,:constant,0.0,1000.0,0.0,1500.0); #(east/west, top/bottom)
-    #m=generateRectMesh(100,150,:periodic,:constant,0.0,1000.0,0.0,1500.0); #(east/west, top/bottom)
+    m=generateRectMesh(100,150,:periodic,:constant,0.0,1000.0,0.0,1500.0); #(east/west, top/bottom)
+    #m=generateRectMesh(50,75,:periodic,:constant,0.0,1000.0,0.0,1500.0); #(east/west, top/bottom)
     #Resolution: 20m, 10m
 
     p=femProblem(m, femType, t=:compressible, advection=advection, taskRecovery=taskRecovery);
@@ -26,8 +26,8 @@ function testCollidingBubbles()
     UMax=0.0; #UMax determines the advection in x direction
     MISMethod=MIS(:MIS2); #method of time integration
 
-    dt=0.32
-    #dt=0.16;
+    dt=0.16;
+    #dt=0.32
     ns=15;
     EndTime=600.0;
     nIter=Int64(EndTime/dt);

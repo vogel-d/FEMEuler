@@ -25,7 +25,7 @@ function testMountainWaves()
     UMax=10.0; #UMax determines the advection in x direction
     MISMethod=MIS(:MIS2); #method of time integration
 
-    dt=3.0; #10.0;
+    dt=3.0;
     ns=20;
     EndTime=2160.0;
     nIter=Int64(EndTime/dt);
@@ -83,12 +83,12 @@ function testMountainWaves()
       p.solution[Time]=y;
       p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
-      #=
+
       if mod(i,50)==0
         p2=deepcopy(p);
         unstructured_vtk(p2, maximum(collect(keys(p2.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
       end
-      =#
+
       println(Time)
     end
     #Speichern des Endzeitpunktes als vtu-Datei:

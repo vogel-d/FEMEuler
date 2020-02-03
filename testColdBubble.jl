@@ -1,7 +1,7 @@
 include("modulesCE.jl")
 
 function testColdBubble()
-    filename = "ColdBubble";
+    filename = "coldBubble";
 
     #order: comp, compHigh, compRec, compDG
     femType=Dict(:rho=>[:DG0, :P1, :DG1, :DG0],
