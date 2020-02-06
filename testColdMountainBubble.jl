@@ -14,8 +14,8 @@ function testColdMountainBubble()
     taskRecovery=true;
     advection=true;
 
-    #m=generateRectMesh(360,64,:periodic,:constant,-18000.0,18000.0,0.0,6400.0); #(east/west, top/bottom)
-    m=generateRectMesh(180,32,:periodic,:constant,-18000.0,18000.0,0.0,6400.0); #(east/west, top/bottom)
+    m=generateRectMesh(360,64,:periodic,:constant,-18000.0,18000.0,0.0,6400.0); #(east/west, top/bottom)
+    #m=generateRectMesh(180,32,:periodic,:constant,-18000.0,18000.0,0.0,6400.0); #(east/west, top/bottom)
     p=femProblem(m, femType, t=:compressible, advection=advection, taskRecovery=taskRecovery);
 
     adaptGeometry!(m,1000.0,2000.0); #witch of agnesi with Gall-Chen and Sommerville transformation
@@ -24,7 +24,7 @@ function testColdMountainBubble()
     UMax=0.0; #UMax determines the advection in x direction
     MISMethod=MIS(:MIS4_4); #method of time integration
 
-    dt=1.0 #Fine: 0.5 ?
+    dt=0.5 #Coarse: 1.0, Fine: 0.5
     ns=6;
     EndTime=900.0;
     nIter=Int64(EndTime/dt)
