@@ -15,7 +15,8 @@ function testBoussinesqTri()
     dt=0.5;
     tend=3000.0;
 
-    solSaves=15.0:15:tend; #determines at which points of time the solution is saved
+    solSaves=1; #determines at which points of time the solution is saved
+    nIter=tend/solSaves;
     #solSaves=tend;
 
     b0=0.01;
@@ -36,10 +37,11 @@ function testBoussinesqTri()
     Fb=p.massM[p.femType[:b][1]];
 
     #return p;
-
+    time=0.0;
     for i in collect(solSaves)
-        solveB!(p,Fp,Fv,Fb,dt,i,method);
-        #println(i);
+        solveB!(p,Fp,Fv,Fb,time,dt,nIter,method);
+        time+=nIter;
+        println(time);
     end
 
     #Speichern des Endzeitpunktes als vtu-Datei:
