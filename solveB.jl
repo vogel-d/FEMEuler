@@ -3,7 +3,7 @@ function solveB!(p::femProblem,
                  Fp::SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64}, Fv::SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64}, Fb::SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64},
                  tstart::Float64, dt::Float64, nt::Float64, method::Symbol)
 
-  tend=tstart+nt;
+  iterations=nt/dt;
 
   cs2=115600;
   N2=1.e-4;
@@ -22,7 +22,7 @@ function solveB!(p::femProblem,
   nb=p.degFBoundary[p.femType[:b][1]].num
 
   if method==:euler
-    for i in 1:tend
+    for i in 1:iterations
       yV[1:nv]=yV[1:nv]+dt*(Fv\(-Svp*yP+Svb*yB));
       yP[1:np]=yP[1:np]+dt*(Fp\(-cs2*(Spv*yV)));
       yB[1:nb]=yB[1:nb]+dt*(Fb\(-N2*(Sbv*yV)));
@@ -33,7 +33,7 @@ function solveB!(p::femProblem,
     p1=copy(p.solution[tstart].p); p2=copy(p.solution[tstart].p); p3=copy(p.solution[tstart].p); p4=copy(p.solution[tstart].p);
     b1=copy(p.solution[tstart].b); b2=copy(p.solution[tstart].b); b3=copy(p.solution[tstart].b); b4=copy(p.solution[tstart].b);
 
-    for i in 1:tend
+    for i in 1:iterations
       v1[1:nv]=Fv\(-Svp*yP+Svb*yB);
       p1[1:np]=Fp\(-cs2*(Spv*yV));
       b1[1:nb]=Fb\(-N2*(Sbv*yV));
@@ -60,5 +60,5 @@ function solveB!(p::femProblem,
     error("Keine zulässige Methode! Mögliche Methoden sind :euler und :rk4.");
   end
 
-  p.solution[tend]=createSolution(yV,yP,yB);
+  p.solution[tstart+nt]=createSolution(yV,yP,yB);
 end
