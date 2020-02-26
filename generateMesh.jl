@@ -163,7 +163,7 @@ function generateTriMesh(nx::Int, ny::Int, condEW::Symbol, condTB::Symbol, xl::F
         for h in 1:nx
             i=[z, z+1, z+1+nx];
             append!(incf,i);
-            i=[z+1, z+1+nx+1, z+1+nx];
+            i=[z+nx+1, z+nx+2, z+1]
             append!(incf,i);
             z+=1;
         end
@@ -211,9 +211,7 @@ function generateTriMesh(nx::Int, ny::Int, condEW::Symbol, condTB::Symbol, xl::F
             if condEW==:constant && condTB==:constant
                 bV[i]=1;
             elseif condEW==:periodic && condTB==:periodic
-                if !(coord[1,i]==xl && coord[2,i]==yl)
-                    bV[i]=-1;
-                end
+                bV[i]=-1;
             elseif condEW==:periodic && coord[1,i]==xl
                 bV[i]=-i-nx;
             elseif condTB==:periodic && coord[2,i]==yl
@@ -256,7 +254,6 @@ function generateTriMesh(nx::Int, ny::Int, condEW::Symbol, condTB::Symbol, xl::F
             end
         end
     end
-
 
     #Initialisieren der Topologie, Geometrie und damit des Meshes
     n=Int[nx,ny];

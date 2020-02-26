@@ -7,7 +7,7 @@ function assembStiff!(p::femProblem)
 
         z=[0.0, 1.0];
 
-        Spv=assembStiff(degF[pkey], degF[vkey], p.mesh.topology.size[3], p.kubWeights);
+        Spv=assembStiff(degF[pkey], degF[vkey], p.mesh, p.kubWeights, p.kubPoints);
         Svp = copy(-Spv');
         Sbv=assembStiff(degF[bkey], degF[vkey], z, p.mesh, p.kubWeights, p.kubPoints)
         Svb = copy(Sbv');
@@ -25,7 +25,7 @@ function assembStiff!(p::femProblem)
 
         z=zeros(Float64, p.mesh.geometry.dim); z[2]=1.0;
 
-        Spv=assembStiff(degF[pkey], degF[vkey], p.mesh.topology.size[3], p.kubWeights);
+        Spv=assembStiff(degF[pkey], degF[vkey], p.mesh, p.kubWeights, p.kubPoints);
         Svp = copy(-Spv');
         Srhov=assembStiff(degF[rhokey], degF[vkey], z, p.mesh, p.kubWeights, p.kubPoints)
         Svrho = copy(Srhov');
@@ -46,8 +46,9 @@ function assembStiff!(p::femProblem)
 end
 
 #skalare Größe mit Divergenz von vektorieller Größe
-function assembStiff(degFs::degF{1}, degFv::degF{2}, nf::Int64, kubWeights::Array{Float64,2})
+function assembStiff(degFs::degF{1}, degFv::degF{2}, m::mesh, kubWeights::Array{Float64,2}, kubPoints::Array{Float64,2})
 
+    nf=m.topology.size[m.topology.D+1]
     nT=degFs.numB;
     nF=degFv.numB;
     phiT=degFs.phi;
@@ -72,15 +73,25 @@ function assembStiff(degFs::degF{1}, degFv::degF{2}, nf::Int64, kubWeights::Arra
             lS[i,j] = currentval;
         end
     end
+
+    phiRef=degFv.phi;
+    iter=size(phiRef,2);
+    sk=size(kubWeights)
+    J=initJacobi((2,2),sk);
+    ddJ=Array{Float64,2}(undef,sk);
+    jphiRef=initJacobi(size(phiRef),sk);
+    coord=Array{Float64,2}(undef,2,m.meshType);
     for k in 1:nf
         globalNumT=l2g(degFs,k);
         globalNumF=l2g(degFv,k);
+        jacobi!(J,ddJ,jphiRef,m,k,kubPoints, phiRef,coord);
         for j in 1:length(globalNumF)
             for i in 1:length(globalNumT)
                 if !isequal(lS[i,j],0.0) || (globalNumT[i]==nT && globalNumF[j]==nF)
                     push!(rows,globalNumT[i]);
                     push!(cols,globalNumF[j]);
-                    push!(vals,lS[i,j]);
+                    push!(vals,(abs(ddJ[1])/ddJ[1])*lS[i,j]);
+                    #ddJ[1] reicht um Vorzeichen der Determinante zu identifizieren
                 end
             end
         end
@@ -115,11 +126,15 @@ function assembStiff(degFs::degF{1}, degFv::degF{2}, z::Array{Float64,1}, m::mes
                 currentval=0.0;
                 for r in 1:sk[2]
                     for l in 1:sk[1]
+<<<<<<< HEAD
                         zjphi=0.0
                         for d in 1:m.geometry.dim
                             zjphi+=z[d]*jphiF[d,j][l,r]
                         end
                         currentval+=kubWeights[l,r]*phiT[i][l,r]*zjphi;
+=======
+                        currentval+=kubWeights[l,k]*(abs(ddJ[i,j])/ddJ[i,j])*phiT[i][l,k]*(z[1]*jphiF[1,j][l,k]+z[2]*jphiF[2,j][l,k]);
+>>>>>>> 9769bfbcb07b5b2b7e36bbd8673a21c1644bd528
                     end
                 end
                 lS[i,j] = currentval;

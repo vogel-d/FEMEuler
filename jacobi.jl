@@ -86,21 +86,19 @@ function jacobi!(J::Array{Array{Float64,2},2},ddJ::Array{Float64,2},jphi::Array{
     if mt==3
         a=coord[:,2]-coord[:,1];
         b=coord[:,3]-coord[:,1];
-        for i in 1:sk
-            ddJ[i]=1/abs(a[1]*b[2]-b[1]*a[2]);
 
+        for i in 1:sk
+            #ddJ[i]=1/abs(a[1]*b[2]-b[1]*a[2]);
+            ddJ[i]=1/(a[1]*b[2]-b[1]*a[2]);
             J[1,1][1,i]=a[1];
             J[1,2][1,i]=b[1];
             J[2,1][1,i]=a[2];
             J[2,2][1,i]=b[2];
-
             for k in 1:size(phi,2)
                 jphi[1,k][1,i]=(J[1,1][1,i]*phi[1,k][1,i]+J[1,2][1,i]*phi[2,k][1,i]);
                 jphi[2,k][1,i]=(J[2,1][1,i]*phi[1,k][1,i]+J[2,2][1,i]*phi[2,k][1,i]);
             end
         end
-        println("coord: $coord")
-        println([a[1] b[1];a[2] b[2]])
     elseif mt==4
         for i=1:sk, j=1:sk
             J[1,1][i,j]=(coord[1,2]-coord[1,1])+(coord[1,3]-coord[1,4]-coord[1,2]+coord[1,1])*kubPoints[2,j];

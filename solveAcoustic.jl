@@ -1,5 +1,5 @@
 #Lösen der Akkustik-Gleichung mit Buoyancy
-function solveB!(p::femProblem,
+function solveAcoustic!(p::femProblem,
                  Fp::SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64}, Fv::SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64}, Fb::SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64},
                  tstart::Float64, dt::Float64, nt::Float64, method::Symbol)
 
@@ -19,15 +19,15 @@ function solveB!(p::femProblem,
 
   np=p.degFBoundary[p.femType[:p][1]].num
   nv=p.degFBoundary[p.femType[:v][1]].num
-  nb=p.degFBoundary[p.femType[:b][1]].num
+  #nb=p.degFBoundary[p.femType[:b][1]].num
 
   if method==:euler
     for i in 1:iterations
       yV[1:nv]=yV[1:nv]+dt*(Fv\(-Svp*yP+Svb*yB));
       yP[1:np]=yP[1:np]+dt*(Fp\(-cs2*(Spv*yV)));
-      yB[1:nb]=yB[1:nb]+dt*(Fb\(-N2*(Sbv*yV)));
+      #yB[1:nb]=yB[1:nb]+dt*(Fb\(-N2*(Sbv*yV)));
     end
-
+    #println(sum(Svp*yP));
   elseif method==:rk4
     v1=copy(p.solution[tstart].v); v2=copy(p.solution[tstart].v); v3=copy(p.solution[tstart].v); v4=copy(p.solution[tstart].v);
     p1=copy(p.solution[tstart].p); p2=copy(p.solution[tstart].p); p3=copy(p.solution[tstart].p); p4=copy(p.solution[tstart].p);
@@ -60,5 +60,5 @@ function solveB!(p::femProblem,
     error("Keine zulässige Methode! Mögliche Methoden sind :euler und :rk4.");
   end
 
-  p.solution[tstart+nt]=createSolution(yV,yP,yB);
+  p.solution[tstart+nt]=createSolution(yV,yP,p.solution[tstart].b);
 end

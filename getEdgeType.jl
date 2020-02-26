@@ -7,11 +7,11 @@ function getEdgeType(n::Array{Float64,1})
         edgeType=3;
     elseif n==[1.0,0.0]
         edgeType=4;
-    elseif n==[0.7071067811865475244, 0.7071067811865475244]
-        edgeType=1;
+    elseif isequal(n,[1/sqrt(2), 1/sqrt(2)])
+        edgeType=3;
     else
-        error("Kein zulässiger Normalenvektor!");
+        error("Kein zulässiger Normalenvektor: $(n)");
     end
-    
+
     return edgeType
 end
