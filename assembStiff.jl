@@ -17,13 +17,13 @@ function assembStiff!(p::femProblem)
         p.stiffM[:vp]=Svp[1:degF[vkey].num,:];
         p.stiffM[:vb]=Svb[1:degF[vkey].num,:];
 
-    elseif p.type==:compressible
+    elseif p.type==:compressible || p.type==:shallow
         degF=p.degFBoundary;
         rhokey=p.femType[:rho][1];
         vkey=p.femType[:rhoV][1];
         pkey=p.femType[:p][1];
 
-        z=[0.0, 1.0];
+        z=zeros(Float64, p.mesh.geometry.dim); z[2]=1.0;
 
         Spv=assembStiff(degF[pkey], degF[vkey], p.mesh.topology.size[3], p.kubWeights);
         Svp = copy(-Spv');
@@ -101,21 +101,25 @@ function assembStiff(degFs::degF{1}, degFv::degF{2}, z::Array{Float64,1}, m::mes
 
     sk=size(kubWeights)
 
-    J=initJacobi((2,2),sk);
+    J=initJacobi((m.geometry.dim,m.topology.dim),sk);
     ddJ=Array{Float64,2}(undef,sk);
     jphiF=initJacobi(size(phiF),sk);
-    coord=Array{Float64,2}(undef,2,m.meshType);
+    coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
     lS=zeros(length(phiT), size(phiF,2));
 
-    for k in 1:m.topology.size[m.topology.D+1]
+    for k in 1:m.topology.size[m.topology.dim+1]
         jacobi!(J,ddJ,jphiF,m, k, kubPoints, phiF,coord);
         for i in 1:length(phiT)
             for j in 1:size(phiF,2)
                 currentval=0.0;
-                for k in 1:sk[2]
+                for r in 1:sk[2]
                     for l in 1:sk[1]
-                        currentval+=kubWeights[l,k]*phiT[i][l,k]*(z[1]*jphiF[1,j][l,k]+z[2]*jphiF[2,j][l,k]);
+                        zjphi=0.0
+                        for d in 1:m.geometry.dim
+                            zjphi+=z[d]*jphiF[d,j][l,r]
+                        end
+                        currentval+=kubWeights[l,r]*phiT[i][l,r]*zjphi;
                     end
                 end
                 lS[i,j] = currentval;
@@ -153,15 +157,15 @@ function assembStiff!(p::femProblem, comp::Symbol)
     kubWeights=p.kubWeights;
     sk=size(kubWeights)
 
-    J=initJacobi((2,2),sk);
+    J=initJacobi((m.geometry.dim,m.topology.dim),sk);
     dJ=Array{Float64,2}(undef,sk);
-    coord=Array{Float64,2}(undef,2,m.meshType);
+    coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
     nDF=degF[comp].numB;
     S=spzeros(nDF,nDF);
     lS=zeros(size(dphiRef,2), size(dphiRef,2));
 
-    for k in 1:m.topology.size[m.topology.D+1]
+    for k in 1:m.topology.size[m.topology.dim+1]
         jacobi!(J,dJ,m,k,kubPoints,coord);
 
         for j in 1:size(dphiRef,2)
