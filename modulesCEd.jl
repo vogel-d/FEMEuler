@@ -2,7 +2,6 @@ using SparseArrays;
 using LinearAlgebra;
 using SuiteSparse;
 using Plots;
-using Distributed;
 
 gr()
 
