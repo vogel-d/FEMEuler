@@ -213,10 +213,8 @@ function discGalerkinEdges!(M::Array{Float64,2},
     jphiWn2=initJacobi((m.geometry.dim,size(phiW,2)),sk)
     jphiTn2=initJacobi((m.geometry.dim,size(phiT,2)),sk);
 
-    w1=Array{Array{Float64,1},1}(undef,m.geometry.dim);
-    fill!(w1,zeros(sk))
-    w2=Array{Array{Float64,1},1}(undef,m.geometry.dim);
-    fill!(w2,zeros(sk))
+    w1=[zeros(sk) for d in 1:m.geometry.dim]
+    w2=[zeros(sk) for d in 1:m.geometry.dim]
 
     lM11=zeros(nT,nF);
     lM12=zeros(nT,nF);
@@ -247,12 +245,12 @@ function discGalerkinEdges!(M::Array{Float64,2},
         jacobi!(J2,ddJ2,jphiWn2,jphiTn2,m,inc2,kubPn2, phiWn2, phiTn2, coord);
 
 
-        fill!(w1,zeros(sk));
-        fill!(w2,zeros(sk));
         l2g!(globalNumW1,degFW,inc1);
         l2g!(globalNumW2,degFW,inc2);
-        for i in 1:length(globalNumW1)
-            for d in 1:m.geometry.dim
+        for d in 1:m.geometry.dim
+            fill!(w1[d],0.0);
+            fill!(w2[d],0.0);
+            for i in 1:length(globalNumW1)
                 @. w1[d]+=wval[globalNumW1[i]]*jphiWn1[d,i];
                 @. w2[d]+=wval[globalNumW2[i]]*jphiWn2[d,i];
             end

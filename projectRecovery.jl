@@ -48,8 +48,7 @@ function projectRecovery(degFH::degF{2},degF::degF{2},cval::Array{Float64,1},mas
     jphiH=initJacobi((m.geometry.dim,sph),sk);
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
-    cl=Array{Array{Float64,2},1}(undef,m.geometry.dim);
-    fill!(cl, zeros(sk))
+    cl=[zeros(sk) for d in 1:m.geometry.dim]
 
     globalNum=Array{Int64,1}(undef,size(phi,2));
     globalNumH=Array{Int64,1}(undef,size(phiH,2));
@@ -61,9 +60,9 @@ function projectRecovery(degFH::degF{2},degF::degF{2},cval::Array{Float64,1},mas
         l2g!(globalNum,degF,k);
         l2g!(globalNumH,degFH,k);
 
-        fill!(cl, zeros(sk))
-        for i in 1:length(globalNum)
-            for d in 1:m.geometry.dim
+        for d in 1:m.geometry.dim
+            fill!(cl[d], 0.0)
+            for i in 1:length(globalNum)
                 @. cl[d]+=cval[globalNum[i]]*jphi[d,i];
             end
         end
