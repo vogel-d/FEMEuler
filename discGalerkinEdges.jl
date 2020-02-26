@@ -213,9 +213,9 @@ function discGalerkinEdges!(M::Array{Float64,2},
     jphiWn2=initJacobi((m.geometry.dim,size(phiW,2)),sk)
     jphiTn2=initJacobi((m.geometry.dim,size(phiT,2)),sk);
 
-    w1=Array{Array{Float64,2},1}(undef,m.geometry.dim);
+    w1=Array{Array{Float64,1},1}(undef,m.geometry.dim);
     fill!(w1,zeros(sk))
-    w2=Array{Array{Float64,2},1}(undef,m.geometry.dim);
+    w2=Array{Array{Float64,1},1}(undef,m.geometry.dim);
     fill!(w2,zeros(sk))
 
     lM11=zeros(nT,nF);
