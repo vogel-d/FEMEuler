@@ -3,7 +3,13 @@ function setEdgeData!(p::femProblem, compVf::Symbol)
     degFVf=p.degFBoundary[p.femType[compVf][1]];
     mt=m.meshType;
     refBound=getElementProperties(mt,p.femType[compVf][1]);
-    mt==4 ?  normal=[0.5 0.0 1.0 1.0 0.5 0.0 0.0 -1.0; 0.0 -1.0 0.5 0.0 1.0 1.0 0.5 0.0] : normal=[0.5 0.0 0.5 1/sqrt(2) 0.0 -1.0; 0.0 -1.0 0.5 1/sqrt(2) 0.5 0.0];
+    if mt==4
+        normal=Dict([1,2]=>[0.0,-1.0],[2,3]=>[1.0,0.0],[3,4]=>[0.0,1.0],[1,4]=>[-1.0,0.0])
+        coordref=[0.0 1.0 1.0 0.0; 0.0 0.0 1.0 1.0]
+    else
+        normal=Dict([1,2]=>[0.0,-1.0],[2,3]=>[1/sqrt(2),1/sqrt(2)],[1,3]=>[-1.0,0.0])
+        coordref=[0.0 1.0 0.0; 0.0 0.0 1.0]
+    end
     meshConnectivity!(m,1,2)
     offe=m.topology.offset["12"];
     ince=m.topology.incidence["12"];
@@ -41,42 +47,32 @@ function setEdgeData!(p::femProblem, compVf::Symbol)
         t2(v::Array{Float64,1})=transformation(m,coord2,v[1],v[2]);
 
         coordv= @views m.geometry.coordinates[:,incv[offv[e]:(offv[e]+1)]];
-        mv=(1/size(coordv,2)).*[sum(coordv[1,:]), sum(coordv[2,:])];
-        n1=Array{Float64,1}();
-        n2=Array{Float64,1}();
 
         if h1 #Fall periodische Randkante
             coordve= @views m.geometry.coordinates[:,incv[offv[e1]:(offv[e1]+1)]];
-            mva=(1/size(coordve,2)).*[sum(coordve[1,:]), sum(coordve[2,:])];
-            mvb=mv;
         else #Fall innere Kante
-            mva=mvb=mvc=mv;
+            coordve=coordv
         end
-
+        n1=Array{Float64,1}();
+        n2=Array{Float64,1}();
+        coordvn1=Array{Float64,2}(undef,m.geometry.dim,mt);
+        coordvn2=Array{Float64,2}(undef,m.geometry.dim,mt);
         for i in 1:mt
-            m1=t1(normal[:,2*i-1]);
-            m2=t2(normal[:,2*i-1]);
-            if isapprox(m1,mva)
-                n1=normal[:,2*i];
-            end
-
-            if isapprox(m2,mvb)
-                n2=normal[:,2*i];
-            end
-
+            coordvn1[:,i]=t1(coordref[:,i])
+            coordvn2[:,i]=t2(coordref[:,i])
         end
+        v1=findall(coordve[:,1],coordvn1);
+        sort!(append!(v1, findall(coordve[:,2],coordvn1)))
+        n1=normal[v1]
+        v2=findall(coordv[:,1],coordvn2);
+        sort!(append!(v2, findall(coordv[:,2],coordvn2)))
+        n2=normal[v2]
         globalNumVf=l2g(degFVf,inc[1])
-        for i in 1:mt
-            rb=t1(refBound[i,1:2]);
-            if isapprox(rb,mva)
-                d=refBound[i,3:end];
-                for j in 1:length(d)
-                    if d[j]==1.0
-                        push!(globv,globalNumVf[j]);
-                        zo+=1;
-                    end
-                end
-                break;
+        rb=refBound[v1]
+        for j in 1:length(rb)
+            if rb[j]==1.0
+                push!(globv,globalNumVf[j]);
+                zo+=1;
             end
         end
         push!(off,zo);
