@@ -50,7 +50,7 @@ function advectionStiff(degFT::degF{2}, phiTtrans::Array{Array{Array{Float64,1},
     sk=size(kubWeights);
 
     quadPoints, quadWeights=getQuad(2*sk[1]-1);
-    coord=Array{Float64,2}(undef,2,m.meshType);
+    coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
     globalNumT1=Array{Int64,1}(undef,size(phiT,2));
     globalNumF1=Array{Int64,1}(undef,size(phiF,2));
