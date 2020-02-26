@@ -37,19 +37,21 @@ function testInertiaGravity2()
     H=10000;
     a=5000;
     xC=150000;
-    function frho(x::Float64,z::Float64)
+    function frho(xz::Array{Float64,1})
+        x=xz[1]; z=xz[2];
         S=N*N/Grav
         ThLoc=th0*exp(S*z)+DeltaTh1*sin(pi*z/H)/(1.0+((x-xC)/a)^2);
         pLoc=p0*(1.0-Grav/(Cpd*th0*S)*(1.0-exp(-S*z)))^(Cpd/Rd)
         return pLoc/((pLoc/p0)^kappa*Rd*ThLoc);
     end
 
-    function ftheta(x::Float64,z::Float64)
+    function ftheta(xz::Array{Float64,1})
+        x=xz[1]; z=xz[2];
         S=N*N/Grav
         return th0*exp(S*z)+DeltaTh1*sin(pi*z/H)/(1.0+((x-xC)/a)^2);
     end
-    fv1(x, y)=UMax;
-    fv2(x, y)=0;
+    fv1(xz::Array{Float64,1})=UMax;
+    fv2(xz::Array{Float64,1})=0;
     fvel=[fv1, fv2];
     f=Dict(:rho=>frho,:theta=>ftheta,:v=>fvel);
 
