@@ -140,6 +140,7 @@ function unstructured_vtk(p::femProblem, t::Array{Float64,1}, comp::Array{Symbol
     return outfiles::Vector{String}
 end
 
+#Plotten auf verfeinerten Mesh
 
 function unstructured_vtk(p::femProblem, rx::Int, ry::Int, tend::Float64, comp::Array{Symbol,1}, name::Array{String,1}, filename::String)
 
