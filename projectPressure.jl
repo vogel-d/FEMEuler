@@ -5,9 +5,9 @@ function projectPressure(degFP::degF{1},massMP::SuiteSparse.UMFPACK.UmfpackLU{Fl
     phiP=@views degFP.phi;
     sk=size(kubWeights);
 
-    J=initJacobi((2,2),sk);
+    J=initJacobi((m.geometry.dim,m.topology.dim),sk);
     dJ=Array{Float64,2}(undef,sk);
-    coord=Array{Float64,2}(undef,2,m.meshType);
+    coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
     globalNumRT=Array{Int64,1}(undef,length(phiRT));
     globalNumP=Array{Int64,1}(undef,length(phiP));
@@ -52,9 +52,9 @@ function projectPressure(degFP::degF{1},massMP::SuiteSparse.UMFPACK.UmfpackLU{Fl
     phiP=@views degFP.phi;
     sk=size(kubWeights);
 
-    J=initJacobi((2,2),sk);
+    J=initJacobi((m.geometry.dim,m.topology.dim),sk);
     dJ=Array{Float64,2}(undef,sk);
-    coord=Array{Float64,2}(undef,2,m.meshType);
+    coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
     globalNumRT=Array{Int64,1}(undef,length(phiRT));
     globalNumP=Array{Int64,1}(undef,length(phiP));
