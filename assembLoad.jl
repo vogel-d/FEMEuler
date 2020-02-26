@@ -65,6 +65,7 @@ function assembLoad(degF::degF{2}, f, m::mesh, kubPoints::Array{Float64,2}, kubW
                 for i=1:sk[1], j=1:sk[2]
                     xy=transformation(m,coord,kubPoints[1,i],kubPoints[2,j])
                     ft[d][i,j]=f[d](xy[1],xy[2]);
+                end
             end
         end
         globalNum=l2g(degF,k);
