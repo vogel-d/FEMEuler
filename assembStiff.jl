@@ -48,7 +48,7 @@ end
 #skalare Größe mit Divergenz von vektorieller Größe
 function assembStiff(degFs::degF{1}, degFv::degF{2}, m::mesh, kubWeights::Array{Float64,2}, kubPoints::Array{Float64,2})
 
-    nf=m.topology.size[m.topology.D+1]
+    nf=m.topology.size[m.topology.dim+1]
     nT=degFs.numB;
     nF=degFv.numB;
     phiT=degFs.phi;
