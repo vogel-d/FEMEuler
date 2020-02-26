@@ -77,10 +77,10 @@ function assembStiff(degFs::degF{1}, degFv::degF{2}, m::mesh, kubWeights::Array{
     phiRef=degFv.phi;
     iter=size(phiRef,2);
     sk=size(kubWeights)
-    J=initJacobi((2,2),sk);
+    J=initJacobi((m.geometry.dim,m.topology.dim),sk);
     ddJ=Array{Float64,2}(undef,sk);
-    jphiRef=initJacobi(size(phiRef),sk);
-    coord=Array{Float64,2}(undef,2,m.meshType);
+    jphiRef=initJacobi((m.geometry.dim,iter),sk);
+    coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
     for k in 1:nf
         globalNumT=l2g(degFs,k);
         globalNumF=l2g(degFv,k);
@@ -114,7 +114,7 @@ function assembStiff(degFs::degF{1}, degFv::degF{2}, z::Array{Float64,1}, m::mes
 
     J=initJacobi((m.geometry.dim,m.topology.dim),sk);
     ddJ=Array{Float64,2}(undef,sk);
-    jphiF=initJacobi(size(phiF),sk);
+    jphiF=initJacobi((m.geometry.dim,size(phiF,2)),sk);
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
     lS=zeros(length(phiT), size(phiF,2));
