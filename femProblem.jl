@@ -42,7 +42,7 @@ function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}};advection::B
     stiffM=Dict();
     loadV=Dict();
     bV=Dict();
-    s=Set{Symbol}([:poisson,:boussinesq,:compressible]);
+    s=Set{Symbol}([:poisson,:boussinesq,:compressible,:shallow]);
     !in(t,s) && error("Die Methode $t ist keine zulässige Eingabe. Möglich sind $s");
     femProblem(m,bV,dF,femType,edgeData,sol,massM,massMB,stiffM,t,kubWeights, kubPoints, taskRecovery, advection);
 end
