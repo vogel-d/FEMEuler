@@ -3,7 +3,7 @@
     bspw. Jacobi-Matrix, transformierte Ansatzfunktionen, Determinante der Jacobi-Matrix, ...
 =#
 
-function jacobi!(J::Array{Array{Float64,2},2},dJ::Array{Float64,2},m::mesh, fid::Int64, kubPoints::Array{Float64,2}, coord::Array{Float64,2})
+function jacobi!(J::Array{Array{Float64,2},2},dJ::Array{Float64,2},m::mesh, fid::Int, kubPoints::Array{Float64,2}, coord::Array{Float64,2})
     key="20";
     mt=m.meshType;
     rstart=m.topology.offset[key][fid];
@@ -28,10 +28,6 @@ function jacobi!(J::Array{Array{Float64,2},2},dJ::Array{Float64,2},m::mesh, fid:
             J[2,2][i]=b[2];
         end
     elseif mt==4
-         #J[1,1]=Array{Float64,2}(undef,sk,sk);
-         #J[1,2]=Array{Float64,2}(undef,sk,sk);
-         #J[2,1]=Array{Float64,2}(undef,sk,sk);
-         #J[2,2]=Array{Float64,2}(undef,sk,sk);
          for i=1:sk, j=1:sk
              J[1,1][i,j]=(coord[1,2]-coord[1,1])+(coord[1,3]-coord[1,4]-coord[1,2]+coord[1,1])*kubPoints[2,j];
              J[2,1][i,j]=(coord[2,2]-coord[2,1])+(coord[2,3]-coord[2,4]-coord[2,2]+coord[2,1])*kubPoints[2,j];
@@ -43,7 +39,7 @@ function jacobi!(J::Array{Array{Float64,2},2},dJ::Array{Float64,2},m::mesh, fid:
     return nothing;
 end
 
-function jacobi!(J::Array{Float64,2},m::mesh, fid::Int64, x::Float64, y::Float64, coord::Array{Float64,2})
+function jacobi!(J::Array{Float64,2},m::mesh, fid::Int, x::Float64, y::Float64, coord::Array{Float64,2})
     key="20";
     mt=m.meshType;
     rstart=m.topology.offset[key][fid];
@@ -73,7 +69,7 @@ function jacobi!(J::Array{Float64,2},m::mesh, fid::Int64, x::Float64, y::Float64
     return dJ;
 end
 
-function jacobi!(J::Array{Array{Float64,2},2},ddJ::Array{Float64,2},jphi::Array{Array{Float64,2},2},m::mesh, fid::Int64, kubPoints::Array{Float64,2}, phi::Array{Array{Float64,2},2}, coord::Array{Float64,2})
+function jacobi!(J::Array{Array{Float64,2},2},ddJ::Array{Float64,2},jphi::Array{Array{Float64,2},2},m::mesh, fid::Int, kubPoints::Array{Float64,2}, phi::Array{Array{Float64,2},2}, coord::Array{Float64,2})
     key="20";
     mt=m.meshType;
     rstart=m.topology.offset[key][fid];
@@ -106,10 +102,6 @@ function jacobi!(J::Array{Array{Float64,2},2},ddJ::Array{Float64,2},jphi::Array{
         println("coord: $coord")
         println([a[1] b[1];a[2] b[2]])
     elseif mt==4
-        #J[1,1]=Array{Float64,2}(undef,sk,sk);
-        #J[1,2]=Array{Float64,2}(undef,sk,sk);
-        #J[2,1]=Array{Float64,2}(undef,sk,sk);
-        #J[2,2]=Array{Float64,2}(undef,sk,sk);
         for i=1:sk, j=1:sk
             J[1,1][i,j]=(coord[1,2]-coord[1,1])+(coord[1,3]-coord[1,4]-coord[1,2]+coord[1,1])*kubPoints[2,j];
             J[2,1][i,j]=(coord[2,2]-coord[2,1])+(coord[2,3]-coord[2,4]-coord[2,2]+coord[2,1])*kubPoints[2,j];
@@ -125,7 +117,7 @@ function jacobi!(J::Array{Array{Float64,2},2},ddJ::Array{Float64,2},jphi::Array{
     return nothing;
 end
 
-function jacobi!(ddJ::Array{Float64,2}, jphi::Array{Array{Float64,2},2}, m::mesh, fid::Int64, kubPoints::Array{Float64,2}, phi::Array{Array{Float64,2},2}, coord::Array{Float64,2})
+function jacobi!(ddJ::Array{Float64,2}, jphi::Array{Array{Float64,2},2}, m::mesh, fid::Int, kubPoints::Array{Float64,2}, phi::Array{Array{Float64,2},2}, coord::Array{Float64,2})
     key="20";
     mt=m.meshType;
     rstart=m.topology.offset[key][fid];
@@ -174,7 +166,7 @@ function jacobi!(ddJ::Array{Float64,2}, jphi::Array{Array{Float64,2},2}, m::mesh
     return nothing;
 end
 
-function jacobi!(J::Array{Array{Float64,2},2},ddJ::Array{Float64,2},jphi::Array{Array{Float64,2},2},jpsi::Array{Array{Float64,2},2},m::mesh, fid::Int64, kubPoints::Array{Float64,2}, phi::Array{Array{Float64,2},2}, psi::Array{Array{Float64,2},2}, coord::Array{Float64,2})
+function jacobi!(J::Array{Array{Float64,2},2},ddJ::Array{Float64,2},jphi::Array{Array{Float64,2},2},jpsi::Array{Array{Float64,2},2},m::mesh, fid::Int, kubPoints::Array{Float64,2}, phi::Array{Array{Float64,2},2}, psi::Array{Array{Float64,2},2}, coord::Array{Float64,2})
     key="20";
     mt=m.meshType;
     rstart=m.topology.offset[key][fid];
@@ -211,10 +203,6 @@ function jacobi!(J::Array{Array{Float64,2},2},ddJ::Array{Float64,2},jphi::Array{
             end
         end
     elseif mt==4
-        #J[1,1]=Array{Float64,2}(undef,sk,sk);
-        #J[1,2]=Array{Float64,2}(undef,sk,sk);
-        #J[2,1]=Array{Float64,2}(undef,sk,sk);
-        #J[2,2]=Array{Float64,2}(undef,sk,sk);
         for i=1:sk, j=1:sk
             J[1,1][i,j]=(coord[1,2]-coord[1,1])+(coord[1,3]-coord[1,4]-coord[1,2]+coord[1,1])*kubPoints[2,j];
             J[2,1][i,j]=(coord[2,2]-coord[2,1])+(coord[2,3]-coord[2,4]-coord[2,2]+coord[2,1])*kubPoints[2,j];
@@ -235,7 +223,7 @@ function jacobi!(J::Array{Array{Float64,2},2},ddJ::Array{Float64,2},jphi::Array{
     return nothing;
 end
 
-function jacobi!(J::Array{Array{Float64,1},2},dJ::Array{Float64,1},m::mesh, fid::Int64, kubPoints::Array{Float64,2}, coord::Array{Float64,2})
+function jacobi!(J::Array{Array{Float64,1},2},dJ::Array{Float64,1},m::mesh, fid::Int, kubPoints::Array{Float64,2}, coord::Array{Float64,2})
     key="20";
     mt=m.meshType;
     rstart=m.topology.offset[key][fid];
@@ -260,10 +248,6 @@ function jacobi!(J::Array{Array{Float64,1},2},dJ::Array{Float64,1},m::mesh, fid:
             J[2,2][i]=b[2];
         end
     elseif mt==4
-         #J[1,1]=Array{Float64,1}(undef,sk);
-         #J[1,2]=Array{Float64,1}(undef,sk);
-         #J[2,1]=Array{Float64,1}(undef,sk);
-         #J[2,2]=Array{Float64,1}(undef,sk);
          for i=1:sk
              J[1,1][i]=(coord[1,2]-coord[1,1])+(coord[1,3]-coord[1,4]-coord[1,2]+coord[1,1])*kubPoints[2,i];
              J[2,1][i]=(coord[2,2]-coord[2,1])+(coord[2,3]-coord[2,4]-coord[2,2]+coord[2,1])*kubPoints[2,i];
@@ -275,7 +259,7 @@ function jacobi!(J::Array{Array{Float64,1},2},dJ::Array{Float64,1},m::mesh, fid:
     return nothing;
 end
 
-function jacobi!(J::Array{Array{Float64,1},2},ddJ::Array{Float64,1},jphi::Array{Array{Float64,1},2},jpsi::Array{Array{Float64,1},2},m::mesh, fid::Int64, kubPoints::Array{Float64,2}, phi::Array{Array{Float64,1},2}, psi::Array{Array{Float64,1},2}, coord::Array{Float64,2})
+function jacobi!(J::Array{Array{Float64,1},2},ddJ::Array{Float64,1},jphi::Array{Array{Float64,1},2},jpsi::Array{Array{Float64,1},2},m::mesh, fid::Int, kubPoints::Array{Float64,2}, phi::Array{Array{Float64,1},2}, psi::Array{Array{Float64,1},2}, coord::Array{Float64,2})
     key="20";
     mt=m.meshType;
     rstart=m.topology.offset[key][fid];
@@ -309,10 +293,6 @@ function jacobi!(J::Array{Array{Float64,1},2},ddJ::Array{Float64,1},jphi::Array{
             end
         end
     elseif mt==4
-        #J[1,1]=Array{Float64,1}(undef,sk);
-        #J[1,2]=Array{Float64,1}(undef,sk);
-        #J[2,1]=Array{Float64,1}(undef,sk);
-        #J[2,2]=Array{Float64,1}(undef,sk);
         for i=1:sk
             J[1,1][i]=(coord[1,2]-coord[1,1])+(coord[1,3]-coord[1,4]-coord[1,2]+coord[1,1])*kubPoints[2,i];
             J[2,1][i]=(coord[2,2]-coord[2,1])+(coord[2,3]-coord[2,4]-coord[2,2]+coord[2,1])*kubPoints[2,i];
