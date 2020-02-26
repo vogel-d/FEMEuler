@@ -150,7 +150,7 @@ function meshConnectivity!(m::mesh, d::Int, ds::Int)
       inc,off=meshTranspose(m,d,ds);
     else
       if d==0 && ds==0
-        dss=m.topology.D;
+        dss=m.topology.dim;
       else
         dss=0;
       end
@@ -167,8 +167,8 @@ end
 
 function completeMesh!(m)
   #jede mögliche Verbindung/Richtung wird erzeugt
-    for i in 0:(m.topology.D)
-        for j in 0:(m.topology.D)
+    for i in 0:(m.topology.dim)
+        for j in 0:(m.topology.dim)
           meshConnectivity!(m,i,j);
         end
     end
@@ -180,7 +180,7 @@ function checkSurr(m::mesh, d::Int, id::Int)
     completeMesh!(m)
     surr = Dict{String, Array{Int,1}}()
 
-    for i in 0:(m.topology.D)
+    for i in 0:(m.topology.dim)
         #jede mögliche Dimension wird durchlaufen
         dir = "$d$i"
         #Feststellen des richtigen Bereichs im Inzidenzvektor

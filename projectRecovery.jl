@@ -14,7 +14,7 @@ function projectRecovery(degFH::degF{1},degF::degF{1},cval::Array{Float64,1},mas
     globalNumH=Array{Int64,1}(undef,length(phiH));
 
     gbh=zeros(degFH.numB)
-    for k in 1:m.topology.size[m.topology.D+1]
+    for k in 1:m.topology.size[m.topology.dim+1]
         jacobi!(J,dJ,m,k,kubPoints,coord);
 
         l2g!(globalNum,degF,k);
@@ -55,7 +55,7 @@ function projectRecovery(degFH::degF{2},degF::degF{2},cval::Array{Float64,1},mas
     globalNumH=Array{Int64,1}(undef,size(phiH,2));
 
     gbh=zeros(degFH.numB)
-    for k in 1:m.topology.size[m.topology.D+1]
+    for k in 1:m.topology.size[m.topology.dim+1]
         jacobi!(J,ddJ,jphi,jphiH,m,k,kubPoints, phi, phiH,coord);
 
         l2g!(globalNum,degF,k);

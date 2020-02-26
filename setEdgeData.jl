@@ -17,7 +17,7 @@ function setEdgeData!(p::femProblem, compVf::Symbol)
     globv=Int64[];
     off=Int64[1];
     zo=1;
-    for e in 1:m.topology.size[m.topology.D]
+    for e in 1:m.topology.size[m.topology.dim]
         off1=offe[e];
         off2=offe[e+1];
         h1=false;
