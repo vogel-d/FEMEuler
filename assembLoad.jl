@@ -53,28 +53,18 @@ function assembLoad(degF::degF{2}, f, m::mesh, kubPoints::Array{Float64,2}, kubW
         coord=@views m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][k]:m.topology.offset["20"][k+1]-1]]
 
         jacobi!(J,ddJ,jphiT,m,k,kubPoints,phiT,jcoord);
-<<<<<<< HEAD
         ft=Array{Array{Float64,2},1}(undef,m.geometry.dim);
         for d in 1:m.geometry.dim
             ft[d]=Array{Float64,2}(undef,sk);
-            for i=1:sk[1], j=1:sk[2]
-                xy=transformation(m,coord,kubPoints[1,i],kubPoints[2,j])
-                ft[d][i,j]=f[1](xy[1],xy[2]);
-=======
-        ft1=Array{Float64,2}(undef,sk);
-        ft2=Array{Float64,2}(undef,sk);
-        if sk[1]==1 # <=> dreiecke, muss liste durchlaufen
-            for i=1:sk[2]
-                xy=transformation(m,coord,kubPoints[1,i],kubPoints[2,i])
-                ft1[i]=f[1](xy[1],xy[2]);
-                ft2[i]=f[2](xy[1],xy[2]);
-            end
-        else # <=> vierecke, muss matrix durchlaufen
-            for i=1:sk[1], j=1:sk[2]
-                xy=transformation(m,coord,kubPoints[1,i],kubPoints[2,j])
-                ft1[i,j]=f[1](xy[1],xy[2]);
-                ft2[i,j]=f[2](xy[1],xy[2]);
->>>>>>> 9769bfbcb07b5b2b7e36bbd8673a21c1644bd528
+            if sk[1]==1 # <=> dreiecke, muss liste durchlaufen
+                for i=1:sk[2]
+                    xy=transformation(m,coord,kubPoints[1,i],kubPoints[2,i])
+                    ft[d][i]=f[d](xy[1],xy[2]);
+                end
+            else # <=> vierecke, muss matrix durchlaufen
+                for i=1:sk[1], j=1:sk[2]
+                    xy=transformation(m,coord,kubPoints[1,i],kubPoints[2,j])
+                    ft[d][i,j]=f[d](xy[1],xy[2]);
             end
         end
         globalNum=l2g(degF,k);

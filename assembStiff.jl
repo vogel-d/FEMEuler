@@ -126,15 +126,11 @@ function assembStiff(degFs::degF{1}, degFv::degF{2}, z::Array{Float64,1}, m::mes
                 currentval=0.0;
                 for r in 1:sk[2]
                     for l in 1:sk[1]
-<<<<<<< HEAD
                         zjphi=0.0
                         for d in 1:m.geometry.dim
                             zjphi+=z[d]*jphiF[d,j][l,r]
                         end
-                        currentval+=kubWeights[l,r]*phiT[i][l,r]*zjphi;
-=======
-                        currentval+=kubWeights[l,k]*(abs(ddJ[i,j])/ddJ[i,j])*phiT[i][l,k]*(z[1]*jphiF[1,j][l,k]+z[2]*jphiF[2,j][l,k]);
->>>>>>> 9769bfbcb07b5b2b7e36bbd8673a21c1644bd528
+                        currentval+=kubWeights[l,r]*(abs(ddJ[i,j])/ddJ[i,j])*phiT[i][l,r]*zjphi;
                     end
                 end
                 lS[i,j] = currentval;
