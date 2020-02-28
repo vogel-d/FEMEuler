@@ -17,13 +17,13 @@ function assembStiff!(p::femProblem)
         p.stiffM[:vp]=Svp[1:degF[vkey].num,:];
         p.stiffM[:vb]=Svb[1:degF[vkey].num,:];
 
-    elseif p.type==:compressible || p.type==:shallow
+    elseif p.type==:compressible
         degF=p.degFBoundary;
         rhokey=p.femType[:rho][1];
         vkey=p.femType[:rhoV][1];
         pkey=p.femType[:p][1];
 
-        z=zeros(Float64, p.mesh.geometry.dim); z[2]=1.0;
+        z=[0.0,1.0]
 
         Spv=assembStiff(degF[pkey], degF[vkey], p.mesh, p.kubWeights, p.kubPoints);
         Svp = copy(-Spv');
@@ -33,6 +33,19 @@ function assembStiff!(p::femProblem)
         p.stiffM[:rho]=Spv[1:degF[rhokey].num,:];
         p.stiffM[:vp]=Svp[1:degF[vkey].num,:];
         p.stiffM[:vrho]=Svrho[1:degF[vkey].num,:];
+
+    elseif p.type==:shallow
+        degF=p.degFBoundary;
+        rhokey=p.femType[:rho][1];
+        vkey=p.femType[:rhoV][1];
+        pkey=p.femType[:p][1];
+
+        Spv=assembStiff(degF[pkey], degF[vkey], p.mesh, p.kubWeights, p.kubPoints);
+        #Svp = copy(-Spv');
+        Svp =assembStiff(degF[vkey], degF[pkey], p.mesh, p.kubWeights, p.kubPoints);
+
+        p.stiffM[:rho]=Spv[1:degF[rhokey].num,:];
+        p.stiffM[:vp]=Svp[1:degF[vkey].num,:];
 
     else
         comp=Set{Symbol}()
@@ -74,23 +87,20 @@ function assembStiff(degFs::degF{1}, degFv::degF{2}, m::mesh, kubWeights::Array{
         end
     end
 
-    phiRef=degFv.phi;
-    iter=size(phiRef,2);
     sk=size(kubWeights)
     J=initJacobi((m.geometry.dim,m.topology.dim),sk);
-    ddJ=Array{Float64,2}(undef,sk);
-    jphiRef=initJacobi((m.geometry.dim,iter),sk);
+    dJ=Array{Float64,2}(undef,sk);
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
     for k in 1:nf
         globalNumT=l2g(degFs,k);
         globalNumF=l2g(degFv,k);
-        jacobi!(J,ddJ,jphiRef,m,k,kubPoints, phiRef,coord);
+        jacobi!(J,dJ,m,k,kubPoints,coord);
         for j in 1:length(globalNumF)
             for i in 1:length(globalNumT)
                 if !isequal(lS[i,j],0.0) || (globalNumT[i]==nT && globalNumF[j]==nF)
                     push!(rows,globalNumT[i]);
                     push!(cols,globalNumF[j]);
-                    push!(vals,(abs(ddJ[1])/ddJ[1])*lS[i,j]);
+                    push!(vals,(abs(dJ[1])/dJ[1])*lS[i,j]);
                     #ddJ[1] reicht um Vorzeichen der Determinante zu identifizieren
                 end
             end
@@ -130,7 +140,7 @@ function assembStiff(degFs::degF{1}, degFv::degF{2}, z::Array{Float64,1}, m::mes
                         for d in 1:m.geometry.dim
                             zjphi+=z[d]*jphiF[d,j][l,r]
                         end
-                        currentval+=kubWeights[l,r]*(abs(ddJ[i,j])/ddJ[i,j])*phiT[i][l,r]*zjphi;
+                        currentval+=kubWeights[l,r]*(ddJ[i,j]/abs(ddJ[i,j]))*phiT[i][l,r]*zjphi;
                     end
                 end
                 lS[i,j] = currentval;

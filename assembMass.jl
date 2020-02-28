@@ -12,9 +12,7 @@ function assembMass!(p::femProblem)
         end
     end
     comp=Set{Symbol}(s);
-    #comp=[:DG0, :P1, :RT0, :DG1, :RT0B, :VecP1, :VecDG1]
     for i in comp
-    #    println(i)
         massM=assembMass(p.degFBoundary[i],p.mesh,p.kubPoints,p.kubWeights);
         n=p.degFBoundary[i].num
         p.massM[i]=lu(massM[1:n,1:n]);
@@ -42,7 +40,7 @@ function assembMass(degF::degF{1}, m::mesh, kubPoints::Array{Float64,2}, kubWeig
                 currentval=0.0;
                 for r in 1:sk[2]
                     for l in 1:sk[1]
-                        currentval+=kubWeights[l,r]*phiRef[i][l,r]*phiRef[j][l,r]*dJ[l,r];
+                        currentval+=kubWeights[l,r]*phiRef[i][l,r]*phiRef[j][l,r]*abs(dJ[l,r]);
                     end
                 end
                 if !isequal(currentval,0.0)

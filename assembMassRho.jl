@@ -32,7 +32,7 @@ function assembMassRho(degF::degF{1}, degFRho::degF{1}, valRho::Array{Float64,1}
                 currentval=0.0;
                 for r in 1:sk[2]
                     for l in 1:sk[1]
-                        currentval+=kubWeights[l,r]*cRho[l,r]*phi[i][l,r]*phi[j][l,r]*dJ[l,r];
+                        currentval+=kubWeights[l,r]*cRho[l,r]*phi[i][l,r]*phi[j][l,r]*abs(dJ[l,r]);
                     end
                 end
                 if !isequal(currentval,0.0) || (globalNum[i]==n && globalNum[j]==n)
@@ -85,7 +85,7 @@ function assembMassRho(degF::degF{2}, degFRho::degF{1}, valRho::Array{Float64,1}
                         for d in 1:m.geometry.dim
                             jphiDot+=jphi[d,i][l,r]*jphi[d,j][l,r];
                         end
-                        currentval+=kubWeights[l,r]*ddJ[l,r]*cRho[l,r]*jphiDot;
+                        currentval+=kubWeights[l,r]*abs(ddJ[l,r])*cRho[l,r]*jphiDot;
                     end
                 end
                 if !isequal(currentval,0.0) || (globalNum[i]==n && globalNum[j]==n)
