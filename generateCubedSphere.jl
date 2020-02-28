@@ -164,6 +164,8 @@ function generateCubedSphere(n::Int,r::Float64,nz::Int=0,case::Symbol=:purser1) 
   m.topology.incidence["20"]=inc;
   m.topology.offset["20"]=off;
 
+  setOrientation!(m)
+
   # Extension to 3 d
   #Extension3DPolyGrid(nz,PolyGrid,NumberOfNodesPlane,NumberOfEdgesPlane,NumberOfFacesPlane)
 

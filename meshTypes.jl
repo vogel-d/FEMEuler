@@ -56,6 +56,7 @@ struct mesh
   normals::Array{Float64,2} #Normalen des Referenzelementes
   boundaryEdges::SparseVector{Int,Int};
   boundaryVertices::SparseVector{Int,Int};
+  orientation::Array{Float64,1};
 end
 
 function mesh(topology::meshTopology, geometry::meshGeometry, bE::SparseVector{Int,Int}, bV::SparseVector{Int,Int}, mt::Int=topology.offset["20"][2]-topology.offset["20"][1])
@@ -70,5 +71,6 @@ function mesh(topology::meshTopology, geometry::meshGeometry, bE::SparseVector{I
       z+=2;
   end
   mt==4 ? n=[0.0 -1.0 0.0 1.0;-1.0 0.0 1.0 0.0] : n=[0.0 -1.0 0.7071067811865475244;-1.0 0.0 0.7071067811865475244];
-  mesh(topology, geometry, mt, l, n, bE, bV)
+  orientation=Float64[];
+  mesh(topology, geometry, mt, l, n, bE, bV, orientation)
 end
