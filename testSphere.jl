@@ -29,7 +29,7 @@ function testSphere()
     m=generateCubedSphere(3,3600.0)
 
     p=femProblem(m, femType,t=:shallow, advection=advection, taskRecovery=taskRecovery);
-    return p;
+    #return p;
     gamma=0.5; #upwind
     UMax=0.0; #UMax determines the advection in x direction
     MISMethod=MIS(:MIS2); #method of time integration
