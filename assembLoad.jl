@@ -7,12 +7,14 @@ function assembLoad(degF::degF{1}, f, m::mesh, kubPoints::Array{Float64,2}, kubW
     jcoord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
     gb=zeros(degF.numB)
 
+    ft=zeros(sk);
+
     iter=length(phiT);
     for k in 1:m.topology.size[m.topology.dim+1]
         coord=@views m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][k]:m.topology.offset["20"][k+1]-1]]
 
         jacobi!(J,dJ,m,k,kubPoints,jcoord);
-        ft=Array{Float64,2}(undef,sk);
+        fill!(ft,0.0);
         if sk[1]==1 # <=> dreiecke, muss liste durchlaufen
             for i=1:sk[2]
                 xy=transformation(m,coord,kubPoints[1,i],kubPoints[2,i])
@@ -49,13 +51,14 @@ function assembLoad(degF::degF{2}, f, m::mesh, kubPoints::Array{Float64,2}, kubW
     jcoord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
     gb=zeros(degF.numB);
 
+    ft=[zeros(sk) for d in 1:m.geometry.dim]
+
     for k in 1:m.topology.size[m.topology.dim+1]
         coord=@views m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][k]:m.topology.offset["20"][k+1]-1]]
 
         jacobi!(J,ddJ,jphiT,m,k,kubPoints,phiT,jcoord);
-        ft=Array{Array{Float64,2},1}(undef,m.geometry.dim);
         for d in 1:m.geometry.dim
-            ft[d]=Array{Float64,2}(undef,sk);
+            fill!(ft[d],0.0);
             if sk[1]==1 # <=> dreiecke, muss liste durchlaufen
                 for i=1:sk[2]
                     xy=transformation(m,coord,kubPoints[1,i],kubPoints[2,i])
