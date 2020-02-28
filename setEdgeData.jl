@@ -61,11 +61,11 @@ function setEdgeData!(p::femProblem, compVf::Symbol)
             coordvn1[:,i]=t1(coordref[:,i])
             coordvn2[:,i]=t2(coordref[:,i])
         end
-        v1=findall(coordve[:,1],coordvn1);
-        sort!(append!(v1, findall(coordve[:,2],coordvn1)))
+        v1=findall(coordve[:,1],coordvn1,1e-10);
+        sort!(append!(v1, findall(coordve[:,2],coordvn1,1e-10)))
         n1=normal[v1]
-        v2=findall(coordv[:,1],coordvn2);
-        sort!(append!(v2, findall(coordv[:,2],coordvn2)))
+        v2=findall(coordv[:,1],coordvn2,1e-10);
+        sort!(append!(v2, findall(coordv[:,2],coordvn2,1e-10)))
         n2=normal[v2]
         globalNumVf=l2g(degFVf,inc[1])
         rb=refBound[v1]
