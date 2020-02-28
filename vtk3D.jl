@@ -61,7 +61,7 @@ function unstructured_vtk3D(p::femProblem, tend::Float64, comp::Array{Symbol,1},
             vtk_cell_data(vtk, cvtk[1,:], name[l]*" x")
             vtk_cell_data(vtk, cvtk[2,:], name[l]*" y")
             vtk_cell_data(vtk, cvtk[3,:], name[l]*" z")
-            vtk_cell_data(vtk, (cvtk[1,:],cvtk[2,:],zeros(Float64,nf)), name[l])
+            vtk_cell_data(vtk, (cvtk[1,:],cvtk[2,:],cvtk[3,:]), name[l])
         end
     end
 
