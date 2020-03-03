@@ -40,7 +40,7 @@ function assembMass(degF::degF{1}, m::mesh, kubPoints::Array{Float64,2}, kubWeig
                 currentval=0.0;
                 for r in 1:sk[2]
                     for l in 1:sk[1]
-                        currentval+=kubWeights[l,r]*phiRef[i][l,r]*phiRef[j][l,r]*dJ[l,r];
+                        currentval+=kubWeights[l,r]*phiRef[i][l,r]*phiRef[j][l,r]*abs(dJ[l,r]);
                     end
                 end
                 if !isequal(currentval,0.0)
@@ -75,6 +75,7 @@ function assembMass(degF::degF{2}, m::mesh, kubPoints::Array{Float64,2}, kubWeig
                 for r in 1:sk[2]
                     for l in 1:sk[1]
                         currentval+=kubWeights[l,r]*abs(ddJ[l,r])*(jphiRef[1,i][l,r]*jphiRef[1,j][l,r]+jphiRef[2,i][l,r]*jphiRef[2,j][l,r]);
+                        # jacobi : (1/dJ)*(1/dJ)*abs(dJ) = abs(ddJ)
                     end
                 end
 
