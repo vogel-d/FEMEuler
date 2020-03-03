@@ -3,7 +3,7 @@ function setEdgeData!(p::femProblem, compVf::Symbol)
     degFVf=p.degFBoundary[p.femType[compVf][1]];
     mt=m.meshType;
     refBound=getElementProperties(mt,p.femType[compVf][1]);
-    mt==4 ?  normal=[0.5 0.0 1.0 1.0 0.5 0.0 0.0 -1.0; 0.0 -1.0 0.5 0.0 1.0 1.0 0.5 0.0] : normal=[0.5 0.0 0.5 1/sqrt(2) 0.0 -1.0; 0.0 -1.0 0.5 1/sqrt(2) 0.5 0.0];
+    mt==4 ?  normal=[0.5 0.0 1.0 1.0 0.5 0.0 0.0 -1.0; 0.0 -1.0 0.5 0.0 1.0 1.0 0.5 0.0] : normal=[0.5 0.0 0.5 1.0 0.0 -1.0; 0.0 -1.0 0.5 1.0 0.5 0.0];
     meshConnectivity!(m,1,2)
     offe=m.topology.offset["12"];
     ince=m.topology.incidence["12"];
@@ -21,6 +21,7 @@ function setEdgeData!(p::femProblem, compVf::Symbol)
         off1=offe[e];
         off2=offe[e+1];
         h1=false;
+        switched=false;
         if (off2-off1)==1
             e1=m.boundaryEdges[e];
             if e1<0
@@ -32,6 +33,21 @@ function setEdgeData!(p::femProblem, compVf::Symbol)
             end
         else
             inc=(ince[off1:(off2-1)]);
+        end
+
+        if mt==3
+            coord_aux= @views m.geometry.coordinates[:,incf[offf[inc[1]]:(offf[inc[1]]+mt-1)]];
+            if cross([coord_aux[1,2]-coord_aux[1,1], coord_aux[2,2]-coord_aux[2,1], 0.0],[coord_aux[1,3]-coord_aux[1,1], coord_aux[2,3]-coord_aux[2,1], 0.0])[3]<0.0
+                inc=inc[[2,1]];
+                switched=true;
+            end
+            #Vektorprodukt(v1,v2)<0 --> lokale Num. im Uhrzeigersinn orientiert
+            #                       --> sollte nicht das erste sein
+            #v1=coord1[:,2]-coord1[:,1];
+            #v2=coord1[:,3]-coord1[:,1];
+            #if v1[1]*v2[2]-v1[2]*v2[1]<0
+            #    inc=inc[[2,1]];
+            #end
         end
 
         coord1= @views m.geometry.coordinates[:,incf[offf[inc[1]]:(offf[inc[1]]+mt-1)]];
@@ -47,8 +63,13 @@ function setEdgeData!(p::femProblem, compVf::Symbol)
 
         if h1 #Fall periodische Randkante
             coordve= @views m.geometry.coordinates[:,incv[offv[e1]:(offv[e1]+1)]];
-            mva=(1/size(coordve,2)).*[sum(coordve[1,:]), sum(coordve[2,:])];
-            mvb=mv;
+            if switched
+                mva=mv;
+                mvb=(1/size(coordve,2)).*[sum(coordve[1,:]), sum(coordve[2,:])];
+            else
+                mva=(1/size(coordve,2)).*[sum(coordve[1,:]), sum(coordve[2,:])];
+                mvb=mv;
+            end
         else #Fall innere Kante
             mva=mvb=mvc=mv;
         end
@@ -81,8 +102,8 @@ function setEdgeData!(p::femProblem, compVf::Symbol)
         end
         push!(off,zo);
         append!(cells,inc)
-        push!(edgeType,getEdgeType(n1))
-        push!(edgeType,getEdgeType(n2))
+        push!(edgeType,getEdgeType(mt,n1))
+        push!(edgeType,getEdgeType(mt,n2))
         push!(edgeNum,e)
     end
     p.edgeData=[edgeNum,cells,edgeType,globv,off];
