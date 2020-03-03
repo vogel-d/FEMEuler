@@ -27,7 +27,6 @@ function setEdgeData!(p::femProblem, compVf::Symbol)
         off1=offe[e];
         off2=offe[e+1];
         h1=false;
-        switched=false;
         if (off2-off1)==1
             e1=m.boundaryEdges[e];
             if e1<0
@@ -45,7 +44,6 @@ function setEdgeData!(p::femProblem, compVf::Symbol)
             coord_aux= @views m.geometry.coordinates[:,incf[offf[inc[1]]:(offf[inc[1]]+mt-1)]];
             if cross([coord_aux[1,2]-coord_aux[1,1], coord_aux[2,2]-coord_aux[2,1], 0.0],[coord_aux[1,3]-coord_aux[1,1], coord_aux[2,3]-coord_aux[2,1], 0.0])[3]<0.0
                 inc=inc[[2,1]];
-                switched=true;
             end
             #Vektorprodukt(v1,v2)<0 --> lokale Num. im Uhrzeigersinn orientiert
             #                       --> sollte nicht das erste sein
