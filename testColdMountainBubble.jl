@@ -37,7 +37,8 @@ function testColdMountainBubble()
     Grav=9.81;
     Cpd=1004.0; Cvd=717.0; Cpv=1885.0;
     Rd=Cpd-Cvd; Gamma=Cpd/Cvd; kappa=Rd/Cpd;
-    function frho(x::Float64,z::Float64)
+    function frho(xz::Array{Float64,1})
+        x=xz[1]; z=xz[2];
         pLoc=p0*(1.0-kappa*Grav*z/(Rd*th0))^(Cpd/Rd)
         Rad=sqrt(((x-xCM)/xCR)^2+((z-zCM)/zCR)^2);
         ThStart=th0
@@ -46,7 +47,8 @@ function testColdMountainBubble()
         end
         return pLoc/((pLoc/p0)^kappa*Rd*ThStart)
     end
-    function ftheta(x::Float64,z::Float64)
+    function ftheta(xz::Array{Float64,1})
+        x=xz[1]; z=xz[2];
         pLoc=p0*(1.0-kappa*Grav*z/(Rd*th0))^(Cpd/Rd)
         Rad=sqrt(((x-xCM)/xCR)^2+((z-zCM)/zCR)^2);
         ThStart=th0
@@ -55,8 +57,8 @@ function testColdMountainBubble()
         end
         return ThStart
     end
-    fv1(x::Float64, y::Float64)=UMax;
-    fv2(x::Float64, y::Float64)=0.0;
+    fv1(xz::Array{Float64,1})=UMax;
+    fv2(xz::Array{Float64,1})=0.0;
     fvel=[fv1, fv2];
     f=Dict(:rho=>frho,:theta=>ftheta,:v=>fvel);
 

@@ -2,13 +2,13 @@ using SparseArrays;
 using LinearAlgebra;
 using SuiteSparse;
 using Plots;
+#using Distributed;
+using OffsetArrays;
 
 gr()
 
 include("solution.jl");
 @solution(rho, rhoV, rhoTheta, v, theta);
-include("diagnostic.jl");
-@diagnostic(rhoBar, pBar, thBar);
 include("getKub.jl");
 include("getQuad.jl");
 include("meshTypes.jl");
@@ -21,10 +21,10 @@ include("getElementProperties.jl")
 include("degF.jl");
 include("generateMesh.jl")
 include("refineMesh.jl")
-include("femProblemd.jl");
+include("femProblem.jl");
 
 include("l2g.jl")
-include("jacobi.jl");
+include("jacobiSphere.jl");
 include("initJacobi.jl")
 include("adaptGeometry.jl")
 include("additionalFunctions.jl")
@@ -33,7 +33,7 @@ include("assembMass.jl");
 include("assembMassRho.jl");
 include("assembLoad.jl");
 include("assembStiff.jl");
-include("applyStartValuesd.jl");
+include("applyStartValues.jl");
 
 include("projectRecovery.jl")
 include("embed.jl")
@@ -48,7 +48,7 @@ include("getEdgeType.jl")
 include("setEdgeData.jl")
 include("advectionCE.jl")
 include("splitExplicitCE.jl")
-include("symplektischerEulerCEd.jl")
+include("symplektischerEulerCE.jl")
 include("projectPressure.jl")
 include("projectChi.jl")
 include("projectRhoChi.jl")
@@ -60,3 +60,13 @@ include("plotMesh.jl");
 include("plotFEM.jl")
 include("vtk2D.jl");
 include("jld.jl");
+
+include("generateCubedSphere.jl")
+include("insert.jl")
+include("xmtoxc.jl")
+include("set_cuco.jl")
+include("tay.jl")
+include("fft.jl")
+include("vtk3D.jl")
+include("setOrientation.jl")
+include("cart2sphere.jl")

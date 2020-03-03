@@ -32,13 +32,15 @@ function testAcousticTri()
     Cpd=1004.0; Cvd=717.0; Cpv=1885.0;
     Rd=Cpd-Cvd; Gamma=Cpd/Cvd; kappa=Rd/Cpd;
 
-    function fp(x::Float64,z::Float64)
+    function fp(xz::Array{Float64,1})
+        x=xz[1]; z=xz[2];
         rad=sqrt((x-xCM)^2+(z-zCM)^2);
         return 0+(rad<r0)*(DeltaTh1*cos(0.5*pi*rad/r0)^2)
     end
 
 #=
-    function fp(x,z)
+    function fp(xz::Array{Float64,1})
+        x=xz[1]; z=xz[2];
         if x>2 && x<3 && z>2 && z<3
             result=2.0
         else

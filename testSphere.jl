@@ -1,7 +1,8 @@
-include("modulesCE.jl")
+include("modulesSphere.jl")
 
-function testWarmBubbleTri()
-    filename = "test";
+function testSphere()
+
+    filename = "cubedSphereConstant";
 
     #order: comp, compHigh, compRec, compDG
 
@@ -22,54 +23,49 @@ function testWarmBubbleTri()
                  :theta=>[:DG1]);
     =#
 
-    taskRecovery=false;
+    taskRecovery=true;
     advection=true;
 
-    m=generateTriMesh(160,80,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
-    #m=generateTriMesh(80,40,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
+    m=generateCubedSphere(3,3600.0)
 
-    #adaptGeometry!(m,(0.3,0.3),false); #sin perbutation
-
-    p=femProblem(m, femType,t=:compressible, advection=advection, taskRecovery=taskRecovery);
-
+    p=femProblem(m, femType,t=:shallow, advection=advection, taskRecovery=taskRecovery);
+    #return p;
     gamma=0.5; #upwind
     UMax=0.0; #UMax determines the advection in x direction
     MISMethod=MIS(:MIS2); #method of time integration
 
-    dt=0.5; #Coarse: 2.0
-    #dt=0.5; #Coarse: 1.0
+    dt=1.0;
     ns=15;
-    EndTime=1000.0;
+    EndTime=10.0;
     nIter=Int64(EndTime/dt);
 
     #start functions
-    xCM=0.0; zCM=2000.0;
-    r0=2000.0; th0=300.0; p0=100000.0;
-    DeltaTh1=2;
-    Grav=9.81;
-    Cpd=1004.0; Cvd=717.0; Cpv=1885.0;
-    Rd=Cpd-Cvd; Gamma=Cpd/Cvd; kappa=Rd/Cpd;
-    function frho(xz::Array{Float64,1})
-        x=xz[1]; z=xz[2];
-        pLoc=p0*(1-kappa*Grav*z/(Rd*th0))^(Cpd/Rd);
-        Rad=sqrt((x-xCM)^2+(z-zCM)^2);
-        ThLoc=th0+(Rad<r0)*(DeltaTh1*cos(0.5*pi*Rad/r0)^2);
-        return pLoc/((pLoc/p0)^kappa*Rd*ThLoc);
+    Rad=3600.0
+    function frho(xyz::Array{Float64,1})
+        #=
+        x=xyz[1]; y=xyz[2]; z=xyz[3];
+        lon,lat,r=cart2sphere(x,y,z);
+        rd=distCircle(lon,lat,0.5*pi,0.0,Rad)
+        R=Rad/3.0;
+        rd<=R ? rhoLoc=10.0  : rhoLoc=0.0; #rhoLoc=1000.0/2.0*(1.0+cos(pi*rd/R))
+        return rhoLoc+1.0;
+        =#
+        return 2.0
     end
-    function ftheta(xz::Array{Float64,1})
-        x=xz[1]; z=xz[2];
-        rad=sqrt((x-xCM)^2+(z-zCM)^2);
-        return th0+(rad<r0)*(DeltaTh1*cos(0.5*pi*rad/r0)^2);
+    function ftheta(xyz::Array{Float64,1})
+        return 1.0;
     end
-    fv1(xz::Array{Float64,1})=UMax;
-    fv2(xz::Array{Float64,1})=0.0;
-    fvel=[fv1, fv2];
+    fv1(xyz::Array{Float64,1})=UMax;
+    fv2(xyz::Array{Float64,1})=0.0;
+    fv3(xyz::Array{Float64,1})=0.0;
+    fvel=[fv1, fv2, fv3];
     f=Dict(:rho=>frho,:theta=>ftheta,:v=>fvel);
 
     assembMass!(p);
     assembStiff!(p);
-    p.boundaryValues[(:theta,:P1)]=300.0*ones(p.degFBoundary[:P1].numB-p.degFBoundary[:P1].num);
     applyStartValues!(p, f);
+
+    unstructured_vtk3D(p, 0.0, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename*"0")
 
     rho0=p.solution[0.0].rho;
     p.solution[0.0].rhoTheta=projectChi(p,rho0,p.solution[0.0].theta,:rho,:theta);
@@ -91,20 +87,22 @@ function testWarmBubbleTri()
     FY=Array{solution,1}(undef,MISMethod.nStage);
     SthY=Array{SparseMatrixCSC{Float64,Int64},1}(undef,MISMethod.nStage);
     Time=0.0;
+
     for i=1:nIter
       @time y=splitExplicit(y,Y,FY,SthY,p,gamma,nquadPhi,nquadPoints,MrT,MrV,MISMethod,Time,dt,ns);
       Time+=dt
       p.solution[Time]=y;
       p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
-      unstructured_vtk(p, sort(collect(keys(p.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEulerTriangles/"*filename)
+      p2=deepcopy(p);
+      unstructured_vtk3D(p2, Time, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename*"$i")
       println(Time)
     end
 
     #Speichern des Endzeitpunktes als vtu-Datei:
-    #unstructured_vtk(p, EndTime, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEulerTriangles/"*filename)
+    unstructured_vtk3D(p, EndTime, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename)
     #Speichern aller berechneten Zwischenwerte als vtz-Datei:
-    unstructured_vtk(p, sort(collect(keys(p.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEulerTriangles/"*filename)
+    #unstructured_vtk3D(p, sort(collect(keys(p.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
 
-    return p
+    return p;
 end

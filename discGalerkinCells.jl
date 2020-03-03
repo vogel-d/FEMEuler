@@ -10,7 +10,7 @@ function discGalerkinCells!(M::Array{Float64,2},
     gradw1=zeros(sk);
     gradw2=zeros(sk);
 
-    J=initJacobi((2,2),sk);
+    J=initJacobi((m.geometry.dim,m.topology.dim),sk);
     dJ=Array{Float64,2}(undef,sk);
 
     for k in 1:m.topology.size[3]
@@ -68,7 +68,7 @@ function discGalerkinCells!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
     gradw1=zeros(sk);
     gradw2=zeros(sk);
 
-    J=initJacobi((2,2),sk);
+    J=initJacobi((m.geometry.dim,m.topology.dim),sk);
     dJ=Array{Float64,2}(undef,sk);
 
     lM=zeros(nT,nF);

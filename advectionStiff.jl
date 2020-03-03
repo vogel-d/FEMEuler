@@ -21,10 +21,7 @@ function advectionStiff(degFT::degF{1}, phiTtrans::Array{Array{Array{Float64,1},
     globalNumW2=Array{Int64,1}(undef,length(phiW));
 
     M=zeros(degFT.numB,1);
-    coord=Array{Float64,2}(undef,2,m.meshType);
-
-
-    #global St=zeros(degFT.numB,degFF.numB)
+    coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
     discGalerkinCells!(M,degFT,phiT, globalNumT1, degFF,phiF, dphiF, fval, globalNumF1,
                        degFW, phiW, gradphiW, wval, globalNumW1,

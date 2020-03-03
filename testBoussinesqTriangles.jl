@@ -25,7 +25,10 @@ function testBoussinesqTri()
     xM=0.5*(p.mesh.geometry.l[1]+p.mesh.geometry.r[1]);
     #yM=0.5*(p.mesh.geometry.l[2]+p.mesh.geometry.r[2]);
 
-    fb(x,y)=b0*sin(pi*y/H)/(1+((x-xM)/A)^2);
+    function fb(xz::Array{Float64,1})
+        x=xz[1]; z=xz[2];
+        return b0*sin(pi*z/H)/(1+((x-xM)/A)^2);
+    end
     f=Dict(:b=>fb);
 
     assembMass!(p);
@@ -38,14 +41,13 @@ function testBoussinesqTri()
 
     #return p;
     time=0.0;
-    for i in collect(solSaves)
+    for i in 1:solSaves
         solveB!(p,Fp,Fv,Fb,time,dt,nIter,method);
         time+=nIter;
-        println(time);
     end
-
+    println(time)
     #Speichern des Endzeitpunktes als vtu-Datei:
-    unstructured_vtk(p, tend, [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesqTriangles/"*filename)
+    #unstructured_vtk(p, tend, [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesqTriangles/"*filename)
     #Speichern aller berechneten Zwischenwerte als vtz-Datei:
     unstructured_vtk(p, sort(collect(keys(p.solution))), [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesqTriangles/"*filename)
 

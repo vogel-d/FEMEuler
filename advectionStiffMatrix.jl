@@ -24,7 +24,8 @@ function advectionStiffMatrix(degFT::degF{1}, phiTtrans::Array{Array{Array{Float
     rows=Int64[];
     cols=Int64[];
     vals=Float64[];
-    coord=Array{Float64,2}(undef,2,m.meshType);
+
+    coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
     discGalerkinCells!(rows, cols, vals,
                        degFT,phiT, globalNumT1,

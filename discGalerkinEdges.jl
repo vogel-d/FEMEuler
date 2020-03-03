@@ -205,20 +205,18 @@ function discGalerkinEdges!(M::Array{Float64,2},
     nF=size(phiF,2);
     sk=length(quadWeights)
 
-    J1=initJacobi((2,2),sk);
+    J1=initJacobi((m.geometry.dim,m.topology.dim),sk);
     ddJ1=Array{Float64,1}(undef,sk);
-    jphiWn1=initJacobi(size(phiW),sk)
-    jphiTn1=initJacobi(size(phiT),sk)
+    jphiWn1=initJacobi((m.geometry.dim,size(phiW,2)),sk)
+    jphiTn1=initJacobi((m.geometry.dim,size(phiT,2)),sk)
 
-    J2=initJacobi((2,2),sk);
+    J2=initJacobi((m.geometry.dim,m.topology.dim),sk);
     ddJ2=Array{Float64,1}(undef,sk);
-    jphiWn2=initJacobi(size(phiW),sk)
-    jphiTn2=initJacobi(size(phiT),sk);
+    jphiWn2=initJacobi((m.geometry.dim,size(phiW,2)),sk)
+    jphiTn2=initJacobi((m.geometry.dim,size(phiT,2)),sk);
 
-    w11=zeros(sk);
-    w12=zeros(sk);
-    w21=zeros(sk);
-    w22=zeros(sk);
+    w1=[zeros(sk) for d in 1:m.geometry.dim]
+    w2=[zeros(sk) for d in 1:m.geometry.dim]
 
     lM11=zeros(nT,nF);
     lM12=zeros(nT,nF);
@@ -250,17 +248,15 @@ function discGalerkinEdges!(M::Array{Float64,2},
         jacobi!(J2,ddJ2,jphiWn2,jphiTn2,m,inc2,kubPn2, phiWn2, phiTn2, coord);
 
 
-        fill!(w11,0.0);
-        fill!(w12,0.0);
-        fill!(w21,0.0);
-        fill!(w22,0.0);
         l2g!(globalNumW1,degFW,inc1);
         l2g!(globalNumW2,degFW,inc2);
-        for i in 1:length(globalNumW1)
-            @. w11+=wval[globalNumW1[i]]*jphiWn1[1,i];
-            @. w12+=wval[globalNumW1[i]]*jphiWn1[2,i];
-            @. w21+=wval[globalNumW2[i]]*jphiWn2[1,i];
-            @. w22+=wval[globalNumW2[i]]*jphiWn2[2,i];
+        for d in 1:m.geometry.dim
+            fill!(w1[d],0.0);
+            fill!(w2[d],0.0);
+            for i in 1:length(globalNumW1)
+                @. w1[d]+=wval[globalNumW1[i]]*jphiWn1[d,i];
+                @. w2[d]+=wval[globalNumW2[i]]*jphiWn2[d,i];
+            end
         end
 
         s=0.0;
@@ -276,11 +272,17 @@ function discGalerkinEdges!(M::Array{Float64,2},
         for j in 1:nF
             for i in 1:nT
                 for r in 1:length(quadWeights)
-                    lM11[i,j]+=quadWeights[r]*ddJ1[r]*ddJ1[r]*(n1[1]*phiFn1[1,j][r]+n1[2]*phiFn1[2,j][r])*(w11[r]*jphiTn1[1,i][r]+w12[r]*jphiTn1[2,i][r]);
-                    lM12[i,j]+=quadWeights[r]*ddJ1[r]*ddJ2[r]*(n2[1]*phiFn2[1,j][r]+n2[2]*phiFn2[2,j][r])*(w21[r]*jphiTn1[1,i][r]+w22[r]*jphiTn1[2,i][r]);
-                    lM21[i,j]+=quadWeights[r]*ddJ2[r]*ddJ1[r]*(n1[1]*phiFn1[1,j][r]+n1[2]*phiFn1[2,j][r])*(w11[r]*jphiTn2[1,i][r]+w12[r]*jphiTn2[2,i][r]);
-                    lM22[i,j]+=quadWeights[r]*ddJ2[r]*ddJ2[r]*(n2[1]*phiFn2[1,j][r]+n2[2]*phiFn2[2,j][r])*(w21[r]*jphiTn2[1,i][r]+w22[r]*jphiTn2[2,i][r]);
-                    # abs() oder nicht? ist Je nicht JE, also was tun ??
+                    w1jphiTn1=0.0; w2jphiTn1=0.0; w1jphiTn2=0.0; w2jphiTn2=0.0;
+                    for d in 1:m.geometry.dim
+                        w1jphiTn1+=w1[d][r]*jphiTn1[d,i][r];
+                        w2jphiTn1+=w2[d][r]*jphiTn1[d,i][r];
+                        w1jphiTn2+=w1[d][r]*jphiTn2[d,i][r];
+                        w2jphiTn2+=w2[d][r]*jphiTn2[d,i][r];
+                    end
+                    lM11[i,j]+=le^2*quadWeights[r]*ddJ1[r]*ddJ1[r]^2*(n[1]*phiFn1[1,j][r]+n[2]*phiFn1[2,j][r])*w1jphiTn1;
+                    lM12[i,j]+=le^2*quadWeights[r]*ddJ1[r]*ddJ2[r]^2*(n[1]*phiFn2[1,j][r]+n[2]*phiFn2[2,j][r])*w2jphiTn1;
+                    lM21[i,j]+=le^2*quadWeights[r]*ddJ2[r]*ddJ1[r]^2*(n[1]*phiFn1[1,j][r]+n[2]*phiFn1[2,j][r])*w1jphiTn2;
+                    lM22[i,j]+=le^2*quadWeights[r]*ddJ2[r]*ddJ2[r]^2*(n[1]*phiFn2[1,j][r]+n[2]*phiFn2[2,j][r])*w2jphiTn2;
                 end
             end
         end

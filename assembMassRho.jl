@@ -5,9 +5,9 @@ function assembMassRho(degF::degF{1}, degFRho::degF{1}, valRho::Array{Float64,1}
     iter=length(phi);
     n=degF.numB;
 
-    J=initJacobi((2,2),sk);
+    J=initJacobi((m.geometry.dim,m.topology.dim),sk);
     dJ=Array{Float64,2}(undef,sk);
-    coord=Array{Float64,2}(undef,2,m.meshType);
+    coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
     globalNum=Array{Int64,1}(undef,length(phi));
     globalNumRho=Array{Int64,1}(undef,length(phiRho));
@@ -17,7 +17,7 @@ function assembMassRho(degF::degF{1}, degFRho::degF{1}, valRho::Array{Float64,1}
     rows=Int64[];
     cols=Int64[];
     vals=Float64[];
-    for k in 1:m.topology.size[m.topology.D+1]
+    for k in 1:m.topology.size[m.topology.dim+1]
         jacobi!(J,dJ,m,k,kubPoints,coord);
         l2g!(globalNum,degF,k);
         l2g!(globalNumRho,degFRho,k);
@@ -53,10 +53,10 @@ function assembMassRho(degF::degF{2}, degFRho::degF{1}, valRho::Array{Float64,1}
     iter=size(phi,2);
     n=degF.numB;
 
-    J=initJacobi((2,2),sk);
+    J=initJacobi((m.geometry.dim,m.topology.dim),sk);
     ddJ=Array{Float64,2}(undef,sk);
-    jphi=initJacobi(size(phi),sk);
-    coord=Array{Float64,2}(undef,2,m.meshType);
+    jphi=initJacobi((m.geometry.dim, iter),sk);
+    coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
     globalNum=Array{Int64,1}(undef,size(phi,2));
     globalNumRho=Array{Int64,1}(undef,length(phiRho));
@@ -66,7 +66,7 @@ function assembMassRho(degF::degF{2}, degFRho::degF{1}, valRho::Array{Float64,1}
     rows=Int64[];
     cols=Int64[];
     vals=Float64[];
-    for k in 1:m.topology.size[m.topology.D+1]
+    for k in 1:m.topology.size[m.topology.dim+1]
         jacobi!(J,ddJ,jphi,m,k,kubPoints, phi,coord);
         l2g!(globalNum,degF,k);
         l2g!(globalNumRho,degFRho,k);
@@ -81,8 +81,11 @@ function assembMassRho(degF::degF{2}, degFRho::degF{1}, valRho::Array{Float64,1}
                 currentval=0.0;
                 for r in 1:sk[2]
                     for l in 1:sk[1]
-                        currentval+=kubWeights[l,r]*abs(ddJ[l,r])*cRho[l,r]*(jphi[1,i][l,r]*jphi[1,j][l,r]+jphi[2,i][l,r]*jphi[2,j][l,r]);
-                        # transformation: (1/dJ)*(1/dJ)*abs(dJ) = abs(ddJ)
+                        jphiDot=0.0;
+                        for d in 1:m.geometry.dim
+                            jphiDot+=jphi[d,i][l,r]*jphi[d,j][l,r];
+                        end
+                        currentval+=kubWeights[l,r]*abs(ddJ[l,r])*cRho[l,r]*jphiDot;
                     end
                 end
                 if !isequal(currentval,0.0) || (globalNum[i]==n && globalNum[j]==n)

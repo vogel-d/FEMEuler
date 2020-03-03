@@ -4,9 +4,9 @@ function projectRecovery(degFH::degF{1},degF::degF{1},cval::Array{Float64,1},mas
     sph=length(phiH)
     sk=size(kubWeights);
 
-    J=initJacobi((2,2),sk);
+    J=initJacobi((m.geometry.dim,m.topology.dim),sk);
     dJ=Array{Float64,2}(undef,sk);
-    coord=Array{Float64,2}(undef,2,m.meshType);
+    coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
     cl=zeros(sk);
 
@@ -14,7 +14,7 @@ function projectRecovery(degFH::degF{1},degF::degF{1},cval::Array{Float64,1},mas
     globalNumH=Array{Int64,1}(undef,length(phiH));
 
     gbh=zeros(degFH.numB)
-    for k in 1:m.topology.size[m.topology.D+1]
+    for k in 1:m.topology.size[m.topology.dim+1]
         jacobi!(J,dJ,m,k,kubPoints,coord);
 
         l2g!(globalNum,degF,k);
@@ -42,36 +42,39 @@ function projectRecovery(degFH::degF{2},degF::degF{2},cval::Array{Float64,1},mas
     sph=size(phiH,2);
     sk=size(kubWeights);
 
-    J=initJacobi((2,2),sk);
+    J=initJacobi((m.geometry.dim,m.topology.dim),sk);
     ddJ=Array{Float64,2}(undef,sk);
-    jphi=initJacobi(size(phi),sk);
-    jphiH=initJacobi(size(phiH),sk);
-    coord=Array{Float64,2}(undef,2,m.meshType);
+    jphi=initJacobi((m.geometry.dim,size(phi,2)),sk);
+    jphiH=initJacobi((m.geometry.dim,sph),sk);
+    coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
-    cl1=zeros(sk);
-    cl2=zeros(sk);
+    cl=[zeros(sk) for d in 1:m.geometry.dim]
 
     globalNum=Array{Int64,1}(undef,size(phi,2));
     globalNumH=Array{Int64,1}(undef,size(phiH,2));
 
     gbh=zeros(degFH.numB)
-    for k in 1:m.topology.size[m.topology.D+1]
+    for k in 1:m.topology.size[m.topology.dim+1]
         jacobi!(J,ddJ,jphi,jphiH,m,k,kubPoints, phi, phiH,coord);
 
         l2g!(globalNum,degF,k);
         l2g!(globalNumH,degFH,k);
 
-        fill!(cl1,0.0);
-        fill!(cl2,0.0);
-        for i in 1:length(globalNum)
-            @. cl1+=cval[globalNum[i]]*jphi[1,i];
-            @. cl2+=cval[globalNum[i]]*jphi[2,i];
+        for d in 1:m.geometry.dim
+            fill!(cl[d], 0.0)
+            for i in 1:length(globalNum)
+                @. cl[d]+=cval[globalNum[i]]*jphi[d,i];
+            end
         end
 
         for j in 1:sph
             for r in 1:sk[2]
                 for l in 1:sk[1]
-                    gbh[globalNumH[j]]+=kubWeights[l,r]*abs(ddJ[l,r])*(cl1[l,r]*jphiH[1,j][l,r]+cl2[l,r]*jphiH[2,j][l,r]);
+                    vecdot=0.0
+                    for d in 1:m.geometry.dim
+                        vecdot+=cl[d][l,r]*jphiH[d,j][l,r];
+                    end
+                    gbh[globalNumH[j]]+=kubWeights[l,r]*abs(ddJ[l,r])*vecdot;
                 end
             end
         end

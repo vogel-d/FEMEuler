@@ -24,7 +24,10 @@ function testBoussinesq()
     A=5000;
     xM=0.5*(pv.mesh.geometry.l[1]+pv.mesh.geometry.r[1]);
 
-    fb(x,y)=b0*sin(pi*y/H)/(1+((x-xM)/A)^2);
+    function fb(xz::Array{Float64,1})
+        x=xz[1]; z=xz[2];
+        return b0*sin(pi*z/H)/(1+((x-xM)/A)^2);
+    end
     f=Dict(:b=>fb);
 
     assembMass!(pv);

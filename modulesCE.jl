@@ -2,7 +2,6 @@ using SparseArrays;
 using LinearAlgebra;
 using SuiteSparse;
 using Plots;
-using Distributed;
 
 gr()
 
@@ -57,5 +56,5 @@ include("plotSolution.jl");
 include("plotSolutionGif.jl");
 include("plotMesh.jl");
 include("plotFEM.jl")
-include("vtk.jl");
+include("vtk2D.jl");
 include("jld.jl");
