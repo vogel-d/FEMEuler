@@ -25,12 +25,11 @@ function assembLoad(degF::degF{1}, f, m::mesh, kubPoints::Array{Float64,2}, kubW
             end
         end
 
-
         globalNum=l2g(degF,k);
         for j in 1:iter
             for r in 1:sk[2]
                 for l in 1:sk[1]
-                    gb[globalNum[j]]+=kubWeights[l,r]*phiT[j][l,r]*ft[l,r]*dJ[l,r];
+                    gb[globalNum[j]]+=kubWeights[l,r]*phiT[j][l,r]*ft[l,r]*abs(dJ[l,r]);
                 end
             end
         end
@@ -72,7 +71,7 @@ function assembLoad(degF::degF{2}, f, m::mesh, kubPoints::Array{Float64,2}, kubW
         for j in 1:iter
             for r in 1:sk[2]
                 for l in 1:sk[1]
-                    gb[globalNum[j]]+=kubWeights[l,r]*(ft1[l,r]*jphiT[1,j][l,r]+ft2[l,r]*jphiT[2,j][l,r]);
+                    gb[globalNum[j]]+=kubWeights[l,r]*(ddJ[l,r]/abs(ddJ[l,r]))*(ft1[l,r]*jphiT[1,j][l,r]+ft2[l,r]*jphiT[2,j][l,r]);
                 end
             end
         end
