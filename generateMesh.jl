@@ -163,7 +163,7 @@ function generateTriMesh(nx::Int64, ny::Int64, condEW::Symbol, condTB::Symbol, x
         for h in 1:nx
             i=[z, z+1, z+1+nx];
             append!(incf,i);
-            i=[z+nx+1, z+nx+2, z+1]
+            i=[z+1, z+nx+1, z+nx+2]
             append!(incf,i);
             z+=1;
         end
