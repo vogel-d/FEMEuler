@@ -11,22 +11,22 @@
 #Beide werden allerdings nicht im Konstruktor angegeben, da sie aus incidence und
 #offset berechnet werden
 struct meshTopology
-  incidence::Dict{String, Array{Int64,1}}
-  offset::Dict{String, Array{Int64,1}}
-  size::Array{Int64,1}
-  D::Int64
-  n::Array{Int64,1}
+  incidence::Dict{String, Array{Int,1}}
+  offset::Dict{String, Array{Int,1}}
+  size::Array{Int,1}
+  dim::Int
+  n::Array{Int,1}
 end
 
-function meshTopology(inc::Dict{String, Array{Int64,1}},off::Dict{String, Array{Int64,1}}, n::Array{Int64,1})
-  size=Int64[];
+function meshTopology(inc::Dict{String, Array{Int,1}},off::Dict{String, Array{Int,1}}, n::Array{Int,1})
+  size=Int[];
   push!(size,maximum(inc["10"]));
   a=0;
   for k in 2:(length(inc)+1)
     push!(size,length(off["$(k-1)$a"])-1);
   end
-  D=length(size)-1;
-  meshTopology(inc,off,size,D,n)
+  dim=length(size)-1;
+  meshTopology(inc,off,size,dim,n)
 end
 
 
@@ -36,8 +36,14 @@ end
 #l und r speichern jeweils die äußersten Koordinaten für jede Dimension
 struct meshGeometry
   coordinates::Array{Float64,2}
+  dim::Int;
   l::Array{Float64,1}
   r::Array{Float64,1}
+end
+
+function meshGeometry(coord::Array{Float64,2},l::Array{Float64,1}, r::Array{Float64,1})
+  dim=size(coord,1);
+  meshGeometry(coord,dim,l,r)
 end
 
 #Struct-Objekt zum Speichern eines Meshes, durch Speichern der
@@ -45,14 +51,15 @@ end
 struct mesh
   topology::meshTopology
   geometry::meshGeometry
-  meshType::Int64
+  meshType::Int
   edgeLength::Array{Float64,1} #Kantenlängen
   normals::Array{Float64,2} #Normalen des Referenzelementes
   boundaryEdges::SparseVector{Int,Int};
   boundaryVertices::SparseVector{Int,Int};
+  orientation::Array{Float64,1};
 end
 
-function mesh(topology::meshTopology, geometry::meshGeometry, bE::SparseVector{Int,Int}, bV::SparseVector{Int,Int})
+function mesh(topology::meshTopology, geometry::meshGeometry, bE::SparseVector{Int,Int}, bV::SparseVector{Int,Int}, mt::Int=topology.offset["20"][2]-topology.offset["20"][1])
   inc=topology.incidence["10"];
   coord=geometry.coordinates;
   ne=topology.size[2];
@@ -60,10 +67,10 @@ function mesh(topology::meshTopology, geometry::meshGeometry, bE::SparseVector{I
   z=1;
   for i in 1:ne
       c=coord[:,inc[z:(z+1)]];
-      l[i]=sqrt((c[1,1]-c[1,2])^2+(c[2,1]-c[2,2])^2);
+      l[i]=sqrt(sum((c[:,1].-c[:,2]).^2));
       z+=2;
   end
-  mt=topology.offset["20"][2]-topology.offset["20"][1];
   mt==4 ? n=[0.0 -1.0 0.0 1.0;-1.0 0.0 1.0 0.0] : n=[0.0 -1.0 0.7071067811865475244;-1.0 0.0 0.7071067811865475244];
-  mesh(topology, geometry, mt, l, n, bE, bV)
+  orientation=Float64[];
+  mesh(topology, geometry, mt, l, n, bE, bV, orientation)
 end

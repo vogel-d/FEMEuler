@@ -25,12 +25,13 @@ function advectionStiffMatrix(degFT::degF{1}, phiTtrans::Array{Array{Array{Float
     cols=Int64[];
     vals=Float64[];
 
+    coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
     discGalerkinCells!(rows, cols, vals,
                        degFT,phiT, globalNumT1,
                        degFF,phiF, dphiF, fval, globalNumF1,
                        degFW, phiW, gradphiW, wval, globalNumW1,
-                       m, kubPoints, kubWeights)
+                       m, kubPoints, kubWeights, coord)
 
 
     quadPoints, quadWeights=getQuad(2*sk[1]-1);

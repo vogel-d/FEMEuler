@@ -25,7 +25,10 @@ function testBoussinesqTri()
     xM=0.5*(p.mesh.geometry.l[1]+p.mesh.geometry.r[1]);
     #yM=0.5*(p.mesh.geometry.l[2]+p.mesh.geometry.r[2]);
 
-    fb(x,y)=b0*sin(pi*y/H)/(1+((x-xM)/A)^2);
+    function fb(xz::Array{Float64,1})
+        x=xz[1]; z=xz[2];
+        return b0*sin(pi*z/H)/(1+((x-xM)/A)^2);
+    end
     f=Dict(:b=>fb);
 
     assembMass!(p);

@@ -29,10 +29,10 @@ function assembMass(degF::degF{1}, m::mesh, kubPoints::Array{Float64,2}, kubWeig
     phiRef=degF.phi;
     iter=length(phiRef);
     sk=size(kubWeights)
-    J=initJacobi((2,2),sk);
+    J=initJacobi((m.geometry.dim,m.topology.dim),sk);
     dJ=Array{Float64,2}(undef,sk);
-    coord=Array{Float64,2}(undef,2,m.meshType);
-    for k in 1:m.topology.size[m.topology.D+1]
+    coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
+    for k in 1:m.topology.size[m.topology.dim+1]
         jacobi!(J,dJ,m,k,kubPoints,coord);
         gvertices=l2g(degF,k);
         for j in 1:iter
@@ -40,7 +40,7 @@ function assembMass(degF::degF{1}, m::mesh, kubPoints::Array{Float64,2}, kubWeig
                 currentval=0.0;
                 for r in 1:sk[2]
                     for l in 1:sk[1]
-                        currentval+=kubWeights[l,r]*phiRef[i][l,r]*phiRef[j][l,r]*dJ[l,r];
+                        currentval+=kubWeights[l,r]*phiRef[i][l,r]*phiRef[j][l,r]*abs(dJ[l,r]);
                     end
                 end
                 if !isequal(currentval,0.0)
@@ -61,12 +61,12 @@ function assembMass(degF::degF{2}, m::mesh, kubPoints::Array{Float64,2}, kubWeig
     vals=Float64[];
     phiRef=degF.phi;
     iter=size(phiRef,2);
-    sk=size(kubWeights);
-    J=initJacobi((2,2),sk);
+    sk=size(kubWeights)
+    J=initJacobi((m.geometry.dim,m.topology.dim),sk);
     ddJ=Array{Float64,2}(undef,sk);
-    jphiRef=initJacobi(size(phiRef),sk);
-    coord=Array{Float64,2}(undef,2,m.meshType);
-    for k in 1:m.topology.size[m.topology.D+1]
+    jphiRef=initJacobi((m.geometry.dim,iter),sk);
+    coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
+    for k in 1:m.topology.size[m.topology.dim+1]
         jacobi!(J,ddJ,jphiRef,m,k,kubPoints, phiRef,coord);
         gvertices=l2g(degF,k);
         for j in 1:iter
@@ -74,7 +74,11 @@ function assembMass(degF::degF{2}, m::mesh, kubPoints::Array{Float64,2}, kubWeig
                 currentval=0.0;
                 for r in 1:sk[2]
                     for l in 1:sk[1]
-                        currentval+=kubWeights[l,r]*abs(ddJ[l,r])*(jphiRef[1,i][l,r]*jphiRef[1,j][l,r]+jphiRef[2,i][l,r]*jphiRef[2,j][l,r]);
+                        jphi=0.0;
+                        for d in 1:m.geometry.dim
+                            jphi+=jphiRef[d,i][l,r]*jphiRef[d,j][l,r];
+                        end
+                        currentval+=kubWeights[l,r]*abs(ddJ[l,r])*jphi
                     end
                 end
 

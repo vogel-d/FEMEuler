@@ -42,9 +42,7 @@ function getTriElementProperties(type::Symbol)
         nEdge=0;
         nVert=1;
 
-        cm=[0.5 0.0 1.0 1.0 0.0;
-            0.5 0.5 0.0 1.0 1.0;
-            0.0 0.5 1.0 0.0 1.0];
+        cm=Dict([1,2]=>[1,1,0], [2,3]=>[0,1,1], [1,3]=>[1,0,1]);
 
     elseif type==:DG0
         phi=[f1];
@@ -57,7 +55,7 @@ function getTriElementProperties(type::Symbol)
         nEdge=0;
         nVert=0;
 
-        cm=[0.5 0.0 0.0; 0.5 0.5 0.0; 0.0 0.5 0.0];
+        cm=Dict([1,2]=>[0], [2,3]=>[0], [1,3]=>[0]);
 
     elseif type==:DG1
         phi=[f1mxmy, fx, fy];
@@ -72,9 +70,7 @@ function getTriElementProperties(type::Symbol)
         nEdge=0;
         nVert=0;
 
-        cm=[0.5 0.0 0.0 0.0 0.0;
-            0.5 0.5 0.0 0.0 0.0;
-            0.0 0.5 0.0 0.0 0.0];
+        cm=Dict([1,2]=>[0,0,0], [2,3]=>[0,0,0], [1,3]=>[0,0,0]);
 
     elseif type==:RT0
 
@@ -90,9 +86,7 @@ function getTriElementProperties(type::Symbol)
         nEdge=1;
         nVert=0;
 
-        cm=[0.5 0.0 1.0 0.0 0.0;
-            0.5 0.5 0.0 1.0 0.0;
-            0.0 0.5 0.0 0.0 1.0];
+        cm=Dict([1,2]=>[1,0,0], [2,3]=>[0,1,0], [1,3]=>[0,0,1]);
 
     elseif type==:RT0B
 
@@ -108,9 +102,7 @@ function getTriElementProperties(type::Symbol)
         nEdge=0;
         nVert=0;
 
-        cm=[0.5 0.0 0.0 0.0 0.0;
-            0.5 0.5 0.0 0.0 0.0;
-            0.0 0.5 0.0 0.0 0.0];
+        cm=Dict([1,2]=>[0,0,0], [2,3]=>[0,0,0], [1,3]=>[0,0,0]);
 
     elseif type==:VecP1
         phi=[f1mxmy null fx null fy null;
@@ -124,9 +116,7 @@ function getTriElementProperties(type::Symbol)
         nEdge=0;
         nVert=2;
 
-        cm=[0.5 0.0 1.0 1.0 1.0 1.0 0.0 0.0;
-            0.5 0.5 0.0 0.0 1.0 1.0 1.0 1.0;
-            0.0 0.5 1.0 1.0 0.0 0.0 1.0 1.0];
+        cm=Dict([1,2]=>[1,1,1,1,0,0], [2,3]=>[0,0,1,1,1,1], [1,3]=>[1,1,0,0,1,1]);
 
     elseif type==:VecDG1
         phi=[f1mxmy null fx null fy null;
@@ -140,9 +130,7 @@ function getTriElementProperties(type::Symbol)
         nEdge=0;
         nVert=0;
 
-        cm=[0.5 0.0 0.0 0.0 0.0 0.0 0.0 0.0;
-            0.5 0.5 0.0 0.0 0.0 0.0 0.0 0.0;
-            0.0 0.5 0.0 0.0 0.0 0.0 0.0 0.0];
+        cm=Dict([1,2]=>[0,0,0,0,0,0], [2,3]=>[0,0,0,0,0,0], [1,3]=>[0,0,0,0,0,0]);
     else
         error("Unzulässiger finite-Elemente-Raum");
     end
