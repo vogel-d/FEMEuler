@@ -37,7 +37,7 @@ function projectPressure(degFP::degF{1},massMP::SuiteSparse.UMFPACK.UmfpackLU{Fl
         for j in 1:length(phiP)
             for r in 1:sk[2]
                 for l in 1:sk[1]
-                    gbh[globalNumP[j]]+=kubWeights[l,r]*cl[l,r]*phiP[j][l,r]*dJ[l,r];
+                    gbh[globalNumP[j]]+=kubWeights[l,r]*cl[l,r]*phiP[j][l,r]*abs(dJ[l,r]);
                 end
             end
         end

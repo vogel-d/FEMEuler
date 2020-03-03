@@ -78,19 +78,19 @@ function assembStiff(degFs::degF{1}, degFv::degF{2}, m::mesh, kubWeights::Array{
     iter=size(phiRef,2);
     sk=size(kubWeights)
     J=initJacobi((2,2),sk);
-    ddJ=Array{Float64,2}(undef,sk);
-    jphiRef=initJacobi(size(phiRef),sk);
+    dJ=Array{Float64,2}(undef,sk);
     coord=Array{Float64,2}(undef,2,m.meshType);
+
     for k in 1:nf
         globalNumT=l2g(degFs,k);
         globalNumF=l2g(degFv,k);
-        jacobi!(J,ddJ,jphiRef,m,k,kubPoints, phiRef,coord);
+        jacobi!(J,dJ,m,k,kubPoints,coord);
         for j in 1:length(globalNumF)
             for i in 1:length(globalNumT)
                 if !isequal(lS[i,j],0.0) || (globalNumT[i]==nT && globalNumF[j]==nF)
                     push!(rows,globalNumT[i]);
                     push!(cols,globalNumF[j]);
-                    push!(vals,(abs(ddJ[1])/ddJ[1])*lS[i,j]);
+                    push!(vals,(abs(dJ[1])/dJ[1])*lS[i,j]);
                     #ddJ[1] reicht um Vorzeichen der Determinante zu identifizieren
                 end
             end
@@ -126,7 +126,7 @@ function assembStiff(degFs::degF{1}, degFv::degF{2}, z::Array{Float64,1}, m::mes
                 currentval=0.0;
                 for k in 1:sk[2]
                     for l in 1:sk[1]
-                        currentval+=kubWeights[l,k]*(abs(ddJ[i,j])/ddJ[i,j])*phiT[i][l,k]*(z[1]*jphiF[1,j][l,k]+z[2]*jphiF[2,j][l,k]);
+                        currentval+=kubWeights[l,k]*(ddJ[i,j]/abs(ddJ[i,j]))*phiT[i][l,k]*(z[1]*jphiF[1,j][l,k]+z[2]*jphiF[2,j][l,k]);
                     end
                 end
                 lS[i,j] = currentval;

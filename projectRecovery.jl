@@ -28,7 +28,7 @@ function projectRecovery(degFH::degF{1},degF::degF{1},cval::Array{Float64,1},mas
         for j in 1:sph
             for k in 1:sk[2]
                 for l in 1:sk[1]
-                    gbh[globalNumH[j]]+=kubWeights[l,k]*cl[l,k]*phiH[j][l,k]*dJ[l,k];
+                    gbh[globalNumH[j]]+=kubWeights[l,k]*cl[l,k]*phiH[j][l,k]*abs(dJ[l,k]);
                 end
             end
         end
@@ -71,7 +71,7 @@ function projectRecovery(degFH::degF{2},degF::degF{2},cval::Array{Float64,1},mas
         for j in 1:sph
             for r in 1:sk[2]
                 for l in 1:sk[1]
-                    gbh[globalNumH[j]]+=kubWeights[l,r]*ddJ[l,r]*(cl1[l,r]*jphiH[1,j][l,r]+cl2[l,r]*jphiH[2,j][l,r]);
+                    gbh[globalNumH[j]]+=kubWeights[l,r]*abs(ddJ[l,r])*(cl1[l,r]*jphiH[1,j][l,r]+cl2[l,r]*jphiH[2,j][l,r]);
                 end
             end
         end
