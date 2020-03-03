@@ -20,7 +20,7 @@ function coordTrans(mt::Int64, normals::Array{Float64,2}, type::Array{Symbol,1},
         elseif n==[1.0,0.0]
             newQuadPoints=ones(2,sk);
             newQuadPoints[2,:]=quadPoints;
-        elseif n==[0.7071067811865475244, 0.7071067811865475244]
+        elseif n==[1.0,1.0]
             newQuadPoints=zeros(2,sk);
             newQuadPoints[2,:]=quadPoints;
             newQuadPoints[1,:]=1 .- quadPoints;

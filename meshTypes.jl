@@ -64,6 +64,8 @@ function mesh(topology::meshTopology, geometry::meshGeometry, bE::SparseVector{I
       z+=2;
   end
   mt=topology.offset["20"][2]-topology.offset["20"][1];
-  mt==4 ? n=[0.0 -1.0 0.0 1.0;-1.0 0.0 1.0 0.0] : n=[0.0 -1.0 0.7071067811865475244;-1.0 0.0 0.7071067811865475244];
+  mt==4 ? n=[0.0 -1.0 0.0 1.0;-1.0 0.0 1.0 0.0] : n=[0.0 1.0 -1.0;-1.0 1.0 0.0];
+  # Normalen müssen bereits mit Länge der entsprechenden Kante multipliziert sein
+  #   (wegen Integraltransformation auf Kante)
   mesh(topology, geometry, mt, l, n, bE, bV)
 end
