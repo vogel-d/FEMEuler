@@ -25,7 +25,6 @@ function discGalerkinEdges!(M::Array{Float64,2},
         inc2=edgeData[2][z+1]; # <- lokale Nummerierung variiert
         eT1=edgeData[3][z];
         eT2=edgeData[3][z+1];
-
         z+=2;
         n1=@views m.normals[:,eT1];
         n2=@views m.normals[:,eT2];
@@ -279,10 +278,10 @@ function discGalerkinEdges!(M::Array{Float64,2},
                         w1jphiTn2+=w1[d][r]*jphiTn2[d,i][r];
                         w2jphiTn2+=w2[d][r]*jphiTn2[d,i][r];
                     end
-                    lM11[i,j]+=quadWeights[r]*ddJ1[r]*ddJ1[r]*(n[1]*phiFn1[1,j][r]+n[2]*phiFn1[2,j][r])*w1jphiTn1;
-                    lM12[i,j]+=quadWeights[r]*ddJ1[r]*ddJ2[r]*(n[1]*phiFn2[1,j][r]+n[2]*phiFn2[2,j][r])*w2jphiTn1;
-                    lM21[i,j]+=quadWeights[r]*ddJ2[r]*ddJ1[r]*(n[1]*phiFn1[1,j][r]+n[2]*phiFn1[2,j][r])*w1jphiTn2;
-                    lM22[i,j]+=quadWeights[r]*ddJ2[r]*ddJ2[r]*(n[1]*phiFn2[1,j][r]+n[2]*phiFn2[2,j][r])*w2jphiTn2;
+                    lM11[i,j]+=quadWeights[r]*ddJ1[r]*ddJ1[r]*(n1[1]*phiFn1[1,j][r]+n1[2]*phiFn1[2,j][r])*w1jphiTn1;
+                    lM12[i,j]+=quadWeights[r]*ddJ1[r]*ddJ2[r]*(n2[1]*phiFn2[1,j][r]+n2[2]*phiFn2[2,j][r])*w2jphiTn1;
+                    lM21[i,j]+=quadWeights[r]*ddJ2[r]*ddJ1[r]*(n1[1]*phiFn1[1,j][r]+n1[2]*phiFn1[2,j][r])*w1jphiTn2;
+                    lM22[i,j]+=quadWeights[r]*ddJ2[r]*ddJ2[r]*(n2[1]*phiFn2[1,j][r]+n2[2]*phiFn2[2,j][r])*w2jphiTn2;
                 end
             end
         end
