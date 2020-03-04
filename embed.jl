@@ -73,7 +73,7 @@ function embed(comp::Symbol,degF::degF{2},cval::Array{Float64,1},compRec::Symbol
         for i in 1:n
             l2g!(globalNum,degF,i);
             l2g!(globalNumRec,degFRec,i);
-            for j in 1:8
+            for j in 1:length(globalNum)
                 cEmbed[globalNumRec[j]]+=cval[globalNum[j]];
             end
         end
@@ -81,17 +81,21 @@ function embed(comp::Symbol,degF::degF{2},cval::Array{Float64,1},compRec::Symbol
         for i in 1:n
             l2g!(globalNum,degF,i);
             l2g!(globalNumRec,degFRec,i);
-            for j in 1:18
+            for j in 1:length(globalNum)
                 cEmbed[globalNumRec[j]]+=cval[globalNum[j]];
             end
         end
     elseif (comp==:RT0 || comp==:RT0B) && compRec==:VecDG1
         #h=[1,1,2,2,3,3,4,4];
-        h=[4,1,2,1,2,3,4,3]
+        if length(globalNumRec)==8
+            h=[4,1,2,1,2,3,4,3]
+        elseif length(globalNumRec)==6
+            h=[3,1,2,1,3,2]
+        end
         for i in 1:n
             l2g!(globalNum,degF,i);
             l2g!(globalNumRec,degFRec,i);
-            for j in 1:8
+            for j in 1:length(globalNumRec)
                 cEmbed[globalNumRec[j]]+=cval[globalNum[h[j]]];
             end
         end
