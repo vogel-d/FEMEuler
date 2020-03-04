@@ -41,8 +41,7 @@ function assembStiff!(p::femProblem)
         pkey=p.femType[:p][1];
 
         Spv=assembStiff(degF[pkey], degF[vkey], p.mesh, p.kubWeights, p.kubPoints);
-        #Svp = copy(-Spv');
-        Svp =assembStiff(degF[vkey], degF[pkey], p.mesh, p.kubWeights, p.kubPoints);
+        Svp = copy(-Spv');
 
         p.stiffM[:rho]=Spv[1:degF[rhokey].num,:];
         p.stiffM[:vp]=Svp[1:degF[vkey].num,:];
