@@ -92,7 +92,7 @@ function plotMesh3D(m::mesh, showann::Bool=false; showvertices::Bool=showann,
         coorde[2,k]=0.5*sum(y[:,k]);
         coorde[3,k]=0.5*sum(z[:,k]);
     end
-    p=plot(x,y,z, c=linecolor, legend=false);
+    p=plot(x,y,z, c=linecolor, legend=false, xlabel="x in m", ylabel="y in m", zlabel="z in m");
     #=
     coordf=Array{Float64,2}(undef,3,nf);
     ng=offf[2]-offf[1];
