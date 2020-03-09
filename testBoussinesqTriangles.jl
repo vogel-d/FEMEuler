@@ -41,14 +41,13 @@ function testBoussinesqTri()
 
     #return p;
     time=0.0;
-    for i in collect(solSaves)
+    for i in 1:solSaves
         solveB!(p,Fp,Fv,Fb,time,dt,nIter,method);
         time+=nIter;
-        println(time);
     end
-
+    println(time)
     #Speichern des Endzeitpunktes als vtu-Datei:
-    unstructured_vtk(p, tend, [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesqTriangles/"*filename)
+    #unstructured_vtk(p, tend, [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesqTriangles/"*filename)
     #Speichern aller berechneten Zwischenwerte als vtz-Datei:
     unstructured_vtk(p, sort(collect(keys(p.solution))), [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesqTriangles/"*filename)
 
