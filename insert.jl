@@ -38,9 +38,9 @@ function insertFaceFace!(incfe::Array{Int,1},EdgeNumberStart1::Int,EdgeNumberSta
       append!(incfe,e)
       EdgeNumber1+=1
       EdgeNumber2+=1
-      #FaceNumber+=1
     end
   end
+  return nothing;
 end
 
 function insertFaceEdge!(ince::Array{Int,1},NodeNumberStart::Int, NodeNumberE1Start1::Int, NodeNumberE2Start1::Int, NodeNumberE1Start2::Int,

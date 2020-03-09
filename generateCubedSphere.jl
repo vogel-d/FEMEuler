@@ -124,7 +124,7 @@ function generateCubedSphere(n::Int,r::Float64,nz::Int=0,case::Symbol=:purser1) 
   NumberOfFacesPlane=6*n*n
   #Inzidenz 2->1
   incfe=Int[];
-  FaceNumber=1
+
   # Faces
   # West
   insertFaceFace!(incfe,EdgeNumberW1,EdgeNumberW2,EdgeNumberSNmm,EdgeNumberSNmp,EdgeNumberBTmm,EdgeNumberBTmp,n)
@@ -138,7 +138,6 @@ function generateCubedSphere(n::Int,r::Float64,nz::Int=0,case::Symbol=:purser1) 
   insertFaceFace!(incfe,EdgeNumberB1,EdgeNumberB2,EdgeNumberWEmm,EdgeNumberWEpm,EdgeNumberSNmm,EdgeNumberSNpm,n)
   # Top
   insertFaceFace!(incfe,EdgeNumberT1,EdgeNumberT2,EdgeNumberWEmp,EdgeNumberWEpp,EdgeNumberSNmp,EdgeNumberSNpp,n)
-
   #Initialisieren des Offsets mit den Einträgen "21" und "10"
   off=Dict("21"=>collect(1:4:(4*NumberOfFacesPlane+1)),"10"=>collect(1:2:(2*NumberOfEdgesPlane+1)));
 
@@ -165,10 +164,9 @@ function generateCubedSphere(n::Int,r::Float64,nz::Int=0,case::Symbol=:purser1) 
   m.topology.offset["20"]=off;
 
   setOrientation!(m)
-
+  
   # Extension to 3 d
   #Extension3DPolyGrid(nz,PolyGrid,NumberOfNodesPlane,NumberOfEdgesPlane,NumberOfFacesPlane)
-
   return m;
 end
 

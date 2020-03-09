@@ -55,6 +55,7 @@ function degF(m::mesh, femType::Symbol, ordEdgesB::Array{Int,1}, nebP::Int, nebC
         end
 
         edges=incfe[offfe[f]:offfe[f+1]-1];
+        #=
         #Sortieren von edges in  richtige Reigenforge nach Knoten
         push!(vert,vert[1]);
         ind=zeros(Int,length(edges)); #ALLOCATION
@@ -77,6 +78,7 @@ function degF(m::mesh, femType::Symbol, ordEdgesB::Array{Int,1}, nebP::Int, nebC
             end
         end
         edges=edges[ind];
+        =#
         ze=off[f]+refFace;
         for e in edges
             if m.boundaryEdges[e]>=0
