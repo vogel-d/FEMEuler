@@ -16,14 +16,14 @@ function advection(p::femProblem, gamma::Float64, y::solution,
                         p.degFBoundary[fTv[3]],nquadPhi[fTv[3]],cR,
                         gamma,p.mesh,p.kubPoints,p.kubWeights,
                         nquadPoints,p.edgeData);
-      rCv=Fv\Sv;
+      rCv=Fv\(Sv-p.stiffM[:fv]*y.rhoV);
     else
       Sv=advectionStiff(p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],
                         p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],sparse(y.rhoV),
                         p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],cR,
                         gamma,p.mesh,p.kubPoints,p.kubWeights,
                         nquadPoints,p.edgeData);
-      rCv=Fv\Sv;
+      rCv=Fv\(Sv-p.stiffM[:fv]*y.rhoV);
     end
     cR=projectRhoChi(p,y.rho,y.rhoTheta,:rho,:rhoTheta,MrT);
     if p.taskRecovery
