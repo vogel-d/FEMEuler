@@ -369,7 +369,7 @@ function jacobi!(J::Array{Array{Float64,1},2},ddJ::Array{Float64,1},jphi::Array{
             for k in 1:size(psi,2)
                 jpsi[1,k][i]=(J[1,1][i]*psi[1,k][i]+J[1,2][i]*psi[2,k][i]);
                 jpsi[2,k][i]=(J[2,1][i]*psi[1,k][i]+J[2,2][i]*psi[2,k][i]);
-                jpsi[2,k][i]=(J[3,1][i]*psi[1,k][i]+J[3,2][i]*psi[2,k][i]);
+                jpsi[3,k][i]=(J[3,1][i]*psi[1,k][i]+J[3,2][i]*psi[2,k][i]);
             end
         end
     end
