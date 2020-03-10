@@ -62,12 +62,12 @@ function assembLoad(degF::degF{2}, f, m::mesh, kubPoints::Array{Float64,2}, kubW
             if sk[1]==1 # <=> dreiecke, muss liste durchlaufen
                 for i=1:sk[2]
                     xy=transformation(m,coord,kubPoints[1,i],kubPoints[2,i])
-                    ft[d][i]=f[d](xy);
+                    ft[d][i]=f(xy)[d];
                 end
             else # <=> vierecke, muss matrix durchlaufen
                 for i=1:sk[1], j=1:sk[2]
                     xy=transformation(m,coord,kubPoints[1,i],kubPoints[2,j])
-                    ft[d][i,j]=f[d](xy);
+                    ft[d][i,j]=f(xy)[d];
                 end
             end
         end

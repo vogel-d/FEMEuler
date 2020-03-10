@@ -2,7 +2,7 @@ include("modulesSphere.jl")
 
 function testGalewsky()
 
-    filename = "galewsky";
+    filename = "galewskyI";
 
     #order: comp, compHigh, compRec, compDG
 
@@ -27,6 +27,7 @@ function testGalewsky()
     advection=true;
 
     m=generateCubedSphere(36,6300000.0)
+    #m=generateCubedSphere(2,6300000.0)
 
     p=femProblem(m, femType,t=:shallow, advection=advection, taskRecovery=taskRecovery);
     #return p;
@@ -35,7 +36,7 @@ function testGalewsky()
 
     dt=50.0 #1600.0;
     ns=4;
-    EndTime=50.0 #1000.0 #86400; #259200.0
+    EndTime=1000.0 #86400; #259200.0
     nIter=Int64(EndTime/dt);
 
     #start functions
@@ -71,7 +72,7 @@ function testGalewsky()
     function ftheta(xyz::Array{Float64,1})
         return 1.0;
     end
-    function fv1(xyz::Array{Float64,1})
+    function fvel(xyz::Array{Float64,1})
         x=xyz[1]; y=xyz[2]; z=xyz[3];
         lon,lat,r=cart2sphere(x,y,z);
         uM=80.0
@@ -83,11 +84,8 @@ function testGalewsky()
         else
           uS=uM/eN*exp(1.0/((lat-lat0G)*(lat-lat1G)))
         end
-        return uS;
+        return velCa([uS,0.0,0.0],lon,lat)
     end
-    fv2(xyz::Array{Float64,1})=0.0;
-    fv3(xyz::Array{Float64,1})=0.0;
-    fvel=[fv1, fv2, fv3];
     f=Dict(:rho=>frho,:theta=>ftheta,:v=>fvel);
 
     assembMass!(p);
@@ -116,7 +114,7 @@ function testGalewsky()
     FY=Array{solution,1}(undef,MISMethod.nStage);
     SthY=Array{SparseMatrixCSC{Float64,Int64},1}(undef,MISMethod.nStage);
     Time=0.0;
-
+    println(isapprox(y.rhoTheta,y.rho))
     for i=1:nIter
       @time y=splitExplicit(y,Y,FY,SthY,p,gamma,nquadPhi,nquadPoints,MrT,MrV,MISMethod,Time,dt,ns);
       Time+=dt
