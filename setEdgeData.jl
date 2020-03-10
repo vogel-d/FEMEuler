@@ -5,7 +5,7 @@ function setEdgeData!(p::femProblem, compVf::Symbol)
     refBound=getElementProperties(mt,p.femType[compVf][1]);
     if mt==4
         #normal=Dict([1,2]=>[0.0,-1.0],[2,3]=>[1.0,0.0],[3,4]=>[0.0,1.0],[1,4]=>[-1.0,0.0])
-´       normal=Dict([1,2]=>[0.0,1.0],[2,3]=>[1.0,0.0],[3,4]=>[0.0,1.0],[1,4]=>[1.0,0.0])
+        normal=Dict([1,2]=>[0.0,1.0],[2,3]=>[1.0,0.0],[3,4]=>[0.0,1.0],[1,4]=>[1.0,0.0])
         coordref=[0.0 1.0 1.0 0.0; 0.0 0.0 1.0 1.0]
     else
         normal=Dict([1,2]=>[0.0,-1.0],[2,3]=>[1/sqrt(2),1/sqrt(2)],[1,3]=>[-1.0,0.0])
