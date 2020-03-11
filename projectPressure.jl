@@ -1,5 +1,5 @@
-function projectPressure(degFP::degF{1},massMP::SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64},
-                        degFRT::degF{1},valRT::Array{Float64,1},
+function projectPressure(degFP::degF{1,:H1},massMP::SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64},
+                        degFRT::degF{1,:H1},valRT::Array{Float64,1},
                         m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
     phiRT=@views degFRT.phi;
     phiP=@views degFP.phi;
@@ -45,8 +45,8 @@ function projectPressure(degFP::degF{1},massMP::SuiteSparse.UMFPACK.UmfpackLU{Fl
     return massMP\gbh;
 end
 
-function projectPressure(degFP::degF{1},massMP::SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64},
-                        degFRT::degF{1},valRT::Array{Float64,1},
+function projectPressure(degFP::degF{1,:H1},massMP::SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64},
+                        degFRT::degF{1,:H1},valRT::Array{Float64,1},
                         m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
     phiRT=@views degFRT.phi;
     phiP=@views degFP.phi;

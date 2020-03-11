@@ -3,8 +3,8 @@ function recovery(p::femProblem, comp::Array{Symbol,1}, cval::Array{Float64,1}) 
     kubPoints=p.kubPoints;
     kubWeights=p.kubWeights;
     degF=p.degFBoundary;
-    cH=projectRecovery(degF[comp[2]],degF[comp[1]],cval,p.massMProjection[comp[2]],m,kubPoints,kubWeights);
-    cHP=projectRecovery(degF[comp[4]],degF[comp[2]],cH,p.massMProjection[comp[4]],m,kubPoints,kubWeights);
+    cH=projectRecovery(degF[comp[2]],degF[comp[1]],cval,p.massMBoundary[comp[2]],m,kubPoints,kubWeights);
+    cHP=projectRecovery(degF[comp[4]],degF[comp[2]],cH,p.massMBoundary[comp[4]],m,kubPoints,kubWeights);
     comp[4]==:RT0B && global valchp=cHP
     comp[4]==:RT0B && global valch=cH
     n=m.topology.size[3]

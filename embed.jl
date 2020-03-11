@@ -1,4 +1,4 @@
-function embed(comp::Symbol,degF::degF{1},cval::Array{Float64,1},compRec::Symbol,degFRec::degF{1},n::Int64)
+function embed(comp::Symbol,degF::degF{1,S} where S,cval::Array{Float64,1},compRec::Symbol,degFRec::degF{1,S} where S,n::Int64)
     cEmbed=zeros(degFRec.numB);
 
     globalNum=Array{Int64,1}(undef,length(degF.phi));
@@ -62,7 +62,7 @@ function embed(comp::Symbol,degF::degF{1},cval::Array{Float64,1},compRec::Symbol
     return cEmbed;
 end
 
-function embed(comp::Symbol,degF::degF{2},cval::Array{Float64,1},compRec::Symbol,degFRec::degF{2},n::Int64)
+function embed(comp::Symbol,degF::degF{2,S} where S,cval::Array{Float64,1},compRec::Symbol,degFRec::degF{2,S} where S,n::Int64)
     cEmbed=zeros(degFRec.numB);
 
     globalNum=Array{Int64,1}(undef,size(degF.phi,2));
@@ -109,10 +109,7 @@ function embed(comp::Symbol,degF::degF{2},cval::Array{Float64,1},compRec::Symbol
                 end
             end
         end
-        println("cval")
-        println(cval)
-        println("cembed")
-        println(cEmbed)
+        
 
 #=
         #h=[1,1,2,2,3,3,4,4];

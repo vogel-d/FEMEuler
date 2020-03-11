@@ -1,4 +1,4 @@
-function assembLoad(degF::degF{1}, f, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
+function assembLoad(degF::degF{1,:H1}, f, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
     phiT=degF.phi;
     sk=size(kubWeights);
 
@@ -39,7 +39,7 @@ function assembLoad(degF::degF{1}, f, m::mesh, kubPoints::Array{Float64,2}, kubW
     return gb;
 end
 
-function assembLoad(degF::degF{2}, f, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
+function assembLoad(degF::degF{2,S} where S, f, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
     phiT=degF.phi;
     sk=size(kubWeights);
     iter=size(phiT,2);

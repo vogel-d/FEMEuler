@@ -1,4 +1,4 @@
-function assembMassRho(degF::degF{1}, degFRho::degF{1}, valRho::Array{Float64,1}, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
+function assembMassRho(degF::degF{1,:H1}, degFRho::degF{1,:H1}, valRho::Array{Float64,1}, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
     phi=@views degF.phi;
     phiRho=@views degFRho.phi;
     sk=size(kubWeights);
@@ -46,7 +46,7 @@ function assembMassRho(degF::degF{1}, degFRho::degF{1}, valRho::Array{Float64,1}
     return sparse(rows,cols,vals);
 end
 
-function assembMassRho(degF::degF{2}, degFRho::degF{1}, valRho::Array{Float64,1}, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
+function assembMassRho(degF::degF{2,:H1div}, degFRho::degF{1,H1}, valRho::Array{Float64,1}, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
     phi=@views degF.phi;
     phiRho=@views degFRho.phi;
     sk=size(kubWeights);
