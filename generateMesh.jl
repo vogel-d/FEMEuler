@@ -104,6 +104,18 @@ function generateRectMesh(nx::Int, ny::Int, condEW::Symbol, condTB::Symbol, xl::
         b2=bV[v2];
         if b1==0 && b2==0
             continue;
+        elseif v1==1 || v2==1 #Kante unten links gesondert behandelt wegen periodic/periodic, 0 in bV[1] macht Probleme
+            if b2==b1==1
+                bE[i]=1;
+            elseif (b1==1 && b2<=0) || (b1<=0 && b2==1)
+                bE[i]=1;
+            elseif (b1==0 && b2<0) || (b1<0 && b2==0) || (b1<0 && b2<0)
+                if coord[1,v1]==coord[1,v2]
+                    bE[i]=-i-nx;
+                elseif coord[2,v1]==coord[2,v2]
+                    bE[i]=-i-ny;
+                end
+            end
         elseif (b1!=0 && b2!=0) || in(v1,corners) || in(v2,corners)
             if b2==b1==1
                 bE[i]=1;
@@ -210,11 +222,11 @@ function generateTriMesh(nx::Int, ny::Int, condEW::Symbol, condTB::Symbol, xl::F
             push!(corners,i);
             if condEW==:constant && condTB==:constant
                 bV[i]=1;
-            elseif condEW==:periodic && condTB==:periodic
+            elseif condEW==:periodic && condTB==:periodic && !(coord[1,i]==xl && coord[2,i]==yl)
                 bV[i]=-1;
-            elseif condEW==:periodic && coord[1,i]==xl
+            elseif condEW==:periodic && condTB==:constant && coord[1,i]==xl
                 bV[i]=-i-nx;
-            elseif condTB==:periodic && coord[2,i]==yl
+            elseif condTB==:periodic && condEW==:constant && coord[2,i]==yl
                 bV[i]=-i-(nx+1)*ny;
             end
         elseif condEW==:constant && (coord[1,i]==xl || coord[1,i]==xr)
@@ -238,11 +250,23 @@ function generateTriMesh(nx::Int, ny::Int, condEW::Symbol, condTB::Symbol, xl::F
         b2=bV[v2];
         if b1==0 && b2==0
             continue;
+        elseif v1==1 || v2==1 #Kante unten links gesondert behandelt wegen periodic/periodic, 0 in bV[1] macht Probleme
+            if b2==b1==1
+                bE[i]=1;
+            elseif (b1==1 && b2<=0) || (b1<=0 && b2==1)
+                bE[i]=1;
+            elseif (b1==0 && b2<0) || (b1<0 && b2==0) || (b1<0 && b2<0)
+                if coord[1,v1]==coord[1,v2]
+                    bE[i]=-i-nx;
+                elseif coord[2,v1]==coord[2,v2]
+                    bE[i]=-i-ny;
+                end
+            end
         elseif (b1!=0 && b2!=0) || in(v1,corners) || in(v2,corners)
             if b2==b1==1
                 bE[i]=1;
             elseif (b1==1 && b2<=0) || (b1<=0 && b2==1)
-                if !(coord[1,v1]!=coord[1,v2] && coord[2,v1]!=coord[2,v2])
+                if !(coord[1,v1]!=coord[1,v2] && coord[2,v1]!=coord[2,v2]) #nur Kante die tatsächlich am Rand liegt (keine schrägen)
                     bE[i]=1;
                 end
             elseif b1<0 && b2<0
