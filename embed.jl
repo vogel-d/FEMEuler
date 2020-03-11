@@ -88,6 +88,35 @@ function embed(comp::Symbol,degF::degF{2},cval::Array{Float64,1},compRec::Symbol
     elseif (comp==:RT0 || comp==:RT0B) && compRec==:VecDG1
         #h=[1,1,2,2,3,3,4,4];
         if length(globalNumRec)==8
+            assign = [[[4],[1],[2],[1],[2],[3],[4],[3]]]
+            factors = [[[1.0],[1.0],[1.0],[1.0],[1.0],[1.0],[1.0],[1.0]]]
+        elseif length(globalNumRec)==6
+            assign = [[[3],[1],[2,1],[1],[3],[2,3]],
+                      [[3],[1,3],[3],[2],[1,2],[2]]]
+            factors = [[[-1.0],[-1.0],[1.0,1.0],[-1.0],[-1.0],[1.0,1.0]],
+                       [[-1.0],[1.0,1.0],[-1.0],[-1.0],[1.0,1.0],[-1.0]]]
+        end
+
+        cellshape=1;
+        ncellshapes=length(assign);
+        for i in 1:n
+            cellshape=1+mod(i-1,ncellshapes)
+            l2g!(globalNum,degF,i);
+            l2g!(globalNumRec,degFRec,i);
+            for j in 1:length(globalNumRec)
+                for k in 1:length(assign[cellshape][j])
+                    cEmbed[globalNumRec[j]]+=factors[cellshape][j][k]*cval[globalNum[assign[cellshape][j][k]]];
+                end
+            end
+        end
+        println("cval")
+        println(cval)
+        println("cembed")
+        println(cEmbed)
+
+#=
+        #h=[1,1,2,2,3,3,4,4];
+        if length(globalNumRec)==8
             h=[4,1,2,1,2,3,4,3]
         elseif length(globalNumRec)==6
             h=[3,1,2,1,3,2]
@@ -99,6 +128,7 @@ function embed(comp::Symbol,degF::degF{2},cval::Array{Float64,1},compRec::Symbol
                 cEmbed[globalNumRec[j]]+=cval[globalNum[h[j]]];
             end
         end
+=#
     elseif (comp==:RT1 || comp==:RT1B) && compRec==:VecDG2
         for i in 1:n
             l2g!(globalNum,degF,i);
