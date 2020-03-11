@@ -19,7 +19,7 @@ end
 
 function velocity!(rhoVS::Array{Float64,1},p::femProblem, yRho::Array{Float64,1},yRhoTheta::Array{Float64,1})
   pres=projectPressure(p.degFBoundary[p.femType[:p][1]],p.massMBoundary[p.femType[:p][1]],p.degFBoundary[p.femType[:rhoTheta][1]],yRhoTheta,p.mesh,p.kubPoints,p.kubWeights,Val(p.type);
-  return p.massM[p.femType[:rhoV][1]]\(-(p.stiffM[:vp]*(pres-p.diagnostic.pBar)+9.81*(p.stiffM[:vrho]*(yRho-p.diagnostic.rhoBar))));
+  return p.massM[p.femType[:rhoV][1]]\(-(p.stiffM[:vp]*(pres-p.diagnostic.pBar)+Grav*(p.stiffM[:vrho]*(yRho-p.diagnostic.rhoBar))));
 end
 
 function rhoTheta!(rhoS::Array{Float64,1},rhoThetaS::Array{Float64,1},p::femProblem, yRhoV::Array{Float64,1}, STh::SparseMatrixCSC{Float64,Int64})

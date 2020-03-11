@@ -8,6 +8,7 @@ gr() #Pkg.build("CodecZlib") #Pkg.build("LightXML")
 
 include("solution.jl");
 @solution(v,p,b);
+include("constants.jl")
 include("getKub.jl");
 include("getQuad.jl");
 include("meshTypes.jl");

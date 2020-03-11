@@ -28,12 +28,8 @@ function testInertiaGravity2()
 
     #start functions
     xCM=0.0; zCM=2000.0;
-    r0=2000.0; th0=300.0; p0=100000.0;
+    r0=2000.0; th0=300.0;
     DeltaTh1=.01;
-    Grav=9.81;
-    Cpd=1004.0; Cvd=717.0; Cpv=1885.0;
-    N=1.e-2;
-    Rd=Cpd-Cvd; Gamma=Cpd/Cvd; kappa=Rd/Cpd;
     H=10000;
     a=5000;
     xC=150000;

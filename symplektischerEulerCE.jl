@@ -19,7 +19,7 @@ end
 
 function velocity!(rhoVS::Array{Float64,1},p::femProblem, yRho::Array{Float64,1},yRhoTheta::Array{Float64,1},type::Val{:compressible})
   pres=projectPressure(p.degFBoundary[p.femType[:p][1]],p.massMBoundary[p.femType[:p][1]],p.degFBoundary[p.femType[:rhoTheta][1]],yRhoTheta,p.mesh,p.kubPoints,p.kubWeights);
-  rhoVS[:]=p.massM[p.femType[:rhoV][1]]\(-(p.stiffM[:vp]*pres+9.81*(p.stiffM[:vrho]*yRho)));
+  rhoVS[:]=p.massM[p.femType[:rhoV][1]]\(-(p.stiffM[:vp]*pres+Grav*(p.stiffM[:vrho]*yRho)));
   return nothing;
 end
 

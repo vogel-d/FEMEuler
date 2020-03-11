@@ -29,11 +29,8 @@ function testColdBubble()
     #start functions
     xCM=0.0; zCM=3000.0;
     xCR=4000.0; zCR=2000.0;
-    r0=2000.0; th0=300.0; p0=100000.0;
+    r0=2000.0; th0=300.0;
     DeltaTh1=-15;
-    Grav=9.81;
-    Cpd=1004.0; Cvd=717.0; Cpv=1885.0;
-    Rd=Cpd-Cvd; Gamma=Cpd/Cvd; kappa=Rd/Cpd;
     function frho(xz::Array{Float64,1})
         x=xz[1]; z=xz[2];
         TLoc=th0-z/Cpd*Grav;

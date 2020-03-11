@@ -9,6 +9,7 @@ include("solution.jl");
 @solution(rho, rhoV, rhoTheta, v, theta);
 include("diagnostic.jl");
 @diagnostic(rhoBar, pBar, thBar);
+include("constants.jl")
 include("getKub.jl");
 include("getQuad.jl");
 include("meshTypes.jl");
