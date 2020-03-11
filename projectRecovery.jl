@@ -24,7 +24,6 @@ function projectRecovery(degFH::degF{1},degF::degF{1},cval::Array{Float64,1},mas
         for i in 1:length(globalNum)
             @. cl+=cval[globalNum[i]]*phi[i];
         end
-
         for j in 1:sph
             for k in 1:sk[2]
                 for l in 1:sk[1]
@@ -75,6 +74,7 @@ function projectRecovery(degFH::degF{2},degF::degF{2},cval::Array{Float64,1},mas
                         vecdot+=cl[d][l,r]*jphiH[d,j][l,r];
                     end
                     gbh[globalNumH[j]]+=kubWeights[l,r]*abs(ddJ[l,r])*vecdot;
+                    #piola: abs(dJ)*ddJ*ddJ=abs(ddJ)
                 end
             end
         end
