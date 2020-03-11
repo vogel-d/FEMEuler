@@ -71,9 +71,9 @@ function projectRecovery(degFH::degF{2},degF::degF{2},cval::Array{Float64,1},mas
                 for l in 1:sk[1]
                     vecdot=0.0
                     for d in 1:m.geometry.dim
-                        vecdot+=cl[d][l,r]*jphiH[d,j][l,r];
+                        vecdot+=cl[d][l,r]*phiH[d,j][l,r];
                     end
-                    gbh[globalNumH[j]]+=kubWeights[l,r]*abs(ddJ[l,r])*vecdot;
+                    gbh[globalNumH[j]]+=kubWeights[l,r]*ddJ[l,r]*abs(ddJ[l,r])*vecdot;
                     #piola: abs(dJ)*ddJ*ddJ=abs(ddJ)
                 end
             end
