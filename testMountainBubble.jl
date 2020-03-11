@@ -33,11 +33,8 @@ function testMountainBubble()
 
     #start functions
     xCM=0.0; zCM=3000.0;
-    r0=2000.0; th0=300.0; p0=100000.0;
+    r0=2000.0; th0=300.0;
     DeltaTh1=2;
-    Grav=9.81;
-    Cpd=1004.0; Cvd=717.0; Cpv=1885.0;
-    Rd=Cpd-Cvd; Gamma=Cpd/Cvd; kappa=Rd/Cpd;
     function frho(xz::Array{Float64,1})
         x=xz[1]; z=xz[2];
         pLoc=p0*(1-kappa*Grav*z/(Rd*th0))^(Cpd/Rd);

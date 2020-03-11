@@ -7,6 +7,7 @@ gr()
 
 include("solution.jl");
 @solution(rho, rhoV, rhoTheta, v, theta);
+include("constants.jl")
 include("getKub.jl");
 include("getQuad.jl");
 include("meshTypes.jl");

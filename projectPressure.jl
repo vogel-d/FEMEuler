@@ -12,9 +12,6 @@ function projectPressure(degFP::degF{1},massMP::SuiteSparse.UMFPACK.UmfpackLU{Fl
     globalNumRT=Array{Int64,1}(undef,length(phiRT));
     globalNumP=Array{Int64,1}(undef,length(phiP));
 
-    Cpd=1004.0;
-    Rd=Cpd-717.0; kappa=Rd/Cpd;
-    p0=100000.0;
     Pres1=p0*(Rd/p0)^(1.0/(1.0-kappa));
     Pres2=(1.0/(1.0-kappa));
 
@@ -59,8 +56,6 @@ function projectPressure(degFP::degF{1},massMP::SuiteSparse.UMFPACK.UmfpackLU{Fl
     globalNumRT=Array{Int64,1}(undef,length(phiRT));
     globalNumP=Array{Int64,1}(undef,length(phiP));
 
-    grav2=0.5*9.81;
-
     cl=zeros(sk);
 
     gbh=zeros(degFP.numB)
@@ -75,7 +70,7 @@ function projectPressure(degFP::degF{1},massMP::SuiteSparse.UMFPACK.UmfpackLU{Fl
             @. cl+=valRT[globalNumRT[i]]*phiRT[i];
         end
 
-        @. cl=grav2*cl^2;
+        @. cl=2*Grav*cl^2;
 
         for j in 1:length(phiP)
             for r in 1:sk[2]

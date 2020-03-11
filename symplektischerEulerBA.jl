@@ -29,8 +29,6 @@ function velocity!(vS::Array{Float64,1},p::femProblem, yP::Array{Float64,1},yB::
 end
 
 function pressureBuoyancy!(pS::Array{Float64,1},bS::Array{Float64,1},p::femProblem, yV::Array{Float64,1})
-  cs2=115600;
-  N2=1.e-4;
 
   Fp=p.massM[p.femType[:p][1]];
   Fb=p.massM[p.femType[:b][1]];

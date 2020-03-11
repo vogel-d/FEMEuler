@@ -36,10 +36,7 @@ function testMountainWaves()
     EndTime=nIter*dt;
 
     #start functions
-    th0=300.0; p0=100000.0;
-    Grav=9.81; N=0.01
-    Cpd=1004.0; Cvd=717.0; Cpv=1885.0;
-    Rd=Cpd-Cvd; Gamma=Cpd/Cvd; kappa=Rd/Cpd;
+    th0=300.0; 
     function frho(xz::Array{Float64,1})
         x=xz[1]; z=xz[2];
         s=N*N/Grav

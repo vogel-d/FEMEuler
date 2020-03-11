@@ -35,12 +35,9 @@ function testCollidingBubbles()
     #start functions
     xW=500.0; zW=300.0; xC=560.0; zC=640.0;
     rW0=150.0; rC0=0.0;
-    th0=300.0; p0=100000.0;
+    th0=300.0;
     DeltaThW=0.5; DeltaThC=-0.15;
     sW=50; sC=50;
-    Grav=9.81;
-    Cpd=1004.0; Cvd=717.0; Cpv=1885.0;
-    Rd=Cpd-Cvd; Gamma=Cpd/Cvd; kappa=Rd/Cpd;
     function frho(xz::Array{Float64,1})
         x=xz[1]; z=xz[2];
         pLoc=p0*(1-kappa*Grav*z/(Rd*th0))^(Cpd/Rd);

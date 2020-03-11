@@ -5,9 +5,6 @@ function solveAcoustic!(p::femProblem,
 
   iterations=nt/dt;
 
-  cs2=115600;
-  N2=1.e-4;
-
   Spv=p.stiffM[:pv];
   Svp=p.stiffM[:vp];
   Svb=p.stiffM[:vb];
