@@ -112,11 +112,11 @@ function assembMass(degF::degF{2,:H1xH1}, m::mesh, kubPoints::Array{Float64,2}, 
                 currentval=0.0;
                 for r in 1:sk[2]
                     for l in 1:sk[1]
-                        jphi=0.0;
+                        vecdot=0.0;
                         for d in 1:m.geometry.dim
-                            jphi+=phiRef[d,i][l,r]*phiRef[d,j][l,r];
+                            vecdot+=phiRef[d,i][l,r]*phiRef[d,j][l,r];
                         end
-                        currentval+=kubWeights[l,r]*abs(dJ[l,r])*jphi
+                        currentval+=kubWeights[l,r]*abs(dJ[l,r])*vecdot
                     end
                 end
 
