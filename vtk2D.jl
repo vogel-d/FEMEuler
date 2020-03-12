@@ -42,7 +42,7 @@ function unstructured_vtk(p::femProblem, tend::Float64, comp::Array{Symbol,1}, n
     sol=p.solution[tend];
     for l in 1:length(comp)
         solc=getfield(sol,comp[l]);
-        if isa(p.degFBoundary[p.femType[comp[l]][1]],degF{1})
+        if isa(p.degFBoundary[p.femType[comp[l]][1]],degF{1,S} where S)
             cvtk=zeros(Float64, nf)
             for k in 1:nf
                 cLoc=solc[l2g(p.degFBoundary[p.femType[comp[l]][1]], k)]
@@ -112,7 +112,7 @@ function unstructured_vtk(p::femProblem, t::Array{Float64,1}, comp::Array{Symbol
             sol=p.solution[t[it]];
             for l in 1:length(comp)
                 solc=getfield(sol,comp[l]);
-                if isa(p.degFBoundary[p.femType[comp[l]][1]],degF{1})
+                if isa(p.degFBoundary[p.femType[comp[l]][1]],degF{1,S} where S)
                     cvtk=zeros(Float64, nf)
                     for k in 1:nf
                         cLoc=solc[l2g(p.degFBoundary[p.femType[comp[l]][1]], k)]
@@ -183,7 +183,7 @@ function unstructured_vtk(p::femProblem, rx::Int, ry::Int, tend::Float64, comp::
         for i in 1:size(rcoord,2)
                 fComp[i]=getElementProperties(p.femType[comp[l]][1],mf.meshType,rcoord[1,i],rcoord[2,i]);
         end
-        if isa(p.degFBoundary[p.femType[comp[l]][1]],degF{1})
+        if isa(p.degFBoundary[p.femType[comp[l]][1]],degF{1,S} where S)
             cvtk=zeros(Float64, nf)
             cLoc=zeros(Float64, length(p.degFBoundary[p.femType[comp[l]][1]].phi))
             for k in 1:nfc
@@ -263,7 +263,7 @@ function unstructured_vtk(p::femProblem, rx::Int, ry::Int, t::Array{Float64,1}, 
                 for i in 1:size(rcoord,2)
                         fComp[i]=getElementProperties(p.femType[comp[l]][1],mf.meshType,rcoord[1,i],rcoord[2,i]);
                 end
-                if isa(p.degFBoundary[p.femType[comp[l]][1]],degF{1})
+                if isa(p.degFBoundary[p.femType[comp[l]][1]],degF{1,S} where S)
                     cvtk=zeros(Float64, nf)
                     cLoc=zeros(Float64, length(p.degFBoundary[p.femType[comp[l]][1]].phi))
                     for k in 1:nfc

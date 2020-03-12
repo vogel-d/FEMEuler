@@ -43,7 +43,7 @@ function unstructured_vtk3D(p::femProblem, tend::Float64, comp::Array{Symbol,1},
     sol=p.solution[tend];
     for l in 1:length(comp)
         solc=getfield(sol,comp[l]);
-        if isa(p.degFBoundary[p.femType[comp[l]][1]],degF{1})
+        if isa(p.degFBoundary[p.femType[comp[l]][1]],degF{1,S} where S)
             cvtk=zeros(Float64, nf)
             for k in 1:nf
                 cLoc=solc[l2g(p.degFBoundary[p.femType[comp[l]][1]], k)]
