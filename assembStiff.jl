@@ -188,8 +188,6 @@ function assembStiff(degFT::degF{2}, degFF::degF{2}, m::mesh, kubWeights::Array{
     #f=zeros(sk); Omega=7.292e-5;
     #fac=[-1.0, 1.0, 0.0]; perm=[3,1,2]; #Kreuzprodukt mit Normalenvektor der Ebene
 
-    Omega=2*pi/(24*3600);
-
     lS=zeros(size(phiT,2), size(phiF,2));
 
     for k in 1:m.topology.size[m.topology.dim+1]

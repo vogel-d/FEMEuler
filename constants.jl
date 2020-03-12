@@ -9,3 +9,4 @@ const Rd=Cpd-Cvd;
 const Gamma=Cpd/Cvd;
 const kappa=Rd/Cpd;
 const p0=100000.0;
+const Omega=2*pi/(24*3600);
