@@ -142,7 +142,7 @@ function discGalerkinCells!(M::Array{Float64,2},
         fill!(w1,0.0);
         fill!(w2,0.0);
         for i in 1:length(globalNumW)
-            @. w1+= wval[globalNumW[i]]* phiW[1,i];
+            @. w1+= wval[globalNumW[i]]*phiW[1,i];
             @. w2+=wval[globalNumW[i]]*phiW[2,i];
         end
 
@@ -188,7 +188,6 @@ function discGalerkinCells!(M::Array{Float64,2},
                             m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2}, coord::Array{Float64,2})
 
     sk=size(kubWeights);
-
     J=initJacobi((m.geometry.dim,m.topology.dim),sk);
     ddJ=Array{Float64,2}(undef,sk);
     jphiT=initJacobi(size(phiT),sk);
@@ -208,7 +207,7 @@ function discGalerkinCells!(M::Array{Float64,2},
         fill!(w1,0.0);
         fill!(w2,0.0);
         for i in 1:length(globalNumW)
-            @. w1+= wval[globalNumW[i]]* phiW[1,i];
+            @. w1+= wval[globalNumW[i]]*phiW[1,i];
             @. w2+=wval[globalNumW[i]]*phiW[2,i];
         end
 
