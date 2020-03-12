@@ -5,8 +5,6 @@ function recovery(p::femProblem, comp::Array{Symbol,1}, cval::Array{Float64,1}) 
     degF=p.degFBoundary;
     cH=projectRecovery(degF[comp[2]],degF[comp[1]],cval,p.massMBoundary[comp[2]],m,kubPoints,kubWeights);
     cHP=projectRecovery(degF[comp[4]],degF[comp[2]],cH,p.massMBoundary[comp[4]],m,kubPoints,kubWeights);
-    comp[4]==:RT0B && global valchp=cHP
-    comp[4]==:RT0B && global valch=cH
     n=m.topology.size[3]
 
     cR=embed(comp[2],degF[comp[2]],cH,comp[3],degF[comp[3]],n);
