@@ -85,7 +85,7 @@ function setEdgeData!(p::femProblem, compVf::Symbol)
             coordvn1[:,i]=t1(coordref[:,i])
             coordvn2[:,i]=t2(coordref[:,i])
         end
-    
+
         v1=findall(coordve[:,1],coordvn1,1e-10);
         sort!(append!(v1, findall(coordve[:,2],coordvn1,1e-10)))
         n1=normal[v1]
