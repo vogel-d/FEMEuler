@@ -5,7 +5,41 @@ function coordTrans(mt::Int64, normals::Array{Float64,2}, type::Array{Symbol,1},
 
     nquadPhi=Dict{Symbol, Array{Array{Array{Float64,1},2},1}}();
     nquadPoints=Array{Array{Float64,2},1}(undef, size(normals,2));
+    if mt==4
+        #Kante 1
+        nquadPoints[1]=zeros(2,sk);
+        nquadPoints[1][1,:]=quadPoints;
 
+        #Kante 2
+        nquadPoints[2]=ones(2,sk);
+        nquadPoints[2][2,:]=quadPoints;
+
+        #Kante 3
+        nquadPoints[3]=ones(2,sk);
+        nquadPoints[3][1,:]=quadPoints;
+
+        #Kante 4
+        nquadPoints[4]=zeros(2,sk);
+        nquadPoints[4][2,:]=quadPoints;
+
+    elseif mt==3
+        #Kante 1
+        nquadPoints[1]=zeros(2,sk);
+        nquadPoints[1][1,:]=quadPoints;
+
+        #Kante 2
+        nquadPoints=zeros(2,sk);
+        nquadPoints[2,:]=quadPoints;
+        nquadPoints[1,:]=1 .- quadPoints;
+
+        #Kante 3
+        nquadPoints[3]=zeros(2,sk);
+        nquadPoints[3][2,:]=quadPoints;
+
+    else
+        error("Unbekannter meshType")
+    end
+#=
     for i in 1:size(normals,2)
         n=normals[:,i];
         if n==[0.0,-1.0]
@@ -27,6 +61,7 @@ function coordTrans(mt::Int64, normals::Array{Float64,2}, type::Array{Symbol,1},
         end
         nquadPoints[i]=newQuadPoints;
     end
+=#
 
     for k in type
         nquadPhi[k]=Array{Array{Array{Float64,1},2},1}(undef, size(normals,2));
