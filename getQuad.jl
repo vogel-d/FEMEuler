@@ -36,7 +36,7 @@ function getQuad(g::Int64)
     elseif g>1
         a=0.5773502691896258;
         gdots=[-a,a];
-        W=[1.0 1.0];
+        W=[1.0, 1.0];
     else
         error("Geben Sie ein g>0 an.")
     end
@@ -48,6 +48,6 @@ function getQuad(g::Int64)
     for k in 1:n
         gdots[k]=hx*gdots[k]+sx;
     end
-    
+
     return gdots, hx*W;
 end
