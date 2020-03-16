@@ -55,14 +55,19 @@ function testSphere()
     function ftheta(xyz::Array{Float64,1})
         return 1.0;
     end
-    fvel(xyz::Array{Float64,1})=[UMax,0.0,0.0];
+    function fvel(xyz::Array{Float64,1})
+        x=xyz[1]; y=xyz[2]; z=xyz[3];
+        lon,lat,r=cart2sphere(x,y,z);
+        uS=UMax*cos(lat)
+        return velCa([uS,0.0,0.0],lon,lat)
+    end
     f=Dict(:rho=>frho,:theta=>ftheta,:v=>fvel);
 
     assembMass!(p);
     assembStiff!(p);
     applyStartValues!(p, f);
 
-    unstructured_vtk3D(p, 0.0, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename*"0")
+    unstructured_vtk(p, 0.0, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename*"0")
 
     rho0=p.solution[0.0].rho;
     p.solution[0.0].rhoTheta=projectChi(p,rho0,p.solution[0.0].theta,:rho,:theta);
@@ -92,12 +97,12 @@ function testSphere()
       p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
       p2=deepcopy(p);
-      unstructured_vtk3D(p2, Time, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename*"$i")
+      unstructured_vtk(p2, Time, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename*"$i")
       println(Time)
     end
 
     #Speichern des Endzeitpunktes als vtu-Datei:
-    unstructured_vtk3D(p, EndTime, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename)
+    unstructured_vtk(p, EndTime, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename)
     #Speichern aller berechneten Zwischenwerte als vtz-Datei:
     #unstructured_vtk3D(p, sort(collect(keys(p.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
 
