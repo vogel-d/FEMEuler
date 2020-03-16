@@ -4,10 +4,10 @@ function setEdgeData!(p::femProblem, compVf::Symbol)
     mt=m.meshType;
     refBound=getElementProperties(mt,p.femType[compVf][1]);
     if mt==4
-        normal=Dict([1,2]=>[0.0,-1.0],[2,3]=>[1.0,0.0],[3,4]=>[0.0,1.0],[1,4]=>[-1.0,0.0])
+        edgeTypes=Dict([1,2]=>1,[2,3]=>2,[3,4]=>3,[1,4]=>4)
         coordref=[0.0 1.0 1.0 0.0; 0.0 0.0 1.0 1.0]
     else
-        normal=Dict([1,2]=>[0.0,-1.0],[2,3]=>[1.0,1.0],[1,3]=>[-1.0,0.0])
+        edgeTypes=Dict([1,2]=>1,[2,3]=>2,[1,3]=>3)
         coordref=[0.0 1.0 0.0; 0.0 0.0 1.0]
     end
     meshConnectivity!(m,1,2)
@@ -77,8 +77,8 @@ function setEdgeData!(p::femProblem, compVf::Symbol)
                 coordve=coordv
             end
         end
-        n1=Array{Float64,1}();
-        n2=Array{Float64,1}();
+        eT1=Array{Float64,1}();
+        eT2=Array{Float64,1}();
         coordvn1=Array{Float64,2}(undef,m.geometry.dim,mt);
         coordvn2=Array{Float64,2}(undef,m.geometry.dim,mt);
         for i in 1:mt
@@ -88,10 +88,10 @@ function setEdgeData!(p::femProblem, compVf::Symbol)
 
         v1=findall(coordve[:,1],coordvn1,1e-10);
         sort!(append!(v1, findall(coordve[:,2],coordvn1,1e-10)))
-        n1=normal[v1]
+        eT1=edgeTypes[v1]
         v2=findall(coordv[:,1],coordvn2,1e-10);
         sort!(append!(v2, findall(coordv[:,2],coordvn2,1e-10)))
-        n2=normal[v2]
+        eT2=edgeTypes[v2]
         globalNumVf=l2g(degFVf,inc[1])
         rb=refBound[v1]
         for j in 1:length(rb)
@@ -102,8 +102,8 @@ function setEdgeData!(p::femProblem, compVf::Symbol)
         end
         push!(off,zo);
         append!(cells,inc)
-        push!(edgeType,getEdgeType(mt,n1))
-        push!(edgeType,getEdgeType(mt,n2))
+        push!(edgeType,eT1)
+        push!(edgeType,eT2)
         push!(edgeNum,e)
     end
     p.edgeData=[edgeNum,cells,edgeType,globv,off];
