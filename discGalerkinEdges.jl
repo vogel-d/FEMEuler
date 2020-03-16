@@ -198,13 +198,13 @@ end
 function discGalerkinEdges!(M::Array{Float64,2},
                             degFT::degF{2,:H1div},phiT::Array{Array{Float64,2},2}, phiTtrans::Array{Array{Array{Float64,1},2},1}, globalNumT1::Array{Int64,1}, globalNumT2::Array{Int64,1},
                             degFF::degF{2,:H1div},phiF::Array{Array{Float64,2},2}, phiFtrans::Array{Array{Array{Float64,1},2},1}, fval::SparseVector{Float64,Int64}, globalNumF1::Array{Int64,1}, globalNumF2::Array{Int64,1},
-                            degFW::degF{2,:H1div},phiW::Array{Array{Float64,2},2}, phiWtrans::Array{Array{Array{Float64,1},2},1}, wval::Array{Float64,1}, globalNumW1::Array{Int64,1}, globalNumW2::Array{Int64,1},
+                            #degFW::degF{2,:H1div},phiW::Array{Array{Float64,2},2}, phiWtrans::Array{Array{Array{Float64,1},2},1}, wval::Array{Float64,1}, globalNumW1::Array{Int64,1}, globalNumW2::Array{Int64,1},
+                            degFW::degF{2,S} where S,phiW::Array{Array{Float64,2},2}, phiWtrans::Array{Array{Array{Float64,1},2},1}, wval::Array{Float64,1}, globalNumW1::Array{Int64,1}, globalNumW2::Array{Int64,1},
                             m::mesh, quadWeights::Array{Float64,1}, nquadPoints::Array{Array{Float64,2},1}, edgeData::Array{Array{Int64,1},1},gamma::Float64, coord::Array{Float64,2})
 
     nT=size(phiT,2);
     nF=size(phiF,2);
     sk=length(quadWeights)
-
     J1=initJacobi((m.geometry.dim,m.topology.dim),sk);
     ddJ1=Array{Float64,1}(undef,sk);
     jphiWn1=initJacobi((m.geometry.dim,size(phiW,2)),sk)
@@ -280,14 +280,13 @@ function discGalerkinEdges!(M::Array{Float64,2},
                         w2jphiTn2+=w2[d][r]*jphiTn2[d,i][r];
                     end
                     lM11[i,j]+=quadWeights[r]*ddJ1[r]*ddJ1[r]*(n1[1]*phiFn1[1,j][r]+n1[2]*phiFn1[2,j][r])*w1jphiTn1;
-                    lM12[i,j]+=quadWeights[r]*ddJ1[r]*ddJ2[r]*(n2[1]*phiFn2[1,j][r]+n2[2]*phiFn2[2,j][r])*w2jphiTn1;
-                    lM21[i,j]+=quadWeights[r]*ddJ2[r]*ddJ1[r]*(n1[1]*phiFn1[1,j][r]+n1[2]*phiFn1[2,j][r])*w1jphiTn2;
+                    lM12[i,j]+=quadWeights[r]*ddJ2[r]*ddJ1[r]*(n2[1]*phiFn2[1,j][r]+n2[2]*phiFn2[2,j][r])*w2jphiTn1;
+                    lM21[i,j]+=quadWeights[r]*ddJ1[r]*ddJ2[r]*(n1[1]*phiFn1[1,j][r]+n1[2]*phiFn1[2,j][r])*w1jphiTn2;
                     lM22[i,j]+=quadWeights[r]*ddJ2[r]*ddJ2[r]*(n2[1]*phiFn2[1,j][r]+n2[2]*phiFn2[2,j][r])*w2jphiTn2;
                     # piola: nphiF mit 1/Je = 1/Kantenlänge, phiW und phiT mit 1/dJ*J
                 end
             end
         end
-
 
         l2g!(globalNumF1,degFF,inc1);
         l2g!(globalNumT1,degFT,inc1);
@@ -312,7 +311,7 @@ function discGalerkinEdges!(M::Array{Float64,2},
     return nothing;
 end
 
-
+#=
 function discGalerkinEdges!(M::Array{Float64,2},
                             degFT::degF{2,:H1div},phiT::Array{Array{Float64,2},2}, phiTtrans::Array{Array{Array{Float64,1},2},1}, globalNumT1::Array{Int64,1}, globalNumT2::Array{Int64,1},
                             degFF::degF{2,:H1div},phiF::Array{Array{Float64,2},2}, phiFtrans::Array{Array{Array{Float64,1},2},1}, fval::SparseVector{Float64,Int64}, globalNumF1::Array{Int64,1}, globalNumF2::Array{Int64,1},
@@ -427,3 +426,4 @@ function discGalerkinEdges!(M::Array{Float64,2},
     end
     return nothing;
 end
+=#
