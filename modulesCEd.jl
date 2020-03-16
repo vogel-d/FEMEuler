@@ -59,5 +59,6 @@ include("plotSolution.jl");
 include("plotSolutionGif.jl");
 include("plotMesh.jl");
 include("plotFEM.jl")
-include("vtk2D.jl");
+include("vtk.jl");
+include("vtkTest.jl");
 include("jld.jl");

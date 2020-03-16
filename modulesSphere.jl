@@ -59,7 +59,6 @@ include("plotSolution.jl");
 include("plotSolutionGif.jl");
 include("plotMesh.jl");
 include("plotFEM.jl")
-include("vtk2D.jl");
 include("jld.jl");
 
 include("generateCubedSphere.jl")
@@ -68,6 +67,7 @@ include("xmtoxc.jl")
 include("set_cuco.jl")
 include("tay.jl")
 include("fft.jl")
-include("vtk3D.jl")
+include("vtk.jl");
+include("vtkTest.jl");
 include("setOrientation.jl")
 include("cart2sphere.jl")
