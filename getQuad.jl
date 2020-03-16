@@ -48,6 +48,6 @@ function getQuad(g::Int64)
     for k in 1:n
         gdots[k]=hx*gdots[k]+sx;
     end
-    
+
     return gdots, hx*W;
 end
