@@ -73,8 +73,8 @@ function projectRecovery(degFH::degF{2,:H1xH1},degF::degF{2,:H1div},cval::Array{
                     for d in 1:m.geometry.dim
                         vecdot+=cl[d][l,r]*phiH[d,j][l,r];
                     end
-                    gbh[globalNumH[j]]+=kubWeights[l,r]*ddJ[l,r]*abs(ddJ[l,r])*vecdot;
-                    #piola: abs(dJ)*ddJ*ddJ=abs(ddJ)
+                    gbh[globalNumH[j]]+=kubWeights[l,r]*(ddJ[l,r]/abs(ddJ[l,r]))*vecdot;
+                    #piola: abs(dJ)*ddJ=ddJ/abs(ddJ)
                 end
             end
         end
@@ -120,8 +120,8 @@ function projectRecovery(degFH::degF{2,:H1div},degF::degF{2,:H1xH1},cval::Array{
                     for d in 1:m.geometry.dim
                         vecdot+=cl[d][l,r]*jphiH[d,j][l,r];
                     end
-                    gbh[globalNumH[j]]+=kubWeights[l,r]*ddJ[l,r]*abs(ddJ[l,r])*vecdot;
-                    #piola: abs(dJ)*ddJ*ddJ=abs(ddJ)
+                    gbh[globalNumH[j]]+=kubWeights[l,r]*(ddJ[l,r]/abs(ddJ[l,r]))*vecdot;
+                    #piola: abs(dJ)*ddJ=ddJ/abs(ddJ)
                 end
             end
         end
