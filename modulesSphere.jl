@@ -71,4 +71,4 @@ include("vtkTest.jl");
 include("setOrientation.jl")
 include("cart2sphere.jl")
 include("simpson.jl")
-include("velCa.jl")
+include("vel.jl")
