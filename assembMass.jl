@@ -56,6 +56,7 @@ end
 
 #Funktion zum Assemblieren der globalen Massematrix für einen Finite-Elemente-Raum mit vektoriellen Ansatzfunktionen
 function assembMass(degF::degF{2,:H1div}, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
+#function assembMass(degF::degF{2,S} where S, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
     rows=Int64[];
     cols=Int64[];
     vals=Float64[];
@@ -92,6 +93,7 @@ function assembMass(degF::degF{2,:H1div}, m::mesh, kubPoints::Array{Float64,2}, 
     end
     return sparse(rows,cols,vals);
 end
+
 
 function assembMass(degF::degF{2,:H1xH1}, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
     rows=Int64[];
