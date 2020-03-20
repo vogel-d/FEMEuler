@@ -1,12 +1,12 @@
 include("modulesB.jl")
 
 function testBoussinesqTri()
-    filename = "test";
+    filename = "testjez";
 
     femType=Dict(:p=>[:DG0], :v=>[:RT0], :b=>[:P1]);
     #femType=Dict(:p=>[:DG1], :v=>[:RT1], :b=>[:DG1]);
 
-    m=generateTriMesh(300,10,:periodic,:constant,0.0,300000.0,0.0,10000.0); #(east/west, top/bottom)
+    m=generateTriMesh(300,20,:periodic,:constant,0.0,300000.0,0.0,10000.0); #(east/west, top/bottom)
     #m=generateTriMesh(2,2,:periodic,:constant,0.0,1.0,0.0,1.0); #(east/west, top/bottom)
     p=femProblem(m, femType, g=5);
 
@@ -15,7 +15,7 @@ function testBoussinesqTri()
     dt=0.5;
     tend=3000.0;
 
-    solSaves=1; #determines at which points of time the solution is saved
+    solSaves=100; #determines every which point of time the solution is saved
     nIter=tend/solSaves;
     #solSaves=tend;
 
