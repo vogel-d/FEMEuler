@@ -36,6 +36,5 @@ function velSp(velCa::Array{Float64,1},lam::Float64,phi::Float64)
   velSp[2]=rot[2,1]*velCa[1]+rot[2,2]*velCa[2]+rot[2,3]*velCa[3]
   velSp[3]=rot[3,1]*velCa[1]+rot[3,2]*velCa[2]+rot[3,3]*velCa[3]
 
-  return velCa
-
+  return velSp
 end

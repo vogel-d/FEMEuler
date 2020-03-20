@@ -1,7 +1,7 @@
 using WriteVTK
 using Printf
 
-function unstructured_vtk(p::femProblem, tend::Float64, comp::Array{Symbol,1}, name::Array{String,1}, filename::String)
+function unstructured_vtk(p::femProblem, tend::Float64, comp::Array{Symbol,1}, name::Array{String,1}, filename::String; printSpherical::Bool=false)
 
     m=p.mesh;
     pts=m.geometry.coordinates;
@@ -57,7 +57,13 @@ function unstructured_vtk(p::femProblem, tend::Float64, comp::Array{Symbol,1}, n
                 cLoc=solc[l2g(p.degFBoundary[p.femType[comp[l]][1]], k)]
                 dJ=jacobi!(J,m,k,mx,my,coord);
                 fLoc=(1/dJ)*J*fComp[l]
-                cvtk[:,k]=fLoc*cLoc;
+                if printSpherical
+                    xyz=transformation(m,coord,mx,my)
+                    lon,lat,r=cart2sphere(xyz[1],xyz[2],xyz[3]);
+                    cvtk[:,k]=velSp(fLoc*cLoc,lon,lat)
+                else
+                    cvtk[:,k]=fLoc*cLoc;
+                end
             end
             if size(cvtk,1)==2
                 vtk_cell_data(vtk, cvtk[1,:], name[l]*" x")
@@ -76,7 +82,7 @@ function unstructured_vtk(p::femProblem, tend::Float64, comp::Array{Symbol,1}, n
     return outfiles::Vector{String}
 end
 
-function unstructured_vtk(p::femProblem, t::Array{Float64,1}, comp::Array{Symbol,1}, name::Array{String,1}, filename::String)
+function unstructured_vtk(p::femProblem, t::Array{Float64,1}, comp::Array{Symbol,1}, name::Array{String,1}, filename::String; printSpherical::Bool=false)
 
     m=p.mesh;
     pts=m.geometry.coordinates;
@@ -134,7 +140,13 @@ function unstructured_vtk(p::femProblem, t::Array{Float64,1}, comp::Array{Symbol
                         cLoc=solc[l2g(p.degFBoundary[p.femType[comp[l]][1]], k)]
                         dJ=jacobi!(J,m,k,mx,my,coord);
                         fLoc=(1/dJ)*J*fComp[l]
-                        cvtk[:,k]=fLoc*cLoc;
+                        if printSpherical
+                            xyz=transformation(m,coord,mx,my)
+                            lon,lat,r=cart2sphere(xyz[1],xyz[2],xyz[3]);
+                            cvtk[:,k]=velSp(fLoc*cLoc,lon,lat)
+                        else
+                            cvtk[:,k]=fLoc*cLoc;
+                        end
                     end
                     if size(cvtk,1)==2
                         vtk_cell_data(vtk, cvtk[1,:], name[l]*" x")
