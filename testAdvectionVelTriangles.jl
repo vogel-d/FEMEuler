@@ -14,7 +14,7 @@ function testAdvectionVelTri()
 
   taskRecovery=true;
 
-  m=generateTriMesh(300,20,:periodic,:periodic,0.0,300000.0,0.0,10000.0); #(east/west, top/bottom)
+  m=generateTriMesh(300,10,:periodic,:periodic,0.0,300000.0,0.0,10000.0); #(east/west, top/bottom)
   #m=generateTriMesh(100,100,:periodic,:periodic,0.0,20000.0,0.0,20000.0); #(east/west, top/bottom)
   #m=generateTriMesh(3,3,:periodic,:periodic,0.0,6.0,0.0,6.0); #(east/west, top/bottom)
   #adaptGeometry!(m,(0.3,0.3),false); #sin perbutation
