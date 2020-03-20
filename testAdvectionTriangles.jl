@@ -25,7 +25,7 @@ function testAdvectionTri()
   #UMax=1.0; #UMax determines the advection in x direction
   #UMax=0.0;
   #MISMethod=MIS(:MIS_Euler);
-  MISMethod=MIS(:MIS_Euler);
+  MISMethod=MIS(:MIS4_4);
 
   dt=10.0;
   #dt=0.5;
