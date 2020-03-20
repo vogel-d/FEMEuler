@@ -319,7 +319,7 @@ function jacobi!(J::Array{Array{Float64,2},2},ddJ::Array{Float64,2},jphi::Array{
             for k in 1:size(phi,2)
                 jphi[1,k][i,j]=(J[1,1][i,j]*phi[1,k][i,j]+J[1,2][i,j]*phi[2,k][i,j]);
                 jphi[2,k][i,j]=(J[2,1][i,j]*phi[1,k][i,j]+J[2,2][i,j]*phi[2,k][i,j]);
-                jphi[2,k][i,j]=(J[3,1][i,j]*phi[1,k][i,j]+J[3,2][i,j]*phi[2,k][i,j]);
+                jphi[3,k][i,j]=(J[3,1][i,j]*phi[1,k][i,j]+J[3,2][i,j]*phi[2,k][i,j]);
             end
             for k in 1:size(psi,2)
                 jpsi[1,k][i,j]=(J[1,1][i,j]*psi[1,k][i,j]+J[1,2][i,j]*psi[2,k][i,j]);
@@ -332,7 +332,7 @@ function jacobi!(J::Array{Array{Float64,2},2},ddJ::Array{Float64,2},jphi::Array{
     return nothing;
 end
 
-function jacobi!(J::Array{Array{Float64,1},2},dJ::Array{Float64,1},m::mesh, fid::Int64, kubPoints::Array{Float64,2}, coord::Array{Float64,2})
+function jacobi!(ddJe::Array{Float64,1},m::mesh, fid::Int64,n,kubPoints::Array{Float64,2}, coord::Array{Float64,2})
     key="20";
     mt=m.meshType;
     rstart=m.topology.offset[key][fid];
@@ -377,20 +377,33 @@ function jacobi!(J::Array{Array{Float64,1},2},dJ::Array{Float64,1},m::mesh, fid:
              dξ3dX1=(coord[3,2]-coord[3,1])+(coord[3,3]-coord[3,4]-coord[3,2]+coord[3,1])*X2;
              dξ3dX2=(coord[3,4]-coord[3,1])+(coord[3,3]-coord[3,4]-coord[3,2]+coord[3,1])*X1;
 
-             J[1,1][i]=dx1dξ1*dξ1dX1+dx1dξ2*dξ2dX1+dx1dξ3*dξ3dX1;
-             J[2,1][i]=dx2dξ1*dξ1dX1+dx2dξ2*dξ2dX1+dx2dξ3*dξ3dX1;
-             J[3,1][i]=dx3dξ1*dξ1dX1+dx3dξ2*dξ2dX1+dx3dξ3*dξ3dX1;
-             J[1,2][i]=dx1dξ1*dξ1dX2+dx1dξ2*dξ2dX2+dx1dξ3*dξ3dX2;
-             J[2,2][i]=dx2dξ1*dξ1dX2+dx2dξ2*dξ2dX2+dx2dξ3*dξ3dX2;
-             J[3,2][i]=dx3dξ1*dξ1dX2+dx3dξ2*dξ2dX2+dx3dξ3*dξ3dX2;
+             j11=dx1dξ1*dξ1dX1+dx1dξ2*dξ2dX1+dx1dξ3*dξ3dX1;
+             j21=dx2dξ1*dξ1dX1+dx2dξ2*dξ2dX1+dx2dξ3*dξ3dX1;
+             j31=dx3dξ1*dξ1dX1+dx3dξ2*dξ2dX1+dx3dξ3*dξ3dX1;
+             j12=dx1dξ1*dξ1dX2+dx1dξ2*dξ2dX2+dx1dξ3*dξ3dX2;
+             j22=dx2dξ1*dξ1dX2+dx2dξ2*dξ2dX2+dx2dξ3*dξ3dX2;
+             j32=dx3dξ1*dξ1dX2+dx3dξ2*dξ2dX2+dx3dξ3*dξ3dX2;
 
-             dJ[i]=sign*sqrt((J[2,1][i]*J[3,2][i]-J[3,1][i]*J[2,2][i])^2+(J[3,1][i]*J[1,2][i]-J[1,1][i]*J[3,2][i])^2+(J[1,1][i]*J[2,2][i]-J[2,1][i]*J[1,2][i])^2);
+             JtJ11=j11^2+j21^2+j31^2;
+             JtJ12=JtJ21=j11*j12+j21*j22+j31*j32;
+             JtJ22=j12^2+j22^2+j32^2;
+
+             fj=1/(JtJ11*JtJ22-JtJ12^2)
+             jInvT11=fj*(JtJ22*j11-JtJ12*j12)
+             jInvT12=fj*(JtJ11*j12-JtJ12*j11)
+             jInvT21=fj*(JtJ22*j21-JtJ12*j22)
+             jInvT22=fj*(JtJ11*j22-JtJ12*j21)
+             jInvT31=fj*(JtJ22*j31-JtJ12*j32)
+             jInvT32=fj*(JtJ11*j32-JtJ12*j31)
+
+             dJ=sqrt((j21*j32-j31*j22)^2+(j31*j12-j11*j32)^2+(j11*j22-j21*j12)^2);
+             ddJe[i]=1/(dJ*sqrt((jInvT11*n[1]+jInvT12*n[2])^2+(jInvT21*n[1]+jInvT22*n[2])^2+(jInvT31*n[1]+jInvT32*n[2])^2))
          end
     end
     return nothing;
 end
 
-function jacobi!(J::Array{Array{Float64,1},2},ddJ::Array{Float64,1},jphi::Array{Array{Float64,1},2},jpsi::Array{Array{Float64,1},2},m::mesh, fid::Int64, kubPoints::Array{Float64,2}, phi::Array{Array{Float64,1},2}, psi::Array{Array{Float64,1},2}, coord::Array{Float64,2})
+function jacobi!(ddJ::Array{Float64,1},ddJe::Array{Float64,1},jphi::Array{Array{Float64,1},2},jpsi::Array{Array{Float64,1},2},m::mesh, fid::Int64, n, kubPoints::Array{Float64,2}, phi::Array{Array{Float64,1},2}, psi::Array{Array{Float64,1},2}, coord::Array{Float64,2})
     key="20";
     mt=m.meshType;
     rstart=m.topology.offset[key][fid];
@@ -444,23 +457,37 @@ function jacobi!(J::Array{Array{Float64,1},2},ddJ::Array{Float64,1},jphi::Array{
             dξ3dX1=(coord[3,2]-coord[3,1])+(coord[3,3]-coord[3,4]-coord[3,2]+coord[3,1])*X2;
             dξ3dX2=(coord[3,4]-coord[3,1])+(coord[3,3]-coord[3,4]-coord[3,2]+coord[3,1])*X1;
 
-            J[1,1][i]=dx1dξ1*dξ1dX1+dx1dξ2*dξ2dX1+dx1dξ3*dξ3dX1;
-            J[2,1][i]=dx2dξ1*dξ1dX1+dx2dξ2*dξ2dX1+dx2dξ3*dξ3dX1;
-            J[3,1][i]=dx3dξ1*dξ1dX1+dx3dξ2*dξ2dX1+dx3dξ3*dξ3dX1;
-            J[1,2][i]=dx1dξ1*dξ1dX2+dx1dξ2*dξ2dX2+dx1dξ3*dξ3dX2;
-            J[2,2][i]=dx2dξ1*dξ1dX2+dx2dξ2*dξ2dX2+dx2dξ3*dξ3dX2;
-            J[3,2][i]=dx3dξ1*dξ1dX2+dx3dξ2*dξ2dX2+dx3dξ3*dξ3dX2;
+            j11=dx1dξ1*dξ1dX1+dx1dξ2*dξ2dX1+dx1dξ3*dξ3dX1;
+            j21=dx2dξ1*dξ1dX1+dx2dξ2*dξ2dX1+dx2dξ3*dξ3dX1;
+            j31=dx3dξ1*dξ1dX1+dx3dξ2*dξ2dX1+dx3dξ3*dξ3dX1;
+            j12=dx1dξ1*dξ1dX2+dx1dξ2*dξ2dX2+dx1dξ3*dξ3dX2;
+            j22=dx2dξ1*dξ1dX2+dx2dξ2*dξ2dX2+dx2dξ3*dξ3dX2;
+            j32=dx3dξ1*dξ1dX2+dx3dξ2*dξ2dX2+dx3dξ3*dξ3dX2;
 
-            ddJ[i]=sign*1/sqrt((J[2,1][i]*J[3,2][i]-J[3,1][i]*J[2,2][i])^2+(J[3,1][i]*J[1,2][i]-J[1,1][i]*J[3,2][i])^2+(J[1,1][i]*J[2,2][i]-J[2,1][i]*J[1,2][i])^2);
+            JtJ11=j11^2+j21^2+j31^2;
+            JtJ12=JtJ21=j11*j12+j21*j22+j31*j32;
+            JtJ22=j12^2+j22^2+j32^2;
+
+            fj=1/(JtJ11*JtJ22-JtJ12^2)
+            jInvT11=fj*(JtJ22*j11-JtJ12*j12)
+            jInvT12=fj*(JtJ11*j12-JtJ12*j11)
+            jInvT21=fj*(JtJ22*j21-JtJ12*j22)
+            jInvT22=fj*(JtJ11*j22-JtJ12*j21)
+            jInvT31=fj*(JtJ22*j31-JtJ12*j32)
+            jInvT32=fj*(JtJ11*j32-JtJ12*j31)
+
+            dJ=sqrt((j21*j32-j31*j22)^2+(j31*j12-j11*j32)^2+(j11*j22-j21*j12)^2);
+            ddJe[i]=1/(dJ*sqrt((jInvT11*n[1]+jInvT12*n[2])^2+(jInvT21*n[1]+jInvT22*n[2])^2+(jInvT31*n[1]+jInvT32*n[2])^2))
+            ddJ[i]=sign*1/dJ;
             for k in 1:size(phi,2)
-                jphi[1,k][i]=(J[1,1][i]*phi[1,k][i]+J[1,2][i]*phi[2,k][i]);
-                jphi[2,k][i]=(J[2,1][i]*phi[1,k][i]+J[2,2][i]*phi[2,k][i]);
-                jphi[3,k][i]=(J[3,1][i]*phi[1,k][i]+J[3,2][i]*phi[2,k][i]);
+                jphi[1,k][i]=(j11*phi[1,k][i]+j12*phi[2,k][i]);
+                jphi[2,k][i]=(j21*phi[1,k][i]+j22*phi[2,k][i]);
+                jphi[3,k][i]=(j31*phi[1,k][i]+j32*phi[2,k][i]);
             end
             for k in 1:size(psi,2)
-                jpsi[1,k][i]=(J[1,1][i]*psi[1,k][i]+J[1,2][i]*psi[2,k][i]);
-                jpsi[2,k][i]=(J[2,1][i]*psi[1,k][i]+J[2,2][i]*psi[2,k][i]);
-                jpsi[3,k][i]=(J[3,1][i]*psi[1,k][i]+J[3,2][i]*psi[2,k][i]);
+                jpsi[1,k][i]=(j11*psi[1,k][i]+j12*psi[2,k][i]);
+                jpsi[2,k][i]=(j21*psi[1,k][i]+j22*psi[2,k][i]);
+                jpsi[3,k][i]=(j31*psi[1,k][i]+j32*psi[2,k][i]);
             end
         end
     end

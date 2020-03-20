@@ -38,7 +38,6 @@ function discGalerkinCells!(M::Array{Float64,2},
             z=0.0;
             for j in 1:length(globalNumF)
                 gj=globalNumF[j];
-                zLoc=0.0;
                 for r in 1:size(kubWeights,2)
                     for l in 1:size(kubWeights,1)
                         z+=fval[gj]*kubWeights[l,r]*(abs(dJ[l,r])/dJ[l,r])*phiT[i][l,r]*(w[l,r]*dphiF[j][l,r]+(gradw1[l,r]*phiF[1,j][l,r]+gradw2[l,r]*phiF[2,j][l,r]));
@@ -125,7 +124,6 @@ function discGalerkinCells!(M::Array{Float64,2},
 
 
     sk=size(kubWeights);
-
     ddJ=Array{Float64,2}(undef,sk);
     jphiT=initJacobi(size(phiT),sk);
 
