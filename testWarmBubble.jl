@@ -22,7 +22,7 @@ function testWarmBubble()
                  :theta=>[:DG1]);
     =#
 
-    taskRecovery=true;
+    taskRecovery=false;
     advection=true;
 
     m=generateRectMesh(160,80,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
