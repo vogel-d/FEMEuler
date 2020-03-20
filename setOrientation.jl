@@ -5,9 +5,10 @@ function setOrientation!(m::mesh)
     ne=m.topology.size[m.topology.dim]
     nf=m.topology.size[m.topology.dim+1]
 
+    incef=zeros(Int,2*ne);
     visited=falses(ne);
     for e in 1:ne
-        setOrientation!(m,visited,e,m.topology.incidence["10"][m.topology.offset["10"][e]:m.topology.offset["10"][e+1]-1])
+        setOrientation!(m,visited,incef,e,m.topology.incidence["10"][m.topology.offset["10"][e]:m.topology.offset["10"][e+1]-1])
     end
 
     @views ince=m.topology.incidence["21"]
@@ -104,16 +105,18 @@ function setOrientation!(m::mesh)
     end
     m.topology.incidence["20"]=incfv;
     m.topology.incidence["21"]=incfe;
+    m.topology.incidence["12"]=incef;
     return nothing
 end
 
-function setOrientation!(m::mesh,visited::BitArray{1},e::Int,v::Array{Int,1})
+function setOrientation!(m::mesh,visited::BitArray{1},inc::Array{Int,1},e::Int,v::Array{Int,1})
     if visited[e]
         if m.topology.incidence["10"][m.topology.offset["10"][e]:m.topology.offset["10"][e+1]-1]!=v
             error("Möbius strip found.")
         end
     else
-        @views cells=m.topology.incidence["12"][m.topology.offset["12"][e]:m.topology.offset["12"][e+1]-1]
+        @views offc=m.topology.offset["12"]
+        @views incc=m.topology.incidence["12"]
         @views ince=m.topology.incidence["21"]
         @views offe=m.topology.offset["21"]
         @views incv=m.topology.incidence["20"]
@@ -121,7 +124,15 @@ function setOrientation!(m::mesh,visited::BitArray{1},e::Int,v::Array{Int,1})
 
         visited[e]=true
         m.topology.incidence["10"][m.topology.offset["10"][e]:m.topology.offset["10"][e+1]-1]=v;
-        for c in cells
+        permc=(2,1);
+        if iszero(inc[offc[e]])
+            cells=incc[offc[e]:offc[e+1]-1];
+            inc[offc[e]:offc[e+1]-1]=cells;
+        else
+            cells=inc[offc[e]:offc[e+1]-1];
+        end
+        for ic in 1:length(cells)
+            c=cells[ic];
             edges=ince[offe[c]:offe[c+1]-1];
             vert=incv[offv[c]:offv[c+1]-1][[1,2,4,3]];
 
@@ -139,7 +150,13 @@ function setOrientation!(m::mesh,visited::BitArray{1},e::Int,v::Array{Int,1})
                 v2=vert[v2[[2,1]]];
             end
 
-            !visited[e2] && setOrientation!(m,visited,e2,v2)
+            cells2=incc[offc[e2]:offc[e2+1]-1];
+            if c==cells2[1]
+                inc[offc[e2]:offc[e2+1]-1]=cells2[[permc[ic],ic]]
+            elseif c==cells2[2]
+                inc[offc[e2]:offc[e2+1]-1]=cells2[[ic,permc[ic]]]
+            end
+            !visited[e2] && setOrientation!(m,visited,inc,e2,v2)
         end
     end
     return nothing
