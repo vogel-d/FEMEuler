@@ -34,7 +34,7 @@ function plotSolution(p::femProblem, key::Symbol, t::Float64, comp::Int=0;filena
     end
 end
 
-function getSolution(sol::Array{Float64,1},degF::degF{1}, m::mesh, key::Symbol, comp::Int)
+function getSolution(sol::Array{Float64,1},degF::degF{1,S} where S, m::mesh, key::Symbol, comp::Int)
     nf=m.topology.size[3];
     skm=zeros(Float64,nf);
     fComp=getElementProperties(key,m.meshType,0.5,0.5);
@@ -45,7 +45,7 @@ function getSolution(sol::Array{Float64,1},degF::degF{1}, m::mesh, key::Symbol, 
     return skm;
 end
 
-function getSolution(sol::Array{Float64,1},degF::degF{2}, m::mesh, key::Symbol, comp::Int)
+function getSolution(sol::Array{Float64,1},degF::degF{2,S} where S, m::mesh, key::Symbol, comp::Int)
     comp==0 && error("Für eine vektorielle Variable muss die zu plottende Komponente spezifiziert werden, für x comp=1 und für y comp=2.")
     nf=m.topology.size[3];
     skm=zeros(Float64,nf);

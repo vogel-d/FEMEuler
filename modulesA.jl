@@ -6,8 +6,7 @@ using Plots;
 gr()
 
 include("solution.jl");
-@solution(rho, rhoV, rhoTheta, v, theta);
-include("constants.jl")
+@solution(v,p,b);
 include("getKub.jl");
 include("getQuad.jl");
 include("meshTypes.jl");
@@ -31,7 +30,6 @@ include("getDim.jl")
 include("getSpace.jl")
 
 include("assembMass.jl");
-include("assembMassRho.jl");
 include("assembLoad.jl");
 include("assembStiff.jl");
 include("applyStartValues.jl");
@@ -39,26 +37,22 @@ include("applyStartValues.jl");
 include("projectRecovery.jl")
 include("embed.jl")
 include("recovery.jl")
+include("projectAdvection.jl")
 include("advectionStiff.jl")
-include("advectionStiffMatrix.jl")
 include("discGalerkinCells.jl")
 include("discGalerkinEdges.jl")
 include("MIS.jl")
 include("coordTrans.jl")
 include("getEdgeType.jl")
 include("setEdgeData.jl")
-include("advectionCE.jl")
-include("splitExplicitCE.jl")
-include("symplektischerEulerCE.jl")
-include("projectPressure.jl")
-include("projectChi.jl")
-include("projectRhoChi.jl")
-
+include("advectionA.jl")
+include("splitExplicitBA.jl")
+include("symplektischerEulerA.jl")
+include("RKadvection.jl")
 
 include("plotSolution.jl");
 include("plotSolutionGif.jl");
 include("plotMesh.jl");
 include("plotFEM.jl")
-include("vtk.jl");
-include("vtkTest.jl");
+include("vtk2D.jl");
 include("jld.jl");

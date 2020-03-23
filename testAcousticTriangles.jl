@@ -1,4 +1,5 @@
 include("modulesB.jl")
+include("solveAcoustic.jl")
 
 function testAcousticTri()
     filename = "testAcousticbig";

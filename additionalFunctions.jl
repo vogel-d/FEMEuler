@@ -25,6 +25,14 @@ function subsetint(k::Array{Int64,1},g::Array{Int64,1})
   return t;
 end
 
+import Base.abs
+function abs(Array::Array)
+    for i in 1:length(Array)
+        Array[i]=abs(Array[i]);
+    end
+    return Array
+end
+
 #Funktion zum vollständigen printen einer Matrix beliebiger Größe
 #falls vollständiges printen nicht notwendig: display(Matrix)
 function printMatrix(m::Array)

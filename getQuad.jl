@@ -1,5 +1,6 @@
 function getQuad(g::Int64)
     n=Int64(ceil((g+1)/2));
+    if n>5 n=5 end
     gdots=Array{Float64,1};
     W=Array{Float64,1};
 
@@ -33,7 +34,7 @@ function getQuad(g::Int64)
         b1=5/9;
         b2=8/9;
         W=[b1, b2, b1];
-    elseif g>1
+    elseif g>=1
         a=0.5773502691896258;
         gdots=[-a,a];
         W=[1.0, 1.0];

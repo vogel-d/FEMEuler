@@ -1,4 +1,4 @@
-function assembLoad(degF::degF{1}, f, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
+function assembLoad(degF::degF{1,:H1}, f, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
     phiT=degF.phi;
     sk=size(kubWeights);
 
@@ -27,7 +27,6 @@ function assembLoad(degF::degF{1}, f, m::mesh, kubPoints::Array{Float64,2}, kubW
             end
         end
 
-
         globalNum=l2g(degF,k);
         for j in 1:iter
             for r in 1:sk[2]
@@ -40,7 +39,7 @@ function assembLoad(degF::degF{1}, f, m::mesh, kubPoints::Array{Float64,2}, kubW
     return gb;
 end
 
-function assembLoad(degF::degF{2}, f, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
+function assembLoad(degF::degF{2,S} where S, f, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
     phiT=degF.phi;
     sk=size(kubWeights);
     iter=size(phiT,2);
@@ -85,4 +84,49 @@ function assembLoad(degF::degF{2}, f, m::mesh, kubPoints::Array{Float64,2}, kubW
         end
     end
     return gb;
+end
+
+
+function assembLoad!(F::Array{Float64,1},
+                     degFRT::degF{2,:H1div}, f::Array{Float64,1},
+                     degFVecDG::degF{2,:H1xH1},
+                     m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
+
+    phi=degFRT.phi;
+    psi=degFVecDG.phi;
+    nphi=size(phi,2);
+    npsi=size(psi,2);
+
+    gverticesRT=Array{Int64,1}(undef,nphi)
+    gverticesVecDG=Array{Int64,1}(undef,npsi)
+
+    sk=size(kubWeights);
+
+    J=initJacobi((m.geometry.dim,m.topology.dim),sk);
+    ddJ=Array{Float64,2}(undef,sk);
+    jphi=initJacobi((m.geometry.dim,npsi),sk);
+
+    coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
+
+    vecdot=0.0;
+    for k in 1:m.topology.size[m.topology.dim+1]
+        jacobi!(J,ddJ,jphi,m,k,kubPoints,phi,coord);
+
+        l2g!(gverticesRT,degFRT,k);
+        l2g!(gverticesVecDG,degFVecDG,k);
+
+        for i in 1:npsi
+            for j in 1:nphi
+                for r in 1:sk[2]
+                    for l in 1:sk[1]
+                        vecdot=0.0;
+                        for d in 1:m.geometry.dim
+                            vecdot+=psi[d,i][l,r]*jphi[d,j][l,r]
+                        end
+                        F[gverticesVecDG[i]]+=kubWeights[l,r]*f[gverticesRT[j]]*(ddJ[l,r]/abs(ddJ[l,r]))*vecdot;
+                    end
+                end
+            end
+        end
+    end
 end

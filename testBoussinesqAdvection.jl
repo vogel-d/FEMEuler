@@ -1,7 +1,7 @@
 include("modulesBA.jl")
 
 function testBoussinesqAdvection()
-  filename = "boussinesqAdvection"
+  filename = "test"
 
   #order: comp, compHigh, compRec, compDG
   femType=Dict(:p=>[:DG0, :P1, :DG1, :DG0], :v=>[:RT0, :VecP1, :VecDG1, :RT0B], :b=>[:DG0, :P1, :DG1, :DG0]);
@@ -10,9 +10,10 @@ function testBoussinesqAdvection()
   Vfcomp=:RT0
   #Vfcomp=:RT1
 
-  taskRecovery=false;
+  taskRecovery=true;
 
   m=generateRectMesh(300,10,:periodic,:constant,0.0,300000.0,0.0,10000.0); #(east/west, top/bottom)
+  #m=generateRectMesh(3,3,:periodic,:periodic); #(east/west, top/bottom)
   #adaptGeometry!(m,(0.3,0.3),false); #sin perbutation
   p=femProblem(m, femType, taskRecovery=taskRecovery);
 
@@ -21,9 +22,10 @@ function testBoussinesqAdvection()
   #UMax=0.0;
   MISMethod=MIS(:MIS4_4);
 
+  #dt=1.0;
   dt=20.0;
-  #dt=10.0;
   ns=19;
+  #EndTime=2*dt;
   EndTime=3000.0;
   nIter=Int64(EndTime/dt);
 
@@ -34,6 +36,10 @@ function testBoussinesqAdvection()
   function fb(xz::Array{Float64,1})
         x=xz[1]; z=xz[2];
         return b0*sin(pi*z/H)/(1+((x-xM)/A)^2);
+  end
+  function fb2(xz::Array{Float64,1})
+    x=xz[1]; z=xz[2];
+    return (x>1 && x<2 && z>1 && z<2)*1.0
   end
   f=Dict(:b=>fb)
 
@@ -66,7 +72,7 @@ function testBoussinesqAdvection()
   #Speichern des Endzeitpunktes als vtu-Datei:
   unstructured_vtk(p, EndTime, [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesqAdvection/"*filename)
   #Speichern aller berechneten Zwischenwerte als vtz-Datei:
-  #unstructured_vtk(p, sort(collect(keys(p.solution))), [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesqAdvection/"*filename)
+  unstructured_vtk(p, sort(collect(keys(p.solution))), [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesqAdvection/"*filename)
 
   return p
 end

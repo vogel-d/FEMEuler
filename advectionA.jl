@@ -5,49 +5,44 @@ function advection(p::femProblem, gamma::Float64, Vfval::SparseVector{Float64,In
   np=p.degFBoundary[fTp[1]].num; nv=p.degFBoundary[fTv[1]].num; nb=p.degFBoundary[fTb[1]].num;
   if p.taskRecovery
     cR=recovery(p,1,fTp,cval.p);
-    S=advectionStiff(p.degFBoundary[fTp[1]],nquadPhi[fTp[1]],
+    Sp=advectionStiff(p.degFBoundary[fTp[1]],nquadPhi[fTp[1]],
                      p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
                      p.degFBoundary[fTp[3]],nquadPhi[fTp[3]],cR,
                      gamma,p.mesh,p.kubPoints,p.kubWeights,
                      nquadPoints,p.edgeData);
-    rCp=Fp\S;
+
     cR=recovery(p,1,fTb,cval.b);
-    S=advectionStiff(p.degFBoundary[fTb[1]],nquadPhi[fTb[1]],
+    Sb=advectionStiff(p.degFBoundary[fTb[1]],nquadPhi[fTb[1]],
                      p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
                      p.degFBoundary[fTb[3]],nquadPhi[fTb[3]],cR,
                      gamma,p.mesh,p.kubPoints,p.kubWeights,
                      nquadPoints,p.edgeData);
-    rCb=Fb\S;
+
     cR=recovery(p,2,fTv,cval.v);
-    S=advectionStiff(p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],
+    Sv=advectionStiff(p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],
                      p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
                      p.degFBoundary[fTv[3]],nquadPhi[fTv[3]],cR,
                      gamma,p.mesh,p.kubPoints,p.kubWeights,
                      nquadPoints,p.edgeData);
     rCv=Fv\S;
   else
-    S=advectionStiff(p.degFBoundary[fTp[1]],nquadPhi[fTp[1]],
+    Sp=advectionStiff(p.degFBoundary[fTp[1]],nquadPhi[fTp[1]],
                      p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
                      p.degFBoundary[fTp[1]],nquadPhi[fTp[1]],cval.p,
                      gamma,p.mesh,p.kubPoints,p.kubWeights,
                      nquadPoints,p.edgeData);
-    rCp=Fp\S;
-    S=advectionStiff(p.degFBoundary[fTb[1]],nquadPhi[fTb[1]],
+
+    Sb=advectionStiff(p.degFBoundary[fTb[1]],nquadPhi[fTb[1]],
                      p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
                      p.degFBoundary[fTb[1]],nquadPhi[fTb[1]],cval.b,
                      gamma,p.mesh,p.kubPoints,p.kubWeights,
                      nquadPoints,p.edgeData);
-    rCb=Fb\S;
-    S=advectionStiff(p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],
+
+    Sv=advectionStiff(p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],
                      p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
                      p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],cval.v,
                      gamma,p.mesh,p.kubPoints,p.kubWeights,
                      nquadPoints,p.edgeData);
-    rCv=Fv\S;
   end
-  f=createSolution(length(cval.v),length(cval.p),length(cval.b));
-  f.p[1:np]=rCp[:,1];
-  f.b[1:nb]=rCb[:,1];
-  f.v[1:nv]=rCv[:,1];
-  return f;
+  return Sp,Sb,Sv
 end

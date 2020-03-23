@@ -230,6 +230,34 @@ function MIS(s::Symbol)
            d[i]=d[i]+beta[i,j];
          end
        end
+   elseif s==:MIS_Euler
+
+      nStage=1;
+      nPhiStage=zeros(nStage+1);
+      nPhi=1;
+
+      nPhiStageBeta=ones(Int64,nStage+1);
+      nPhiStageBeta[1]= 0;
+
+      nPhiStageGamma=ones(Int64,nStage+1);
+      nPhiStageGamma[1]= 0;
+
+      beta=zeros(nStage+1, nStage);
+      beta[2,1] = 1.0;
+
+      c=zeros(nStage+1);
+      c[2]=1.0;
+
+      alpha=zeros(nStage+1,nStage);
+
+      gamma=zeros(nStage+1, nStage);
+
+      d=zeros(nStage+1);
+      for i in 2:nStage+1
+        for j=1:nStage
+          d[i]=d[i]+beta[i,j];
+        end
+      end
 
    else
       error("Keine implementierte MIS-Methode.")

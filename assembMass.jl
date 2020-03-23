@@ -22,7 +22,7 @@ end
 
 
 #Funktion zum Assemblieren der globalen Massematrix für einen Finite-Elemente-Raum mit skalaren Ansatzfunktionen
-function assembMass(degF::degF{1}, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
+function assembMass(degF::degF{1,:H1}, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
     rows=Int64[];
     cols=Int64[];
     vals=Float64[];
@@ -55,7 +55,8 @@ function assembMass(degF::degF{1}, m::mesh, kubPoints::Array{Float64,2}, kubWeig
 end
 
 #Funktion zum Assemblieren der globalen Massematrix für einen Finite-Elemente-Raum mit vektoriellen Ansatzfunktionen
-function assembMass(degF::degF{2}, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
+function assembMass(degF::degF{2,:H1div}, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
+#function assembMass(degF::degF{2,S} where S, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
     rows=Int64[];
     cols=Int64[];
     vals=Float64[];
@@ -79,6 +80,45 @@ function assembMass(degF::degF{2}, m::mesh, kubPoints::Array{Float64,2}, kubWeig
                             jphi+=jphiRef[d,i][l,r]*jphiRef[d,j][l,r];
                         end
                         currentval+=kubWeights[l,r]*abs(ddJ[l,r])*jphi
+                    end
+                end
+
+                if !isequal(currentval,0.0)
+                    push!(rows,gvertices[i]);
+                    push!(cols,gvertices[j]);
+                    push!(vals,currentval);
+                end
+            end
+        end
+    end
+    return sparse(rows,cols,vals);
+end
+
+
+function assembMass(degF::degF{2,:H1xH1}, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
+    rows=Int64[];
+    cols=Int64[];
+    vals=Float64[];
+    phiRef=degF.phi;
+    iter=size(phiRef,2);
+    sk=size(kubWeights)
+    J=initJacobi((m.geometry.dim,m.topology.dim),sk);
+    dJ=Array{Float64,2}(undef,sk);
+    jphiRef=initJacobi((m.geometry.dim,iter),sk);
+    coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
+    for k in 1:m.topology.size[m.topology.dim+1]
+        jacobi!(J,dJ,m,k,kubPoints,coord);
+        gvertices=l2g(degF,k);
+        for j in 1:iter
+            for i in 1:iter
+                currentval=0.0;
+                for r in 1:sk[2]
+                    for l in 1:sk[1]
+                        vecdot=0.0;
+                        for d in 1:m.geometry.dim
+                            vecdot+=phiRef[d,i][l,r]*phiRef[d,j][l,r];
+                        end
+                        currentval+=kubWeights[l,r]*abs(dJ[l,r])*vecdot
                     end
                 end
 

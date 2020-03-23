@@ -7,6 +7,7 @@ mutable struct femProblem
     solution::Dict{Float64, solution};
     massM::Dict{Symbol, SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64}};
     massMBoundary::Dict{Symbol, SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64}};
+    massMProjection::Dict{Symbol, SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64}};
     stiffM::Dict{Symbol, SparseMatrixCSC{Float64,Int64}};
     type::Symbol;
     kubWeights::Array{Float64,2};
@@ -39,10 +40,11 @@ function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}};advection::B
     edgeData=Array{Array{Int64,1},1}();
     massM=Dict();
     massMB=Dict();
+    massMP=Dict()
     stiffM=Dict();
     loadV=Dict();
     bV=Dict();
     s=Set{Symbol}([:poisson,:boussinesq,:compressible,:shallow]);
     !in(t,s) && error("Die Methode $t ist keine zulässige Eingabe. Möglich sind $s");
-    femProblem(m,bV,dF,femType,edgeData,sol,massM,massMB,stiffM,t,kubWeights, kubPoints, taskRecovery, advection);
+    femProblem(m,bV,dF,femType,edgeData,sol,massM,massMB,massMP,stiffM,t,kubWeights, kubPoints, taskRecovery, advection);
 end
