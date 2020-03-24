@@ -36,7 +36,7 @@ function testGalewsky()
 
     dt=50.0 #1600.0;
     ns=4;
-    EndTime=1000.0 #86400; #259200.0
+    EndTime=86400.0; #259200.0
     nIter=Int64(EndTime/dt);
 
     #start functions
@@ -122,14 +122,14 @@ function testGalewsky()
       p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
       p2=deepcopy(p);
-      unstructured_vtk3D(p2, Time, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename*"$i")
+      unstructured_vtk(p2, Time, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename*"$i")
       println(Time)
     end
 
     #Speichern des Endzeitpunktes als vtu-Datei:
     unstructured_vtk(p, EndTime, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename)
     #Speichern aller berechneten Zwischenwerte als vtz-Datei:
-    #unstructured_vtk(p, sort(collect(keys(p.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
+    #unstructured_vtk(p, sort(collect(keys(p.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename)
 
     return p;
 end

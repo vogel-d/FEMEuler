@@ -2,7 +2,7 @@ include("modulesSphere.jl")
 
 function testSphere()
 
-    filename = "cubedSphereConstant";
+    filename = "cubedSphereBB";
 
     #order: comp, compHigh, compRec, compDG
 
@@ -23,7 +23,7 @@ function testSphere()
                  :theta=>[:DG1]);
     =#
 
-    taskRecovery=true;
+    taskRecovery=false;
     advection=true;
 
     m=generateCubedSphere(36,6300000.0)
@@ -36,7 +36,7 @@ function testSphere()
 
     dt=50.0;
     ns=10;
-    EndTime=1000.0;
+    EndTime=1000000.0;
     nIter=Int64(EndTime/dt);
 
     #start functions
@@ -50,7 +50,20 @@ function testSphere()
         rd<=R ? rhoLoc=1000.0/2.0*(1.0+cos(pi*rd/R))  : rhoLoc=0.0; #rhoLoc=1000.0/2.0*(1.0+cos(pi*rd/R))
         return rhoLoc+1.0;
         =#
-        return 2.0
+        x=xyz[1]; y=xyz[2]; z=xyz[3];
+        lat0=4.0*atan(1.0)
+        lon0=2.0*atan(1.0)
+        r=sqrt(x*x+y*y+z*z)
+        lat=asin(z/r)
+        lon=atan(x,y)
+        d=acos(sin(lat0)*sin(lat)+cos(lat0)*cos(lat)*cos(lon-lon0))
+        if abs(d)<=0.8
+            conc=1.0
+        else
+            conc=0.1
+        end
+        return conc;
+        #return 2.0
     end
     function ftheta(xyz::Array{Float64,1})
         return 1.0;
@@ -96,15 +109,15 @@ function testSphere()
       p.solution[Time]=y;
       p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
-      p2=deepcopy(p);
-      unstructured_vtk(p2, Time, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename*"$i")
+      #p2=deepcopy(p);
+      #unstructured_vtk(p2, Time, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename*"$i")
       println(Time)
     end
 
     #Speichern des Endzeitpunktes als vtu-Datei:
     unstructured_vtk(p, EndTime, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename)
     #Speichern aller berechneten Zwischenwerte als vtz-Datei:
-    #unstructured_vtk3D(p, sort(collect(keys(p.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
+    #unstructured_vtk(p, sort(collect(keys(p.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename)
 
     return p;
 end
