@@ -33,10 +33,10 @@ function testWarmBubble()
     p=femProblem(m, femType,t=:compressible, advection=advection, taskRecovery=taskRecovery);
 
     gamma=0.5; #upwind
-    UMax=0.0; #UMax determines the advection in x direction
+    UMax=20.0; #UMax determines the advection in x direction
     MISMethod=MIS(:MIS2); #method of time integration
 
-    dt=1.0; #Coarse: 2.0
+    dt=2.0; #Coarse: 2.0
     #dt=0.5; #Coarse: 1.0
     ns=15;
     EndTime=1000.0;

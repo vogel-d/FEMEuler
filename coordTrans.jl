@@ -28,9 +28,9 @@ function coordTrans(mt::Int64, normals::Array{Float64,2}, type::Array{Symbol,1},
         nquadPoints[1][1,:]=quadPoints;
 
         #Kante 2
-        nquadPoints=zeros(2,sk);
-        nquadPoints[2,:]=quadPoints;
-        nquadPoints[1,:]=1 .- quadPoints;
+        nquadPoints[2]=zeros(2,sk);
+        nquadPoints[2][2,:]=quadPoints;
+        nquadPoints[2][1,:]=1 .- quadPoints;
 
         #Kante 3
         nquadPoints[3]=zeros(2,sk);

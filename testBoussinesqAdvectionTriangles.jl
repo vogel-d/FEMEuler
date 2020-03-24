@@ -21,8 +21,8 @@ function testBoussinesqAdvectionTri()
   #UMax=0.0;
   MISMethod=MIS(:MIS4_4);
 
-  dt=20.0;
-  #dt=10.0;
+  #dt=1.0;
+  dt=10.0;
   ns=19;
   EndTime=3000.0;
   nIter=Int64(EndTime/dt);
@@ -60,13 +60,17 @@ function testBoussinesqAdvectionTri()
     y=splitExplicit(p,gamma,Vfcomp,Vf,nquadPhi,nquadPoints,MISMethod,y,Time,dt,ns);
     Time=Time+dt
     p.solution[Time]=y;
+    if mod(i,50)==0
+      #p2=deepcopy(p)
+      #unstructured_vtk(p2, sort(collect(keys(p2.solution))), [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesqAdvectionTriangles/"*filename)
+    end
     println(Time)
   end
 
   #Speichern des Endzeitpunktes als vtu-Datei:
   unstructured_vtk(p, EndTime, [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesqAdvectionTriangles/"*filename)
   #Speichern aller berechneten Zwischenwerte als vtz-Datei:
-  #unstructured_vtk(p, sort(collect(keys(p.solution))), [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesqAdvectionTriangles/"*filename)
+  unstructured_vtk(p, sort(collect(keys(p.solution))), [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesqAdvectionTriangles/"*filename)
 
   return p
 end

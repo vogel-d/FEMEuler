@@ -1,6 +1,6 @@
-function advectionStiffMatrix(degFT::degF{1}, phiTtrans::Array{Array{Array{Float64,1},2},1},
-                              degFF::degF{2}, phiFtrans::Array{Array{Array{Float64,1},2},1},fval::Array{Float64,1},
-                              degFW::degF{1}, phiWtrans::Array{Array{Array{Float64,1},2},1},wval::Array{Float64,1},
+function advectionStiffMatrix(degFT::degF{1,:H1}, phiTtrans::Array{Array{Array{Float64,1},2},1},
+                              degFF::degF{2,:H1div}, phiFtrans::Array{Array{Array{Float64,1},2},1},fval::Array{Float64,1},
+                              degFW::degF{1,:H1}, phiWtrans::Array{Array{Array{Float64,1},2},1},wval::Array{Float64,1},
                               gamma::Float64, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2},
                               nquadPoints::Array{Array{Float64,2},1}, edgeData::Array{Array{Int64,1},1})
 
@@ -34,7 +34,11 @@ function advectionStiffMatrix(degFT::degF{1}, phiTtrans::Array{Array{Array{Float
                        m, kubPoints, kubWeights, coord)
 
 
-    quadPoints, quadWeights=getQuad(2*sk[1]-1);
+    if sk[1]==1
+        quadPoints, quadWeights=getQuad(sk[2]+1); #TODO: find better way to handle g (argument of getQuad)
+    else
+        quadPoints, quadWeights=getQuad(2*sk[1]-1);
+    end
 
     discGalerkinEdges!(rows, cols, vals,
                        degFT,phiT, phiTtrans,globalNumT1, globalNumT2,

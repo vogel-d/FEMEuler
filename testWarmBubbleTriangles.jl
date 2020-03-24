@@ -22,7 +22,7 @@ function testWarmBubbleTri()
                  :theta=>[:DG1]);
     =#
 
-    taskRecovery=false;
+    taskRecovery=true;
     advection=true;
 
     m=generateTriMesh(160,80,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
@@ -36,7 +36,7 @@ function testWarmBubbleTri()
     UMax=0.0; #UMax determines the advection in x direction
     MISMethod=MIS(:MIS2); #method of time integration
 
-    dt=0.5; #Coarse: 2.0
+    dt=1.0; #Coarse: 2.0
     #dt=0.5; #Coarse: 1.0
     ns=15;
     EndTime=1000.0;
@@ -94,7 +94,7 @@ function testWarmBubbleTri()
       p.solution[Time]=y;
       p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
-      unstructured_vtk(p, sort(collect(keys(p.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEulerTriangles/"*filename)
+      mod(i,100)==0 && unstructured_vtk(p, sort(collect(keys(p.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEulerTriangles/"*filename)
       println(Time)
     end
 

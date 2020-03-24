@@ -1,4 +1,4 @@
-function l2g(degF::degF{N} where N,fid::Int64)
+function l2g(degF::degF{N,S} where N where S,fid::Int64)
     #globale Nummerierung der vertices einer Entität aus D besteht aus
     #beliebigen Zahlen, startend "unten links", gegen den Uhrzeigersinn velaufend
     #vertices der Entität fid aus D werden festgestellt und zurückgegeben,
@@ -9,7 +9,7 @@ function l2g(degF::degF{N} where N,fid::Int64)
 end
 
 
-function l2g!(globalNum::Array{Int64,1},degF::degF{N} where N,fid::Int64)
+function l2g!(globalNum::Array{Int64,1},degF::degF{N,S} where N where S,fid::Int64)
     #globale Nummerierung der vertices einer Entität aus D besteht aus
     #beliebigen Zahlen, startend "unten links", gegen den Uhrzeigersinn velaufend
     #vertices der Entität fid aus D werden festgestellt und zurückgegeben,

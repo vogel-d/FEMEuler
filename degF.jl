@@ -1,4 +1,4 @@
-struct degF{N}
+struct degF{N,Space}
     # size: in assembLoad, assembMassRho, advectionStiff, assembStiff, applyStartValues, embed, testFunctions, projectPressure, projectRecovery
     # in generateBoundary.jl, plotFEM.jl
     numB::Int;
@@ -96,5 +96,5 @@ function degF(m::mesh, femType::Symbol, ordEdgesB::Array{Int,1}, nebP::Int, nebC
     end
     nb=nf*refFace+(ne-nebP)*refEdge+(nv-nvbP)*refVert;
     n=nb-nebC*refEdge-nvbC*refVert;
-    degF(nb,n, inc, off, phi, divphi, gradphi);
+    degF{getDim(phi),getSpace(femType)}(nb,n, inc, off, phi, divphi, gradphi);
 end
