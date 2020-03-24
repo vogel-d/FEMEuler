@@ -44,7 +44,6 @@ function projectRecovery(degFH::degF{2,:H1xH1},degF::degF{2,:H1div},cval::Array{
     J=initJacobi((m.geometry.dim,m.topology.dim),sk);
     ddJ=Array{Float64,2}(undef,sk);
     jphi=initJacobi((m.geometry.dim,size(phi,2)),sk);
-    jphiH=initJacobi((m.geometry.dim,sph),sk);
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
     cl=[zeros(sk) for d in 1:m.geometry.dim]
@@ -90,7 +89,6 @@ function projectRecovery(degFH::degF{2,:H1div},degF::degF{2,:H1xH1},cval::Array{
 
     J=initJacobi((m.geometry.dim,m.topology.dim),sk);
     ddJ=Array{Float64,2}(undef,sk);
-    jphi=initJacobi((m.geometry.dim,size(phi,2)),sk);
     jphiH=initJacobi((m.geometry.dim,sph),sk);
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 

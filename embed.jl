@@ -75,7 +75,7 @@ function embed(p::femProblem,comp::Symbol,compRec::Symbol,cval::Array{Float64,1}
     globalNumRec=Array{Int64,1}(undef,size(degFRec.phi,2));
 
     #println(" V: comp ",comp," compRec ",compRec)
-    if comp==:VecP1 && compRec==:VecDG1
+    if (comp==:VecP1 && compRec==:VecDG1) || (comp==:VecP1S && compRec==:VecDG1S)
         for i in 1:n
             l2g!(globalNum,degF,i);
             l2g!(globalNumRec,degFRec,i);
@@ -91,14 +91,14 @@ function embed(p::femProblem,comp::Symbol,compRec::Symbol,cval::Array{Float64,1}
                 cEmbed[globalNumRec[j]]+=cval[globalNum[j]];
             end
         end
-    elseif (comp==:RT0 || comp==:RT0B) && compRec==:VecDG1
+    elseif ((comp==:RT0 || comp==:RT0B) && compRec==:VecDG1) || ((comp==:RT0 || comp==:RT0B) && compRec==:VecDG1S)
         F=Array{Float64,1}(undef,degFRec.numB);
         fill!(F,0.0);
 
         assembLoad!(F,degF,cval,degFRec,p.mesh,p.kubPoints,p.kubWeights);
 
         cEmbed = p.massMBoundary[compRec]\F
-        
+
     elseif (comp==:RT1 || comp==:RT1B) && compRec==:VecDG2
         for i in 1:n
             l2g!(globalNum,degF,i);

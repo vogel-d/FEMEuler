@@ -96,5 +96,24 @@ function degF(m::mesh, femType::Symbol, ordEdgesB::Array{Int,1}, nebP::Int, nebC
     end
     nb=nf*refFace+(ne-nebP)*refEdge+(nv-nvbP)*refVert;
     n=nb-nebC*refEdge-nvbC*refVert;
-    degF{getDim(phi),getSpace(femType)}(nb,n, inc, off, phi, divphi, gradphi);
+    degF{ndims(phi),getSpace(femType)}(nb,n, inc, off, phi, divphi, gradphi);
+end
+
+#TODO: DELETE GETSPACE.jl
+
+function getSpace(femType::Symbol)
+
+    H1=[:DG0,:DG1,:DG2,:P1,:P2];
+    H1div=[:RT0,:RT1,:RT0B,:RT1B];
+    H1xH1=[:VecDG1,:VecP1,:VecDG1S,:VecP1S];
+
+    if in(femType,H1)
+        return :H1
+    elseif in(femType,H1div)
+        return :H1div
+    elseif in(femType,H1xH1)
+        return :H1xH1
+    else
+        error("Bitte für $femType Raum spezifizieren.")
+    end
 end

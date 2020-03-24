@@ -340,6 +340,107 @@ function getQuadElementProperties(type::Symbol)
 
         cm=Dict([1,2]=>[0,0,0,0,0,0,0,0], [2,3]=>[0,0,0,0,0,0,0,0], [3,4]=>[0,0,0,0,0,0,0,0], [1,4]=>[0,0,0,0,0,0,0,0]);
 
+    elseif type==:VecP1S
+
+        phi=[h10_10 null    null    h11_10  null    null    h11_11  null    null    h10_11  null    null;
+             null   h10_10  null    null    h11_10  null    null    h11_11  null    null    h10_11  null;
+             null   null    h10_10  null    null    h11_10  null    null    h11_11  null    null    h10_11]
+        divphi=[Dxh10_10,Dyh10_10,null,Dxh11_10,Dyh11_10,null,Dxh11_11,Dyh11_11,null,Dxh10_11,Dyh10_11,null]; #Evtl. falsche Divergenz für dritte Komponente
+        gradphi=Matrix(undef, 3, 24)
+        gradphi[1:3, 1: 2]=[Dxh10_10 Dyh10_10;
+                            null     null;
+                            null     null]
+        gradphi[1:3, 3: 4]=[null     null
+                            Dxh10_10 Dyh10_10;
+                            null     null]
+        gradphi[1:3, 5: 6]=[null     null;
+                            null     null;
+                            Dxh10_10 Dyh10_10]
+        gradphi[1:3, 7: 8]=[Dxh11_10 Dyh11_10;
+                            null     null;
+                            null     null]
+        gradphi[1:3, 9:10]=[null     null;
+                            Dxh11_10 Dyh11_10;
+                            null     null]
+        gradphi[1:3,11:12]=[null     null;
+                            null     null;
+                            Dxh11_10 Dyh11_10]
+        gradphi[1:3,13:14]=[Dxh11_11 Dyh11_11;
+                            null     null;
+                            null     null]
+        gradphi[1:3,15:16]=[null     null;
+                            Dxh11_11 Dyh11_11;
+                            null     null]
+        gradphi[1:3,17:18]=[null     null;
+                            null     null;
+                            Dxh11_11 Dyh11_11]
+        gradphi[1:3,19:20]=[Dxh10_11 Dyh10_11;
+                            null     null;
+                            null     null]
+        gradphi[1:3,21:22]=[null     null;
+                            Dxh10_11 Dyh10_11;
+                            null     null]
+        gradphi[1:3,23:24]=[null     null;
+                            null     null;
+                            Dxh10_11 Dyh10_11]
+
+        nFace=0;
+        nEdge=0;
+        nVert=3;
+
+        cm=Dict([1,2]=>[0,1, 0 ,0,1, 0 ,0,0, 0 ,0,0, 0], [2,3]=>[0,0, 0 ,1,0, 0 ,1,0, 0 ,0,0, 0],
+                [3,4]=>[0,0, 0 ,0,0, 0 ,0,1, 0 ,0,1, 0], [1,4]=>[1,0, 0 ,0,0, 0 ,0,0, 0 ,1,0, 0]);
+
+    elseif type==:VecDG1S
+
+        phi=[h10_10 null    null    h11_10  null    null    h11_11  null    null    h10_11  null    null;
+             null   h10_10  null    null    h11_10  null    null    h11_11  null    null    h10_11  null;
+             null   null    h10_10  null    null    h11_10  null    null    h11_11  null    null    h10_11]
+        divphi=[Dxh10_10,Dyh10_10,null,Dxh11_10,Dyh11_10,null,Dxh11_11,Dyh11_11,null,Dxh10_11,Dyh10_11,null]; #Evtl. falsche Divergenz für dritte Komponente
+        gradphi=Matrix(undef, 3, 24)
+        gradphi[1:3, 1: 2]=[Dxh10_10 Dyh10_10;
+                            null     null;
+                            null     null]
+        gradphi[1:3, 3: 4]=[null     null
+                            Dxh10_10 Dyh10_10;
+                            null     null]
+        gradphi[1:3, 5: 6]=[null     null;
+                            null     null;
+                            Dxh10_10 Dyh10_10]
+        gradphi[1:3, 7: 8]=[Dxh11_10 Dyh11_10;
+                            null     null;
+                            null     null]
+        gradphi[1:3, 9:10]=[null     null;
+                            Dxh11_10 Dyh11_10;
+                            null     null]
+        gradphi[1:3,11:12]=[null     null;
+                            null     null;
+                            Dxh11_10 Dyh11_10]
+        gradphi[1:3,13:14]=[Dxh11_11 Dyh11_11;
+                            null     null;
+                            null     null]
+        gradphi[1:3,15:16]=[null     null;
+                            Dxh11_11 Dyh11_11;
+                            null     null]
+        gradphi[1:3,17:18]=[null     null;
+                            null     null;
+                            Dxh11_11 Dyh11_11]
+        gradphi[1:3,19:20]=[Dxh10_11 Dyh10_11;
+                            null     null;
+                            null     null]
+        gradphi[1:3,21:22]=[null     null;
+                            Dxh10_11 Dyh10_11;
+                            null     null]
+        gradphi[1:3,23:24]=[null     null;
+                            null     null;
+                            Dxh10_11 Dyh10_11]
+
+        nFace=12;
+        nEdge=0;
+        nVert=0;
+
+        cm=Dict([1,2]=>[0,0,0,0,0,0,0,0,0,0,0,0], [2,3]=>[0,0,0,0,0,0,0,0,0,0,0,0], [3,4]=>[0,0,0,0,0,0,0,0,0,0,0,0], [1,4]=>[0,0,0,0,0,0,0,0,0,0,0,0]);
+
     elseif type==:VecP2
 
         phi=[h21_21 null   h21_20 null   h22_21 null   h21_22 null   h20_21 null   h20_20 null  h22_20 null   h22_22 null   h20_22 null  ;
@@ -437,7 +538,7 @@ function getQuadElementProperties(type::Symbol)
         nFace=18;
         nEdge=0;
         nVert=0;
-        
+
         cm=Dict([1,2]=>[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [2,3]=>[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [3,4]=>[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [1,4]=>[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
 
     else
