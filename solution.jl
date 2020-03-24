@@ -35,6 +35,17 @@ macro solution(fieldname...)
                    return s;
                end
 
+               import Base.copy
+               function copy(s::solution)
+                 r=solution();
+                 k=fieldnames(solution);
+                 for i in 1:length(k)
+                   a=copy(getfield(s, k[i]));
+                   setfield!(r, k[i],a);
+                 end
+                 return r;
+               end
+
                import Base.+
                function +(s1::solution, s2::solution)
                  r=solution();
