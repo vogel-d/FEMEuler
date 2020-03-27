@@ -129,6 +129,7 @@ function discGalerkinEdges!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
         z+=2;
         n1=@views m.normals[:,eT1];
         n2=@views m.normals[:,eT2];
+        le=m.edgeLength[edgeData[1][e]];
         globv=@views edgeData[4][edgeData[5][e]:edgeData[5][e+1]-1];
 
         phiFn1=@views phiFtrans[eT1];
