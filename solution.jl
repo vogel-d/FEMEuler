@@ -67,6 +67,16 @@ macro solution(fieldname...)
                  end
                  return r;
                end
+
+               import Base.copy
+               function copy(s::solution)
+                 copied=solution();
+                 for field in fieldnames(s)
+                   fieldvalues = copy(getfield(s, field));
+                   setfield!(copied, field, fieldvalues)
+                 end
+                 return copied
+               end
            end)
 
            return s;
