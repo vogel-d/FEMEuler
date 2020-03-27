@@ -5,12 +5,16 @@ function recovery(p::femProblem, dim::Int64, comp::Array{Symbol,1}, cval::Array{
     degF=p.degFBoundary;
     cH=projectRecovery(degF[comp[2]],degF[comp[1]],cval,p.massMBoundary[comp[2]],m,kubPoints,kubWeights);
     cHP=projectRecovery(degF[comp[4]],degF[comp[2]],cH,p.massMBoundary[comp[4]],m,kubPoints,kubWeights);
+    #=
     n=m.topology.size[3]
-
     dim=Val{dim}();
     cR=embed(p,comp[2],comp[3],cH,n,dim);
     cEmbed=embed(p,comp[1],comp[3],cval,n,dim);
     cHPEmbed=embed(p,comp[4],comp[3],cHP,n,dim);
+    =#
+    cR=projectRecovery(degF[comp[3]],degF[comp[2]],cH,p.massMBoundary[comp[3]],m,kubPoints,kubWeights);
+    cEmbed=projectRecovery(degF[comp[3]],degF[comp[1]],cval,p.massMBoundary[comp[3]],m,kubPoints,kubWeights);
+    cHPEmbed=projectRecovery(degF[comp[3]],degF[comp[4]],cHP,p.massMBoundary[comp[3]],m,kubPoints,kubWeights);
 
     return cR+(cEmbed-cHPEmbed);
 end
