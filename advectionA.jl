@@ -24,7 +24,6 @@ function advection(p::femProblem, gamma::Float64, Vfval::SparseVector{Float64,In
                      p.degFBoundary[fTv[3]],nquadPhi[fTv[3]],cR,
                      gamma,p.mesh,p.kubPoints,p.kubWeights,
                      nquadPoints,p.edgeData);
-    rCv=Fv\S;
   else
     Sp=advectionStiff(p.degFBoundary[fTp[1]],nquadPhi[fTp[1]],
                      p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
