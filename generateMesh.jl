@@ -329,28 +329,47 @@ function generateTriMesh2(nx::Int, ny::Int, condEW::Symbol, condTB::Symbol, xl::
             #   |/\|    = vier Dreieck-Zellen
 
             #vertex-id's bestimmen
-            #namen sind bezogen auf das aktuelle Viereck
+            #variablennamen sind bezogen auf das aktuelle Viereck
             bottomleft=(k-1)*nx+(k-1)+l;
             bottomright=bottomleft+1;
             topleft=k*(nx+1)+l;
             topright=topleft+1;
             middle=(nx+1)*(ny+1)+(k-1)*nx+l
 
+            #nummeriert nach aufsteigend globaler Nummer
             #append!(incf,[bottomleft,  bottomright, middle])
-            #append!(incf,[topleft,     topright,    middle])
             #append!(incf,[bottomright, topright,    middle])
+            #append!(incf,[topleft,     topright,    middle])
             #append!(incf,[bottomleft,  topleft,     middle])
 
+
+            #nummeriert nach "Schachbrettmuster"
+            #mathematisch positiv nummeriertes dreieck immer von negativ nummerierten umgeben
+            #und andersrum
             if mod(k,2)==1
-                append!(incf,[bottomleft,  bottomright, middle])
-                append!(incf,[middle,      topright,    topleft])
-                append!(incf,[bottomright, topright,    middle])
-                append!(incf,[middle,      topleft,     bottomleft])
+                if mod(l,2)==1
+                    append!(incf,[bottomleft,  bottomright, middle])
+                    append!(incf,[middle,      topright,    topleft])
+                    append!(incf,[middle,      topright,    bottomright])
+                    append!(incf,[bottomleft,  topleft,     middle])
+                else
+                    append!(incf,[middle,      bottomright, bottomleft])
+                    append!(incf,[topleft,     topright,    middle])
+                    append!(incf,[bottomright, topright,    middle])
+                    append!(incf,[middle, topleft, bottomleft])
+                end
             else
-                append!(incf,[middle,     bottomright, bottomleft])
-                append!(incf,[topleft,    topright,    middle])
-                append!(incf,[middle,     topright,    bottomright])
-                append!(incf,[bottomleft, topleft,     middle])
+                if mod(l,2)==1
+                    append!(incf,[middle,      bottomright, bottomleft])
+                    append!(incf,[topleft,     topright,    middle])
+                    append!(incf,[bottomright, topright,    middle])
+                    append!(incf,[middle, topleft, bottomleft])
+                else
+                    append!(incf,[bottomleft,  bottomright, middle])
+                    append!(incf,[middle,      topright,    topleft])
+                    append!(incf,[middle,      topright,    bottomright])
+                    append!(incf,[bottomleft,  topleft,     middle])
+                end
             end
         end
     end
@@ -386,10 +405,10 @@ function generateTriMesh2(nx::Int, ny::Int, condEW::Symbol, condTB::Symbol, xl::
             topright=topleft+1;
             middle=(nx+1)*(ny+1)+(k-1)*nx+l
 
-            append!(ince,[bottomleft, middle])
+            append!(ince,[bottomleft,  middle])
             append!(ince,[bottomright, middle])
-            append!(ince,[topleft, middle])
-            append!(ince,[topright, middle])
+            append!(ince,[topright,    middle])
+            append!(ince,[topleft,     middle])
         end
     end
 
