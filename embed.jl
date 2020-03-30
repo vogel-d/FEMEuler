@@ -41,7 +41,7 @@ function embed(p::femProblem,comp::Symbol,compRec::Symbol,cval::Array{Float64,1}
             end
         end
         cEmbed=cEmbed./z;
-    elseif (comp==:P1y || comp==:DG1y )&& compRec==:P1
+    elseif (comp==:P1y || comp==:DG1y) && compRec==:P1
         z=zeros(degFRec.numB);
         h=[1,1,2,2];
         for i in 1:n
