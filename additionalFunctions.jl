@@ -35,7 +35,7 @@ end
 
 #Funktion zum vollständigen printen einer Matrix beliebiger Größe
 #falls vollständiges printen nicht notwendig: display(Matrix)
-function printMatrix(m::Array)
+function printMatrix(m)
     maxPreDigits=floor(maximum(m));
     maxPreDigits=length(String("$maxPreDigits"));
     for i in 1:size(m,1)
