@@ -209,7 +209,7 @@ function assembStiff(degFT::degF{2}, degFF::degF{2}, m::mesh, kubWeights::Array{
                         end
                         currentval+=kubWeights[l,r]*f[l,r]*(ddJ[i,j]^3/abs(ddJ[i,j]))*njphi;
                         =#
-                        currentval+=kubWeights[l,r]*Omega*abs(ddJ[l,r])*(jphiF[1,j][l,r]*jphiT[2,i][l,r]-jphiF[2,j][l,r]*jphiT[1,i][l,r]);
+                        currentval+=kubWeights[l,r]*2*Omega*abs(ddJ[l,r])*(jphiF[2,j][l,r]*jphiT[1,i][l,r]-jphiF[1,j][l,r]*jphiT[2,i][l,r]);
                     end
                 end
                 lS[i,j] = currentval;
