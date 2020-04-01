@@ -337,15 +337,16 @@ function generateTriMesh2(nx::Int, ny::Int, condEW::Symbol, condTB::Symbol, xl::
             middle=(nx+1)*(ny+1)+(k-1)*nx+l
 
             #nummeriert nach aufsteigend globaler Nummer
-            #append!(incf,[bottomleft,  bottomright, middle])
-            #append!(incf,[bottomright, topright,    middle])
-            #append!(incf,[topleft,     topright,    middle])
-            #append!(incf,[bottomleft,  topleft,     middle])
-
+            append!(incf,[bottomleft,  bottomright, middle])
+            append!(incf,[bottomright, topright,    middle])
+            append!(incf,[topleft,     topright,    middle])
+            append!(incf,[bottomleft,  topleft,     middle])
+            
 
             #nummeriert nach "Schachbrettmuster"
             #mathematisch positiv nummeriertes dreieck immer von negativ nummerierten umgeben
             #und andersrum
+            #=
             if mod(k,2)==1
                 if mod(l,2)==1
                     append!(incf,[bottomleft,  bottomright, middle])
@@ -371,6 +372,7 @@ function generateTriMesh2(nx::Int, ny::Int, condEW::Symbol, condTB::Symbol, xl::
                     append!(incf,[bottomleft,  topleft,     middle])
                 end
             end
+            =#
         end
     end
 
