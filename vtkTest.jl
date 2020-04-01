@@ -45,7 +45,7 @@ function vtk(m::mesh, degF::degF{1}, sol::Array{Float64,1}, femType::Symbol, fil
     return outfiles::Vector{String}
 end
 
-function vtk(m::mesh, degF::degF{2}, sol::Array{Float64,1}, femType::Symbol, filename::String, name::String="Test")
+function vtk(m::mesh, degF::degF{2}, sol::Array{Float64,1}, femType::Symbol, filename::String, name::String="Test"; printSpherical::Bool=false)
 
     pts=m.geometry.coordinates;
 
@@ -86,7 +86,13 @@ function vtk(m::mesh, degF::degF{2}, sol::Array{Float64,1}, femType::Symbol, fil
         cLoc=sol[l2g(degF, k)]
         dJ=jacobi!(J,m,k,mx,my,coord);
         fLoc=(1/dJ)*J*fComp
-        cvtk[:,k]=fLoc*cLoc;
+        if printSpherical
+            xyz=transformation(m,coord,mx,my)
+            lon,lat,r=cart2sphere(xyz[1],xyz[2],xyz[3]);
+            cvtk[:,k]=velSp(fLoc*cLoc,lon,lat)
+        else
+            cvtk[:,k]=fLoc*cLoc;
+        end
     end
     if size(cvtk,1)==2
         vtk_cell_data(vtk, cvtk[1,:], name*" x")
