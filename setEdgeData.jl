@@ -41,6 +41,7 @@ function setEdgeData!(p::femProblem, compVf::Symbol)
             inc=(ince[off1:(off2-1)]);
         end
 
+        #=
         if mt==3
             coord_aux= @views m.geometry.coordinates[:,incf[offf[inc[1]]:(offf[inc[1]]+mt-1)]];
             if cross([coord_aux[1,2]-coord_aux[1,1], coord_aux[2,2]-coord_aux[2,1], 0.0],[coord_aux[1,3]-coord_aux[1,1], coord_aux[2,3]-coord_aux[2,1], 0.0])[3]<0.0
@@ -55,6 +56,7 @@ function setEdgeData!(p::femProblem, compVf::Symbol)
             #    inc=inc[[2,1]];
             #end
         end
+        =#
 
         coord1= @views m.geometry.coordinates[:,incf[offf[inc[1]]:(offf[inc[1]]+mt-1)]];
         coord2= @views m.geometry.coordinates[:,incf[offf[inc[2]]:(offf[inc[2]]+mt-1)]];
