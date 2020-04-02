@@ -70,7 +70,9 @@ function mesh(topology::meshTopology, geometry::meshGeometry, bE::SparseVector{I
       l[i]=sqrt(sum((c[:,1].-c[:,2]).^2));
       z+=2;
   end
-  #Viereck-Normalen fraglich (Richtung)
+  #Viereck-Normalen fraglich (Richtung) (--> coordTrans Kanten in richtige Richtung integrieren?)
+  #Hier normale * Kantenlänge
+  #wegen discEdges, ist sozusagen transformation auf jeweilige Kante
   mt==4 ? n=[0.0 1.0 0.0 1.0;1.0 0.0 1.0 0.0] : n=[0.0 1.0 -1.0;-1.0 1.0 0.0];
   orientation=Float64[];
   mesh(topology, geometry, mt, l, n, bE, bV, orientation)
