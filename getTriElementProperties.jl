@@ -31,6 +31,8 @@ function getTriElementProperties(type::Symbol)
     #negative third-edge functions
     fnegxm1(x,y)=-(x-1);
     fnegy(x,y)=-y;
+    fnegym1(x,y)=-(y-1);
+    fnegx(x,y)=-x;
     fneg2(x,y)=-2;
     fneg1(x,y)=-1;
 
@@ -96,12 +98,12 @@ function getTriElementProperties(type::Symbol)
 
     elseif type==:RT0B
 
-        phi=[fx fx fxm1;
-             fym1 fy fy];
+        phi=[fx fx fnegxm1;
+             fym1 fy fnegy];
 
-        divphi=[f2, f2, f2];
-        gradphi=[f1 null f1 null f1 null;
-                 null f1 null f1 null f1];
+        divphi=[f2, f2, fneg2];
+        gradphi=[f1 null f1 null fneg1 null;
+                 null f1 null f1 null fneg1];
 
 
         nFace=3;
