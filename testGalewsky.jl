@@ -7,7 +7,7 @@ function testGalewsky()
     #order: comp, compHigh, compRec, compDG
 
     femType=Dict(:rho=>[:DG0, :P1, :DG1, :DG0],
-                 :rhoV=>[:RT0, :VecP1, :VecDG1, :RT0B],
+                 :rhoV=>[:RT0, :VecP1S, :VecDG1S, :RT0B],
                  :rhoTheta=>[:DG0, :P1, :DG1, :DG0],
                  :p=>[:DG0],
                  :v=>[:RT0],
@@ -23,20 +23,19 @@ function testGalewsky()
                  :theta=>[:DG1]);
     =#
 
-    taskRecovery=false;
+    taskRecovery=true;
     advection=true;
 
-    m=generateCubedSphere(36,6300000.0)
-    #m=generateCubedSphere(2,6300000.0)
+    m=generateCubedSphere(100,6300000.0)
 
     p=femProblem(m, femType,t=:shallow, advection=advection, taskRecovery=taskRecovery);
-    #return p;
+
     gamma=0.5; #upwind
     MISMethod=MIS(:MIS4_4); #method of time integration
 
-    dt=50.0 #1600.0;
+    dt=200.0 #50.0 #1600.0;
     ns=4;
-    EndTime=86400.0; #259200.0
+    EndTime=6.0*86400.0;
     nIter=Int64(EndTime/dt);
 
     #start functions
@@ -44,8 +43,6 @@ function testGalewsky()
     betaG=1.0/15.0
     hH=120.0
     H0G=10000.0
-    Grav=9.80616
-    Omega=7.292*10^(-5)
     function integrandG(tau,RadEarth)
       uM=80.0
       lat0G=pi/7.0
@@ -96,7 +93,7 @@ function testGalewsky()
     p.solution[0.0].rhoTheta=projectChi(p,rho0,p.solution[0.0].theta,:rho,:theta);
     p.solution[0.0].rhoV=projectChi(p,rho0,p.solution[0.0].v,:rho,:v);
 
-    unstructured_vtk(p, 0.0, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename*"0")
+    unstructured_vtk(p, 0.0, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename*"0", printSpherical=true)
 
     taskRecovery ? pos=[1,3] : pos=[1];
     advectionTypes=Symbol[];
@@ -121,24 +118,18 @@ function testGalewsky()
       p.solution[Time]=y;
       p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
-      p2=deepcopy(p);
-      unstructured_vtk(p2, Time, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename*"$i")
+      if mod(i,4)==0
+          p2=deepcopy(p);
+          unstructured_vtk(p2, Time, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename*"$i", printSpherical=true)
+      end
       println(Time)
     end
 
     #Speichern des Endzeitpunktes als vtu-Datei:
-    unstructured_vtk(p, EndTime, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename)
+    unstructured_vtk(p, EndTime, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename, printSpherical=true)
     #Speichern aller berechneten Zwischenwerte als vtz-Datei:
     #unstructured_vtk(p, sort(collect(keys(p.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename)
 
     return p;
 end
-
-
-#=
-lon,lat,r=cart2sphere(x,y,z);
-GradSph%x=0.0
-GradSph%y=-integrandG(lat,r)/r
-GradSph%z=0.0
-GradScalar=VelCa(GradSph,lon,lat)
-=#
+p=testGalewsky()
