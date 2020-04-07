@@ -10,6 +10,8 @@ function setEdgeData!(p::femProblem, compVf::Symbol)
         edgeTypes=Dict([1,2]=>1,[2,3]=>2,[1,3]=>3)
         coordref=[0.0 1.0 0.0; 0.0 0.0 1.0]
     end
+    clockwiseRotation = [0 1; -1 0];
+
     meshConnectivity!(m,1,2)
     offe=m.topology.offset["12"];
     ince=m.topology.incidence["12"];
@@ -41,22 +43,43 @@ function setEdgeData!(p::femProblem, compVf::Symbol)
             inc=(ince[off1:(off2-1)]);
         end
 
-        #=
-        if mt==3
-            coord_aux= @views m.geometry.coordinates[:,incf[offf[inc[1]]:(offf[inc[1]]+mt-1)]];
-            if cross([coord_aux[1,2]-coord_aux[1,1], coord_aux[2,2]-coord_aux[2,1], 0.0],[coord_aux[1,3]-coord_aux[1,1], coord_aux[2,3]-coord_aux[2,1], 0.0])[3]<0.0
-                inc=inc[[2,1]];
-                switched=true;
-            end
-            #Vektorprodukt(v1,v2)<0 --> lokale Num. im Uhrzeigersinn orientiert
-            #                       --> sollte nicht das erste sein
-            #v1=coord1[:,2]-coord1[:,1];
-            #v2=coord1[:,3]-coord1[:,1];
-            #if v1[1]*v2[2]-v1[2]*v2[1]<0
-            #    inc=inc[[2,1]];
-            #end
+        #make sure global orientation is right ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        #(so that global edge-normal points from inc[1] to inc[2])
+        #(global edge-normal is the vector
+        # from lower-number-vertex to higher-number-vertex
+        # rotated 90° clockwise)
+        # -> switch inc1 and inc2 if needed
+        #TODO: think about how it works in 3d
+
+        #get numbers of vertices
+        edgeVertices = incv[offv[e]:offv[e]+1];
+        #create vector pointing from vertex lower number to vertex higher number
+        # (with respect to global edge orientation)
+        sort!(edgeVertices);
+        globalNormal = m.geometry.coordinates[:,edgeVertices[2]] .- m.geometry.coordinates[:,edgeVertices[1]]
+        #rotate it clockwise (becomes global normal)
+        globalNormal = clockwiseRotation*globalNormal;
+
+        #compute centers of cells
+        verticesInc1 = m.geometry.coordinates[:,incf[offf[inc[1]]:(offf[inc[1]+1]-1)]]
+        verticesInc2 = m.geometry.coordinates[:,incf[offf[inc[2]]:(offf[inc[2]+1]-1)]]
+        centerInc1 = 1/(mt) * sum(verticesInc1,dims=2);
+        centerInc2 = 1/(mt) * sum(verticesInc2,dims=2);
+
+        currentNormal = centerInc2 .- centerInc1;
+
+        #note: if edge e is on periodic boundary (h1=true) the computed "currentNormal" will have
+        #the opposite direction of the actual current normal (which is pointing out of the grid), so:
+        if h1
+            currentNormal= -currentNormal;
         end
-        =#
+
+        #compare directions and switch inc if needed
+        if dot(currentNormal, globalNormal)<0
+            inc=inc[[2,1]];
+            switched = true
+        end
+        #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
         coord1= @views m.geometry.coordinates[:,incf[offf[inc[1]]:(offf[inc[1]]+mt-1)]];
         coord2= @views m.geometry.coordinates[:,incf[offf[inc[2]]:(offf[inc[2]]+mt-1)]];
