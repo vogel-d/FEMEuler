@@ -146,7 +146,7 @@ end
 #Funktion zum Generieren von zweidimensionalen Dreieck-Gitter im Rahmen eines Rechtecks
 #Input: nx bzw. ny ist die Anzahl der Gitterelemente in x- bzw. y-Richtung, also die Feinheit des Meshes
 #       xl bzw. yl ist die Länge des Meshes in x- bzw. y-Richtung, als Default ist die Länge nx bzw. ny
-function generateTriMesh(nx::Int, ny::Int, condEW::Symbol, condTB::Symbol, xl::Float64=0.0, xr::Float64=Float64(nx), yl::Float64=0.0, yr::Float64=Float64(ny))
+function generateTriMeshHalved(nx::Int, ny::Int, condEW::Symbol, condTB::Symbol, xl::Float64=0.0, xr::Float64=Float64(nx), yl::Float64=0.0, yr::Float64=Float64(ny))
 
     #Berechnen der Anzahl der Entitäten für die verschiedenen Dimensionen
     size=[(ny+1)*(nx+1), ny*(nx+1)+nx*(ny+1)+nx*ny, 2*nx*ny];
@@ -291,7 +291,7 @@ function generateTriMesh(nx::Int, ny::Int, condEW::Symbol, condTB::Symbol, xl::F
 end
 
 
-function generateTriMesh2(nx::Int, ny::Int, condEW::Symbol, condTB::Symbol, xl::Float64=0.0, xr::Float64=Float64(nx), yl::Float64=0.0, yr::Float64=Float64(ny))
+function generateTriMeshQuartered(nx::Int, ny::Int, condEW::Symbol, condTB::Symbol, xl::Float64=0.0, xr::Float64=Float64(nx), yl::Float64=0.0, yr::Float64=Float64(ny))
 
     #Berechnen der Anzahl der Entitäten für die verschiedenen Dimensionen
     size=[(ny+1)*(nx+1)+nx*ny, ny*(nx+1)+nx*(ny+1)+4*nx*ny, 4*nx*ny];
@@ -505,11 +505,142 @@ function generateTriMesh2(nx::Int, ny::Int, condEW::Symbol, condTB::Symbol, xl::
 end
 
 
+#Funktion zum Generieren von zweidimensionalen, gleichschenkligen Dreieck-Gitter
+#Input: nx bzw. ny ist die Anzahl der Gitterelemente in x- bzw. y-Richtung, also die Feinheit des Meshes
+#       xl bzw. yl ist die Länge des Meshes in x- bzw. y-Richtung, als Default ist die Länge nx bzw. ny
+function generateTriMeshEquilateral(xl::Float64, xr::Float64, yl::Float64, yr::Float64, nrows::Int64, condEW::Symbol, condTB::Symbol)
+    l = (2*(yr-yl))/(nrows*sqrt(3)); #see latex equilateralTriMesh
+    height=(yr-yl)/nrows;
+    nx=Int64(div(xr-xl-0.5*l,l)+1); #smallest nx so that nx*l+0.5*l>yr
+    xR=xl+nx*l+0.5*l;
+    @info "mesh details\n ny=$nrows (=nrows)\n nx=$nx \n edge length=$l\n gridsize=[$xl,$xR]x[$yl,$yr]\n xR deviation: $(xR-xr)"
+
+    #Berechnen der Anzahl der Entitäten für die verschiedenen Dimensionen
+    size=[(nx+1)*(nrows+1), nrows*(3*nx+1)+nx, nrows*2*nx];
+    nk=3;
+
+    #Initialisieren des Offsets mit den Einträgen "20" und "10"
+    offe=collect(1:2:(2*size[2]+1));
+    off=Dict("20"=>collect(1:nk:(nk*size[3]+1)),"10"=>offe);
+
+    #Erstellen der Koordinatenmatrix
+    coord=Array{Float64}(undef,2,size[1]);
+    for line in 1:(nrows+1)
+        #coordinates for one horizontal line of points are assembled at once
+        coord[1,((line-1)*(nx+1)+1):((line-1)*(nx+1)+1+nx)] = collect(range(mod(line-1,2)*(0.5*l)+xl,step=l,length=nx+1))
+        coord[2,((line-1)*(nx+1)+1):((line-1)*(nx+1)+1+nx)] = ones(nx+1)*(yl+(line-1)*height)
+    end
+
+    #note to mod(,2) if-clauses: the two types of rows differ in calculating
+    #                            the vertex numbers of vertices above
+
+    #Erstellen der Inzidenz 2->0
+    inc20=Int[];
+    for row in 1:nrows
+        if mod(row,2)==1
+            for vertex in range((nx+1)*(row-1)+1, step=1, length=nx)
+                append!(inc20,[vertex, vertex+1, vertex+nx+1])
+                append!(inc20,[vertex+1, vertex+1+nx, vertex+1+nx+1])
+            end
+        else
+            for vertex in range((nx+1)*(row-1)+1, step=1, length=nx)
+                append!(inc20,[vertex, vertex+nx+1, vertex+nx+2])
+                append!(inc20,[vertex, vertex+1, vertex+1+nx+1])
+            end
+        end
+    end
+
+    #Erstellen der Inzidenz 1->0
+    inc10=Int[];
+    for vertex in 1:((nx+1)*(nrows+1))
+        mod(vertex,nx+1)==0 && continue; #skip the last vertex of each horizontal line
+        append!(inc10,[vertex,vertex+1]);
+    end
+    for row in 1:nrows
+        if mod(row,2)==1
+            bottomleft=(nx+1)*(row-1)+1;
+            bottomright=bottomleft+1;
+            top=bottomright+nx;
+            for hat_number in 0:(nx-1)
+                append!(inc10,[bottomleft,top]);
+                append!(inc10,[bottomright,top]);
+                bottomleft+=1;
+                bottomright+=1;
+                top+=1;
+            end
+            #add last edge of row of odd number
+            append!(inc10,[bottomleft,top]);
+        else
+            bottom=(nx+1)*(row-1)+1;
+            topleft=bottom+nx+1;
+            topright=topleft+1;
+            for hat_number in 0:(nx-1)
+                append!(inc10,[bottom,topleft]);
+                append!(inc10,[bottom,topright]);
+                bottom+=1;
+                topleft+=1;
+                topright+=1;
+            end
+            #add last edge of row of even number
+            append!(inc10,[bottom,topleft]);
+        end
+    end
+
+    #Initialisieren der Inzidenz mit den Einträgen "20" und "10"
+    inc=Dict("20"=>inc20,"10"=>inc10);
+
+
+    bE=spzeros(Int, size[2]);
+    bV=spzeros(Int, size[1]);
+
+    #boundary-Vektor Randknoten
+    if condTB==:constant
+        bV[1:nx+1]=ones(nx+1);
+        bV[(size[1]-nx):size[1]]=ones(nx+1);
+    elseif condTB==:periodic
+        bV[1:nx+1]=collect(-(size[1]-nx):-1:-size[1]);
+    end
+
+    if condEW==:constant
+        bV[1:(nx+1):(size[1]-nx)]=ones(nrows+1);
+        bV[(nx+1):(nx+1):size[1]]=ones(nrows+1);
+    elseif condEW==:periodic
+        bV[1:(nx+1):(size[1]-nx)]=-(nx+1):-(nx+1):-size[1];
+    end
+
+
+    #boundary-Vektor Randkanten
+    if condTB==:constant
+        bE[1:nx]=ones(nx);
+        bE[(nrows*nx+1):((nrows+1)*nx)]=ones(nx);
+    elseif condTB==:periodic
+        bE[1:nx]=-(nrows*nx+1):-1:-((nrows+1)*nx);
+    end
+
+    if condEW==:constant
+        skipHorizontal=(nrows+1)*nx;
+        bE[range(skipHorizontal+1,step=2*nx+1,length=nrows)]=ones(nrows);
+        bE[range(skipHorizontal+1+2*nx,step=2*nx+1,length=nrows)]=ones(nrows);
+    elseif condEW==:periodic
+        skipHorizontal=(nrows+1)*nx;
+        bE[range(skipHorizontal+1,step=2*nx+1,length=nrows)]=range(-(skipHorizontal+1+2*nx),step=-(2*nx+1),length=nrows);
+    end
+
+    n=Int[nx,nrows];
+    l=Float64[xl,yl];
+    r=Float64[xR,yr];
+    mT=meshTopology(inc,off,n);
+    mG=meshGeometry(coord,l,r);
+    m=mesh(mT,mG, bE, bV);
+
+    return m
+end
+
 
 #Funktion zum Generieren von zweidimensionalen, gleichschenkligen Dreieck-Gitter
 #Input: nx bzw. ny ist die Anzahl der Gitterelemente in x- bzw. y-Richtung, also die Feinheit des Meshes
 #       xl bzw. yl ist die Länge des Meshes in x- bzw. y-Richtung, als Default ist die Länge nx bzw. ny
-function generateTriMesh3(nx::Int, ny::Int, xl::Float64=0.0, yl::Float64=0.0, xr::Float64=Float64(nx), yr::Float64=Float64(ny))
+function generateTriMeshIsosceles(nx::Int, ny::Int, xl::Float64=0.0, yl::Float64=0.0, xr::Float64=Float64(nx), yr::Float64=Float64(ny))
     if iseven(ny)
         #Berechnen der Anzahl der Entitäten für die verschiedenen Dimensionen
         nf=ny*(2*nx-1);
@@ -635,10 +766,27 @@ function generateTriMesh3(nx::Int, ny::Int, xl::Float64=0.0, yl::Float64=0.0, xr
 end
 
 
+function generateHexMesh(nx::Int, ny::Int, condEW::Symbol, condTB::Symbol, xl::Float64=0.0, xr::Float64=Float64(nx), yl::Float64=0.0, yr::Float64=Float64(ny))
+    #Berechnen der Anzahl der Entitäten für die verschiedenen Dimensionen
+    size=[(ny+1)*(2*(nx+1))-2, ny*(nx+1)+(ny+1)*(2*nx+1)-2, nx*ny];
+    nk=6;
+
+    #Initialisieren des Offsets mit den Einträgen "20" und "10"
+    offe=collect(1:2:(2*size[2]+1));
+    off=Dict("20"=>collect(1:nk:(nk*size[3]+1)),"10"=>offe);
+
+    #Erstellen der Koordinatenmatrix
+    coord=Array{Float64}(undef,2,size[1]);
+
+
+
+end
+
+
 #Funktion zum Generieren von zweidimensionalen Sechseck-Gitter
 #Input: nx bzw. ny ist die Anzahl der Gitterelemente in x- bzw. y-Richtung, also die Feinheit des Meshes
 #       Die Länge jeder Seite jedes Sechseck ist hier konstant 1.
-function generateHexMesh(nx::Int, ny::Int)
+function generateHexMesh2(nx::Int, ny::Int)
     if iseven(ny)
         #Berechnen der Anzahl der Entitäten für die verschiedenen Dimensionen
         nf=0.5*ny*(2*nx-1)
