@@ -34,6 +34,19 @@ function getQuadElementProperties(type::Symbol)
     Dyh0_10(x,y)=g0(x)*Dg10(y);
     Dyh0_11(x,y)=g0(x)*Dg11(y);
 
+    h10_0neg(x,y)=(-1)*g10(x)*g0(y);
+    h11_0neg(x,y)=(-1)*g11(x)*g0(y);
+    h0_10neg(x,y)=(-1)*g0(x)*g10(y);
+    h0_11neg(x,y)=(-1)*g0(x)*g11(y);
+    Dxh10_0neg(x,y)=(-1)*Dg10(x)*g0(y);
+    Dxh11_0neg(x,y)=(-1)*Dg11(x)*g0(y);
+    Dxh0_10neg(x,y)=(-1)*Dg0(x)*g10(y);
+    Dxh0_11neg(x,y)=(-1)*Dg0(x)*g11(y);
+    Dyh10_0neg(x,y)=(-1)*g10(x)*Dg0(y);
+    Dyh11_0neg(x,y)=(-1)*g11(x)*Dg0(y);
+    Dyh0_10neg(x,y)=(-1)*g0(x)*Dg10(y);
+    Dyh0_11neg(x,y)=(-1)*g0(x)*Dg11(y);
+
     h10_10(x,y)=g10(x)*g10(y);
     h10_11(x,y)=g10(x)*g11(y);
     h11_10(x,y)=g11(x)*g10(y);
@@ -182,11 +195,11 @@ function getQuadElementProperties(type::Symbol)
     elseif type==:RT0
 
         phi=[null h11_0 null h10_0;
-             h0_10 null h0_11 null];
+             h0_10neg null h0_11neg null];
 
-        divphi=[Dyh0_10, Dxh11_0, Dyh0_11, Dxh10_0];
+        divphi=[Dyh0_10neg, Dxh11_0, Dyh0_11neg, Dxh10_0];
         gradphi=[null null    Dxh11_0 null null null    Dxh10_0 null;
-                 null Dyh0_10 null    null null Dyh0_11 null    null];
+                 null Dyh0_10neg null    null null Dyh0_11neg null    null];
 
         nFace=0;
         nEdge=1;
@@ -197,11 +210,11 @@ function getQuadElementProperties(type::Symbol)
     elseif type==:RT0B #Broken RT0
 
         phi=[null h11_0 null h10_0;
-             h0_10 null h0_11 null];
+             h0_10neg null h0_11neg null];
 
-        divphi=[Dyh0_10, Dxh11_0, Dyh0_11, Dxh10_0];
+        divphi=[Dyh0_10neg, Dxh11_0, Dyh0_11neg, Dxh10_0];
         gradphi=[null null    Dxh11_0 null null null    Dxh10_0 null;
-                 null Dyh0_10 null    null null Dyh0_11 null    null];
+                 null Dyh0_10neg null    null null Dyh0_11neg null    null];
 
         nFace=4;
         nEdge=0;
@@ -437,7 +450,7 @@ function getQuadElementProperties(type::Symbol)
         nFace=18;
         nEdge=0;
         nVert=0;
-        
+
         cm=Dict([1,2]=>[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [2,3]=>[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [3,4]=>[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [1,4]=>[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
 
     else
