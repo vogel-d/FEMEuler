@@ -15,7 +15,7 @@ function applyStartValues!(p::femProblem,f)
         if iszero(nb)
             setfield!(sol,i,h);
         elseif haskey(p.boundaryValues,(i,ti))
-            h[(ni+1):nc]=p.boundaryValues[(i, ti)]
+            h[(ni+1):nc]=p.boundaryValues[(i,ti)]
             setfield!(sol,i,h);
         else
             h[(ni+1):nc]=zeros(nb);

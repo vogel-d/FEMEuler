@@ -58,7 +58,6 @@ function discGalerkinCells!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
                             degFW::degF{1,:H1},phiW::Array{Array{Float64,2},1}, gradphiW::Array{Array{Float64,2},2}, wval::Array{Float64,1}, globalNumW::Array{Int64,1},
                             m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2}, coord::Array{Float64,2})
 
-
     sk=size(kubWeights);
 
     nT=length(phiT);

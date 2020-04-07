@@ -21,8 +21,8 @@ function discGalerkinEdges!(M::Array{Float64,2},
     mt=m.meshType;
     z=1;
     for e in 1:length(edgeData[1])
-        inc1=edgeData[2][z]; # <- lokal gegen Uhrzeigersinn nummeriert
-        inc2=edgeData[2][z+1]; # <- lokale Nummerierung variiert
+        inc1=edgeData[2][z];
+        inc2=edgeData[2][z+1];
         eT1=edgeData[3][z];
         eT2=edgeData[3][z+1];
         z+=2;
@@ -61,15 +61,10 @@ function discGalerkinEdges!(M::Array{Float64,2},
         for j in 1:nF
             for i in 1:nT
                 for r in 1:sk
-                    fac=1.0
-                    if j==3
-                        fac=1.0
-                        #println("hallo1")
-                    end
-                    lM11[i,j]+=fac*quadWeights[r]*w1[r]*phiTn1[i][r]*(n1[1]*phiFn1[1,j][r]+n1[2]*phiFn1[2,j][r]);
-                    lM12[i,j]+=fac*quadWeights[r]*w2[r]*phiTn1[i][r]*(n2[1]*phiFn2[1,j][r]+n2[2]*phiFn2[2,j][r]);
-                    lM21[i,j]+=fac*quadWeights[r]*w1[r]*phiTn2[i][r]*(n1[1]*phiFn1[1,j][r]+n1[2]*phiFn1[2,j][r]);
-                    lM22[i,j]+=fac*quadWeights[r]*w2[r]*phiTn2[i][r]*(n2[1]*phiFn2[1,j][r]+n2[2]*phiFn2[2,j][r]);
+                    lM11[i,j]+=quadWeights[r]*w1[r]*phiTn1[i][r]*(n1[1]*phiFn1[1,j][r]+n1[2]*phiFn1[2,j][r]);
+                    lM12[i,j]+=quadWeights[r]*w2[r]*phiTn1[i][r]*(n2[1]*phiFn2[1,j][r]+n2[2]*phiFn2[2,j][r]);
+                    lM21[i,j]+=quadWeights[r]*w1[r]*phiTn2[i][r]*(n1[1]*phiFn1[1,j][r]+n1[2]*phiFn1[2,j][r]);
+                    lM22[i,j]+=quadWeights[r]*w2[r]*phiTn2[i][r]*(n2[1]*phiFn2[1,j][r]+n2[2]*phiFn2[2,j][r]);
                 end
             end
         end
@@ -85,24 +80,11 @@ function discGalerkinEdges!(M::Array{Float64,2},
             for j in 1:length(globalNumF2)
                 gj1=globalNumF1[j];
                 gj2=globalNumF2[j];
-                fac=1.0
-                if j==3
-                    fac=-1.0;
-                    #println("hallo")
-                end
-                M[gi1]+=fac*(+0.5-gammaLoc)*lM11[i,j]*fval[gj1];
-                M[gi1]+=fac*(-0.5+gammaLoc)*lM12[i,j]*fval[gj2];
-                M[gi2]+=fac*(+0.5+gammaLoc)*lM21[i,j]*fval[gj1];
-                M[gi2]+=fac*(-0.5-gammaLoc)*lM22[i,j]*fval[gj2];
 
-                cell=6
-                if gi1==cell || gi2==cell
-                    println("Kante $e, Flächen $gi1 $gi2, Wert:$(M[cell])")
-                    println(fac*(+0.5-gammaLoc)*lM11[i,j]*fval[gj1]);
-                    println(fac*(-0.5+gammaLoc)*lM12[i,j]*fval[gj2]);
-                    println(fac*(+0.5+gammaLoc)*lM21[i,j]*fval[gj1]);
-                    println(fac*(-0.5-gammaLoc)*lM22[i,j]*fval[gj2]);
-                end
+                M[gi1]+=(+0.5-gammaLoc)*lM11[i,j]*fval[gj1];
+                M[gi1]+=(-0.5+gammaLoc)*lM12[i,j]*fval[gj2];
+                M[gi2]+=(+0.5+gammaLoc)*lM21[i,j]*fval[gj1];
+                M[gi2]+=(-0.5-gammaLoc)*lM22[i,j]*fval[gj2];
             end
         end
     end
