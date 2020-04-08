@@ -341,38 +341,6 @@ function generateTriMeshQuartered(nx::Int, ny::Int, condEW::Symbol, condTB::Symb
             append!(incf,[bottomright, topright,    middle])
             append!(incf,[topleft,     topright,    middle])
             append!(incf,[bottomleft,  topleft,     middle])
-
-
-            #nummeriert nach "Schachbrettmuster"
-            #mathematisch positiv nummeriertes dreieck immer von negativ nummerierten umgeben
-            #und andersrum
-            #=
-            if mod(k,2)==1
-                if mod(l,2)==1
-                    append!(incf,[bottomleft,  bottomright, middle])
-                    append!(incf,[middle,      topright,    topleft])
-                    append!(incf,[middle,      topright,    bottomright])
-                    append!(incf,[bottomleft,  topleft,     middle])
-                else
-                    append!(incf,[middle,      bottomright, bottomleft])
-                    append!(incf,[topleft,     topright,    middle])
-                    append!(incf,[bottomright, topright,    middle])
-                    append!(incf,[middle, topleft, bottomleft])
-                end
-            else
-                if mod(l,2)==1
-                    append!(incf,[middle,      bottomright, bottomleft])
-                    append!(incf,[topleft,     topright,    middle])
-                    append!(incf,[bottomright, topright,    middle])
-                    append!(incf,[middle, topleft, bottomleft])
-                else
-                    append!(incf,[bottomleft,  bottomright, middle])
-                    append!(incf,[middle,      topright,    topleft])
-                    append!(incf,[middle,      topright,    bottomright])
-                    append!(incf,[bottomleft,  topleft,     middle])
-                end
-            end
-            =#
         end
     end
 
@@ -509,7 +477,7 @@ end
 #Input: nx bzw. ny ist die Anzahl der Gitterelemente in x- bzw. y-Richtung, also die Feinheit des Meshes
 #       xl bzw. yl ist die Länge des Meshes in x- bzw. y-Richtung, als Default ist die Länge nx bzw. ny
 function generateTriMeshEquilateral(xl::Float64, xr::Float64, yl::Float64, yr::Float64, nrows::Int64, condEW::Symbol, condTB::Symbol)
-    l = (2*(yr-yl))/(nrows*sqrt(3)); #see latex equilateralTriMesh
+    l = (2*(yr-yl))/(nrows*sqrt(3)); #see latex equilateralMesh
     height=(yr-yl)/nrows;
     nx=Int64(div(xr-xl-0.5*l,l)+1); #smallest nx so that nx*l+0.5*l>yr
     xR=xl+nx*l+0.5*l;
@@ -765,11 +733,23 @@ function generateTriMeshIsosceles(nx::Int, ny::Int, xl::Float64=0.0, yl::Float64
     return m
 end
 
+function generateHexMesh(xl::Float64, xr::Float64, yl::Float64, yr::Float64, nrows::Int64, condEW::Symbol, condTB::Symbol)
+    (!iseven(nrows) && condTB==:periodic) && error("Choose even nrows for periodic boundary.")
 
-function generateHexMesh(nx::Int, ny::Int, condEW::Symbol, condTB::Symbol, xl::Float64=0.0, xr::Float64=Float64(nx), yl::Float64=0.0, yr::Float64=Float64(ny))
+    l = ((yr-yl)/nrows) * (2/3); #see latex equilateralMesh
+
+    yR=yl+(3/2)*nrows*l+0.5*l;
+
+    hx=sqrt(3)*l/2
+    nx=Int(ceil((xr-xl-hx)/(2*hx)));
+    xR=xl+(2*nx+1)*hx;
+
     #Berechnen der Anzahl der Entitäten für die verschiedenen Dimensionen
-    size=[(ny+1)*(2*(nx+1))-2, ny*(nx+1)+(ny+1)*(2*nx+1)-2, nx*ny];
+    size=Int64[(nrows+1)*(2*(nx+1))-2, nrows*(nx+1)+(nrows+1)*(2*nx+1)-2, nx*nrows];
     nk=6;
+
+    @info "mesh details\n ny=$nrows (=nrows)\n nx=$nx \n edge length=$l\n gridsize=[$xl,$xR]x[$yl,$yR]\n xR deviation: $(xR-xr)\n yR deviation: $(yR-yr)"
+
 
     #Initialisieren des Offsets mit den Einträgen "20" und "10"
     offe=collect(1:2:(2*size[2]+1));
@@ -777,9 +757,180 @@ function generateHexMesh(nx::Int, ny::Int, condEW::Symbol, condTB::Symbol, xl::F
 
     #Erstellen der Koordinatenmatrix
     coord=Array{Float64}(undef,2,size[1]);
+    coordx=Float64[];
+    coordy=Float64[];
+    line_ypos=-l;
+    sign=1.0;
+
+    for line in 1:(nrows+1)
+        #get line parameters
+        line_ypos+=l+iseven(line)*l;
+            #(hats pointing up or down)
+        isodd(line) ? sign=1.0 : sign=-1.0
+
+        #set first vertex of line (except first line and last line if nrows is odd)
+        if line!=1 && ((line!=nrows+1) || iseven(nrows))
+            append!(coordx,xl)
+            append!(coordy,line_ypos)
+        end
+
+        #set second vertex of line (beginning of first hat)
+        append!(coordx,xl+hx)
+        append!(coordy,line_ypos+sign*0.5*l)
+
+        #set nx hats (upside down depending on even or odd row)
+        for hat in 1:nx
+            append!(coordx,xl+2*hat*hx)
+            append!(coordy,line_ypos)
+
+            append!(coordx,xl+2*hat*hx+hx)
+            append!(coordy,line_ypos+sign*0.5*l)
+        end
+    end
+    #delete the very last vertex if nrows is even,
+    #did so for hat-constructing-continuity
+    if iseven(nrows)
+        pop!(coordx)
+        pop!(coordy)
+    end
+    coord[1,:]=coordx;
+    coord[2,:]=coordy;
+
+    #Erstellen der Inzidenz 2->0
+    inc20=Int[];
+    bottomleft=-2
+    for row in 1:nrows
+        bottomleft+=1+2*isodd(row)
+        for cell in 1:nx
+            #topleft is usually bottomleft+2nx+2, only the last row will miss one vertex if odd
+            topleft=bottomleft+2*nx+1+1*(row!=nrows || iseven(nrows))
+            append!(inc20,[bottomleft,bottomleft+1,bottomleft+2,topleft,topleft+1,topleft+2])
+            bottomleft+=2
+        end
+    end
+
+    #Erstellen der Inzidenz 1->0
+    inc10=Int[]
+    #vertical edges
+    bottom=-2;
+    top=0;
+    for row in 1:nrows
+        bottom+=1+2*isodd(row)
+        for edge in 1:nx
+            top=bottom+2*nx+1+1*(row!=nrows || iseven(nrows))
+            append!(inc10,[bottom,top])
+            bottom+=2
+        end
+        top=bottom+2*nx+1+1*(row!=nrows || iseven(nrows))
+        append!(inc10,[bottom,top])
+    end
+    #rest of edges (every vertex has to be connected to its number neighbors except last in lines)
+    for vertex in 1:size[1]-1
+        #each line has 2*nx vertices for the hats plus 2 outer vertices
+        #the very first left outer vertex is missing, so its mod(vertex PLUS ONE,2nx+2) (missing vertex results in right outer vertices having 2*nx+2-1)
+        if mod(vertex+1,2*nx+2)!=0
+            append!(inc10,[vertex,vertex+1]);
+        end
+    end
+
+    #Initialisieren der Inzidenz mit den Einträgen "20" und "10"
+    inc=Dict("20"=>inc20,"10"=>inc10);
 
 
+    bE=spzeros(Int, size[2]);
+    bV=spzeros(Int, size[1]);
 
+    #boundary Vektor Randknoten
+    if condTB==:constant
+        bV[2:(2*nx)].=1.0;
+        bV[(size[1]-2*nx+1):(size[1]-1)].=1.0;
+    elseif condTB==:periodic
+        bV[2:(2*nx)]=-(size[1]-2*nx+2):-1:-(size[1]-1);
+    end
+
+    if condEW==:constant
+        #walk up east/west boundary vertex-wise
+        vertex_west=0;
+        vertex_east=2*nx;
+        for row in 1:floor(nrows/2)
+            vertex_east+=1;
+            vertex_west+=1;
+            bV[vertex_west]=1.0;
+            bV[vertex_east]=1.0;
+            vertex_east+=2*nx+2;
+            vertex_west+=2*nx+2;
+            bV[vertex_west]=1.0;
+            bV[vertex_east]=1.0;
+            vertex_east+=-1;
+            vertex_west+=-1;
+            bV[vertex_west]=1.0;
+            bV[vertex_east]=1.0;
+            vertex_east+=2*nx+2;
+            vertex_west+=2*nx+2;
+            bV[vertex_west]=1.0;
+            bV[vertex_east]=1.0;
+        end
+        if isodd(nrows)
+            vertex_east+=1;
+            vertex_west+=1;
+            bV[vertex_west]=1.0;
+            bV[vertex_east]=1.0;
+            vertex_east+=2*nx+1;
+            vertex_west+=2*nx+1;
+            bV[vertex_west]=1.0;
+            bV[vertex_east]=1.0;
+        end
+    elseif condEW==:periodic
+        #walk up east/west boundary vertex-wise
+        vertex_west=0;
+        vertex_east=2*nx;
+        for row in 1:floor(nrows/2)
+            vertex_east+=1;
+            vertex_west+=1;
+            bV[vertex_west]=-vertex_east;
+            vertex_east+=2*nx+2;
+            vertex_west+=2*nx+2;
+            bV[vertex_west]=-vertex_east;
+            vertex_east+=-1;
+            vertex_west+=-1;
+            bV[vertex_west]=-vertex_east;
+            vertex_east+=2*nx+2;
+            vertex_west+=2*nx+2;
+            bV[vertex_west]=-vertex_east;
+        end
+        if isodd(nrows)
+            vertex_east+=1;
+            vertex_west+=1;
+            bV[vertex_west]=-vertex_east;
+            vertex_east+=2*nx+1;
+            vertex_west+=2*nx+1;
+            bV[vertex_west]=-vertex_east;
+        end
+    end
+
+    #boundary Vektor für die Randkanten
+    nHorizontal=nrows*(nx+1);
+    if condTB==:constant
+        bE[(nHorizontal+1):(nHorizontal+2*nx)].=1.0;
+        bE[(size[2]-2*nx+1):size[2]].=1.0;
+    elseif condTB==:periodic
+        bE[(nHorizontal+1):(nHorizontal+2*nx)]=-(size[2]-2*nx+1):-1:-size[2];
+    end
+
+    if condEW==:constant
+        bE[1:(nx+1):(nHorizontal-nx)].=1.0
+        bE[(1+nx):(nx+1):nHorizontal].=1.0
+    elseif condEW==:periodic
+        bE[1:(nx+1):(nHorizontal-nx)]=-(1+nx):-(nx+1):-nHorizontal
+    end
+
+    n=Int[nx,nrows];
+    l=Float64[xl,yl];
+    r=Float64[xR,yR];
+    mT=meshTopology(inc,off,n);
+    mG=meshGeometry(coord,l,r);
+    m=mesh(mT,mG, bE, bV);
+    return m
 end
 
 
@@ -888,7 +1039,9 @@ function generateHexMesh2(nx::Int, ny::Int)
         r=Float64[Float64(nx),Float64(ny)];
         mT=meshTopology(inc,off,n);
         mG=meshGeometry(coord,l,r);
-        m=mesh(mT,mG);
+        bE=spzeros(Int, size[2]);
+        bV=spzeros(Int, size[1]);
+        m=mesh(mT,mG,bE,bV);
 
         return m
     else
