@@ -27,8 +27,6 @@ include("jacobi.jl");
 include("initJacobi.jl")
 include("adaptGeometry.jl")
 include("additionalFunctions.jl")
-include("getDim.jl")
-include("getSpace.jl")
 
 include("assembMass.jl");
 include("assembMassRho.jl");
