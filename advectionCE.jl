@@ -16,28 +16,22 @@ function advection(p::femProblem, gamma::Float64, y::solution,
                         p.degFBoundary[fTv[3]],nquadPhi[fTv[3]],cR,
                         gamma,p.mesh,p.kubPoints,p.kubWeights,
                         nquadPoints,p.edgeData);
-      rCv=Fv\(Sv+p.stiffM[:fv]*y.rhoV);
-      #=
-      pS=false;
-      vtk(p.mesh,p.degFBoundary[p.femType[:rhoV][1]],Sv,p.femType[:rhoV][1],"advA", printSpherical=pS)
-      resa=projectRhoChi(p,p.solution[0.0].rho,Sv,:rho,:rhoV,MrV)
-      vtk(p.mesh,p.degFBoundary[p.femType[:rhoV][1]],resa,p.femType[:rhoV][1],"advARho", printSpherical=pS)
-      vtk(p.mesh,p.degFBoundary[p.femType[:rhoV][1]],p.stiffM[:fv]*y.rhoV,p.femType[:rhoV][1],"coriolisA", printSpherical=pS)
-      resc=projectRhoChi(p,p.solution[0.0].rho,p.stiffM[:fv]*p.solution[0.0].rhoV,:rho,:rhoV,MrV)
-      vtk(p.mesh,p.degFBoundary[p.femType[:rhoV][1]],resc,p.femType[:rhoV][1],"coriolisRho", printSpherical=pS)
-      #vtk(p.mesh,p.degFBoundary[p.femType[:rhoV][1]],Sv-p.stiffM[:fv]*y.rhoV,p.femType[:rhoV][1],"advCoriolisA", printSpherical=true)
-      #vtk(p.mesh,p.degFBoundary[p.femType[:rhoV][1]],resa-resc,"advCoriolisA", printSpherical=true)
-      resca=projectRhoChi(p,p.solution[0.0].rho,-Sv-p.stiffM[:fv]*y.rhoV,:rho,:rhoV,MrV)
-      vtk(p.mesh,p.degFBoundary[p.femType[:rhoV][1]],resca,p.femType[:rhoV][1],"advCoriolisARho", printSpherical=pS)
-      println(gfcjzd)
-      =#
+      if p.type==:shallow
+        rCv=Fv\(Sv+p.stiffM[:fv]*y.rhoV);
+      else
+        rCv=Fv\(Sv);
+      end
     else
       Sv=advectionStiff(p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],
                         p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],sparse(y.rhoV),
                         p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],cR,
                         gamma,p.mesh,p.kubPoints,p.kubWeights,
                         nquadPoints,p.edgeData);
-      rCv=Fv\(Sv+p.stiffM[:fv]*y.rhoV);
+      if p.type==:shallow
+        rCv=Fv\(Sv+p.stiffM[:fv]*y.rhoV);
+      else
+        rCv=Fv\(Sv);
+      end
     end
     cR=projectRhoChi(p,y.rho,y.rhoTheta,:rho,:rhoTheta,MrT);
     if p.taskRecovery
