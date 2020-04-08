@@ -68,6 +68,7 @@ include("tay.jl")
 include("fft.jl")
 include("vtk.jl");
 include("vtkTest.jl");
+include("vtkSphere.jl");
 include("setOrientation.jl")
 include("cart2sphere.jl")
 include("simpson.jl")
