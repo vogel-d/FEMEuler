@@ -290,7 +290,6 @@ function generateTriMeshHalved(nx::Int, ny::Int, condEW::Symbol, condTB::Symbol,
     return m
 end
 
-
 function generateTriMeshQuartered(nx::Int, ny::Int, condEW::Symbol, condTB::Symbol, xl::Float64=0.0, xr::Float64=Float64(nx), yl::Float64=0.0, yr::Float64=Float64(ny))
 
     #Berechnen der Anzahl der Entitäten für die verschiedenen Dimensionen
@@ -471,7 +470,6 @@ function generateTriMeshQuartered(nx::Int, ny::Int, condEW::Symbol, condTB::Symb
 
     return m
 end
-
 
 #Funktion zum Generieren von zweidimensionalen, gleichschenkligen Dreieck-Gitter
 #Input: nx bzw. ny ist die Anzahl der Gitterelemente in x- bzw. y-Richtung, also die Feinheit des Meshes
