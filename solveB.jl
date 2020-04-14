@@ -52,7 +52,6 @@ function solveB!(p::femProblem,
       yP[1:np]=yP[1:np]+dt*(1/6)*(p1[1:np]+2*p2[1:np]+2*p3[1:np]+p4[1:np]);
       yB[1:nb]=yB[1:nb]+dt*(1/6)*(b1[1:nb]+2*b2[1:nb]+2*b3[1:nb]+b4[1:nb]);
     end
-
   else
     error("Keine zulässige Methode! Mögliche Methoden sind :euler und :rk4.");
   end
