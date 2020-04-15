@@ -1,3 +1,44 @@
+function projectRecovery(degFT::degF{1,:H1},degFF::degF{1,:H1},valF::Array{Float64,1},m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
+    phiT=@views degFT.phi;
+    phiF=@views degFF.phi;
+    nT=length(phiT)
+    nF=length(phiF)
+    sk=size(kubWeights);
+
+    J=initJacobi((m.geometry.dim,m.topology.dim),sk);
+    dJ=Array{Float64,2}(undef,sk);
+    coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
+
+    globalNumT=Array{Int64,1}(undef,nT);
+    globalNumF=Array{Int64,1}(undef,nF);
+
+    cL=zeros(degFT.numB)
+    for k in 1:m.topology.size[3]
+        jacobi!(J,dJ,m,k,kubPoints,coord);
+
+        l2g!(globalNumT,degFT,k);
+        l2g!(globalNumF,degFF,k);
+
+        for i in 1:nT
+            gi=globalNumT[i];
+            z=0.0;
+            for j in 1:nF
+                gj=globalNumF[j];
+                for r in 1:sk[2]
+                    for l in 1:sk[1]
+                        z+=phiT[i][l,r]*kubWeights[l,r]*abs(dJ[l,r])*valF[gj]*phiF[j][l,r];
+                    end
+                end
+            end
+            cL[gi] += z;
+        end
+    end
+    return cL;
+end
+
+
+
+
 function projectRecovery(degFH::degF{1,:H1},degF::degF{1,:H1},cval::Array{Float64,1},massMH::SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64},m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
     phi=@views degF.phi;
     phiH=@views degFH.phi;
