@@ -2,10 +2,16 @@ include("modulesSphereAdv.jl")
 
 function testSphereAdv()
 
-    filename = "testAdvRecoverySphSph";
+    filename = "testAdvSp";
 
     #order: comp, compHigh, compRec, compDG
-
+    femType=Dict(:rho=>[:DG0, :P1, :DG1, :DG0],
+                 :rhoV=>[:RT0, :VecP1S, :VecDG1S, :RT0B],
+                 :rhoTheta=>[:DG0, :P1, :DG1, :DG0],
+                 :p=>[:DG0],
+                 :v=>[:RT0],
+                 :theta=>[:DG0]);
+    #=
     femType=Dict(:rho=>[:DG0, :P1, :DG1, :DG0],
                  :rhoV=>[:RT0, :VecP1S, :VecDG1S, :RT0B],
                  :rhoTheta=>[:DG0, :P1, :DG1, :DG0],
@@ -14,7 +20,7 @@ function testSphereAdv()
                  :theta=>[:DG0]);
 
     #higher spaces
-    #=
+
     femType=Dict(:rho=>[:DG1, :P1, :DG1, :DG0],
                  :rhoV=>[:RT1, :VecP1, :VecDG1, :RT0B],
                  :rhoTheta=>[:DG1, :P1, :DG1, :DG0],
@@ -38,7 +44,7 @@ function testSphereAdv()
 
     dt=50.0;
     ns=10;
-    EndTime=40000.0
+    EndTime=20000.0
     nIter=Int64(EndTime/dt);
 
     #start functions
@@ -104,7 +110,6 @@ function testSphereAdv()
     p.solution[0.0].rhoV=projectChi(p,rho0,p.solution[0.0].v,:rho,:v);
 
     unstructured_vtk(p, 0.0, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename*"0", printSpherical=true)
-
     function V(xyz::Array{Float64,1})
       x=xyz[1]; y=xyz[2]; z=xyz[3];
       lon,lat,r=cart2sphere(x,y,z);
