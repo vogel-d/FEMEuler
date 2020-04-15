@@ -4,10 +4,10 @@ mutable struct femProblem
     degFBoundary::Dict{Symbol, degF};
     femType::Dict{Symbol, Array{Symbol,1}};
     edgeData::Array{Array{Int64,1},1};
+    compoundData::compoundData;
     solution::Dict{Float64, solution};
     massM::Dict{Symbol, SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64}};
     massMBoundary::Dict{Symbol, SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64}};
-    massMProjection::Dict{Symbol, SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64}};
     stiffM::Dict{Symbol, SparseMatrixCSC{Float64,Int64}};
     type::Symbol;
     kubWeights::Array{Float64,2};
@@ -19,7 +19,7 @@ end
 
 #Konstruktoren
 
-function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}};advection::Bool=true, taskRecovery::Bool=false, t::Symbol=:boussinesq, g::Int64=9)
+function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}};advection::Bool=true, taskRecovery::Bool=false, t::Symbol=:boussinesq, g::Int64=9, compoundMethod::Symbol=:none)
     sol=Dict{Float64, solution}()
     kubPoints, kubWeights=getKub(g, m.meshType);
     dF=Dict{Symbol, degF}()
@@ -37,14 +37,20 @@ function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}};advection::B
     for k in femElements
         dF[k]=degF(m,k,ordEdgesB,nebP,nebC,ordVerticesB,nvbP,nvbC,kubPoints);
     end
+
+    if compoundMethod!=:none
+        compoundData=createCompoundData(compoundMethod,femElements);
+    else
+        compoundData=createCompoundData();
+    end
+
     edgeData=Array{Array{Int64,1},1}();
     massM=Dict();
     massMB=Dict();
-    massMP=Dict()
     stiffM=Dict();
     loadV=Dict();
     bV=Dict();
     s=Set{Symbol}([:poisson,:boussinesq,:compressible,:shallow]);
     !in(t,s) && error("Die Methode $t ist keine zulässige Eingabe. Möglich sind $s");
-    femProblem(m,bV,dF,femType,edgeData,sol,massM,massMB,massMP,stiffM,t,kubWeights, kubPoints, taskRecovery, advection);
+    femProblem(m,bV,dF,femType,edgeData,compoundData,sol,massM,massMB,stiffM,t,kubWeights, kubPoints, taskRecovery, advection);
 end
