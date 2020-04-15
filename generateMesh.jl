@@ -732,7 +732,7 @@ function generateTriMeshIsosceles(nx::Int, ny::Int, xl::Float64=0.0, yl::Float64
 end
 
 function generateHexMesh(xl::Float64, xr::Float64, yl::Float64, yr::Float64, nrows::Int64, condEW::Symbol, condTB::Symbol)
-    (!iseven(nrows) && condTB==:periodic) && error("Choose even nrows for periodic boundary.")
+    (isodd(nrows) && condTB==:periodic) && error("Choose even nrows for periodic boundary.")
 
     l = ((yr-yl)/nrows) * (2/3); #see latex equilateralMesh
 
@@ -746,7 +746,7 @@ function generateHexMesh(xl::Float64, xr::Float64, yl::Float64, yr::Float64, nro
     size=Int64[(nrows+1)*(2*(nx+1))-2, nrows*(nx+1)+(nrows+1)*(2*nx+1)-2, nx*nrows];
     nk=6;
 
-    @info "mesh details\n ny=$nrows (=nrows)\n nx=$nx \n edge length=$l\n gridsize=[$xl,$xR]x[$yl,$yR]\n xR deviation: $(xR-xr)\n yR deviation: $(yR-yr)"
+    @info "mesh details\n ny=$nrows (=nrows)\n nx=$nx \n edge length=$l\n gridsize=[$xl,$xR]x[$yl,$yR]\n xR deviation: $(xR-xr)\n yR deviation: $(yR-yr)\n mesh type=4 for use of compound elements"
 
 
     #Initialisieren des Offsets mit den Einträgen "20" und "10"
@@ -802,7 +802,7 @@ function generateHexMesh(xl::Float64, xr::Float64, yl::Float64, yr::Float64, nro
         for cell in 1:nx
             #topleft is usually bottomleft+2nx+2, only the last row will miss one vertex if odd
             topleft=bottomleft+2*nx+1+1*(row!=nrows || iseven(nrows))
-            append!(inc20,[bottomleft,bottomleft+1,bottomleft+2,topleft,topleft+1,topleft+2])
+            append!(inc20,[bottomleft,bottomleft+1,bottomleft+2,topleft+2,topleft+1,topleft])
             bottomleft+=2
         end
     end
@@ -843,7 +843,7 @@ function generateHexMesh(xl::Float64, xr::Float64, yl::Float64, yr::Float64, nro
         bV[2:(2*nx)].=1.0;
         bV[(size[1]-2*nx+1):(size[1]-1)].=1.0;
     elseif condTB==:periodic
-        bV[2:(2*nx)]=-(size[1]-2*nx+2):-1:-(size[1]-1);
+        bV[2:(2*nx)]=-(size[1]-2*nx+1):-1:-(size[1]-1);
     end
 
     if condEW==:constant
@@ -927,7 +927,7 @@ function generateHexMesh(xl::Float64, xr::Float64, yl::Float64, yr::Float64, nro
     r=Float64[xR,yR];
     mT=meshTopology(inc,off,n);
     mG=meshGeometry(coord,l,r);
-    m=mesh(mT,mG, bE, bV);
+    m=mesh(mT,mG, bE, bV, 4);
     return m
 end
 
