@@ -1,13 +1,19 @@
+include("testCompoundAcoustic.jl")
+p=testCompoundAcoustic();
+
 #constraint matrix
 #βi,j = j-th beta from sub-element i
 
 #1.
 #β1,1=β2,1=1 ,  βi,1=0 i∈{3,..,12}
 #βi,2-β1+mod(i,12),3=0 i∈{1,..,12}  (could be βi,2+β1+mod(i,12),3=0)
+
 #2.
 #(β1,1+β1,2-β1,3)-(βi,1+βi,2-βi,3)=0 i∈{2,..,12}
-#3. see below
-#∑_(j=1)^n 0*βj,1 + 1*βj,2 + 1*βj,3 = 0 
+
+#3.
+#have a look in integratedAnsatzfct, its full of [0,1,1] vectors
+#∑_(j=1)^n 0*βj,1 + 1*βj,2 + 1*βj,3 = 0
 
 #aufbau: zuerst alle 12 beta1, dann alle 12 beta2, dann alle 12 beta3
 b=zeros(36);
@@ -101,3 +107,5 @@ function integrateAnsatzfctOverCells(p::femProblem)
     end
     return integratedAnsatzfct;
 end
+
+integratedAnsatzfct=integrateAnsatzfctOverCells(p);
