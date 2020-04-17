@@ -918,6 +918,8 @@ function generateHexMesh(xl::Float64, xr::Float64, yl::Float64, yr::Float64, nro
     if condEW==:constant
         bE[1:(nx+1):(nVertical-nx)].=1.0
         bE[(1+nx):(nx+1):nVertical].=1.0
+        bE[(nVertical+(2*nx+1)):(2*nx+1):(size[2]-4*nx)].=1.0
+        bE[(nVertical+(2*nx+1)+2*nx):(2*nx+1):(size[2]-4*nx+2*nx)].=1.0
     elseif condEW==:periodic
         bE[1:(nx+1):(nVertical-nx)]=-(1+nx):-(nx+1):-nVertical
         bE[(nVertical+(2*nx+1)):(2*nx+1):(size[2]-4*nx)]=-(nVertical+(2*nx+1)+2*nx):-(2*nx+1):-(size[2]-4*nx+2*nx)
