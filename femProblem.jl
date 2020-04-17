@@ -39,7 +39,7 @@ function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}};advection::B
     end
 
     if compoundMethod!=:none
-        compoundData=createCompoundData(compoundMethod,femElements);
+        compoundData=createCompoundData(compoundMethod,femElements,m);
     else
         compoundData=createCompoundData();
     end
