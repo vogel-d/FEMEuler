@@ -7,9 +7,9 @@ function testCompoundAcoustic()
     femType=Dict(:p=>[:DG0], :v=>[:RT0], :b=>[:DG0]);
     #femType=Dict(:p=>[:DG1], :v=>[:RT1], :b=>[:DG1]);
 
-    m=generateHexMesh(0.0,1.0,0.0,1.0,3,:periodic,:constant); #(east/west, top/bottom)
-    #m=generateRectMesh(3,3,:periodic,:periodic,0.0,2.0,0.0,2.0); #(east/west, top/bottom)
-    p=femProblem(m, femType, compoundMethod=:HexToKites);
+    m=generateHexMesh(0.0,1.0,0.0,1.0,1,:periodic,:constant,meshType=3); #(east/west, top/bottom)
+    #m=generateRectMesh(30,30,:periodic,:periodic,0.0,2.0,0.0,2.0); #(east/west, top/bottom)
+    p=femProblem(m, femType, compoundMethod=:HexToTris);
     #p=femProblem(m, femType);
 
     method=:euler;
@@ -50,8 +50,9 @@ function testCompoundAcoustic()
     end
 =#
     f=Dict(:p=>fp);
-
+    return p;
     assembMassCompound!(p);
+    #assembMass!(p);
     error()
     assembStiff!(p);
     applyStartValues!(p,f)
