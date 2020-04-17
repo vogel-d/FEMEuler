@@ -6,11 +6,17 @@ function getStencil(m::mesh, order::Int)
     offe=m.topology.offset["21"]
     incf=m.topology.incidence["12"]
     offf=m.topology.offset["12"]
+    bE=copy(m.boundaryEdges);
+    
     edges=Set{Int}();
     ch=Int[]
     cells=Set{Int}();
+    ocells=Int[];
     for f in 1:m.topology.size[3]
-        cells=Set{Int}(f);
+        empty!(cells)
+        push!(cells,f)
+        empty!(ocells)
+        push!(ocells,f)
         ocells=Int[f];
         for i in 1:order
             for c in ocells
@@ -25,16 +31,24 @@ function getStencil(m::mesh, order::Int)
                                 push!(cells,ce[1])
                                 push!(ch,ce[1])
                             end
+                        elseif length(ce)==1
+                            if bE[e]<0
+                                e2=-bE[e]
+                                bE[e2]=-e
+                                push!(cells,incf[offf[e2]])
+                                push!(ch,incf[offf[e2]])
+                                push!(edges,e2)
+                            end
                         end
                         push!(edges,e)
                     end
                 end
             end
             ocells=ch;
-            ch=Int[];
+            empty!(ch);
         end
         stencil[f]=collect(cells);
-        edges=Int[];
+        empty!(edges);
     end
     return stencil
 end
