@@ -6,7 +6,8 @@
 #βi,2-β1+mod(i,12),3=0 i∈{1,..,12}  (could be βi,2+β1+mod(i,12),3=0)
 #2.
 #(β1,1+β1,2-β1,3)-(βi,1+βi,2-βi,3)=0 i∈{2,..,12}
-#3.
+#3. see below
+#∑_(j=1)^n 0*βj,1 + 1*βj,2 + 1*βj,3 = 0 
 
 #aufbau: zuerst alle 12 beta1, dann alle 12 beta2, dann alle 12 beta3
 b=zeros(36);
@@ -37,7 +38,8 @@ end
 #results in β1,x=0, β2,x=1, β3,x=1 for a HexMesh with one Hexagon in Ω=[0,1]x[0,1])
 A[36,13:36].=1.0;
 
-
+#compute beta-values
+betas=A\b;
 
 #third constraint
 #compute integrals of every ansatzfunction over its specific cell
