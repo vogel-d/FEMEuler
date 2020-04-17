@@ -13,8 +13,9 @@ function assembMassCompound!(p::femProblem)
     end
     comp=Set{Symbol}(s);
     for i in comp
-        massM=assembMassCompound(p.degFBoundary[i],p.mesh,p.kubPoints,p.kubWeights,p.compoundData);
-        i==:DG0 && global MASS=massM
+        @time massM=assembMassCompound(p.degFBoundary[i],p.mesh,p.kubPoints,p.kubWeights,p.compoundData);
+        i==:DG0 && global MASSDG=massM
+        i==:RT0 && global MASSRT=massM
         n=p.degFBoundary[i].num
         p.massM[i]=lu(massM[1:n,1:n]);
         p.massMBoundary[i]=lu(massM);
@@ -36,7 +37,6 @@ function assembMassCompound(degF::degF{1,:H1}, m::mesh, kubPoints::Array{Float64
     key="20";
     mt=m.meshType;
     nSubCells=compoundData.nSubCells;
-    splitCell=getfield(Main,compoundData.getSubCells);
     assembledPhi=compoundData.assembledPhi[degF.femType];
     subcoord=Array{Array{Float64,2},1}(undef,nSubCells);
 
@@ -52,9 +52,7 @@ function assembMassCompound(degF::degF{1,:H1}, m::mesh, kubPoints::Array{Float64
             z+=1;
         end
 
-        #mutating
-        splitCell(subcoord,coord);
-
+        subcoord=compoundData.getSubCells[k];
         gvertices=l2g(degF,k);
         for j in 1:iter
             for i in 1:iter
@@ -101,9 +99,8 @@ function assembMassCompound(degF::degF{2,:H1div}, m::mesh, kubPoints::Array{Floa
     jphiRef=initJacobi((m.geometry.dim,iter),sk);
     coord=Array{Float64,2}(undef,m.geometry.dim,diff(m.topology.offset["20"][1:2])[1]);
     key="20";
-    mt=m.meshType
+    mt=m.meshType;
     nSubCells=compoundData.nSubCells;
-    splitCell=getfield(Main,compoundData.getSubCells);
     assembledPhi=compoundData.assembledPhi[degF.femType];
     subcoord=Array{Array{Float64,2},1}(undef,nSubCells);
 
@@ -118,14 +115,13 @@ function assembMassCompound(degF::degF{2,:H1div}, m::mesh, kubPoints::Array{Floa
             end
             z+=1;
         end
-        #mutating
-        splitCell(subcoord,coord);
+        
+        subcoord=compoundData.getSubCells[k];
 
         gvertices=l2g(degF,k);
         for j in 1:iter
             for i in 1:iter
                 currentval=0.0;
-
                 for subCell in 1:nSubCells
                     jacobi!(J,ddJ,jphiRef,kubPoints,phiRef,subcoord[subCell],mt);
                     for subj in 1:iter
