@@ -907,19 +907,20 @@ function generateHexMesh(xl::Float64, xr::Float64, yl::Float64, yr::Float64, nro
     end
 
     #boundary Vektor für die Randkanten
-    nHorizontal=nrows*(nx+1);
+    nVertical=nrows*(nx+1);
     if condTB==:constant
-        bE[(nHorizontal+1):(nHorizontal+2*nx)].=1.0;
+        bE[(nVertical+1):(nVertical+2*nx)].=1.0;
         bE[(size[2]-2*nx+1):size[2]].=1.0;
     elseif condTB==:periodic
-        bE[(nHorizontal+1):(nHorizontal+2*nx)]=-(size[2]-2*nx+1):-1:-size[2];
+        bE[(nVertical+1):(nVertical+2*nx)]=-(size[2]-2*nx+1):-1:-size[2];
     end
 
     if condEW==:constant
-        bE[1:(nx+1):(nHorizontal-nx)].=1.0
-        bE[(1+nx):(nx+1):nHorizontal].=1.0
+        bE[1:(nx+1):(nVertical-nx)].=1.0
+        bE[(1+nx):(nx+1):nVertical].=1.0
     elseif condEW==:periodic
-        bE[1:(nx+1):(nHorizontal-nx)]=-(1+nx):-(nx+1):-nHorizontal
+        bE[1:(nx+1):(nVertical-nx)]=-(1+nx):-(nx+1):-nVertical
+        bE[(nVertical+(2*nx+1)):(2*nx+1):(size[2]-4*nx)]=-(nVertical+(2*nx+1)+2*nx):-(2*nx+1):-(size[2]-4*nx+2*nx)
     end
 
     n=Int[nx,nrows];
