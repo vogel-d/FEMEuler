@@ -1,13 +1,14 @@
 #constraint matrix
+#βi,j = j-th beta from sub-element i
 
 #1.
-#β1,1=β2,1=1 ,  βx1=0 x∈{3,..,12}
-#βi,2-β1+mod(i,12),3=0 i∈{1,..,12}
+#β1,1=β2,1=1 ,  βi,1=0 i∈{3,..,12}
+#βi,2-β1+mod(i,12),3=0 i∈{1,..,12}  (could be βi,2+β1+mod(i,12),3=0)
 #2.
-#(β1,1+β1,2-β1,3)-(β1,1+βx,2-βx,3)=0 x∈{2,..,12}
+#(β1,1+β1,2-β1,3)-(βi,1+βi,2-βi,3)=0 i∈{2,..,12}
 #3.
 
-#aufbau nach: zuerst alle beta1, dann alle beta2, dann beta3
+#aufbau: zuerst alle 12 beta1, dann alle 12 beta2, dann alle 12 beta3
 b=zeros(36);
 A=zeros(36,36);
 
@@ -32,7 +33,8 @@ for i in 1:11
     b[24+i]=0.0;
 end
 
-#third constraint
+#third constraint (wih a look in integratedAnsatzfct the third constraint
+#results in β1,x=0, β2,x=1, β3,x=1 for a HexMesh with one Hexagon in Ω=[0,1]x[0,1])
 A[36,13:36].=1.0;
 
 
@@ -40,7 +42,7 @@ A[36,13:36].=1.0;
 #third constraint
 #compute integrals of every ansatzfunction over its specific cell
 #obviously with compound Mesh
-
+#integratedAnsatzfct[k][j][i] : integral value from i-th ansatzfct in subCell j from Cell k
 function integrateAnsatzfctOverCells(p::femProblem)
     m=p.mesh;
     nSubCells=p.compoundData.nSubCells;
