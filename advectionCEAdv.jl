@@ -9,11 +9,10 @@ function advection(p::femProblem, gamma::Float64, y::solution, Vfval::SparseVect
   nRho=p.degFBoundary[p.femType[:rho][1]].num;
   stencil=getStencil(p.mesh,1)
   if p.advection
-    #println("rhoV")
     cR=projectRhoChi(p,y.rho,y.rhoV,:rho,:rhoV,MrV);
     if p.taskRecovery
-      #cR=recovery(p,2,fTv,cR);
       cR=recovery(p,fTv,cR,stencil);
+      #vtk(p.mesh,p.degFBoundary[p.femType[:rhoV][3]],cR,p.femType[:rhoV][3],"testRecoveryV")
       Sv=advectionStiff(p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],
                         p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
                         p.degFBoundary[fTv[3]],nquadPhi[fTv[3]],cR,
@@ -27,13 +26,12 @@ function advection(p::femProblem, gamma::Float64, y::solution, Vfval::SparseVect
                         gamma,p.mesh,p.kubPoints,p.kubWeights,
                         nquadPoints,p.edgeData);
       rCv=Fv\(Sv);
-      #rCv=Fv\(-p.stiffM[:fv]*y.rhoV);
     end
-    #println("rhoTheta")
     cR=projectRhoChi(p,y.rho,y.rhoTheta,:rho,:rhoTheta,MrT);
     if p.taskRecovery
-      #cR=recovery(p,1,fTtheta,cR,:theta);
-      cR=recovery(p,fTtheta,cR,stencil);
+      vtk(p.mesh,p.degFBoundary[p.femType[:rhoTheta][1]],cR,p.femType[:rhoTheta][1],"testTheta")
+      cR=recovery(p,fTtheta,cR,stencil,1);
+      vtk(p.mesh,2,2,p.degFBoundary[p.femType[:rhoTheta][3]],cR,p.femType[:rhoTheta][3],"testRecoveryTheta")
       Sth=advectionStiff(p.degFBoundary[fTtheta[1]],nquadPhi[fTtheta[1]],
                          p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
                          p.degFBoundary[fTtheta[3]],nquadPhi[fTtheta[3]],cR,
@@ -48,11 +46,10 @@ function advection(p::femProblem, gamma::Float64, y::solution, Vfval::SparseVect
                           nquadPoints, p.edgeData);
       rCth=Fth\(Sth);
     end
-    #println("rho")
     cR=y.rho
     if p.taskRecovery
-      #cR=recovery(p,1,fTrho,cR);
-      cR=recovery(p,fTrho,cR,stencil);
+      cR=recovery(p,fTrho,cR,stencil,1);
+      #vtk(p.mesh,p.degFBoundary[p.femType[:rho][3]],cR,p.femType[:rho][3],"testRecoveryRho")
       Srho=advectionStiff(p.degFBoundary[fTrho[1]],nquadPhi[fTrho[1]],
                          p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
                          p.degFBoundary[fTrho[3]],nquadPhi[fTrho[3]],cR,
