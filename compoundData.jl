@@ -1,6 +1,6 @@
 struct compoundData
     nSubCells::Int64;
-    getSubCells::Symbol;
+    getSubCells::Array{Array{Array{Float64,2},1},1};
     assembledPhi::Dict{Symbol,Array{Array{Float64,2},1}};
 end
 
@@ -8,9 +8,12 @@ function createCompoundData()
     compoundData(0,:zero,Dict());
 end
 
-function createCompoundData(method::Symbol,femElements::Set{Symbol})
+function createCompoundData(method::Symbol,femElements::Set{Symbol},m::mesh)
     if method==:HexToKites
-        return compoundData(6,:getSubCellsHexToKites!,assemblePhiHexToKites(femElements))
+        return compoundData(6,getSubCellsHexToKites(m),assemblePhiHexToKites(femElements))
+    elseif method==:HexToTris
+        @warn("assembled phi is for kites, not triangles")
+        return compoundData(12,getSubCellsHexToTris(m),assemblePhiHexToKites(femElements))
     end
 end
 
@@ -58,10 +61,4 @@ function assemblePhiHexToKites(femElements::Set{Symbol})
         end
     end
     return assembledPhi;
-end
-
-
-function testest()
-    lal=getfield(Main,:println)
-    lal("was geht")
 end
