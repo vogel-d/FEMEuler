@@ -731,7 +731,7 @@ function generateTriMeshIsosceles(nx::Int, ny::Int, xl::Float64=0.0, yl::Float64
     return m
 end
 
-function generateHexMesh(xl::Float64, xr::Float64, yl::Float64, yr::Float64, nrows::Int64, condEW::Symbol, condTB::Symbol)
+function generateHexMesh(xl::Float64, xr::Float64, yl::Float64, yr::Float64, nrows::Int64, condEW::Symbol, condTB::Symbol; meshType::Int64=4)
     (isodd(nrows) && condTB==:periodic) && error("Choose even nrows for periodic boundary.")
 
     l = ((yr-yl)/nrows) * (2/3); #see latex equilateralMesh
@@ -746,7 +746,7 @@ function generateHexMesh(xl::Float64, xr::Float64, yl::Float64, yr::Float64, nro
     size=Int64[(nrows+1)*(2*(nx+1))-2, nrows*(nx+1)+(nrows+1)*(2*nx+1)-2, nx*nrows];
     nk=6;
 
-    @info "mesh details\n ny=$nrows (=nrows)\n nx=$nx \n edge length=$l\n gridsize=[$xl,$xR]x[$yl,$yR]\n xR deviation: $(xR-xr)\n yR deviation: $(yR-yr)\n mesh type=4 for use of compound elements"
+    @info "mesh details\n ny=$nrows (=nrows)\n nx=$nx \n edge length=$l\n gridsize=[$xl,$xR]x[$yl,$yR]\n xR deviation: $(xR-xr)\n yR deviation: $(yR-yr)\n mesh type=$meshType for use of compound elements"
 
 
     #Initialisieren des Offsets mit den Einträgen "20" und "10"
@@ -930,7 +930,7 @@ function generateHexMesh(xl::Float64, xr::Float64, yl::Float64, yr::Float64, nro
     r=Float64[xR,yR];
     mT=meshTopology(inc,off,n);
     mG=meshGeometry(coord,l,r);
-    m=mesh(mT,mG, bE, bV, 4);
+    m=mesh(mT,mG, bE, bV, meshType);
     return m
 end
 
