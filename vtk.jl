@@ -168,15 +168,35 @@ function unstructured_vtk(p::femProblem, t::Array{Float64,1}, comp::Array{Symbol
     return outfiles::Vector{String}
 end
 
-#Plotten auf verfeinerten Mesh (aktuell nur 2D-Mesh)
+#Plotten auf verfeinerten Mesh (aktuell nur Rechteck-Mesh)
+function unstructured_vtk(p::femProblem, r::Int, t, comp::Array{Symbol,1}, name::Array{String,1}, filename::String; printSpherical::Bool=false)
+    return unstructured_vtk(p, r, r, t, comp, name, filename, printSpherical=printSpherical)
+end
 
-function unstructured_vtk(p::femProblem, rx::Int, ry::Int, tend::Float64, comp::Array{Symbol,1}, name::Array{String,1}, filename::String)
+function unstructured_vtk(p::femProblem, rx::Int, ry::Int, tend::Float64, comp::Array{Symbol,1}, name::Array{String,1}, filename::String; printSpherical::Bool=false)
 
-    mf=refineRectMesh(p.mesh,rx,ry,:periodic,:constant);
+    if p.mesh.geometry.dim==2
+        mf=refineRectMesh(p.mesh,rx,ry,:periodic,:constant);
+    elseif p.mesh.geometry.dim==3
+        mf=refineCubedSphere(p.mesh,rx)
+    end
     pts=mf.geometry.coordinates;
     Npts=size(pts,2);
 
-    mf.meshType==4 ? celltype = VTKCellTypes.VTK_QUAD : celltype = VTKCellTypes.VTK_TRIANGLE;
+    if p.mesh.meshType==4
+        celltype = VTKCellTypes.VTK_QUAD;
+        mx=0.5;
+        my=0.5;
+    elseif p.mesh.meshType==3
+        celltype = VTKCellTypes.VTK_TRIANGLE;
+        mx=0.3333333333333333;
+        my=0.3333333333333333;
+    else
+        error("Ungültiger Mesh-Typ")
+    end
+    if p.mesh.geometry.dim==3
+        celltype = VTKCellTypes.VTK_POLYGON;
+    end
     cells = MeshCell[]
     inc=mf.topology.incidence["20"];
     off=mf.topology.offset["20"];
@@ -186,9 +206,9 @@ function unstructured_vtk(p::femProblem, rx::Int, ry::Int, tend::Float64, comp::
         push!(cells, MeshCell(celltype, inds))
     end
 
-    J=Array{Float64,2}(undef,2,2);
+    J=Array{Float64,2}(undef,mf.geometry.dim,mf.topology.dim);
     dJ=0.0;
-    coord=Array{Float64,2}(undef,2,mf.meshType);
+    coord=Array{Float64,2}(undef,mf.geometry.dim,mf.meshType);
     nfc=p.mesh.topology.size[3];
 
     vtk_filename_noext = (@__DIR__)*"/VTK/"*filename;
@@ -224,7 +244,7 @@ function unstructured_vtk(p::femProblem, rx::Int, ry::Int, tend::Float64, comp::
             end
             vtk_cell_data(vtk, cvtk, name[l])
         else
-            cvtk=zeros(Float64, 2, nf)
+            cvtk=zeros(Float64, mf.geometry.dim, nf)
             cLoc=zeros(Float64, size(p.degFBoundary[p.femType[comp[l]][1]].phi,2))
             for k in 1:nfc
                 f=incm[offm[k]:offm[k+1]-1];
@@ -232,12 +252,25 @@ function unstructured_vtk(p::femProblem, rx::Int, ry::Int, tend::Float64, comp::
                 for i in 1:length(f)
                     dJ=jacobi!(J,p.mesh,k,rcoord[1,i],rcoord[2,i],coord);
                     fLoc=(1/dJ)*J*fComp[i]
-                    cvtk[:,f[i]]=fLoc*cLoc;
+                    if printSpherical
+                        xyz=transformation(p.mesh,coord,rcoord[1,i],rcoord[2,i])
+                        lon,lat,r=cart2sphere(xyz[1],xyz[2],xyz[3]);
+                        cvtk[:,f[i]]=velSp(fLoc*cLoc,lon,lat)
+                    else
+                        cvtk[:,f[i]]=fLoc*cLoc;
+                    end
                 end
             end
-            vtk_cell_data(vtk, cvtk[1,:], name[l]*" x")
-            vtk_cell_data(vtk, cvtk[2,:], name[l]*" z")
-            vtk_cell_data(vtk, (cvtk[1,:],cvtk[2,:],zeros(Float64,nf)), name[l])
+            if size(cvtk,1)==2
+                vtk_cell_data(vtk, cvtk[1,:], name[l]*" x")
+                vtk_cell_data(vtk, cvtk[2,:], name[l]*" z")
+                vtk_cell_data(vtk, (cvtk[1,:],cvtk[2,:],zeros(Float64,nf)), name[l])
+            else
+                vtk_cell_data(vtk, cvtk[1,:], name[l]*" x")
+                vtk_cell_data(vtk, cvtk[2,:], name[l]*" y")
+                vtk_cell_data(vtk, cvtk[3,:], name[l]*" z")
+                vtk_cell_data(vtk, (cvtk[1,:],cvtk[2,:],cvtk[3,:]), name[l])
+            end
             fill!(cLoc,0.0);
         end
     end
@@ -246,13 +279,30 @@ function unstructured_vtk(p::femProblem, rx::Int, ry::Int, tend::Float64, comp::
     return outfiles::Vector{String}
 end
 
-function unstructured_vtk(p::femProblem, rx::Int, ry::Int, t::Array{Float64,1}, comp::Array{Symbol,1}, name::Array{String,1}, filename::String)
+function unstructured_vtk(p::femProblem, rx::Int, ry::Int, t::Array{Float64,1}, comp::Array{Symbol,1}, name::Array{String,1}, filename::String; printSpherical::Bool=false)
 
-    mf=refineRectMesh(p.mesh,rx,ry,:periodic,:constant);
+    if p.mesh.geometry.dim==2
+        mf=refineRectMesh(p.mesh,rx,ry,:periodic,:constant);
+    elseif p.mesh.geometry.dim==3
+        mf=refineCubedSphere(p.mesh,rx)
+    end
     pts=mf.geometry.coordinates;
     Npts=size(pts,2);
 
-    mf.meshType==4 ? celltype = VTKCellTypes.VTK_QUAD : celltype = VTKCellTypes.VTK_TRIANGLE;
+    if p.mesh.meshType==4
+        celltype = VTKCellTypes.VTK_QUAD;
+        mx=0.5;
+        my=0.5;
+    elseif p.mesh.meshType==3
+        celltype = VTKCellTypes.VTK_TRIANGLE;
+        mx=0.3333333333333333;
+        my=0.3333333333333333;
+    else
+        error("Ungültiger Mesh-Typ")
+    end
+    if p.mesh.geometry.dim==3
+        celltype = VTKCellTypes.VTK_POLYGON;
+    end
     cells = MeshCell[]
     inc=mf.topology.incidence["20"];
     off=mf.topology.offset["20"];
@@ -262,9 +312,9 @@ function unstructured_vtk(p::femProblem, rx::Int, ry::Int, t::Array{Float64,1}, 
         push!(cells, MeshCell(celltype, inds))
     end
 
-    J=Array{Float64,2}(undef,2,2);
+    J=Array{Float64,2}(undef,mf.geometry.dim,mf.topology.dim);
     dJ=0.0;
-    coord=Array{Float64,2}(undef,2,mf.meshType);
+    coord=Array{Float64,2}(undef,mf.geometry.dim,mf.meshType);
     nfc=p.mesh.topology.size[3];
 
     vtk_filename_noext = (@__DIR__)*"/VTK/"*filename;
@@ -304,7 +354,7 @@ function unstructured_vtk(p::femProblem, rx::Int, ry::Int, t::Array{Float64,1}, 
                     end
                     vtk_cell_data(vtk, cvtk, name[l])
                 else
-                    cvtk=zeros(Float64, 2, nf)
+                    cvtk=zeros(Float64, mf.geometry.dim, nf)
                     cLoc=zeros(Float64, size(p.degFBoundary[p.femType[comp[l]][1]].phi,2))
                     for k in 1:nfc
                         f=incm[offm[k]:offm[k+1]-1];
@@ -312,12 +362,25 @@ function unstructured_vtk(p::femProblem, rx::Int, ry::Int, t::Array{Float64,1}, 
                         for i in 1:length(f)
                             dJ=jacobi!(J,p.mesh,k,rcoord[1,i],rcoord[2,i],coord);
                             fLoc=(1/dJ)*J*fComp[i]
-                            cvtk[:,f[i]]=fLoc*cLoc;
+                            if printSpherical
+                                xyz=transformation(p.mesh,coord,rcoord[1,i],rcoord[2,i])
+                                lon,lat,r=cart2sphere(xyz[1],xyz[2],xyz[3]);
+                                cvtk[:,f[i]]=velSp(fLoc*cLoc,lon,lat)
+                            else
+                                cvtk[:,f[i]]=fLoc*cLoc;
+                            end
                         end
                     end
-                    vtk_cell_data(vtk, cvtk[1,:], name[l]*" x")
-                    vtk_cell_data(vtk, cvtk[2,:], name[l]*" z")
-                    vtk_cell_data(vtk, (cvtk[1,:],cvtk[2,:],zeros(Float64,nf)), name[l])
+                    if size(cvtk,1)==2
+                        vtk_cell_data(vtk, cvtk[1,:], name[l]*" x")
+                        vtk_cell_data(vtk, cvtk[2,:], name[l]*" z")
+                        vtk_cell_data(vtk, (cvtk[1,:],cvtk[2,:],zeros(Float64,nf)), name[l])
+                    else
+                        vtk_cell_data(vtk, cvtk[1,:], name[l]*" x")
+                        vtk_cell_data(vtk, cvtk[2,:], name[l]*" y")
+                        vtk_cell_data(vtk, cvtk[3,:], name[l]*" z")
+                        vtk_cell_data(vtk, (cvtk[1,:],cvtk[2,:],cvtk[3,:]), name[l])
+                    end
                     fill!(cLoc,0.0);
                 end
             end
