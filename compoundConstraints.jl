@@ -31,25 +31,32 @@ end
 #inner edges
 for i in 1:12
     A[12+i,12+i]=1.0;
-#    A[12+i,24+mod(12,i)+1]=-1.0;
-    A[12+i,24+mod(12,i)+1]=1.0;
+    A[12+i,24+mod(12,i)+1]=-1.0;
+#    A[12+i,24+mod(12,i)+1]=1.0;
     b[12+i]=0.0;
 end
 
 #second constraint
-for i in 2:12
+for i in 1:11
     #FEMEuler divergences
 #    A[24+i,[1,12+1,24+1]]=[1.0,1.0,-1.0];
-#    A[24+i,[i,12+i,24+i]]=[-1.0,-1.0,1.0];
+#    A[24+i,[1+i,12+1+i,24+1+i]]=[-1.0,-1.0,1.0];
     #MelvinThuburn divergences (common divergences)
     A[24+i,[1,12+1,24+1]]=[1.0,1.0,1.0];
-    A[24+i,[i,12+i,24+i]]=[-1.0,-1.0,-1.0];
+    A[24+i,[1+i,12+1+i,24+1+i]]=[-1.0,-1.0,-1.0];
     b[24+i]=0.0;
 end
 
 #third constraint (with a look in integratedAnsatzfct the third constraint
 #results in β1,x=0, β2,x=1, β3,x=1 for a HexMesh with one Hexagon in Ω=[0,1]x[0,1])
 A[36,13:36].=1.0;
+#=
+d=[2,1,1,2,3,4,5,6,6,5,4,3];
+for i in 1:12
+    A[36,12+i]=d[i];
+    A[36,24+i]=d[i];
+end
+=#
 
 #compute beta-values
 betas=A\b;
