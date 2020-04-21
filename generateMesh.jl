@@ -475,7 +475,7 @@ end
 #Input: nx bzw. ny ist die Anzahl der Gitterelemente in x- bzw. y-Richtung, also die Feinheit des Meshes
 #       xl bzw. yl ist die Länge des Meshes in x- bzw. y-Richtung, als Default ist die Länge nx bzw. ny
 function generateTriMeshEquilateral(xl::Float64, xr::Float64, yl::Float64, yr::Float64, nrows::Int64, condEW::Symbol, condTB::Symbol)
-    l = (2*(yr-yl))/(nrows*sqrt(3)); #see latex equilateralMesh
+    l = (2*(yr-yl))/(nrows*sqrt(3));
     height=(yr-yl)/nrows;
     nx=Int64(div(xr-xl-0.5*l,l)+1); #smallest nx so that nx*l+0.5*l>yr
     xR=xl+nx*l+0.5*l;
@@ -734,7 +734,7 @@ end
 function generateHexMesh(xl::Float64, xr::Float64, yl::Float64, yr::Float64, nrows::Int64, condEW::Symbol, condTB::Symbol; meshType::Int64=4)
     (isodd(nrows) && condTB==:periodic) && error("Choose even nrows for periodic boundary.")
 
-    l = ((yr-yl)/nrows) * (2/3); #see latex equilateralMesh
+    l = ((yr-yl)/nrows) * (2/3);
 
     yR=yl+(3/2)*nrows*l+0.5*l;
 
