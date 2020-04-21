@@ -41,7 +41,7 @@ function assembMassCompound(degF::degF{1,:H1}, m::mesh, kubPoints::Array{Float64
     subcoord=Array{Array{Float64,2},1}(undef,nSubCells);
 
     for k in 1:m.topology.size[m.topology.dim+1]
-        #get coordinates of subCells
+        #get coordinates of compound Cell
         rstart=m.topology.offset[key][k];
         rend=m.topology.offset[key][k+1]-1;
         z=1;
@@ -115,7 +115,7 @@ function assembMassCompound(degF::degF{2,:H1div}, m::mesh, kubPoints::Array{Floa
             end
             z+=1;
         end
-        
+
         subcoord=compoundData.getSubCells[k];
 
         gvertices=l2g(degF,k);
