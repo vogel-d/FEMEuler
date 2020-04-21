@@ -20,6 +20,7 @@ b=zeros(36);
 A=zeros(36,36);
 
 #first constraint
+#outer edges
 A[1,1]=1.0; b[1]=1.0;
 A[2,2]=1.0; b[2]=1.0;
 for i in 3:12
@@ -27,20 +28,26 @@ for i in 3:12
     b[i]=0.0;
 end
 
+#inner edges
 for i in 1:12
     A[12+i,12+i]=1.0;
-    A[12+i,24+mod(12,i)+1]=+1.0;
+#    A[12+i,24+mod(12,i)+1]=-1.0;
+    A[12+i,24+mod(12,i)+1]=1.0;
     b[12+i]=0.0;
 end
 
 #second constraint
-for i in 1:11
-    A[24+i,[1,12+1,24+1]]=[1.0,1.0,-1.0];
-    A[24+i,[i,12+i,24+i]]=[-1.0,-1.0,1.0];
+for i in 2:12
+    #FEMEuler divergences
+#    A[24+i,[1,12+1,24+1]]=[1.0,1.0,-1.0];
+#    A[24+i,[i,12+i,24+i]]=[-1.0,-1.0,1.0];
+    #MelvinThuburn divergences (common divergences)
+    A[24+i,[1,12+1,24+1]]=[1.0,1.0,1.0];
+    A[24+i,[i,12+i,24+i]]=[-1.0,-1.0,-1.0];
     b[24+i]=0.0;
 end
 
-#third constraint (wih a look in integratedAnsatzfct the third constraint
+#third constraint (with a look in integratedAnsatzfct the third constraint
 #results in β1,x=0, β2,x=1, β3,x=1 for a HexMesh with one Hexagon in Ω=[0,1]x[0,1])
 A[36,13:36].=1.0;
 
