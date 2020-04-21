@@ -1,13 +1,13 @@
 include("modulesSphereAdv.jl")
-#global zrecovery=1
+
 function testSphereAdv()
 
-    filename = "testAdvSphN";
+    filename = "testAdvSphRN";
 
     #order: comp, compHigh, compRec, compDG
-    femType=Dict(:rho=>[:DG0, :DG0, :DG1],
+    femType=Dict(:rho=>[:DG0, :DG0, :R1],
                  :rhoV=>[:RT0, :RT0, :VecDG1S],
-                 :rhoTheta=>[:DG0, :DG0, :DG1],
+                 :rhoTheta=>[:DG0, :DG0, :R1],
                  :p=>[:DG0],
                  :v=>[:RT0],
                  :theta=>[:DG0]);
@@ -110,7 +110,7 @@ function testSphereAdv()
     p.solution[0.0].rhoV=projectChi(p,rho0,p.solution[0.0].v,:rho,:v);
 
     unstructured_vtk(p, 0.0, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename*"0", printSpherical=true)
-    return p
+
     function V(xyz::Array{Float64,1})
       x=xyz[1]; y=xyz[2]; z=xyz[3];
       lon,lat,r=cart2sphere(x,y,z);
@@ -120,12 +120,18 @@ function testSphereAdv()
     Vfcomp=:RT0
     Vf=projectAdvection(p,V,Vfcomp);
 
-    taskRecovery ? pos=[1,3] : pos=[1];
+    #taskRecovery ? pos=[1,3] : pos=[1];
     advectionTypes=Symbol[];
+    recoveryTypes=Symbol[];
     for i in [:rho,:rhoTheta,:rhoV]
-        append!(advectionTypes,femType[i][pos]);
+        push!(advectionTypes,femType[i][1]);
+        if i==:rhoV
+            taskRecovery && push!(advectionTypes,femType[i][3]);
+        else
+            taskRecovery && push!(recoveryTypes,femType[i][3]);
+        end
     end
-    nquadPhi, nquadPoints=coordTrans(m.meshType, m.normals, collect(Set(advectionTypes)), size(p.kubWeights,2));
+    nquadPhi, nquadPoints=coordTrans(m, m.normals, advectionTypes, recoveryTypes, size(p.kubWeights,2));
     setEdgeData!(p, :v)
 
 

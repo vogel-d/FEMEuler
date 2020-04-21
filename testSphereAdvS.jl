@@ -5,9 +5,9 @@ function testSphereAdvS()
     filename = "testAdvSphS";
 
     #order: comp, compHigh, compRec, compDG
-    femType=Dict(:rho=>[:DG0, :DG0, :DG1],
+    femType=Dict(:rho=>[:DG0, :DG0, :R1],
                  :rhoV=>[:RT0, :RT0, :VecDG1S],
-                 :rhoTheta=>[:DG0, :DG0, :DG1],
+                 :rhoTheta=>[:DG0, :DG0, :R1],
                  :p=>[:DG0],
                  :v=>[:RT0],
                  :theta=>[:DG0]);
@@ -39,7 +39,7 @@ function testSphereAdvS()
     p=femProblem(m, femType,t=:shallow, advection=advection, taskRecovery=taskRecovery);
     #return p;
     gamma=0.5; #upwind
-    UMax=100.0; #UMax determines the advection in x direction
+    UMax=10.0; #UMax determines the advection in x direction
     MISMethod=MIS(:MIS2); #method of time integration
 
     dt=50.0;
@@ -126,12 +126,18 @@ function testSphereAdvS()
     Vfcomp=:RT0
     Vf=projectAdvection(p,V,Vfcomp);
 
-    taskRecovery ? pos=[1,3] : pos=[1];
+    #taskRecovery ? pos=[1,3] : pos=[1];
     advectionTypes=Symbol[];
+    recoveryTypes=Symbol[];
     for i in [:rho,:rhoTheta,:rhoV]
-        append!(advectionTypes,femType[i][pos]);
+        push!(advectionTypes,femType[i][1]);
+        if i==:rhoV
+            taskRecovery && push!(advectionTypes,femType[i][3]);
+        else
+            taskRecovery && push!(recoveryTypes,femType[i][3]);
+        end
     end
-    nquadPhi, nquadPoints=coordTrans(m.meshType, m.normals, collect(Set(advectionTypes)), size(p.kubWeights,2));
+    nquadPhi, nquadPoints=coordTrans(m, m.normals, advectionTypes, recoveryTypes, size(p.kubWeights,2));
     setEdgeData!(p, :v)
 
 
