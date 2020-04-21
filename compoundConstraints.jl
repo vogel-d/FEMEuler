@@ -49,14 +49,10 @@ end
 
 #third constraint (with a look in integratedAnsatzfct the third constraint
 #results in β1,x=0, β2,x=1, β3,x=1 for a HexMesh with one Hexagon in Ω=[0,1]x[0,1])
-A[36,13:36].=1.0;
-#=
-d=[2,1,1,2,3,4,5,6,6,5,4,3];
-for i in 1:12
-    A[36,12+i]=d[i];
-    A[36,24+i]=d[i];
-end
-=#
+A[36,13:24].=1.0;
+#MelvinThuburn ansatzfunctions (common ansatzfunctions)
+#A[36,13:24].=1.0;
+#A[36,25:36].=-1.0;
 
 #compute beta-values
 betas=A\b;
