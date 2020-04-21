@@ -479,7 +479,7 @@ function generateTriMeshEquilateral(xl::Float64, xr::Float64, yl::Float64, yr::F
     height=(yr-yl)/nrows;
     nx=Int64(div(xr-xl-0.5*l,l)+1); #smallest nx so that nx*l+0.5*l>yr
     xR=xl+nx*l+0.5*l;
-    @info "mesh details\n ny=$nrows (=nrows)\n nx=$nx \n edge length=$l\n gridsize=[$xl,$xR]x[$yl,$yr]\n xR deviation: $(xR-xr)"
+    @info "mesh details\n ny=$nrows (=nrows)\n nx=$nx \n edge length=$l\n gridsize=[$xl,$xR]x[$yl,$yr]\n xmax deviation: $(xR-xr)"
 
     #Berechnen der Anzahl der Entitäten für die verschiedenen Dimensionen
     size=[(nx+1)*(nrows+1), nrows*(3*nx+1)+nx, nrows*2*nx];
@@ -746,7 +746,7 @@ function generateHexMesh(xl::Float64, xr::Float64, yl::Float64, yr::Float64, nro
     size=Int64[(nrows+1)*(2*(nx+1))-2, nrows*(nx+1)+(nrows+1)*(2*nx+1)-2, nx*nrows];
     nk=6;
 
-    @info "mesh details\n ny=$nrows (=nrows)\n nx=$nx \n edge length=$l\n gridsize=[$xl,$xR]x[$yl,$yR]\n xR deviation: $(xR-xr)\n yR deviation: $(yR-yr)\n mesh type=$meshType for use of compound elements"
+    @info "mesh details\n ny=$nrows (=nrows)\n nx=$nx \n edge length=$l\n gridsize=[$xl,$xR]x[$yl,$yR]\n xmax deviation: $(xR-xr)\n ymax deviation: $(yR-yr)\n mesh type=$meshType for use of compound elements"
 
 
     #Initialisieren des Offsets mit den Einträgen "20" und "10"
