@@ -23,6 +23,7 @@ include("getElementProperties.jl")
 include("degF.jl");
 include("generateMesh.jl")
 include("refineMesh.jl")
+include("assembleCompoundPhi.jl")
 include("compoundData.jl")
 include("femProblem.jl");
 
