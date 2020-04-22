@@ -5,43 +5,31 @@ function getRecoveryElementProperties(type::Symbol)
     #Ansatzfunktionen
     phi1(xyz,m) = 1.0;
 
-    phix(xyz,m) = (xyz[1]-m[1])^2;
-    phiy(xyz,m) = (xyz[2]-m[2])^2;
-    phiz(xyz,m) = (xyz[3]-m[3])^2;
+    phix(xyz,m) = (xyz[1]-m[1]);
+    phiy(xyz,m) = (xyz[2]-m[2]);
+    phiz(xyz,m) = (xyz[3]-m[3]);
 
-    phixy(xyz,m) = (xyz[1]-m[1])^2*(xyz[2]-m[2])^2
-    phixz(xyz,m) = (xyz[1]-m[1])^2*(xyz[3]-m[3])^2
-    phiyz(xyz,m) = (xyz[2]-m[2])^2*(xyz[3]-m[3])^2
+    phixy(xyz,m) = (xyz[1]-m[1])*(xyz[2]-m[2])
+    phixz(xyz,m) = (xyz[1]-m[1])*(xyz[3]-m[3])
+    phiyz(xyz,m) = (xyz[2]-m[2])*(xyz[3]-m[3])
 
-    phix2(xyz,m) = (xyz[1]-m[1])^4
-    phiy2(xyz,m) = (xyz[2]-m[2])^4
-    phiz2(xyz,m) = (xyz[3]-m[3])^4
+    phix2(xyz,m) = (xyz[1]-m[1])^2
+    phiy2(xyz,m) = (xyz[2]-m[2])^2
+    phiz2(xyz,m) = (xyz[3]-m[3])^2
 
     #Ableitungen
-    dxphix(xyz,m) = 2*(xyz[1]-m[1]);
-    dyphiy(xyz,m) = 2*(xyz[2]-m[2]);
-    dzphiz(xyz,m) = 2*(xyz[3]-m[3]);
-
-    dxphixy(xyz,m) = 2*(xyz[1]-m[1])*(xyz[2]-m[2])^2
-    dyphixy(xyz,m) = 2*(xyz[1]-m[1])^2*(xyz[2]-m[2])
-    dxphixz(xyz,m) = 2*(xyz[1]-m[1])*(xyz[3]-m[3])^2
-    dzphixz(xyz,m) = 2*(xyz[1]-m[1])^2*(xyz[3]-m[3])
-    dyphiyz(xyz,m) = 2*(xyz[2]-m[2])*(xyz[3]-m[3])^2
-    dzphiyz(xyz,m) = 2*(xyz[2]-m[2])^2*(xyz[3]-m[3])
-
-    dxphix2(xyz,m) = 4*(xyz[1]-m[1])^3
-    dyphiy2(xyz,m) = 4*(xyz[2]-m[2])^3
-    dzphiz2(xyz,m) = 4*(xyz[3]-m[3])^3
-
+    phi2x(xyz,m) = 2*(xyz[1]-m[1]);
+    phi2y(xyz,m) = 2*(xyz[2]-m[2]);
+    phi2z(xyz,m) = 2*(xyz[3]-m[3]);
 
     if type==:R1
         phi=[phi1, phix, phiy, phiz]
 
         divphi=[null, null, null, null];
 
-        gradphi=[null  dxphix   null    null;
-                 null  null     dyphiy  null;
-                 null  null     null    dzphiz];
+        gradphi=[null  phi1   null    null;
+                 null  null   phi1    null;
+                 null  null   null    phi1];
 
         nFace=4;
         nEdge=0;
@@ -54,9 +42,9 @@ function getRecoveryElementProperties(type::Symbol)
 
         divphi=[null, null, null, null, null, null, null, null, null, null];
 
-        gradphi=[null  dxphix   null    null    dxphixy   dxphixz   null      dxphix2   null       null;
-                 null  null     dyphiy  null    dyphixy   null      dyphiyz   null      dyphiy1    null;
-                 null  null     null    dzphiz  null      dzphixz   dzphiyz   null      null       dzphiz2]
+        gradphi=[null  phi1   null    null    phiy   phiz   null   phi2x   null     null;
+                 null  null   phi1    null    phix   null   phiz   null    phi2y    null;
+                 null  null   null    phi1    null   phix   phiy   null    null     phi2z]
 
         nFace=10;
         nEdge=0;
