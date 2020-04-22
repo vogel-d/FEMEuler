@@ -53,11 +53,13 @@ function getSubCellsHexToTris(m::mesh)
                   [0.0 0.0 0.0 0.0;
                    0.0 0.0 0.0 0.0],
                   ]
+
+    cyclicstartlowerright=[3,4,5,6,1,2];
+
     for Cell in 1:m.topology.size[m.geometry.dim+1]
         c=m.geometry.coordinates[:,m.topology.incidence["20"][((Cell-1)*6+1):(Cell*6)]];
         middle=(1/6).*sum(c,dims=2);
 
-        cyclicstartlowerright=[3,4,5,6,1,2];
         for i in 1:6
             current=cyclicstartlowerright[i];
             next=1+mod(current,6);
@@ -68,8 +70,7 @@ function getSubCellsHexToTris(m::mesh)
             subCellsCell[i*2]=       [0.5*(c[1,current]+c[1,next]) c[1,next] middle[1];
                                       0.5*(c[2,current]+c[2,next]) c[2,next] middle[2]];
         end
-
-        push!(subCells,subCellsCell);
+        push!(subCells,copy(subCellsCell));
     end
     return subCells;
 end
