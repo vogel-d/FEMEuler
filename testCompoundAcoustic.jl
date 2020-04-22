@@ -2,19 +2,22 @@ include("modulesBcompound.jl")
 include("solveAcoustic.jl")
 
 function testCompoundAcoustic()
-    filename = "testAcousticbig";
+    filename = "COMPOUND";
 
     femType=Dict(:p=>[:DG0], :v=>[:RT0], :b=>[:DG0]);
     #femType=Dict(:p=>[:DG1], :v=>[:RT1], :b=>[:DG1]);
 
-    m=generateHexMesh(0.0,1.0,0.0,1.0,1,:periodic,:constant,meshType=3); #(east/west, top/bottom)
+    m=generateHexMesh(0.0,10.0,0.0,10.0,2,:periodic,:constant,meshType=3); #(east/west, top/bottom)
     #m=generateRectMesh(30,30,:periodic,:periodic,0.0,2.0,0.0,2.0); #(east/west, top/bottom)
     p=femProblem(m, femType, compoundMethod=:HexToTris);
+    #p=femProblem(m, femType, compoundMethod=:HexToKites);
     #p=femProblem(m, femType);
 
     method=:euler;
+    #method=:rk4;
     dt=0.5;
-    tend=50.0;
+    #tend=100.0;
+    tend=1*dt;
 
     solSaves=Int(tend/dt); #determines at which points of time the solution is saved
     nIter=tend/solSaves;
@@ -23,8 +26,8 @@ function testCompoundAcoustic()
     H=10000;
     A=5000;
     xM=0.5*(p.mesh.geometry.l[1]+p.mesh.geometry.r[1]);
-    #yM=0.5*(p.mesh.geometry.l[2]+p.mesh.geometry.r[2]);
-    xCM=50000.0; zCM=50000.0;
+    zM=0.5*(p.mesh.geometry.l[2]+p.mesh.geometry.r[2]);
+    #xCM=50000.0; zCM=50000.0;
     r0=10000.0; th0=300.0; p0=100000.0;
     DeltaTh1=2;
     Grav=9.81;
@@ -33,7 +36,7 @@ function testCompoundAcoustic()
 
     function fp(xz::Array{Float64,1})
         x=xz[1]; z=xz[2];
-        rad=sqrt((x-xCM)^2+(z-zCM)^2);
+        rad=sqrt((x-xM)^2+(z-zM)^2);
         return 0+(rad<r0)*(DeltaTh1*cos(0.5*pi*rad/r0)^2)
     end
 
@@ -50,12 +53,11 @@ function testCompoundAcoustic()
     end
 =#
     f=Dict(:p=>fp);
-    return p;
     assembMassCompound!(p);
     #assembMass!(p);
-    error()
-    assembStiff!(p);
-    applyStartValues!(p,f)
+    #return p;
+    assembStiffCompound!(p);
+    applyStartValuesCompound!(p,f)
 
     Fp=p.massM[p.femType[:p][1]];
     Fv=p.massM[p.femType[:v][1]];
@@ -72,7 +74,7 @@ function testCompoundAcoustic()
     #Speichern des Endzeitpunktes als vtu-Datei:
     #unstructured_vtk(p, tend, [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesqTriangles/"*filename)
     #Speichern aller berechneten Zwischenwerte als vtz-Datei:
-    unstructured_vtk(p, sort(collect(keys(p.solution))), [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testAcousticTriangles/"*filename)
+    #unstructured_vtk(p, sort(collect(keys(p.solution))), [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testAcousticTriangles/"*filename)
 
     return p
 end
