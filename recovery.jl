@@ -1,23 +1,21 @@
-function recovery(p::femProblem, comp::Array{Symbol,1}, cval::Array{Float64,1}, stencil)
-    println("cval")
-    printMatrix(cval)
+function recovery(p::femProblem, comp::Array{Symbol,1}, cval::Array{Float64,1}, stencil, order::Int)
     cS=assembRecovery(p.degFBoundary[comp[2]],p.degFBoundary[comp[1]],cval,p.mesh,p.kubPoints,p.kubWeights)
-    println("cS")
-    printMatrix(cS)
-    cR=recovery(p.degFBoundary[comp[2]],p.degFBoundary[comp[3]],cS,stencil,p.mesh,p.kubPoints,p.kubWeights)
-    println("cR")
-    printMatrix(cR)
+    cR=recovery(p.degFBoundary[comp[2]],order,cS,stencil,p.mesh,p.kubPoints,p.kubWeights)
     return cR
 end
 
-function recovery(degFT::degF{1,:H1}, degFR::degF{1,:H1}, cval::Array{Float64,1},
+function recovery(degFT::degF{1,:H1}, order::Int, cval::Array{Float64,1},
                   stencil, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
     phiT=@views degFT.phi;
-    phiR=@views degFR.phi;
+    #phiR=@views degFR.phi;
 
     nf=m.topology.size[3]
+    mcoord=m.geometry.coordinates;
+    inc=m.topology.incidence["20"];
+    off=m.topology.offset["20"];
+
     nT=length(phiT)
-    nR=div(length(phiR),nf)
+    #nR=div(length(phiR),nf)
 
     sk=size(kubWeights);
 
@@ -31,23 +29,26 @@ function recovery(degFT::degF{1,:H1}, degFR::degF{1,:H1}, cval::Array{Float64,1}
     cR=Float64[];
     zf=0;
     for f in 1:nf
-        jacobi!(J,dJ,m,f,kubPoints,coord);
-
-        #mp=transformation(m,coord,0.5,0.5);
-        #phiR=getPhiRecovery(mp,Val(order));
+        #jacobi!(J,dJ,m,f,kubPoints,coord);
+        fcoord=@views mcoord[:,inc[off[f]:off[f+1]-1]]
+        mp=transformation(m,fcoord,0.5,0.5);
+        phiR=getPhiRecovery(mp,Val(order));
+        nR=length(phiR)
 
         nS=length(stencil[f])
         lM=zeros(nS*nT,nR)
         for j in 1:nR
             z=1;
             for k in stencil[f]
+                jacobi!(J,dJ,m,k,kubPoints,coord);
                 k==f ? w=10.0^8 : w=1.0;
+                kcoord=@views mcoord[:,inc[off[k]:off[k+1]-1]]
                 for i in 1:nT
                     currentval=0.0;
                     for r in 1:sk[2]
                         for l in 1:sk[1]
-                            currentval+=kubWeights[l,r]*abs(dJ[l,r])*phiT[i][l,r]*phiR[zf+j][l,r]
-                            #    phiR[j](transformation(m,coord,kubPoints[1,l],kubPoints[2,r]));
+                            currentval+=kubWeights[l,r]*abs(dJ[l,r])*phiT[i][l,r]* #phiR[zf+j][l,r]
+                                phiR[j](transformation(m,kcoord,kubPoints[1,l],kubPoints[2,r]));
                         end
                     end
                     lM[z,j]+=w*currentval;
@@ -70,6 +71,11 @@ function recovery(degFT::degF{1,:H1}, degFR::degF{1,:H1}, cval::Array{Float64,1}
     return cR;
 end
 
+function recovery(p::femProblem, comp::Array{Symbol,1}, cval::Array{Float64,1}, stencil)
+    cS=assembRecovery(p.degFBoundary[comp[2]],p.degFBoundary[comp[1]],cval,p.mesh,p.kubPoints,p.kubWeights)
+    cR=recovery(p.degFBoundary[comp[2]],p.degFBoundary[comp[3]],cS,stencil,p.mesh,p.kubPoints,p.kubWeights)
+    return cR
+end
 
 #=
 function recovery(degFT::degF{1,:H1}, degFR::degF{1,:H1}, cval::Array{Float64,1},
