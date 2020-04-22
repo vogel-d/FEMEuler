@@ -33,11 +33,10 @@ include("initJacobi.jl")
 include("adaptGeometry.jl")
 include("additionalFunctions.jl")
 
-include("assembMass.jl");
 include("assembMassCompound.jl");
-include("assembLoad.jl");
-include("assembStiff.jl");
-include("applyStartValues.jl");
+include("assembLoadCompound.jl");
+include("assembStiffCompound.jl");
+include("applyStartValuesCompound.jl");
 include("solveB.jl");
 
 include("plotSolution.jl");
