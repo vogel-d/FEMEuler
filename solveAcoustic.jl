@@ -28,29 +28,29 @@ function solveAcoustic!(p::femProblem,
   elseif method==:rk4
     v1=copy(p.solution[tstart].v); v2=copy(p.solution[tstart].v); v3=copy(p.solution[tstart].v); v4=copy(p.solution[tstart].v);
     p1=copy(p.solution[tstart].p); p2=copy(p.solution[tstart].p); p3=copy(p.solution[tstart].p); p4=copy(p.solution[tstart].p);
-    b1=copy(p.solution[tstart].b); b2=copy(p.solution[tstart].b); b3=copy(p.solution[tstart].b); b4=copy(p.solution[tstart].b);
+    #b1=copy(p.solution[tstart].b); b2=copy(p.solution[tstart].b); b3=copy(p.solution[tstart].b); b4=copy(p.solution[tstart].b);
 
     for i in 1:iterations
       v1[1:nv]=Fv\(-Svp*yP+Svb*yB);
       p1[1:np]=Fp\(-cs2*(Spv*yV));
-      b1[1:nb]=Fb\(-N2*(Sbv*yV));
+      #b1[1:nb]=Fb\(-N2*(Sbv*yV));
 
-      v2[1:nv]=Fv\(-Svp*(yP+0.5*dt*p1)+Svb*(yB+0.5*dt*b1));
+      v2[1:nv]=Fv\(-Svp*(yP+0.5*dt*p1));
       p2[1:np]=Fp\(-cs2*(Spv*(yV+0.5*dt*v1)));
-      b2[1:nb]=Fb\(-N2*(Sbv*(yV+0.5*dt*v1)));
+      #b2[1:nb]=Fb\(-N2*(Sbv*(yV+0.5*dt*v1)));
 
-      v3[1:nv]=Fv\(-Svp*(yP+0.5*dt*p2)+Svb*(yB+0.5*dt*b2));
+      v3[1:nv]=Fv\(-Svp*(yP+0.5*dt*p2));
       p3[1:np]=Fp\(-cs2*(Spv*(yV+0.5*dt*v2)));
-      b3[1:nb]=Fb\(-N2*(Sbv*(yV+0.5*dt*v2)));
+      #b3[1:nb]=Fb\(-N2*(Sbv*(yV+0.5*dt*v2)));
 
-      v4[1:nv]=Fv\(-Svp*(yP+dt*p3)+Svb*(yB+dt*b3));
+      v4[1:nv]=Fv\(-Svp*(yP+dt*p3));
       p4[1:np]=Fp\(-cs2*(Spv*(yV+dt*v3)));
-      b4[1:nb]=Fb\(-N2*(Sbv*(yV+dt*v3)));
+      #b4[1:nb]=Fb\(-N2*(Sbv*(yV+dt*v3)));
 
 
       yV[1:nv]=yV[1:nv]+dt*(1/6)*(v1[1:nv]+2*v2[1:nv]+2*v3[1:nv]+v4[1:nv]);
       yP[1:np]=yP[1:np]+dt*(1/6)*(p1[1:np]+2*p2[1:np]+2*p3[1:np]+p4[1:np]);
-      yB[1:nb]=yB[1:nb]+dt*(1/6)*(b1[1:nb]+2*b2[1:nb]+2*b3[1:nb]+b4[1:nb]);
+      #yB[1:nb]=yB[1:nb]+dt*(1/6)*(b1[1:nb]+2*b2[1:nb]+2*b3[1:nb]+b4[1:nb]);
     end
 
   else
