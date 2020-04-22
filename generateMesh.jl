@@ -732,7 +732,7 @@ function generateTriMeshIsosceles(nx::Int, ny::Int, xl::Float64=0.0, yl::Float64
 end
 
 function generateHexMesh(xl::Float64, xr::Float64, yl::Float64, yr::Float64, nrows::Int64, condEW::Symbol, condTB::Symbol; meshType::Int64=4)
-    (isodd(nrows) && condTB==:periodic) && error("Choose even nrows for periodic boundary.")
+    condTB==:periodic && error("periodic boundary only possible for x-direction.")
 
     l = ((yr-yl)/nrows) * (2/3);
 
@@ -912,7 +912,9 @@ function generateHexMesh(xl::Float64, xr::Float64, yl::Float64, yr::Float64, nro
         bE[(nVertical+1):(nVertical+2*nx)].=1.0;
         bE[(size[2]-2*nx+1):size[2]].=1.0;
     elseif condTB==:periodic
-        bE[(nVertical+1):(nVertical+2*nx)]=-(size[2]-2*nx+1):-1:-size[2];
+        bE[nVertical+2*nx]=1.0;
+        bE[size[2]-2*nx+1]=1.0;
+        bE[(nVertical+1):(nVertical+2*nx-1)]=(-(size[2]-2*nx+2)):(-1):(-size[2]);
     end
 
     if condEW==:constant
