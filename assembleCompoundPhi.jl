@@ -1,5 +1,5 @@
 function assemblePhiHexToKites(femElements::Set{Symbol})
-    @warn("not necessarily right for quadrilaterals")
+    @warn("not right for quadrilaterals, check betas and order of ansatzfunctions")
     assembledPhi=Dict();
     for type in femElements
         if type==:RT0
@@ -24,13 +24,8 @@ function assemblePhiHexToKites(femElements::Set{Symbol})
             phi2times = ones(Float64,1,12);
 
             phi1 = phi2times[:,7:12];
-            phi2 = phi2times[:,6:11];
-            phi3 = phi2times[:,5:10];
-            phi4 = phi2times[:,4:9];
-            phi5 = phi2times[:,3:8];
-            phi6 = phi2times[:,2:7];
 
-            assembledPhi[type]=[phi1, phi2, phi3, phi4, phi5, phi6];
+            assembledPhi[type]=[phi1];
         else
             error("Tell me how to assemble HexToKite compound ansatzfunctions in $type")
         end
@@ -51,38 +46,21 @@ function assemblePhiHexToTris(femElements::Set{Symbol})
                          0 -5 -4 -3 -2 -1  0 1 2 3 4 5 0 -5 -4 -3 -2 -1  0 1 2 3 4 5;
                          5  0 -5 -4 -3 -2 -1 0 1 2 3 4 5  0 -5 -4 -3 -2 -1 0 1 2 3 4];
 
-            phi1 = phi2times[:,13:24];
-            phi2 = phi2times[:,12:23];
-            phi3 = phi2times[:,11:22];
-            phi4 = phi2times[:,10:21];
+            phi1 = phi2times[:,5:16];
+            phi2 = phi2times[:,3:14];
+            phi3 = phi2times[:,13:24];
+            phi4 = phi2times[:,11:22];
             phi5 = phi2times[:,9:20];
-            phi6 = phi2times[:,8:19];
-            phi7 = phi2times[:,7:18];
-            phi8 = phi2times[:,6:17];
-            phi9 = phi2times[:,5:16];
-            phi10 = phi2times[:,4:15];
-            phi11 = phi2times[:,3:14];
-            phi12 = phi2times[:,2:13];
+            phi6 = phi2times[:,7:18];
 
-            assembledPhi[type]=[phi1,phi2,phi3,phi4,phi5,phi6,phi7,phi8,phi9,phi10,phi11,phi12];
+            assembledPhi[type]=[phi1,phi2,phi3,phi4,phi5,phi6];
 
         elseif type==:DG0
             phi2times = ones(Float64,1,24);
 
-            phi1 = phi2times[:,13:24];
-            phi2 = phi2times[:,12:23];
-            phi3 = phi2times[:,11:22];
-            phi4 = phi2times[:,10:21];
-            phi5 = phi2times[:,9:20];
-            phi6 = phi2times[:,8:19];
-            phi7 = phi2times[:,7:18];
-            phi8 = phi2times[:,6:17];
-            phi9 = phi2times[:,5:16];
-            phi10 = phi2times[:,4:15];
-            phi11 = phi2times[:,3:14];
-            phi12 = phi2times[:,2:13];
+            phi1 = phi2times[:,5:16];
 
-            assembledPhi[type]=[phi1,phi2,phi3,phi4,phi5,phi6,phi7,phi8,phi9,phi10,phi11,phi12];
+            assembledPhi[type]=[phi1];
 
         else
             error("Tell me how to assemble HexToTri compound ansatzfunctions in $type")
