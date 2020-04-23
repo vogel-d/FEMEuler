@@ -55,7 +55,7 @@ function vtkRecovery(m::mesh, rx::Int, ry::Int, degF::degF{1}, sol::Array{Float6
     cvtk=zeros(Float64, nf)
     cLoc=zeros(Float64, length(degF.phi))
     for k in 1:nfc
-        coord=@views mf.geometry.coordinates[:,mf.topology.incidence["20"][mf.topology.offset["20"][k]:mf.topology.offset["20"][k+1]-1]]
+        coord=@views m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][k]:m.topology.offset["20"][k+1]-1]]
         mp=transformation(mf, coord, mx, my)
         for i in 1:size(rcoord,2)
             mc=transformation(mf, coord, rcoord[1,i],rcoord[2,i])
@@ -135,7 +135,7 @@ function vtkRecovery(m::mesh, rx::Int, ry::Int, degF::degF{2}, sol::Array{Float6
         cLoc=sol[l2g(degF, k)]
         for i in 1:length(f)
             dJ=jacobi!(J,m,k,rcoord[1,i],rcoord[2,i],coord);
-            mp=transformation(mf, mcoord, mx, my)
+            mp=transformation(mf, coord, mx, my)
             for i in 1:size(rcoord,2)
                 mc=transformation(mf, coord, rcoord[1,i],rcoord[2,i])
                 fComp[i]=getElementProperties(femType,mf.meshType,mp,mc);
