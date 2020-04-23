@@ -32,7 +32,7 @@ function recovery(degFT::degF{1,:H1}, order::Int, cval::Array{Float64,1},
         #jacobi!(J,dJ,m,f,kubPoints,coord);
         fcoord=@views mcoord[:,inc[off[f]:off[f+1]-1]]
         mp=transformation(m,fcoord,0.5,0.5);
-        phiR=getPhiRecovery(mp,Val(order));
+        phiR=getPhiRecovery(mp,Val(order),Val(m.geometry.dim));
         nR=length(phiR)
 
         nS=length(stencil[f])

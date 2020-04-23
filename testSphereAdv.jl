@@ -2,12 +2,12 @@ include("modulesSphereAdv.jl")
 
 function testSphereAdv()
 
-    filename = "testAdvSphRN";
+    filename = "testAdvSphRNN";
 
     #order: comp, compHigh, compRec, compDG
-    femType=Dict(:rho=>[:DG0, :DG0, :R1],
+    femType=Dict(:rho=>[:DG0, :DG0, :R1S],
                  :rhoV=>[:RT0, :RT0, :VecDG1S],
-                 :rhoTheta=>[:DG0, :DG0, :R1],
+                 :rhoTheta=>[:DG0, :DG0, :R1S],
                  :p=>[:DG0],
                  :v=>[:RT0],
                  :theta=>[:DG0]);

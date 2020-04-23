@@ -23,6 +23,20 @@ function getRecoveryElementProperties(type::Symbol)
     phi2z(xyz,m) = 2*(xyz[3]-m[3]);
 
     if type==:R1
+        phi=[phi1, phix, phiy]
+
+        divphi=[null, null, null];
+
+        gradphi=[null  phi1   null;
+                 null  null   phi1];
+
+        nFace=3;
+        nEdge=0;
+        nVert=0;
+
+        cm=Dict([1,2]=>[0,0,0], [2,3]=>[0,0,0], [3,4]=>[0,0,0], [1,4]=>[0,0,0]);
+
+    elseif type==:R1S
         phi=[phi1, phix, phiy, phiz]
 
         divphi=[null, null, null, null];
@@ -38,6 +52,21 @@ function getRecoveryElementProperties(type::Symbol)
         cm=Dict([1,2]=>[0,0,0,0], [2,3]=>[0,0,0,0], [3,4]=>[0,0,0,0], [1,4]=>[0,0,0,0]);
 
     elseif type==:R2
+        phi=[phi1 phix phiy phixy phix2 phiy2]
+
+        divphi=[null, null, null, null, null, null];
+
+        gradphi=[null  phi1   null    phiy   phi2x   null;
+                 null  null   phi1    phix   null    phi2y];
+
+        nFace=6;
+        nEdge=0;
+        nVert=0;
+
+        cm=Dict([1,2]=>[0,0,0,0,0,0], [2,3]=>[0,0,0,0,0,0],
+            [3,4]=>[0,0,0,0,0,0], [1,4]=>[0,0,0,0,0,0]);
+
+    elseif type==:R2S
         phi=[phi1 phix phiy phiz phixy phixz phiyz phix2 phiy2 phiz2]
 
         divphi=[null, null, null, null, null, null, null, null, null, null];
