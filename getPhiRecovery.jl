@@ -42,7 +42,7 @@ function getPhiRecovery(m::Array{Float64,1},order::Val{2}, geometryDim::Val{2})
     phix2(xyz) = (xyz[1]-m[1])^2
     phiy2(xyz) = (xyz[2]-m[2])^2
 
-    phi=[phi1 phix phiy phixy phix2 phiy2]
+    phi=[phi1, phix, phiy, phixy, phix2, phiy2]
 
     return phi
 end
@@ -64,7 +64,7 @@ function getPhiRecovery(m::Array{Float64,1},order::Val{2}, geometryDim::Val{3})
     phiy2(xyz) = (xyz[2]-m[2])^2
     phiz2(xyz) = (xyz[3]-m[3])^2
 
-    phi=[phi1 phix phiy phiz phixy phixz phiyz phix2 phiy2 phiz2]
+    phi=[phi1, phix, phiy, phiz, phixy, phixz, phiyz, phix2, phiy2, phiz2]
     #=
     phi=[phi1 phix phiy phiz phixy phixz phiyz phix2 phiy2 phiz2 null null null null null null null null null null null null null null null null null null null null;
          null null null null null null null null null null phi1 phix phiy phiz phixy phixz phiyz phix2 phiy2 phiz2 null null null null null null null null null null;
