@@ -35,6 +35,11 @@ function adaptGeometry!(m::mesh,vid::Array{Int64,1},c::Array{Float64,2})
     return nothing;
 end
 
+function adaptGeometry!(m::mesh,vid::Int64,c::Array{Float64,1})
+    m.geometry.coordinates[:,vid]=c;
+    return nothing;
+end
+
 function adaptGeometry!(m::mesh,r::Float64,adaptBoundary::Bool=false)
     coord=m.geometry.coordinates;
     xR=m.geometry.r[1]; xL=m.geometry.l[1]; yR=m.geometry.r[2]; yL=m.geometry.l[2]
