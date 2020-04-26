@@ -8,30 +8,33 @@ function assembLoadCompound(degF::degF{1,:H1}, f, m::mesh, kubPoints::Array{Floa
     gb=zeros(degF.numB)
 
     nSubCells=compoundData.nSubCells;
-    assembledPhi=compoundData.assembledPhi[degF.femType];
+    nCompoundPhi=compoundData.nCompoundPhi[degF.femType];
+    assembledPhi=Array{Array{Float64,2},1}(undef,nCompoundPhi);
+    subcoord=Array{Array{Float64,2},1}(undef,nSubCells);
     nPhiCompoundElement=length(assembledPhi);
 
     ft=zeros(sk);
 
     nPhiSubElement=length(phiT);
     for k in 1:m.topology.size[m.topology.dim+1]
-        coord=@views m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][k]:m.topology.offset["20"][k+1]-1]]
+        coord= m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][k]:m.topology.offset["20"][k+1]-1]]
 
+        getSubCells!(subcoord, coord, compoundData);
         globalNum=l2g(degF,k);
-        subCoord=compoundData.getSubCells[k];
+        assemblePhi!(assembledPhi, subcoord, degF, m, J, dJ, phiT, kubPoints, kubWeights, compoundData);
         for j in 1:nPhiCompoundElement
             for subCell in 1:nSubCells
-                jacobi!(J,dJ,kubPoints,subCoord[subCell],m.meshType);
+                jacobi!(J,dJ,kubPoints,subcoord[subCell],m.meshType);
                 for d in 1:m.geometry.dim
                     fill!(ft,0.0);
                     if sk[1]==1 # <=> dreiecke, muss liste durchlaufen
                         for i=1:sk[2]
-                            xy=transformation(m,subCoord[subCell],kubPoints[1,i],kubPoints[2,i])
+                            xy=transformation(m,subcoord[subCell],kubPoints[1,i],kubPoints[2,i])
                             ft[i]=f(xy);
                         end
                     else # <=> vierecke, muss matrix durchlaufen
                         for i=1:sk[1], j=1:sk[2]
-                            xy=transformation(m,subCoord[subCell],kubPoints[1,i],kubPoints[2,j])
+                            xy=transformation(m,subcoord[subCell],kubPoints[1,i],kubPoints[2,j])
                             ft[i,j]=f(xy);
                         end
                     end
@@ -58,6 +61,7 @@ function assembLoadCompound(degF::degF{2,S} where S, f, m::mesh, kubPoints::Arra
     sk=size(kubWeights);
     nPhiSubElement=size(phiT,2);
 
+    coord=Array{Float64,2}(undef,m.geometry.dim,diff(m.topology.offset["20"][1:2])[1]);
     J=initJacobi((m.geometry.dim,m.topology.dim),sk);
     ddJ=Array{Float64,2}(undef,sk);
     jphiT=initJacobi((m.geometry.dim,iter),sk);
@@ -65,29 +69,31 @@ function assembLoadCompound(degF::degF{2,S} where S, f, m::mesh, kubPoints::Arra
     gb=zeros(degF.numB);
 
     nSubCells=compoundData.nSubCells;
-    assembledPhi=compoundData.assembledPhi[degF.femType];
+    assembledPhi=Array{Array{Float64,2},1}(undef,nCompoundPhi);
+    subcoord=Array{Array{Float64,2},1}(undef,nSubCells);
     nPhiCompoundElement=length(assembledPhi);
 
     ft=[zeros(sk) for d in 1:m.geometry.dim]
 
     for k in 1:m.topology.size[m.topology.dim+1]
-        coord=@views m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][k]:m.topology.offset["20"][k+1]-1]]
+        coord= m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][k]:m.topology.offset["20"][k+1]-1]]
 
+        getSubCells!(subcoord, coord, compoundData);
         globalNum=l2g(degF,k);
-        subCoord=compoundData.getSubCells[k];
+        assemblePhi!(assembledPhi, subcoord, degF, m, J, ddJ, jphiT, kubPoints, kubWeights, compoundData);
         for j in 1:nPhiCompoundElement
             for subCell in 1:nSubCells
-                jacobi!(J,ddJ,jphiT,kubPoints,phiT,subCoord[subCell],m.meshType);
+                jacobi!(J,ddJ,jphiT,kubPoints,phiT,subcoord[subCell],m.meshType);
                 for d in 1:m.geometry.dim
                     fill!(ft[d],0.0);
                     if sk[1]==1 # <=> dreiecke, muss liste durchlaufen
                         for i=1:sk[2]
-                            xy=transformation(m,subCoord[subCell],kubPoints[1,i],kubPoints[2,i])
+                            xy=transformation(m,subcoord[subCell],kubPoints[1,i],kubPoints[2,i])
                             ft[d][i]=f[d](xy);
                         end
                     else # <=> vierecke, muss matrix durchlaufen
                         for i=1:sk[1], j=1:sk[2]
-                            xy=transformation(m,subCoord[subCell],kubPoints[1,i],kubPoints[2,j])
+                            xy=transformation(m,subcoord[subCell],kubPoints[1,i],kubPoints[2,j])
                             ft[d][i,j]=f[d](xy);
                         end
                     end

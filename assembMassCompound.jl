@@ -26,8 +26,8 @@ function assembMassCompound(degF::degF{1,:H1}, m::mesh, kubPoints::Array{Float64
     rows=Int64[];
     cols=Int64[];
     vals=Float64[];
-    phiRef=degF.phi;
-    nPhiSubElement=length(phiRef);
+    phi=degF.phi;
+    nPhiSubElement=length(phi);
     sk=size(kubWeights);
     J=initJacobi((m.geometry.dim,m.topology.dim),sk);
     dJ=Array{Float64,2}(undef,sk);
@@ -35,15 +35,18 @@ function assembMassCompound(degF::degF{1,:H1}, m::mesh, kubPoints::Array{Float64
     key="20";
     mt=m.meshType;
     nSubCells=compoundData.nSubCells;
-    assembledPhi=compoundData.assembledPhi[degF.femType];
-    nPhiCompoundElement=length(assembledPhi);
+    nCompoundPhi=compoundData.nCompoundPhi[degF.femType];
+    assembledPhi=Array{Array{Float64,2},1}(undef,nCompoundPhi);
     subcoord=Array{Array{Float64,2},1}(undef,nSubCells);
 
     for k in 1:m.topology.size[m.topology.dim+1]
-        subcoord=compoundData.getSubCells[k];
+        coord= m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][k]:m.topology.offset["20"][k+1]-1]]
+
+        getSubCells!(subcoord, coord, compoundData);
         gvertices=l2g(degF,k);
-        for j in 1:nPhiCompoundElement
-            for i in 1:nPhiCompoundElement
+        assemblePhi!(assembledPhi, subcoord, degF, m, J, dJ, phi, kubPoints, kubWeights, compoundData);
+        for j in 1:nCompoundPhi
+            for i in 1:nCompoundPhi
                 currentval=0.0;
                 for subCell in 1:nSubCells
                     jacobi!(J,dJ,kubPoints,subcoord[subCell],mt);
@@ -54,7 +57,7 @@ function assembMassCompound(degF::degF{1,:H1}, m::mesh, kubPoints::Array{Float64
                                     for r in 1:sk[2]
                                         for l in 1:sk[1]
                                             currentval+=assembledPhi[i][subi,subCell]*assembledPhi[j][subj,subCell]*
-                                                        kubWeights[l,r]*phiRef[subi][l,r]*phiRef[subj][l,r]*abs(dJ[l,r]);
+                                                        kubWeights[l,r]*phi[subi][l,r]*phi[subj][l,r]*abs(dJ[l,r]);
                                         end
                                     end
                                 end
@@ -79,40 +82,43 @@ function assembMassCompound(degF::degF{2,:H1div}, m::mesh, kubPoints::Array{Floa
     rows=Int64[];
     cols=Int64[];
     vals=Float64[];
-    phiRef=degF.phi;
-    nPhiSubElement=size(phiRef,2);
+    phi=degF.phi;
+    nPhiSubElement=size(phi,2);
     sk=size(kubWeights)
     J=initJacobi((m.geometry.dim,m.topology.dim),sk);
     ddJ=Array{Float64,2}(undef,sk);
-    jphiRef=initJacobi((m.geometry.dim,nPhiSubElement),sk);
+    jphi=initJacobi((m.geometry.dim,nPhiSubElement),sk);
     coord=Array{Float64,2}(undef,m.geometry.dim,diff(m.topology.offset["20"][1:2])[1]);
     key="20";
     mt=m.meshType;
     nSubCells=compoundData.nSubCells;
-    assembledPhi=compoundData.assembledPhi[degF.femType];
-    nPhiCompoundElement=length(assembledPhi);
+    nCompoundPhi=compoundData.nCompoundPhi[degF.femType];
+    assembledPhi=Array{Array{Float64,2},1}(undef,nCompoundPhi);
     subcoord=Array{Array{Float64,2},1}(undef,nSubCells);
 
     for k in 1:m.topology.size[m.topology.dim+1]
-        subcoord=compoundData.getSubCells[k];
+        coord= m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][k]:m.topology.offset["20"][k+1]-1]]
+
+        getSubCells!(subcoord, coord, compoundData);
         gvertices=l2g(degF,k);
-        for j in 1:nPhiCompoundElement
-            for i in 1:nPhiCompoundElement
+        assemblePhi!(assembledPhi, subcoord, degF, m, J, ddJ, jphi, kubPoints, kubWeights, compoundData);
+        for j in 1:nCompoundPhi
+            for i in 1:nCompoundPhi
                 currentval=0.0;
                 for subCell in 1:nSubCells
-                    jacobi!(J,ddJ,jphiRef,kubPoints,phiRef,subcoord[subCell],mt);
+                    jacobi!(J,ddJ,jphi,kubPoints,phi,subcoord[subCell],mt);
                     for subj in 1:nPhiSubElement
                         if assembledPhi[j][subj,subCell]!=0
                             for subi in 1:nPhiSubElement
                                 if assembledPhi[i][subi,subCell]!=0
                                     for r in 1:sk[2]
                                         for l in 1:sk[1]
-                                            jphi=0.0;
+                                            dotp=0.0;
                                             for d in 1:m.geometry.dim
-                                                jphi+=jphiRef[d,subi][l,r]*jphiRef[d,subj][l,r];
+                                                dotp+=jphi[d,subi][l,r]*jphi[d,subj][l,r];
                                             end
                                             currentval+=assembledPhi[i][subi,subCell]*assembledPhi[j][subj,subCell]*
-                                                        kubWeights[l,r]*abs(ddJ[l,r])*jphi
+                                                        kubWeights[l,r]*abs(ddJ[l,r])*dotp
                                         end
                                     end
                                 end
@@ -136,12 +142,12 @@ function assembMassCompound(degF::degF{2,:H1xH1}, m::mesh, kubPoints::Array{Floa
     rows=Int64[];
     cols=Int64[];
     vals=Float64[];
-    phiRef=degF.phi;
-    iter=size(phiRef,2);
+    phi=degF.phi;
+    iter=size(phi,2);
     sk=size(kubWeights)
     J=initJacobi((m.geometry.dim,m.topology.dim),sk);
     dJ=Array{Float64,2}(undef,sk);
-    jphiRef=initJacobi((m.geometry.dim,iter),sk);
+    jphi=initJacobi((m.geometry.dim,iter),sk);
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
     for k in 1:m.topology.size[m.topology.dim+1]
         jacobi!(J,dJ,m,k,kubPoints,coord);
@@ -153,7 +159,7 @@ function assembMassCompound(degF::degF{2,:H1xH1}, m::mesh, kubPoints::Array{Floa
                     for l in 1:sk[1]
                         vecdot=0.0;
                         for d in 1:m.geometry.dim
-                            vecdot+=phiRef[d,i][l,r]*phiRef[d,j][l,r];
+                            vecdot+=phi[d,i][l,r]*phi[d,j][l,r];
                         end
                         currentval+=kubWeights[l,r]*abs(dJ[l,r])*vecdot
                     end

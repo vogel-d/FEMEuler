@@ -71,61 +71,58 @@ function assembStiffCompound(degFs::degF{1,:H1}, degFv::degF{2,:H1div}, m::mesh,
     nSubCells=compoundData.nSubCells;
     assembledPhiT=compoundData.assembledPhi[degFs.femType];
     assembledPhiF=compoundData.assembledPhi[degFv.femType];
+    nCompoundPhiT=compoundData.nCompoundPhi[degFs.femType];
+    nCompoundPhiF=compoundData.nCompoundPhi[degFv.femType];
+    assembledPhiT=Array{Array{Float64,2},1}(undef,nCompoundPhiT);
+    assembledPhiF=Array{Array{Float64,2},1}(undef,nCompoundPhiF);
+    subcoord=Array{Array{Float64,2},1}(undef,nSubCells);
     mt=m.meshType;
 
     rows=Int64[];
     cols=Int64[];
     vals=Float64[];
 
-    # hier ist Assemblieren nur einmal nötig, da sich die Determinanten der Jacobi-Matrix jeweils
-    # wegkürzt, weshalb die lokale Steifigkeitsmatrix unabhängig von den Koordinaten der jeweiligen Fläche ist.
-
     lS=zeros(length(assembledPhiT), length(assembledPhiF));
-    for i in 1:length(assembledPhiT)
+
+    sk=size(kubWeights)
+    J=initJacobi((m.geometry.dim,m.topology.dim),sk);
+    dJ=Array{Float64,2}(undef,sk);
+    jphi=initJacobi((m.geometry.dim,nPhiF),sk);
+    coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
+
+    checkdet=true;
+
+    for k in 1:nf
+        coord= m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][k]:m.topology.offset["20"][k+1]-1]]
+
+        getSubCells!(subcoord, coord, compoundData);
+        assemblePhi!(assembledPhiT, subcoord, degFs, m, J, dJ, phiT, kubPoints, kubWeights, compoundData);
+        assemblePhi!(assembledPhiF, subcoord, degFv, m, J, dJ, jphi, kubPoints, kubWeights, compoundData);
+        globalNumT=l2g(degFs,k);
+        globalNumF=l2g(degFv,k);
         for j in 1:length(assembledPhiF)
-            currentval=0.0;
-            for subCell in 1:nSubCells
-                for subi in 1:nPhiT
-                    if assembledPhiT[i][subi,subCell]!=0
-                        for subj in 1:nPhiF
-                            if assembledPhiF[j][subj,subCell]!=0
-                                for r in 1:sk[2]
-                                    for l in 1:sk[1]
-                                        currentval+=assembledPhiT[i][subi,subCell]*assembledPhiF[j][subj,subCell]*
-                                                    kubWeights[l,r]*phiT[subi][l,r]*divphiF[subj][l,r];
+            for i in 1:length(assembledPhiT)
+                currentval=0.0;
+                for subCell in 1:nSubCells
+                    for subi in 1:nPhiT
+                        if assembledPhiT[i][subi,subCell]!=0
+                            for subj in 1:nPhiF
+                                if assembledPhiF[j][subj,subCell]!=0
+                                    for r in 1:sk[2]
+                                        for l in 1:sk[1]
+                                            currentval+=assembledPhiT[i][subi,subCell]*assembledPhiF[j][subj,subCell]*
+                                                        kubWeights[l,r]*phiT[subi][l,r]*divphiF[subj][l,r];
+                                        end
                                     end
                                 end
                             end
                         end
                     end
                 end
-            end
-            lS[i,j] = currentval;
-        end
-    end
-    sk=size(kubWeights)
-    J=initJacobi((m.geometry.dim,m.topology.dim),sk);
-    dJ=Array{Float64,2}(undef,sk);
-    coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
-
-    checkdet=true;
-
-    for k in 1:nf
-        globalNumT=l2g(degFs,k);
-        globalNumF=l2g(degFv,k);
-        subcoord=compoundData.getSubCells[k];
-        for subCell in 1:nSubCells
-            jacobi!(J,dJ,kubPoints,subcoord[subCell],mt);
-            if (dJ[1]<0 && checkdet)
-                @warn("determinant is negative but not considered")
-            end
-        end
-        for j in 1:length(globalNumF)
-            for i in 1:length(globalNumT)
-                if !isequal(lS[i,j],0.0) || (globalNumT[i]==nT && globalNumF[j]==nF)
+                if !isequal(currentval,0.0) || (globalNumT[i]==nT && globalNumF[j]==nF)
                     push!(rows,globalNumT[i]);
                     push!(cols,globalNumF[j]);
-                    push!(vals,lS[i,j]);
+                    push!(vals,currentval);
                     #ddJ[1] reicht um Vorzeichen der Determinante zu identifizieren
                 end
             end
@@ -145,6 +142,11 @@ function assembStiffCompound(degFs::degF{1,:H1}, degFv::degF{2,:H1div}, z::Array
     nSubCells=compoundData.nSubCells;
     assembledPhiT=compoundData.assembledPhi[degFs.femType];
     assembledPhiF=compoundData.assembledPhi[degFv.femType];
+    nCompoundPhiT=compoundData.nCompoundPhi[degFs.femType];
+    nCompoundPhiF=compoundData.nCompoundPhi[degFv.femType];
+    assembledPhiT=Array{Array{Float64,2},1}(undef,nCompoundPhiT);
+    assembledPhiF=Array{Array{Float64,2},1}(undef,nCompoundPhiF);
+    subcoord=Array{Array{Float64,2},1}(undef,nSubCells);
     mt=m.meshType;
 
     rows=Int64[];
@@ -160,7 +162,11 @@ function assembStiffCompound(degFs::degF{1,:H1}, degFv::degF{2,:H1div}, z::Array
     lS=zeros(length(assembledPhiT),length(assembledPhiF));
 
     for k in 1:m.topology.size[m.topology.dim+1]
-        subcoord=compoundData.getSubCells[k];
+        coord= m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][k]:m.topology.offset["20"][k+1]-1]]
+
+        getSubCells!(subcoord, coord, compoundData);
+        assemblePhi!(assembledPhiT, subcoord, degFs, m, J, ddJ, phiT, kubPoints, kubWeights, compoundData);
+        assemblePhi!(assembledPhiF, subcoord, degFv, m, J, ddJ, jphiF, kubPoints, kubWeights, compoundData);
         for i in 1:length(assembledPhiT)
             for j in 1:length(assembledPhiF)
                 currentval=0.0;
