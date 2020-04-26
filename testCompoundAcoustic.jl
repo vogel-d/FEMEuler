@@ -2,24 +2,27 @@ include("modulesBcompound.jl")
 include("solveAcoustic.jl")
 
 function testCompoundAcoustic()
-    filename = "COMPOUND";
+    filename = "test";
 
     femType=Dict(:p=>[:DG0], :v=>[:RT0], :b=>[:DG0]);
     #femType=Dict(:p=>[:DG1], :v=>[:RT1], :b=>[:DG1]);
 
-    m=generateHexMesh(0.0,10.0,0.0,10.0,2,:periodic,:constant,meshType=3); #(east/west, top/bottom)
+    m=generateHexMesh(0.0,100000.0,0.0,100000.0,100,:periodic,:constant,meshType=3); #(east/west, top/bottom)
+    #m=generateHexMesh(0.0,1.0,0.0,1.0,2,:periodic,:constant,meshType=3); #(east/west, top/bottom)
     #m=generateRectMesh(30,30,:periodic,:periodic,0.0,2.0,0.0,2.0); #(east/west, top/bottom)
     p=femProblem(m, femType, compoundMethod=:HexToTris);
     #p=femProblem(m, femType, compoundMethod=:HexToKites);
-    #p=femProblem(m, femType);
+
+    adaptGeometry!(p.mesh,300.0);
+    #adaptGeometry!(p.mesh,9,[0.9,0.25]);
 
     method=:euler;
     #method=:rk4;
     dt=0.5;
-    #tend=100.0;
-    tend=1*dt;
+    tend=100.0;
+    #tend=1*dt;
 
-    solSaves=Int(tend/dt); #determines at which points of time the solution is saved
+    solSaves=Int(tend/dt); #determines at how many points of time the solution is saved
     nIter=tend/solSaves;
 
     b0=0.01;
@@ -72,9 +75,9 @@ function testCompoundAcoustic()
     end
     println(time)
     #Speichern des Endzeitpunktes als vtu-Datei:
-    #unstructured_vtk(p, tend, [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesqTriangles/"*filename)
+    #unstructured_vtk(p, tend, [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testCompoundAcoustic/"*filename)
     #Speichern aller berechneten Zwischenwerte als vtz-Datei:
-    #unstructured_vtk(p, sort(collect(keys(p.solution))), [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testAcousticTriangles/"*filename)
+    unstructured_vtk(p, sort(collect(keys(p.solution))), [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testCompoundAcoustic/"*filename)
 
     return p
 end
