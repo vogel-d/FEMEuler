@@ -14,7 +14,6 @@ include("getQuad.jl");
 include("meshTypes.jl");
 include("meshFunctions.jl");
 include("findall.jl");
-include("getSubCells.jl")
 include("getSpace.jl")
 include("transformation.jl")
 
@@ -23,8 +22,9 @@ include("getElementProperties.jl")
 include("degF.jl");
 include("generateMesh.jl")
 include("refineMesh.jl")
-include("assembleCompoundPhi.jl")
 include("compoundData.jl")
+include("getSubCells.jl")
+include("assembleCompoundPhi.jl")
 include("femProblem.jl");
 
 include("l2g.jl")
@@ -43,6 +43,6 @@ include("plotSolution.jl");
 include("plotSolutionGif.jl");
 include("plotMesh.jl");
 include("plotFEM.jl")
-include("vtk.jl");
+include("vtkCompound.jl");
 include("vtkTest.jl");
 include("jld.jl");
