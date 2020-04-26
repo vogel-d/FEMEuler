@@ -73,8 +73,8 @@ function assembStiffCompound(degFs::degF{1,:H1}, degFv::degF{2,:H1div}, m::mesh,
     assembledPhiF=compoundData.assembledPhi[degFv.femType];
     nCompoundPhiT=compoundData.nCompoundPhi[degFs.femType];
     nCompoundPhiF=compoundData.nCompoundPhi[degFv.femType];
-    assembledPhiT=Array{Array{Float64,2},1}(undef,nCompoundPhiT);
-    assembledPhiF=Array{Array{Float64,2},1}(undef,nCompoundPhiF);
+    assembledPhiT=compoundData.assembledPhi[degFs.femType];
+    assembledPhiF=compoundData.assembledPhi[degFv.femType];
     subcoord=Array{Array{Float64,2},1}(undef,nSubCells);
     mt=m.meshType;
 
@@ -100,10 +100,10 @@ function assembStiffCompound(degFs::degF{1,:H1}, degFv::degF{2,:H1div}, m::mesh,
         assemblePhi!(assembledPhiF, subcoord, degFv, m, J, dJ, jphi, kubPoints, kubWeights, compoundData);
         globalNumT=l2g(degFs,k);
         globalNumF=l2g(degFv,k);
-        for j in 1:length(assembledPhiF)
-            for i in 1:length(assembledPhiT)
-                currentval=0.0;
-                for subCell in 1:nSubCells
+        for subCell in 1:nSubCells
+            for j in 1:length(assembledPhiF)
+                for i in 1:length(assembledPhiT)
+                    currentval=0.0;
                     for subi in 1:nPhiT
                         if assembledPhiT[i][subi,subCell]!=0
                             for subj in 1:nPhiF
@@ -118,12 +118,12 @@ function assembStiffCompound(degFs::degF{1,:H1}, degFv::degF{2,:H1div}, m::mesh,
                             end
                         end
                     end
-                end
-                if !isequal(currentval,0.0) || (globalNumT[i]==nT && globalNumF[j]==nF)
-                    push!(rows,globalNumT[i]);
-                    push!(cols,globalNumF[j]);
-                    push!(vals,currentval);
-                    #ddJ[1] reicht um Vorzeichen der Determinante zu identifizieren
+                    if !isequal(currentval,0.0) || (globalNumT[i]==nT && globalNumF[j]==nF)
+                        push!(rows,globalNumT[i]);
+                        push!(cols,globalNumF[j]);
+                        push!(vals,currentval);
+                        #ddJ[1] reicht um Vorzeichen der Determinante zu identifizieren
+                    end
                 end
             end
         end
@@ -140,12 +140,10 @@ function assembStiffCompound(degFs::degF{1,:H1}, degFv::degF{2,:H1div}, z::Array
     nPhiT=length(phiT);
     nPhiF=size(phiF,2);
     nSubCells=compoundData.nSubCells;
-    assembledPhiT=compoundData.assembledPhi[degFs.femType];
-    assembledPhiF=compoundData.assembledPhi[degFv.femType];
     nCompoundPhiT=compoundData.nCompoundPhi[degFs.femType];
     nCompoundPhiF=compoundData.nCompoundPhi[degFv.femType];
-    assembledPhiT=Array{Array{Float64,2},1}(undef,nCompoundPhiT);
-    assembledPhiF=Array{Array{Float64,2},1}(undef,nCompoundPhiF);
+    assembledPhiT=compoundData.assembledPhi[degFs.femType];
+    assembledPhiF=compoundData.assembledPhi[degFv.femType];
     subcoord=Array{Array{Float64,2},1}(undef,nSubCells);
     mt=m.meshType;
 
@@ -164,14 +162,17 @@ function assembStiffCompound(degFs::degF{1,:H1}, degFv::degF{2,:H1div}, z::Array
     for k in 1:m.topology.size[m.topology.dim+1]
         coord= m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][k]:m.topology.offset["20"][k+1]-1]]
 
+        globalNumT=l2g(degFs,k);
+        globalNumF=l2g(degFv,k);
+
         getSubCells!(subcoord, coord, compoundData);
         assemblePhi!(assembledPhiT, subcoord, degFs, m, J, ddJ, phiT, kubPoints, kubWeights, compoundData);
         assemblePhi!(assembledPhiF, subcoord, degFv, m, J, ddJ, jphiF, kubPoints, kubWeights, compoundData);
-        for i in 1:length(assembledPhiT)
-            for j in 1:length(assembledPhiF)
-                currentval=0.0;
-                for subCell in 1:nSubCells
-                    jacobi!(J,ddJ,jphiF,kubPoints,phiF,subcoord[subCell],mt);
+        for subCell in 1:nSubCells
+            jacobi!(J,ddJ,jphiF,kubPoints,phiF,subcoord[subCell],mt);
+            for i in 1:length(assembledPhiT)
+                for j in 1:length(assembledPhiF)
+                    currentval=0.0;
                     for subi in 1:nPhiT
                         if assembledPhiT[i][subi,subCell]!=0
                             for subj in 1:nPhiF
@@ -190,22 +191,11 @@ function assembStiffCompound(degFs::degF{1,:H1}, degFv::degF{2,:H1div}, z::Array
                             end
                         end
                     end
-                end
-                lS[i,j] = currentval;
-            end
-        end
-
-        globalNumT=l2g(degFs,k);
-        globalNumF=l2g(degFv,k);
-
-        for j in 1:length(globalNumF)
-            for i in 1:length(globalNumT)
-                gi=globalNumT[i];
-                gj=globalNumF[j];
-                if !isequal(lS[i,j],0.0) || (gi==nT && gj==nF)
-                    push!(rows,gi);
-                    push!(cols,gj);
-                    push!(vals,lS[i,j]);
+                    if !isequal(currentval,0.0) || (globalNumT[i]==nT && globalNumF[j]==nF)
+                        push!(rows,globalNumT[i]);
+                        push!(cols,globalNumF[j]);
+                        push!(vals,currentval);
+                    end
                 end
             end
         end

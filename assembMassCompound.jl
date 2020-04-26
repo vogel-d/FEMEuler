@@ -36,7 +36,7 @@ function assembMassCompound(degF::degF{1,:H1}, m::mesh, kubPoints::Array{Float64
     mt=m.meshType;
     nSubCells=compoundData.nSubCells;
     nCompoundPhi=compoundData.nCompoundPhi[degF.femType];
-    assembledPhi=Array{Array{Float64,2},1}(undef,nCompoundPhi);
+    assembledPhi=compoundData.assembledPhi[degF.femType];
     subcoord=Array{Array{Float64,2},1}(undef,nSubCells);
 
     for k in 1:m.topology.size[m.topology.dim+1]
@@ -45,11 +45,11 @@ function assembMassCompound(degF::degF{1,:H1}, m::mesh, kubPoints::Array{Float64
         getSubCells!(subcoord, coord, compoundData);
         gvertices=l2g(degF,k);
         assemblePhi!(assembledPhi, subcoord, degF, m, J, dJ, phi, kubPoints, kubWeights, compoundData);
-        for j in 1:nCompoundPhi
-            for i in 1:nCompoundPhi
-                currentval=0.0;
-                for subCell in 1:nSubCells
-                    jacobi!(J,dJ,kubPoints,subcoord[subCell],mt);
+        for subCell in 1:nSubCells
+            jacobi!(J,dJ,kubPoints,subcoord[subCell],mt);
+            for j in 1:nCompoundPhi
+                for i in 1:nCompoundPhi
+                    currentval=0.0;
                     for subj in 1:nPhiSubElement
                         if assembledPhi[j][subj,subCell]!=0
                             for subi in 1:nPhiSubElement
@@ -64,11 +64,11 @@ function assembMassCompound(degF::degF{1,:H1}, m::mesh, kubPoints::Array{Float64
                             end
                         end
                     end
-                end
-                if !isequal(currentval,0.0)
-                    push!(rows,gvertices[i]);
-                    push!(cols,gvertices[j]);
-                    push!(vals,currentval);
+                    if !isequal(currentval,0.0)
+                        push!(rows,gvertices[i]);
+                        push!(cols,gvertices[j]);
+                        push!(vals,currentval);
+                    end
                 end
             end
         end
@@ -93,7 +93,7 @@ function assembMassCompound(degF::degF{2,:H1div}, m::mesh, kubPoints::Array{Floa
     mt=m.meshType;
     nSubCells=compoundData.nSubCells;
     nCompoundPhi=compoundData.nCompoundPhi[degF.femType];
-    assembledPhi=Array{Array{Float64,2},1}(undef,nCompoundPhi);
+    assembledPhi=compoundData.assembledPhi[degF.femType];
     subcoord=Array{Array{Float64,2},1}(undef,nSubCells);
 
     for k in 1:m.topology.size[m.topology.dim+1]
@@ -102,11 +102,11 @@ function assembMassCompound(degF::degF{2,:H1div}, m::mesh, kubPoints::Array{Floa
         getSubCells!(subcoord, coord, compoundData);
         gvertices=l2g(degF,k);
         assemblePhi!(assembledPhi, subcoord, degF, m, J, ddJ, jphi, kubPoints, kubWeights, compoundData);
-        for j in 1:nCompoundPhi
-            for i in 1:nCompoundPhi
-                currentval=0.0;
-                for subCell in 1:nSubCells
-                    jacobi!(J,ddJ,jphi,kubPoints,phi,subcoord[subCell],mt);
+        for subCell in 1:nSubCells
+            jacobi!(J,ddJ,jphi,kubPoints,phi,subcoord[subCell],mt);
+            for j in 1:nCompoundPhi
+                for i in 1:nCompoundPhi
+                    currentval=0.0;
                     for subj in 1:nPhiSubElement
                         if assembledPhi[j][subj,subCell]!=0
                             for subi in 1:nPhiSubElement
@@ -125,11 +125,11 @@ function assembMassCompound(degF::degF{2,:H1div}, m::mesh, kubPoints::Array{Floa
                             end
                         end
                     end
-                end
-                if !isequal(currentval,0.0)
-                    push!(rows,gvertices[i]);
-                    push!(cols,gvertices[j]);
-                    push!(vals,currentval);
+                    if !isequal(currentval,0.0)
+                        push!(rows,gvertices[i]);
+                        push!(cols,gvertices[j]);
+                        push!(vals,currentval);
+                    end
                 end
             end
         end

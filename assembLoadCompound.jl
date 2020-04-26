@@ -9,9 +9,8 @@ function assembLoadCompound(degF::degF{1,:H1}, f, m::mesh, kubPoints::Array{Floa
 
     nSubCells=compoundData.nSubCells;
     nCompoundPhi=compoundData.nCompoundPhi[degF.femType];
-    assembledPhi=Array{Array{Float64,2},1}(undef,nCompoundPhi);
+    assembledPhi=compoundData.assembledPhi[degF.femType];
     subcoord=Array{Array{Float64,2},1}(undef,nSubCells);
-    nPhiCompoundElement=length(assembledPhi);
 
     ft=zeros(sk);
 
@@ -22,9 +21,9 @@ function assembLoadCompound(degF::degF{1,:H1}, f, m::mesh, kubPoints::Array{Floa
         getSubCells!(subcoord, coord, compoundData);
         globalNum=l2g(degF,k);
         assemblePhi!(assembledPhi, subcoord, degF, m, J, dJ, phiT, kubPoints, kubWeights, compoundData);
-        for j in 1:nPhiCompoundElement
-            for subCell in 1:nSubCells
-                jacobi!(J,dJ,kubPoints,subcoord[subCell],m.meshType);
+        for subCell in 1:nSubCells
+            jacobi!(J,dJ,kubPoints,subcoord[subCell],m.meshType);
+            for j in 1:nCompoundPhi
                 for d in 1:m.geometry.dim
                     fill!(ft,0.0);
                     if sk[1]==1 # <=> dreiecke, muss liste durchlaufen
@@ -69,9 +68,9 @@ function assembLoadCompound(degF::degF{2,S} where S, f, m::mesh, kubPoints::Arra
     gb=zeros(degF.numB);
 
     nSubCells=compoundData.nSubCells;
-    assembledPhi=Array{Array{Float64,2},1}(undef,nCompoundPhi);
+    assembledPhi=compoundData.assembledPhi[degF.femType];
+    nCompoundPhi=compoundData.nCompoundPhi[degF.femType];
     subcoord=Array{Array{Float64,2},1}(undef,nSubCells);
-    nPhiCompoundElement=length(assembledPhi);
 
     ft=[zeros(sk) for d in 1:m.geometry.dim]
 
@@ -81,9 +80,9 @@ function assembLoadCompound(degF::degF{2,S} where S, f, m::mesh, kubPoints::Arra
         getSubCells!(subcoord, coord, compoundData);
         globalNum=l2g(degF,k);
         assemblePhi!(assembledPhi, subcoord, degF, m, J, ddJ, jphiT, kubPoints, kubWeights, compoundData);
-        for j in 1:nPhiCompoundElement
-            for subCell in 1:nSubCells
-                jacobi!(J,ddJ,jphiT,kubPoints,phiT,subcoord[subCell],m.meshType);
+        for subCell in 1:nSubCells
+            jacobi!(J,ddJ,jphiT,kubPoints,phiT,subcoord[subCell],m.meshType);
+            for j in 1:nCompoundPhi
                 for d in 1:m.geometry.dim
                     fill!(ft[d],0.0);
                     if sk[1]==1 # <=> dreiecke, muss liste durchlaufen
