@@ -40,15 +40,16 @@ function assemblePhi!(assembledPhi::Array{Array{Float64,2},1}, subcoord::Array{A
         #A[12+i,24+mod(i,12)+1]=1.0;
     end
 
-
+    dotp=0.0;
     for subCell in 1:12
-        tangent=(subcoord[subCell][:,2].-subcoord[subCell][:,1]);
-        tangent=tangent./norm(tangent,2);
+        for i in 1:2
+            tangent[i]=subcoord[subCell][i,2]-subcoord[subCell][i,1];
+        end
+        @. tangent=tangent/sqrt(tangent[1]^2+tangent[2]^2);
         jacobi!(J,ddJ,jphi,kubPoints,phi,subcoord[subCell],mt);
         for i in 1:nPhiSubCell
             for r in 1:sk[2]
                 for l in 1:sk[1]
-                    dotp=0.0;
                     for d in 1:m.geometry.dim
                         dotp+=jphi[d,i][l,r]*tangent[d];
                     end
@@ -61,35 +62,56 @@ function assemblePhi!(assembledPhi::Array{Array{Float64,2},1}, subcoord::Array{A
             end
         end
     end
+
     #apply second constraint (divergence)
     for i in 1:11
         #FEMEuler divergences
-        A[24+i,[1,12+1,24+1]]=divCoeff[1]*[1.0,1.0,-1.0];
-        A[24+i,[1+i,12+1+i,24+1+i]]=divCoeff[i+1]*[-1.0,-1.0,1.0];
+        A[24+i,1]=      1*divCoeff[1];
+        A[24+i,12+1]=   1*divCoeff[1];
+        A[24+i,24+1]=   (-1)*divCoeff[1];
+
+        A[24+i,1+i]=    (-1)*divCoeff[i+1];
+        A[24+i,12+1+i]= (-1)*divCoeff[i+1];
+        A[24+i,24+1+i]= 1*divCoeff[i+1];
         #MelvinThuburn divergences (common divergences)
     #    A[24+i,[1,12+1,24+1]]=[1.0,1.0,1.0];
     #    A[24+i,[1+i,12+1+i,24+1+i]]=[-1.0,-1.0,-1.0];
     end
 
     betas= A\b;
-
+#=
     betas2times=Array{Float64,2}(undef,nPhiSubCell,24);
     betas2times[1,1:12]  = betas[1:12];
     betas2times[1,13:24] = betas[1:12];
-
     betas2times[2,1:12]  = betas[13:24];
     betas2times[2,13:24] = betas[13:24];
-
     betas2times[3,1:12]  = betas[25:36];
     betas2times[3,13:24] = betas[25:36];
 
-    assembledPhi[1] = betas2times[:,5:16];
-    assembledPhi[2] = betas2times[:,3:14];
-    assembledPhi[3] = betas2times[:,13:24];
+    assembledPhi[1] = betas2times[:,13:24];
+    assembledPhi[2] = betas2times[:,11:22];
+    assembledPhi[3] = betas2times[:,9:20];
     #minus needed for correct normals
-    assembledPhi[4] = -betas2times[:,11:22];
-    assembledPhi[5] = -betas2times[:,9:20];
-    assembledPhi[6] = -betas2times[:,7:18];
+    assembledPhi[4] = -betas2times[:,7:18];
+    assembledPhi[5] = -betas2times[:,5:16];
+    assembledPhi[6] = -betas2times[:,3:14];
+    =#
+    for compoundPhi in 1:3
+        for subPhi in 1:3
+            for subElement in 1:12
+                #                                                                   walking through 1:12 cyclic; starting from 1, then 11, then 9, ...
+                assembledPhi[compoundPhi][subPhi,subElement] = betas[(subPhi-1)*12+(1+mod(-1+subElement-2*(compoundPhi-1),12))]
+            end
+        end
+    end
+    for compoundPhi in 4:6
+        for subPhi in 1:3
+            for subElement in 1:12
+                #                                                                   walking through 1:12 cyclic; starting from 1, then 11, then 9, ...
+                assembledPhi[compoundPhi][subPhi,subElement] = -betas[(subPhi-1)*12+(1+mod(-1+subElement-2*(compoundPhi-1),12))]
+            end
+        end
+    end
 end
 
 
