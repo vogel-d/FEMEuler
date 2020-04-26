@@ -16,6 +16,7 @@ include("meshFunctions.jl");
 include("findall.jl");
 include("getSpace.jl")
 include("transformation.jl")
+include("initAssembledPhi.jl");
 
 include("getOrderBoundary.jl")
 include("getElementProperties.jl")
