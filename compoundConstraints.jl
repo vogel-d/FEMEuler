@@ -26,17 +26,35 @@ function integrateAnsatzfcnOverCells(p::femProblem)
     key="20";
     mt=m.meshType;
     subcoord=Array{Array{Float64,2},1}(undef,nSubCells);
+    ddJmatrix=Array{Float64,1}(undef,nSubCells);
 
+    nquadPhi=p.compoundData.nquadPhi
+    nquadPoints=p.compoundData.nquadPoints;
+
+    #outer edges alsays edge 1 for triangles
+    phi=nquadPhi[:RT0][1];
+    kubPn=nquadPoints[1];
+
+    quadWeights=p.compoundData.quadWeights;
+    sk=length(quadWeights)
+
+    J1=initJacobi((m.geometry.dim,m.topology.dim),sk);
+    ddJ1=Array{Float64,1}(undef,sk);
+    jphi1=initJacobi((m.geometry.dim,size(phi,2)),sk);
 
     for Cell in 1:p.mesh.topology.size[p.mesh.geometry.dim+1]
-        subcoord=p.compoundData.getSubCells[Cell];
+        coord= m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][Cell]:m.topology.offset["20"][Cell+1]-1]]
+
+        getSubCells!(subcoord, coord, p.compoundData);
         gvertices=l2g(degF,Cell);
         for subCell in 1:nSubCells
             integratedAnsatzfcnSubCell=zeros(nAnsatzfcn);
             tangent=(subcoord[subCell][:,2].-subcoord[subCell][:,1]);
             tangent=tangent./norm(tangent,2);
-            jacobi!(J,ddJ,jphi,kubPoints,phi,subcoord[subCell],mt);
+            jacobi!(J1,ddJ1,jphi1,kubPn,phi,subcoord[subCell],mt);
+            ddJmatrix[subCell]=copy(ddJ1[1]);
             for i in 1:nAnsatzfcn
+                #=
                 for r in 1:sk[2]
                     for l in 1:sk[1]
                         dotp=0.0;
@@ -46,12 +64,20 @@ function integrateAnsatzfcnOverCells(p::femProblem)
                         integratedAnsatzfcnSubCell[i]+=kubWeights[l,r]*(ddJ[l,r]/abs(ddJ[l,r]))*dotp;
                     end
                 end
+                =#
+                for r in 1:length(quadWeights)
+                    dotp=0.0;
+                    for d in 1:m.geometry.dim
+                        dotp+=jphi1[d,i][r]*tangent[d];
+                    end
+                    integratedAnsatzfcnSubCell[i]+=quadWeights[r]*(ddJ1[r]/abs(ddJ1[r]))*dotp;
+                end
             end
             integratedAnsatzfcnCell[subCell]=deepcopy(integratedAnsatzfcnSubCell);
         end
         push!(integratedAnsatzfcn,deepcopy(integratedAnsatzfcnCell));
     end
-    return integratedAnsatzfcn;
+    return integratedAnsatzfcn, ddJmatrix;
 end
 
 #constraint matrix
@@ -89,11 +115,14 @@ for i in 1:12
     b[12+i]=0.0;
 end
 
+coeff, divcoeff=integrateAnsatzfcnOverCells(p);
+#println(coeff)
+#println(divcoeff)
 #second constraint
 for i in 1:11
     #FEMEuler divergences
-    A[24+i,[1,12+1,24+1]]=[1.0,1.0,-1.0];
-    A[24+i,[1+i,12+1+i,24+1+i]]=[-1.0,-1.0,1.0];
+    A[24+i,[1,12+1,24+1]]=divcoeff[1]*[1.0,1.0,-1.0];
+    A[24+i,[1+i,12+1+i,24+1+i]]=divcoeff[1+i]*[-1.0,-1.0,1.0];
     #MelvinThuburn divergences (common divergences)
 #    A[24+i,[1,12+1,24+1]]=[1.0,1.0,1.0];
 #    A[24+i,[1+i,12+1+i,24+1+i]]=[-1.0,-1.0,-1.0];
@@ -101,10 +130,11 @@ for i in 1:11
 end
 
 #third constraint
-coeff=integrateAnsatzfcnOverCells(p);
+
 for subCell in 1:12
     for i in 1:3
         A[36,(i-1)*12+subCell]=coeff[1][subCell][i];
+        #A[36,(i-1)*12+subCell]=1.0;
     end
 end
 #A[36,13:24].=1.0;
