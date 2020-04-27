@@ -56,21 +56,29 @@ function assembLoadCompound(degF::degF{1,:H1}, f, m::mesh, kubPoints::Array{Floa
 end
 
 function assembLoadCompound(degF::degF{2,S} where S, f, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2}, compoundData::compoundData)
-    phiT=degF.phi;
+    phi=degF.phi;
     sk=size(kubWeights);
     nPhiSubElement=size(phiT,2);
 
     coord=Array{Float64,2}(undef,m.geometry.dim,diff(m.topology.offset["20"][1:2])[1]);
     J=initJacobi((m.geometry.dim,m.topology.dim),sk);
     ddJ=Array{Float64,2}(undef,sk);
-    jphiT=initJacobi((m.geometry.dim,iter),sk);
+    jphi=initJacobi((m.geometry.dim,iter),sk);
     jcoord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
     gb=zeros(degF.numB);
+    sq=length(quadWeights)
+    J1=initJacobi((m.geometry.dim,m.topology.dim),sq);
+    ddJ1=Array{Float64,1}(undef,sq);
+    jphi1=initJacobi((m.geometry.dim,size(phi,2)),sq);
 
     nSubCells=compoundData.nSubCells;
     assembledPhi=compoundData.assembledPhi[degF.femType];
     nCompoundPhi=compoundData.nCompoundPhi[degF.femType];
     subcoord=Array{Array{Float64,2},1}(undef,nSubCells);
+
+    nquadPhi=compoundData.nquadPhi[degF.femType];
+    nquadPoints=compoundData.nquadPoints;
+    quadWeights=compoundData.quadWeights;
 
     ft=[zeros(sk) for d in 1:m.geometry.dim]
 
@@ -79,9 +87,9 @@ function assembLoadCompound(degF::degF{2,S} where S, f, m::mesh, kubPoints::Arra
 
         getSubCells!(subcoord, coord, compoundData);
         globalNum=l2g(degF,k);
-        assemblePhi!(assembledPhi, subcoord, degF, m, J, ddJ, jphiT, kubPoints, kubWeights, compoundData);
+        assemblePhi!(assembledPhi, subcoord, m, divphi, J1, ddJ1, jphi1, nquadPhi, nquadPoints, quadWeights, compoundData);
         for subCell in 1:nSubCells
-            jacobi!(J,ddJ,jphiT,kubPoints,phiT,subcoord[subCell],m.meshType);
+            jacobi!(J,ddJ,jphiT,kubPoints,phi,subcoord[subCell],m.meshType);
             for j in 1:nCompoundPhi
                 for d in 1:m.geometry.dim
                     fill!(ft[d],0.0);
@@ -104,7 +112,7 @@ function assembLoadCompound(degF::degF{2,S} where S, f, m::mesh, kubPoints::Arra
                             for l in 1:sk[1]
                                 vecdot=0.0
                                 for d in 1:m.geometry.dim
-                                    vecdot+=ft[d][l,r]*jphiT[d,subj][l,r]
+                                    vecdot+=ft[d][l,r]*jphi[d,subj][l,r]
                                 end
                                 gb[globalNum[j]]+=assembledPhi[j][subj,subCell]*
                                                   kubWeights[l,r]*vecdot*ddJ[l,r]/abs(ddJ[l,r]);

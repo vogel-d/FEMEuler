@@ -83,6 +83,7 @@ function assembMassCompound(degF::degF{2,:H1div}, m::mesh, kubPoints::Array{Floa
     cols=Int64[];
     vals=Float64[];
     phi=degF.phi;
+    divphi=degF.divphi;
     nPhiSubElement=size(phi,2);
     sk=size(kubWeights)
     J=initJacobi((m.geometry.dim,m.topology.dim),sk);
@@ -92,16 +93,24 @@ function assembMassCompound(degF::degF{2,:H1div}, m::mesh, kubPoints::Array{Floa
     key="20";
     mt=m.meshType;
     nSubCells=compoundData.nSubCells;
+    nquadPhi=compoundData.nquadPhi[degF.femType];
+    nquadPoints=compoundData.nquadPoints;
+    quadWeights=compoundData.quadWeights;
     nCompoundPhi=compoundData.nCompoundPhi[degF.femType];
     assembledPhi=compoundData.assembledPhi[degF.femType];
     subcoord=Array{Array{Float64,2},1}(undef,nSubCells);
+
+    sq=length(quadWeights)
+    J1=initJacobi((m.geometry.dim,m.topology.dim),sq);
+    ddJ1=Array{Float64,1}(undef,sq);
+    jphi1=initJacobi((m.geometry.dim,size(phi,2)),sq);
 
     for k in 1:m.topology.size[m.topology.dim+1]
         coord= m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][k]:m.topology.offset["20"][k+1]-1]]
 
         getSubCells!(subcoord, coord, compoundData);
         gvertices=l2g(degF,k);
-        assemblePhi!(assembledPhi, subcoord, degF, m, J, ddJ, jphi, kubPoints, kubWeights, compoundData);
+        assemblePhi!(assembledPhi, subcoord, m, divphi, J1, ddJ1, jphi1, nquadPhi, nquadPoints, quadWeights, compoundData);
         for subCell in 1:nSubCells
             jacobi!(J,ddJ,jphi,kubPoints,phi,subcoord[subCell],mt);
             for j in 1:nCompoundPhi
