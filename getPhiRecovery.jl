@@ -1,4 +1,4 @@
-function getPhiRecovery(m::Array{Float64,1},order::Val{1}, geometryDim::Val{2})
+function getPhiRecovery(m::Array{Float64,1},recoverySpace::Val{:R1})
 
     #null(xyz) = 0.0
     phi1(xyz) = 1.0;
@@ -11,7 +11,7 @@ function getPhiRecovery(m::Array{Float64,1},order::Val{1}, geometryDim::Val{2})
     return phi
 end
 
-function getPhiRecovery(m::Array{Float64,1},order::Val{1}, geometryDim::Val{3})
+function getPhiRecovery(m::Array{Float64,1},recoverySpace::Val{:R1S})
 
     #null(xyz) = 0.0
     phi1(xyz) = 1.0;
@@ -29,7 +29,7 @@ function getPhiRecovery(m::Array{Float64,1},order::Val{1}, geometryDim::Val{3})
     return phi
 end
 
-function getPhiRecovery(m::Array{Float64,1},order::Val{2}, geometryDim::Val{2})
+function getPhiRecovery(m::Array{Float64,1},recoverySpace::Val{:R2})
 
     #null(xyz) = 0.0
     phi1(xyz) = 1.0;
@@ -47,7 +47,7 @@ function getPhiRecovery(m::Array{Float64,1},order::Val{2}, geometryDim::Val{2})
     return phi
 end
 
-function getPhiRecovery(m::Array{Float64,1},order::Val{2}, geometryDim::Val{3})
+function getPhiRecovery(m::Array{Float64,1},recoverySpace::Val{:R2S})
 
     #null(xyz) = 0.0
     phi1(xyz) = 1.0;

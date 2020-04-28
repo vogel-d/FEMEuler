@@ -9,6 +9,8 @@ mutable struct femProblem
     massMBoundary::Dict{Symbol, SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64}};
     massMProjection::Dict{Symbol, SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64}};
     stiffM::Dict{Symbol, SparseMatrixCSC{Float64,Int64}};
+    stencil::Array{Array{Int,1},1}
+    stencilBoundary::SparseMatrixCSC{Int,Int}
     type::Symbol;
     kubWeights::Array{Float64,2};
     kubPoints::Array{Float64,2};
@@ -19,7 +21,7 @@ end
 
 #Konstruktoren
 
-function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}};advection::Bool=true, taskRecovery::Bool=false, t::Symbol=:boussinesq, g::Int64=9)
+function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}};stencilOrder::Int=1,advection::Bool=true, taskRecovery::Bool=false, t::Symbol=:boussinesq, g::Int64=9)
     sol=Dict{Float64, solution}()
     kubPoints, kubWeights=getKub(g, m.meshType);
     dF=Dict{Symbol, degF}()
@@ -37,6 +39,13 @@ function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}};advection::B
     for k in femElements
         dF[k]=degF(m,k,ordEdgesB,nebP,nebC,ordVerticesB,nvbP,nvbC,kubPoints);
     end
+
+    if taskRecovery
+        stencil, stencilBoundary=getStencil(m,stencilOrder)
+    else
+        stencil=Array{Array{Int,1},1}();
+        stencilBoundary=spzeros(Int,0,0)
+    end
     edgeData=Array{Array{Int64,1},1}();
     massM=Dict();
     massMB=Dict();
@@ -46,5 +55,5 @@ function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}};advection::B
     bV=Dict();
     s=Set{Symbol}([:poisson,:boussinesq,:compressible,:shallow]);
     !in(t,s) && error("Die Methode $t ist keine zulässige Eingabe. Möglich sind $s");
-    femProblem(m,bV,dF,femType,edgeData,sol,massM,massMB,massMP,stiffM,t,kubWeights, kubPoints, taskRecovery, advection);
+    femProblem(m,bV,dF,femType,edgeData,sol,massM,massMB,massMP,stiffM,stencil,stencilBoundary,t,kubWeights, kubPoints, taskRecovery, advection);
 end
