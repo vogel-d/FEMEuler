@@ -59,7 +59,8 @@ function vtkRecovery(m::mesh, rx::Int, ry::Int, degF::degF{1}, sol::Array{Float6
         mp=transformation(mf, coord, mx, my)
         for i in 1:size(rcoord,2)
             mc=transformation(mf, coord, rcoord[1,i],rcoord[2,i])
-            fComp[i]=getElementProperties(femType,mf.meshType,mp,mc);
+            #fComp[i]=getElementProperties(femType,mf.meshType,mp,mc);
+            fComp[i]=getElementProperties(femType,mp,mc);
         end
         f=incm[offm[k]:offm[k+1]-1];
         cLoc=sol[l2g(degF, k)]

@@ -4,10 +4,15 @@ function testSphereAdvS()
 
     filename = "testAdvSphS";
 
+    stencilOrder=1;
+    recoveryOrder=1;
+
+    recoverySpace=Symbol("R$recoveryOrder")
+
     #order: comp, compHigh, compRec, compDG
-    femType=Dict(:rho=>[:DG0, :DG0, :R1S],
+    femType=Dict(:rho=>[:DG0, :DG0, recoverySpace],
                  :rhoV=>[:RT0, :RT0, :VecDG1S],
-                 :rhoTheta=>[:DG0, :DG0, :R1S],
+                 :rhoTheta=>[:DG0, :DG0, recoverySpace],
                  :p=>[:DG0],
                  :v=>[:RT0],
                  :theta=>[:DG0]);
@@ -36,7 +41,7 @@ function testSphereAdvS()
     #m=generateCubedSphere(5,6300000.0)
     m=generateCubedSphere(3,1.0)
 
-    p=femProblem(m, femType,t=:shallow, advection=advection, taskRecovery=taskRecovery);
+    p=femProblem(m, femType,t=:shallow, advection=advection, taskRecovery=taskRecovery, stencilOrder=stencilOrder);
     #return p;
     gamma=0.5; #upwind
     UMax=10.0; #UMax determines the advection in x direction

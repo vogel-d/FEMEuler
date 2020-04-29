@@ -169,3 +169,12 @@ function getElementProperties(type::Symbol, mt::Int, mp::Array{Float64,1}, xyz)
     end
     return valPhi
 end
+
+function getElementProperties(type::Symbol, n::Array{Float64,1}, xyz)
+    phi=getPhiRecovery([0.0,0.0],Val(type));
+    valPhi=similar(phi,Float64);
+    for k=1:length(phi)
+        valPhi[k]=phi[k](transformRecoveryCoord(n,xyz));
+    end
+    return valPhi
+end

@@ -28,19 +28,19 @@ function advection(p::femProblem, gamma::Float64, y::solution, Vfval::SparseVect
     end
     cR=projectRhoChi(p,y.rho,y.rhoTheta,:rho,:rhoTheta,MrT);
     if p.taskRecovery
-      #vtk(p.mesh,p.degFBoundary[p.femType[:rhoTheta][1]],cR,p.femType[:rhoTheta][1],"testThp")
+      vtk(p.mesh,p.degFBoundary[p.femType[:rhoTheta][1]],cR,p.femType[:rhoTheta][1],"testSphereTh")
       cR=recovery(p,fTtheta,cR);
-      #vtkRecovery(p.mesh,2,2,p.degFBoundary[p.femType[:rhoTheta][3]],cR,p.femType[:rhoTheta][3],"testRecoveryThp")
+      vtkRecovery(p.mesh,2,2,p.degFBoundary[p.femType[:rhoTheta][3]],cR,p.femType[:rhoTheta][3],"testSphereRecoveryTh")
       Sth=advectionStiffR(p.degFBoundary[fTtheta[1]],nquadPhi[fTtheta[1]],
                          p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
                          p.degFBoundary[fTtheta[3]],nquadPhi[fTtheta[3]],cR,
                          gamma,p.mesh,p.kubPoints,p.kubWeights,
                          nquadPoints, p.edgeData);
       rCth=Fth\(Sth);
-      #vtk(p.mesh,p.degFBoundary[p.femType[:rhoTheta][1]],rCth,p.femType[:rhoTheta][1],"testThAdvx2")
+      vtk(p.mesh,p.degFBoundary[p.femType[:rhoTheta][1]],rCth,p.femType[:rhoTheta][1],"testSphereThAdv")
     else
        Sth=advectionStiff(p.degFBoundary[fTtheta[1]],nquadPhi[fTtheta[1]],
-                        p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
+                          p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
                           p.degFBoundary[fTtheta[1]],nquadPhi[fTtheta[1]],cR,
                           gamma,p.mesh,p.kubPoints,p.kubWeights,
                           nquadPoints, p.edgeData);
@@ -69,7 +69,7 @@ function advection(p::femProblem, gamma::Float64, y::solution, Vfval::SparseVect
     rCth=zeros(nRhoTheta);
     rCrho=zeros(nRho);
   end
-  #println(uzctujcz)
+  println(uzctujcz)
   f=createSolution(length(y.rho),length(y.rhoV),length(y.rhoTheta),length(y.v),length(y.theta));
   @views f.rhoV[1:nRhoV]=rCv[:,1];
   @views f.rhoTheta[1:nRhoTheta]=rCth[:,1];
