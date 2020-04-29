@@ -3,7 +3,6 @@ function getTangentialPlane(n::Array{Float64,1})
     t1=zeros(3);
     t1[ind[1]]=n[ind[2]]
     t1[ind[2]]=-n[ind[1]]
-    length(n)==2 && push!(n,0.0);
     t2=cross(n,t1);
     return t1, t2;
 end
