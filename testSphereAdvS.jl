@@ -4,6 +4,8 @@ function testSphereAdvS()
 
     filename = "testAdvSphS";
 
+    case=:zPanel
+
     stencilOrder=1;
     recoveryOrder=1;
 
@@ -111,9 +113,15 @@ function testSphereAdvS()
     applyStartValues!(p, f);
 
     ha=zeros(Float64,m.topology.size[3])
-    ha[[19,22,25]].=3.0
-    ha[[20,23,26]].=2.0
-    ha[[21,24,27]].=1.0
+    if case==:zPanel
+        ha[[46,49,52]].=3.0
+        ha[[47,50,53]].=2.0
+        ha[[48,51,54]].=1.0
+    elseif case==:xPanel
+        ha[[19,22,25]].=3.0
+        ha[[20,23,26]].=2.0
+        ha[[21,24,27]].=1.0
+    end
     p.solution[0.0].theta=ha
 
     rho0=p.solution[0.0].rho;
