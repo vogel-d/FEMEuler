@@ -173,8 +173,10 @@ end
 function getElementProperties(type::Symbol, n::Array{Float64,1}, xyz)
     phi=getPhiRecovery([0.0,0.0],Val(type));
     valPhi=similar(phi,Float64);
+    t1,t2=getTangentialPlane(n);
+    txyz=transformRecoveryCoord(n,t1,t2,xyz)
     for k=1:length(phi)
-        valPhi[k]=phi[k](transformRecoveryCoord(n,xyz));
+        valPhi[k]=phi[k](txyz);
     end
     return valPhi
 end

@@ -72,3 +72,5 @@ include("advectionStiffRecovery.jl")
 include("discGalerkinCellsRecovery.jl")
 include("discGalerkinEdgesRecovery.jl")
 include("vtkRecovery.jl");
+include("transformRecoveryCoord.jl")
+include("getTangentialPlane.jl")

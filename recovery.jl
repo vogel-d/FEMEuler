@@ -33,6 +33,7 @@ function recovery(degFT::degF{1,:H1}, recoverySpace::Symbol, cval::Array{Float64
         #jacobi!(J,dJ,m,f,kubPoints,coord);
         fcoord=@views mcoord[:,inc[off[f]:off[f+1]-1]]
         mp=transformation(m,fcoord,0.5,0.5);
+        t1,t2=getTangentialPlane(mp)
         #phiR=getPhiRecovery(mp,Val(recoverySpace));
         phiR=getPhiRecovery([0.0,0.0],Val(recoverySpace));
         nR=length(phiR)
@@ -73,7 +74,7 @@ function recovery(degFT::degF{1,:H1}, recoverySpace::Symbol, cval::Array{Float64
                         for l in 1:sk[1]
                             currentval+=kubWeights[l,r]*abs(dJ[l,r])*phiT[i][l,r]* #phiR[zf+j][l,r]
                                 #phiR[j](transformation(m,kcoord,kubPoints[1,l],kubPoints[2,r]));
-                                phiR[j](transformRecoveryCoord(mp,transformation(m,kcoord,kubPoints[1,l],kubPoints[2,r])));
+                                phiR[j](transformRecoveryCoord(mp,t1,t2,transformation(m,kcoord,kubPoints[1,l],kubPoints[2,r])));
                         end
                     end
                     lM[z,j]+=w*currentval;
