@@ -66,6 +66,7 @@ function setEdgeData!(p::femProblem, compVf::Symbol)
         centerInc1 = 1/(mt) * sum(verticesInc1,dims=2);
         centerInc2 = 1/(mt) * sum(verticesInc2,dims=2);
 
+        #define current normal pointing vom cell 1 to cell 2
         currentNormal = centerInc2 .- centerInc1;
 
         #note: if edge e is on periodic boundary (h1=true) the computed "currentNormal" will have
