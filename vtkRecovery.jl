@@ -1,7 +1,7 @@
 function vtkRecovery(m::mesh, rx::Int, ry::Int, degF::degF{1}, sol::Array{Float64,1}, femType::Symbol, filename::String, name::String="Test")
 
     if m.geometry.dim==2
-        mf=refineRectMesh(m,rx,ry,:periodic,:constant);
+        mf=refineRectMesh(m,rx,ry,:periodic,:periodic);
     elseif m.geometry.dim==3
         mf=refineCubedSphere(m,rx)
     end

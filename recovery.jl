@@ -32,11 +32,7 @@ function recovery(degFT::degF{1,:H1}, recoverySpace::Symbol, cval::Array{Float64
     for f in 1:nf
         #jacobi!(J,dJ,m,f,kubPoints,coord);
         fcoord=@views mcoord[:,inc[off[f]:off[f+1]-1]]
-        if m.geometry.dim==3
-            n=transformation(m,fcoord,0.5,0.5);
-        else
-            n=[0.0,0.0,1.0]
-        end
+        n=transformation(m,fcoord,0.5,0.5);
         t1,t2=getTangentialPlane(n)
         #phiR=getPhiRecovery(n,Val(recoverySpace));
         phiR=getPhiRecovery([0.0,0.0],Val(recoverySpace));
