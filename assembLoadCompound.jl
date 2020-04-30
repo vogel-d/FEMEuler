@@ -1,5 +1,5 @@
 function assembLoadCompound(degF::degF{1,:H1}, f, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2}, compoundData::compoundData)
-    phiT=degF.phi;
+    phi=degF.phi;
     sk=size(kubWeights);
 
     J=initJacobi((m.geometry.dim,m.topology.dim),sk);
@@ -14,13 +14,13 @@ function assembLoadCompound(degF::degF{1,:H1}, f, m::mesh, kubPoints::Array{Floa
 
     ft=zeros(sk);
 
-    nPhiSubElement=length(phiT);
+    nPhiSubElement=length(phi);
     for k in 1:m.topology.size[m.topology.dim+1]
         coord= m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][k]:m.topology.offset["20"][k+1]-1]]
 
         getSubCells!(subcoord, coord, compoundData);
         globalNum=l2g(degF,k);
-        assemblePhi!(assembledPhi, subcoord, degF, m, J, dJ, phiT, kubPoints, kubWeights, compoundData);
+        assemblePhi!(assembledPhi, subcoord, degF, m, J, dJ, phi, kubPoints, kubWeights, compoundData);
         for subCell in 1:nSubCells
             jacobi!(J,dJ,kubPoints,subcoord[subCell],m.meshType);
             for j in 1:nCompoundPhi
@@ -44,7 +44,7 @@ function assembLoadCompound(degF::degF{1,:H1}, f, m::mesh, kubPoints::Array{Floa
                         for r in 1:sk[2]
                             for l in 1:sk[1]
                                 gb[globalNum[j]]+=assembledPhi[j][subj,subCell]*
-                                                  kubWeights[l,r]*phiT[subj][l,r]*ft[l,r]*abs(dJ[l,r]);
+                                                  kubWeights[l,r]*phi[subj][l,r]*ft[l,r]*abs(dJ[l,r]);
                             end
                         end
                     end
@@ -58,7 +58,7 @@ end
 function assembLoadCompound(degF::degF{2,S} where S, f, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2}, compoundData::compoundData)
     phi=degF.phi;
     sk=size(kubWeights);
-    nPhiSubElement=size(phiT,2);
+    nPhiSubElement=size(phi,2);
 
     coord=Array{Float64,2}(undef,m.geometry.dim,diff(m.topology.offset["20"][1:2])[1]);
     J=initJacobi((m.geometry.dim,m.topology.dim),sk);
@@ -89,7 +89,7 @@ function assembLoadCompound(degF::degF{2,S} where S, f, m::mesh, kubPoints::Arra
         globalNum=l2g(degF,k);
         assemblePhi!(assembledPhi, subcoord, m, divphi, J1, ddJ1, jphi1, nquadPhi, nquadPoints, quadWeights, compoundData);
         for subCell in 1:nSubCells
-            jacobi!(J,ddJ,jphiT,kubPoints,phi,subcoord[subCell],m.meshType);
+            jacobi!(J,ddJ,jphi,kubPoints,phi,subcoord[subCell],m.meshType);
             for j in 1:nCompoundPhi
                 for d in 1:m.geometry.dim
                     fill!(ft[d],0.0);
