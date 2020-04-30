@@ -9,40 +9,40 @@ function advection(p::femProblem, gamma::Float64, Vfval::SparseVector{Float64,In
                      p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
                      p.degFBoundary[fTp[3]],nquadPhi[fTp[3]],cR,
                      gamma,p.mesh,p.kubPoints,p.kubWeights,
-                     nquadPoints,p.edgeData);
+                     nquadPoints,p.edgeData,p.compoundData);
     rCp=Fp\S;
     cR=recovery(p,1,fTb,cval.b);
     S=advectionStiff(p.degFBoundary[fTb[1]],nquadPhi[fTb[1]],
                      p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
                      p.degFBoundary[fTb[3]],nquadPhi[fTb[3]],cR,
                      gamma,p.mesh,p.kubPoints,p.kubWeights,
-                     nquadPoints,p.edgeData);
+                     nquadPoints,p.edgeData,p.compoundData);
     rCb=Fb\S;
     cR=recovery(p,2,fTv,cval.v);
     S=advectionStiff(p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],
                      p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
                      p.degFBoundary[fTv[3]],nquadPhi[fTv[3]],cR,
                      gamma,p.mesh,p.kubPoints,p.kubWeights,
-                     nquadPoints,p.edgeData);
+                     nquadPoints,p.edgeData,p.compoundData);
     rCv=Fv\S;
   else
     S=advectionStiff(p.degFBoundary[fTp[1]],nquadPhi[fTp[1]],
                      p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
                      p.degFBoundary[fTp[1]],nquadPhi[fTp[1]],cval.p,
                      gamma,p.mesh,p.kubPoints,p.kubWeights,
-                     nquadPoints,p.edgeData);
+                     nquadPoints,p.edgeData,p.compoundData);
     rCp=Fp\S;
     S=advectionStiff(p.degFBoundary[fTb[1]],nquadPhi[fTb[1]],
                      p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
                      p.degFBoundary[fTb[1]],nquadPhi[fTb[1]],cval.b,
                      gamma,p.mesh,p.kubPoints,p.kubWeights,
-                     nquadPoints,p.edgeData);
+                     nquadPoints,p.edgeData,p.compoundData);
     rCb=Fb\S;
     S=advectionStiff(p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],
                      p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
                      p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],cval.v,
                      gamma,p.mesh,p.kubPoints,p.kubWeights,
-                     nquadPoints,p.edgeData);
+                     nquadPoints,p.edgeData,p.compoundData);
     rCv=Fv\S;
   end
   f=createSolution(length(cval.v),length(cval.p),length(cval.b));
