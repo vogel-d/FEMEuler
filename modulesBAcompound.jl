@@ -18,11 +18,11 @@ include("initAssembledPhi.jl");
 
 include("getOrderBoundary.jl")
 include("getElementProperties.jl")
-include("getCompoundElementProperties.jl")
 include("degF.jl");
 include("generateMesh.jl")
 include("refineMesh.jl")
 include("compoundData.jl")
+include("getCompoundElementProperties.jl")
 include("getSubCells.jl")
 include("assembleCompoundPhi.jl")
 include("femProblem.jl");
@@ -43,7 +43,7 @@ include("applyStartValuesCompound.jl");
 include("projectRecovery.jl")
 include("embed.jl")
 include("recovery.jl")
-include("projectAdvection.jl")
+include("projectAdvectionCompound.jl")
 include("advectionStiffCompound.jl")
 include("discGalerkinCellsCompound.jl")
 include("discGalerkinEdgesCompound.jl")
