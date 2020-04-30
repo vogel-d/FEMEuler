@@ -283,7 +283,7 @@ function discGalerkinCells!(M::Array{Float64,2},
                             degFT::degF{2,:H1div},phiT::Array{Array{Float64,2},2}, globalNumT::Array{Int64,1},
                             degFF::degF{2,:H1div},phiF::Array{Array{Float64,2},2}, dphiF::Array{Array{Float64,2},1}, fval::SparseVector{Float64,Int64}, globalNumF::Array{Int64,1},
                             degFW::degF{2,:H1xH1},phiW::Array{Array{Float64,2},2}, gradphiW::Array{Array{Float64,2},2}, wval::Array{Float64,1}, globalNumW::Array{Int64,1},
-                            m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2}, coord::Array{Float64,2}
+                            m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2}, coord::Array{Float64,2},
                             compoundData::compoundData)
 
     sk=size(kubWeights);
