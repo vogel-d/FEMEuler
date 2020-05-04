@@ -21,7 +21,6 @@ function getStencil(m::mesh, order::Int)
         push!(cells,f)
         empty!(ocells)
         push!(ocells,f)
-        ocells=Int[f];
         for i in 1:order
             for c in ocells
                 for e in ince[offe[c]:offe[c+1]-1]
@@ -64,7 +63,7 @@ function getStencil(m::mesh, order::Int)
                     end
                 end
             end
-            ocells=ch;
+            copy!(ocells,ch);
             empty!(ch);
         end
         stencil[f]=collect(cells);
