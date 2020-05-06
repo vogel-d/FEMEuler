@@ -1,68 +1,75 @@
-function vtkRecovery(m::mesh, rx::Int, ry::Int, degF::degF{1}, sol::Array{Float64,1}, femType::Symbol, filename::String, name::String="Test")
+function vtkRecovery(m::mesh, r::Int, degF::degF{1}, sol::Array{Float64,1}, femType::Symbol, filename::String, name::String="Test")
+    if r==2
+        refCoordE=[0.5 1.0 0.5 0.0;
+                   0.0 0.5 1.0 0.5]
 
-    if m.geometry.dim==2
-        mf=refineRectMesh(m,rx,ry,:periodic,:periodic);
-    elseif m.geometry.dim==3
-        mf=refineCubedSphere(m,rx)
-    end
-    pts=mf.geometry.coordinates;
-    Npts=size(pts,2);
+        refCoordF=[0.5; 0.5]
 
-    if m.meshType==4
-        celltype = VTKCellTypes.VTK_QUAD;
-        mx=0.5;
-        my=0.5;
-    elseif m.meshType==3
-        celltype = VTKCellTypes.VTK_TRIANGLE;
-        mx=0.3333333333333333;
-        my=0.3333333333333333;
+        refInd=[1,5,9,8, 5,2,6,9, 8,9,7,4, 9,6,3,7]
     else
-        error("Ungültiger Mesh-Typ")
+        error("Für das Plotten der $r-fachen Verfeinerung, müssen die Koordinaten und Inzidenzen für das Referenzelement noch angegeben werden.")
     end
-    if m.geometry.dim==3
-        celltype = VTKCellTypes.VTK_POLYGON;
-    end
+    nrCE=size(refCoordE,2)
+    nrCF=size(refCoordF,2)
+    nf=m.topology.size[3];
+    ne=m.topology.size[3];
+    nv=m.topology.size[1]
+    pts=zeros(Float64,m.geometry.dim,m.topology.size[1]+nf*(nrCE+nrCF))
+    pts[:,1:nv]=m.geometry.coordinates;
+
+    m.geometry.dim==3 ? celltype = VTKCellTypes.VTK_POLYGON : celltype = VTKCellTypes.VTK_QUAD;
+    mx=0.5; my=0.5;
+
     cells = MeshCell[]
-    inc=mf.topology.incidence["20"];
-    off=mf.topology.offset["20"];
-    nf=mf.topology.size[3];
+    inc=m.topology.incidence["20"];
+    off=m.topology.offset["20"];
+    ze=1; zf=1;
     for k in 1:nf
         inds=inc[off[k]:off[k+1]-1];
-        push!(cells, MeshCell(celltype, inds))
+        coord=@views m.geometry.coordinates[:,inc[off[k]:off[k+1]-1]]
+        for i in 1:nrCE
+            pts[:,nv+ze]=transformation(m,coord,refCoordE[1,i],refCoordE[2,i])
+            push!(inds,nv+ze);
+            ze+=1
+        end
+        for i in 1:nrCF
+            pts[:,nv+nf*nrCE+zf]=transformation(m,coord,refCoordF[1,i],refCoordF[2,i])
+            push!(inds,nv+nf*nrCE+zf);
+            zf+=1
+        end
+        for i in 1:m.meshType:r^2*m.meshType
+            push!(cells, MeshCell(celltype, inds[refInd[i:i+m.meshType-1]]))
+        end
     end
 
-    J=Array{Float64,2}(undef,mf.geometry.dim,mf.topology.dim);
-    dJ=0.0;
-    coord=Array{Float64,2}(undef,mf.geometry.dim,mf.meshType);
-    nfc=m.topology.size[3];
+    coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
     vtk_filename_noext = (@__DIR__)*"/VTK/"*filename;
     vtk = vtk_grid(vtk_filename_noext, pts, cells,compress=3)
 
-    fComp=Array{Array{Float64},1}(undef, rx*ry);
-    rcoord=Array{Float64,2}(undef,2,rx*ry)
+    fComp=Array{Array{Float64},1}(undef, r^2);
+    rcoord=Array{Float64,2}(undef,2,r^2)
     z=1;
-    for j in 1:2:(2*ry-1)
-        for i in 1:2:(2*rx-1)
-            rcoord[:,z]=[i/(2*rx),j/(2*ry)];
+    for j in 1:2:(2*r-1)
+        for i in 1:2:(2*r-1)
+            rcoord[:,z]=[i/(2*r),j/(2*r)];
             z+=1;
         end
     end
 
-    incm=mf.topology.incidence["CF"]
-    offm=mf.topology.offset["CF"]
-
-    cvtk=zeros(Float64, nf)
+    cvtk=zeros(Float64, nf*r^2)
     cLoc=zeros(Float64, length(degF.phi))
-    for k in 1:nfc
-        coord=@views m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][k]:m.topology.offset["20"][k+1]-1]]
-        mp=transformation(mf, coord, mx, my)
+    zk=1
+    for k in 1:nf
+        coord=@views m.geometry.coordinates[:,inc[off[k]:off[k+1]-1]]
+        mp=transformation(m, coord, mx, my)
         for i in 1:size(rcoord,2)
-            mc=transformation(mf, coord, rcoord[1,i],rcoord[2,i])
-            #fComp[i]=getElementProperties(femType,mf.meshType,mp,mc);
+            mc=transformation(m, coord, rcoord[1,i],rcoord[2,i])
+            #fComp[i]=getElementProperties(femType,m.meshType,mp,mc);
             fComp[i]=getElementProperties(femType,mp,mc);
         end
-        f=incm[offm[k]:offm[k+1]-1];
+        f=zk:(zk+r^2-1);
+        zk+=r^2
         cLoc=sol[l2g(degF, k)]
         for i in 1:length(f)
             cvtk[f[i]]=dot(fComp[i],cLoc);
@@ -75,76 +82,85 @@ function vtkRecovery(m::mesh, rx::Int, ry::Int, degF::degF{1}, sol::Array{Float6
     return outfiles::Vector{String}
 end
 
-function vtkRecovery(m::mesh, rx::Int, ry::Int, degF::degF{2}, sol::Array{Float64,1}, femType::Symbol, filename::String, name::String="Test"; printSpherical::Bool=false)
+function vtkRecovery(m::mesh, r::Int, degF::degF{2}, sol::Array{Float64,1}, femType::Symbol, filename::String, name::String="Test"; printSpherical::Bool=false)
+    if r==2
+        refCoordE=[0.5 1.0 0.5 0.0;
+                   0.0 0.5 1.0 0.5]
 
-    if m.geometry.dim==2
-        mf=refineRectMesh(m,rx,ry,:periodic,:constant);
-    elseif m.geometry.dim==3
-        mf=refineCubedSphere(m,rx)
-    end
-    pts=mf.geometry.coordinates;
-    Npts=size(pts,2);
+        refCoordF=[0.5; 0.5]
 
-    if m.meshType==4
-        celltype = VTKCellTypes.VTK_QUAD;
-        mx=0.5;
-        my=0.5;
-    elseif m.meshType==3
-        celltype = VTKCellTypes.VTK_TRIANGLE;
-        mx=0.3333333333333333;
-        my=0.3333333333333333;
+        refInd=[1,5,9,8, 5,2,6,9, 8,9,7,4, 9,6,3,7]
     else
-        error("Ungültiger Mesh-Typ")
+        error("Für das Plotten der $r-fachen Verfeinerung, müssen die Koordinaten und Inzidenzen für das Referenzelement noch angegeben werden.")
     end
-    if m.geometry.dim==3
-        celltype = VTKCellTypes.VTK_POLYGON;
-    end
+    nrCE=size(refCoordE,2)
+    nrCF=size(refCoordF,2)
+    nf=m.topology.size[3];
+    ne=m.topology.size[3];
+    nv=m.topology.size[1]
+    pts=zeros(Float64,m.geometry.dim,m.topology.size[1]+nf*(nrCE+nrCF))
+    pts[:,1:nv]=m.geometry.coordinates;
+
+    m.geometry.dim==3 ? celltype = VTKCellTypes.VTK_POLYGON : celltype = VTKCellTypes.VTK_QUAD;
+    mx=0.5; my=0.5;
+
     cells = MeshCell[]
-    inc=mf.topology.incidence["20"];
-    off=mf.topology.offset["20"];
-    nf=mf.topology.size[3];
+    inc=m.topology.incidence["20"];
+    off=m.topology.offset["20"];
+    ze=1; zf=1;
     for k in 1:nf
         inds=inc[off[k]:off[k+1]-1];
-        push!(cells, MeshCell(celltype, inds))
+        coord=@views m.geometry.coordinates[:,inc[off[k]:off[k+1]-1]]
+        for i in 1:nrCE
+            pts[:,nv+ze]=transformation(m,coord,refCoordE[1,i],refCoordE[2,i])
+            push!(inds,nv+ze);
+            ze+=1
+        end
+        for i in 1:nrCF
+            pts[:,nv+nf*nrCE+zf]=transformation(m,coord,refCoordF[1,i],refCoordF[2,i])
+            push!(inds,nv+nf*nrCE+zf);
+            zf+=1
+        end
+        for i in 1:m.meshType:r^2*m.meshType
+            push!(cells, MeshCell(celltype, inds[refInd[i:i+m.meshType-1]]))
+        end
     end
 
-    J=Array{Float64,2}(undef,mf.geometry.dim,mf.topology.dim);
+    J=Array{Float64,2}(undef,m.geometry.dim,m.topology.dim);
     dJ=0.0;
-    coord=Array{Float64,2}(undef,mf.geometry.dim,mf.meshType);
-    nfc=m.topology.size[3];
+    coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
     vtk_filename_noext = (@__DIR__)*"/VTK/"*filename;
     vtk = vtk_grid(vtk_filename_noext, pts, cells,compress=3)
 
-    fComp=Array{Array{Float64},1}(undef, rx*ry);
-    rcoord=Array{Float64,2}(undef,2,rx*ry)
+    fComp=Array{Array{Float64},1}(undef, r^2);
+    rcoord=Array{Float64,2}(undef,2,r^2)
     z=1;
-    for j in 1:2:(2*ry-1)
-        for i in 1:2:(2*rx-1)
-            rcoord[:,z]=[i/(2*rx),j/(2*ry)];
+    for j in 1:2:(2*r-1)
+        for i in 1:2:(2*r-1)
+            rcoord[:,z]=[i/(2*r),j/(2*r)];
             z+=1;
         end
     end
 
-    incm=mf.topology.incidence["CF"]
-    offm=mf.topology.offset["CF"]
-
-    cvtk=zeros(Float64, nf)
+    cvtk=zeros(Float64, nf*r^2)
     cLoc=zeros(Float64, length(degF.phi))
+    zk=1
     for k in 1:nf
-        f=incm[offm[k]:offm[k+1]-1];
+        f=zk:(zk+r^2-1);
+        zk+=r^2
         cLoc=sol[l2g(degF, k)]
         for i in 1:length(f)
             dJ=jacobi!(J,m,k,rcoord[1,i],rcoord[2,i],coord);
-            mp=transformation(mf, coord, mx, my)
+            mp=transformation(m, coord, mx, my)
             for i in 1:size(rcoord,2)
-                mc=transformation(mf, coord, rcoord[1,i],rcoord[2,i])
-                fComp[i]=getElementProperties(femType,mf.meshType,mp,mc);
+                mc=transformation(m, coord, rcoord[1,i],rcoord[2,i])
+                fComp[i]=getElementProperties(femType,m.meshType,mp,mc);
             end
             fLoc=(1/dJ)*J*fComp
             if printSpherical
                 xyz=transformation(m,coord,rcoord[1,i],rcoord[2,i])
-                lon,lat,r=cart2sphere(xyz[1],xyz[2],xyz[3]);
+                lon,lat,rad=cart2sphere(xyz[1],xyz[2],xyz[3]);
                 cvtk[:,f[i]]=velSp(fLoc*cLoc,lon,lat)
             else
                 cvtk[:,f[i]]=fLoc*cLoc;

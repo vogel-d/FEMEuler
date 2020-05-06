@@ -58,4 +58,5 @@ include("plotMesh.jl");
 include("plotFEM.jl")
 include("vtk.jl");
 include("vtkTest.jl");
+include("vtkRefined.jl");
 include("jld.jl");

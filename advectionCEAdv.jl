@@ -30,7 +30,7 @@ function advection(p::femProblem, gamma::Float64, y::solution, Vfval::SparseVect
     if p.taskRecovery
       vtk(p.mesh,p.degFBoundary[p.femType[:rhoTheta][1]],cR,p.femType[:rhoTheta][1],"testSphereTh")
       cR=recovery(p,fTtheta,cR);
-      vtkRecovery(p.mesh,2,2,p.degFBoundary[p.femType[:rhoTheta][3]],cR,p.femType[:rhoTheta][3],"testSphereRecoveryTh")
+      vtkRecovery(p.mesh,2,p.degFBoundary[p.femType[:rhoTheta][3]],cR,p.femType[:rhoTheta][3],"testSphereRecoveryTh")
       Sth=advectionStiffR(p.degFBoundary[fTtheta[1]],nquadPhi[fTtheta[1]],
                          p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
                          p.degFBoundary[fTtheta[3]],nquadPhi[fTtheta[3]],cR,
@@ -49,7 +49,7 @@ function advection(p::femProblem, gamma::Float64, y::solution, Vfval::SparseVect
     cR=y.rho
     if p.taskRecovery
       cR=recovery(p,fTrho,cR);
-      #vtkRecovery(p.mesh,2,2,p.degFBoundary[p.femType[:rho][3]],cR,p.femType[:rho][3],"testRecoveryRho")
+      #vtkRecovery(p.mesh,2,p.degFBoundary[p.femType[:rho][3]],cR,p.femType[:rho][3],"testRecoveryRho")
       Srho=advectionStiffR(p.degFBoundary[fTrho[1]],nquadPhi[fTrho[1]],
                          p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
                          p.degFBoundary[fTrho[3]],nquadPhi[fTrho[3]],cR,
