@@ -14,6 +14,8 @@ function recovery(degFT::degF{1,:H1}, recoverySpace::Symbol, cval::Array{Float64
     inc=m.topology.incidence["20"];
     off=m.topology.offset["20"];
 
+    phiR=getPhiRecovery([0.0,0.0],Val(recoverySpace));
+    nR=length(phiR)
     nT=length(phiT)
     #nR=div(length(phiR),nf)
 
@@ -35,8 +37,6 @@ function recovery(degFT::degF{1,:H1}, recoverySpace::Symbol, cval::Array{Float64
         n=transformation(m,fcoord,0.5,0.5);
         t1,t2=getTangentialPlane(n)
         #phiR=getPhiRecovery(n,Val(recoverySpace));
-        phiR=getPhiRecovery([0.0,0.0],Val(recoverySpace));
-        nR=length(phiR)
 
         nS=length(stencil[f])
         lM=zeros(nS*nT,nR)

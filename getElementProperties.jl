@@ -180,3 +180,16 @@ function getElementProperties(type::Symbol, n::Array{Float64,1}, xyz)
     end
     return valPhi
 end
+#=
+function getElementProperties(type::Symbol, n::Array{Float64,1}, xyz)
+    phi=getPhiRecovery([0.0,0.0],Val(type));
+    valPhi=similar(phi,Float64);
+    n2=copy(n)
+    t1,t2=getTangentialPlane(n2);
+    txyz=transformRecoveryCoord(n2,t1,t2,xyz)
+    for k=1:length(phi)
+        valPhi[k]=phi[k](txyz);
+    end
+    return valPhi
+end
+=#
