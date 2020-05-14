@@ -56,10 +56,11 @@ struct mesh
   normals::Array{Float64,2} #Normalen des Referenzelementes
   boundaryEdges::SparseVector{Int,Int};
   boundaryVertices::SparseVector{Int,Int};
-  orientation::Array{Float64,1};
+  boundaryConditionEW::Symbol;
+  boundaryConditionTB::Symbol;
 end
 
-function mesh(topology::meshTopology, geometry::meshGeometry, bE::SparseVector{Int,Int}, bV::SparseVector{Int,Int}, mt::Int=topology.offset["20"][2]-topology.offset["20"][1])
+function mesh(topology::meshTopology, geometry::meshGeometry, bE::SparseVector{Int,Int}, bV::SparseVector{Int,Int},condEW::Symbol,condTB::Symbol, mt::Int=topology.offset["20"][2]-topology.offset["20"][1])
   inc=topology.incidence["10"];
   coord=geometry.coordinates;
   ne=topology.size[2];
@@ -74,6 +75,6 @@ function mesh(topology::meshTopology, geometry::meshGeometry, bE::SparseVector{I
   #Hier normale*Kantenlänge (beachte auch richtung der integration -> +-)
   #wegen discEdges, ist sozusagen transformation auf jeweilige Kante
   mt==4 ? n=[0.0 1.0 0.0 1.0;-1.0 0.0 -1.0 0.0] : n=[0.0 1.0 1.0;-1.0 1.0 0.0];
-  orientation=Float64[];
-  mesh(topology, geometry, mt, l, n, bE, bV, orientation)
+
+  mesh(topology, geometry, mt, l, n, bE, bV, condEW, condTB)
 end
