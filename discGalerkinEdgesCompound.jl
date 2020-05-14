@@ -519,6 +519,8 @@ function discGalerkinEdges!(M::Array{Float64,2},
             end
             getSubCells!(subcoord1, coord1, center, compoundData);
             orderAdjacentSubCells!(adjacentSubCells,subcoord1,subcoord2,adjacentSubCells1,adjacentSubCells2);
+            coord1= m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][inc1]:m.topology.offset["20"][inc1+1]-1]]
+            getSubCells!(subcoord1, coord1, center, compoundData);
         else
             orderAdjacentSubCells!(adjacentSubCells,subcoord1,subcoord2,adjacentSubCells1,adjacentSubCells2);
         end
@@ -735,14 +737,19 @@ function discGalerkinEdges!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
 
         #order adjacentSubCells to have adjacentSubCells[1,j] sharing an edge with adjacentSubCells[2,j]
         if compoundData.isEdgePeriodic[e] #periodic boundary edge
+            #make coordinates of edge equal in both elements
+            #has to be reversed to save correct edge direction
+            #fill coord1 with Inf to avoid other coordinates to being equal than the adjacent
+            fill!(coord1,Inf);
             for d in 1:m.geometry.dim
-                #make coordinates of edge equal in both elements
-                #has to be reversed to save correct edge direction
+                #assuming local edge i connecting local vertices i and its cyclic next neighbour in coord
                 coord1[d,eT1]=coord2[d,mod(eT2,nVertices_CompoundElement)+1];
                 coord1[d,mod(eT1,nVertices_CompoundElement)+1]=coord2[d,eT2];
             end
             getSubCells!(subcoord1, coord1, center, compoundData);
             orderAdjacentSubCells!(adjacentSubCells,subcoord1,subcoord2,adjacentSubCells1,adjacentSubCells2);
+            coord1= m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][inc1]:m.topology.offset["20"][inc1+1]-1]]
+            getSubCells!(subcoord1, coord1, center, compoundData);
         else
             orderAdjacentSubCells!(adjacentSubCells,subcoord1,subcoord2,adjacentSubCells1,adjacentSubCells2);
         end
@@ -798,6 +805,16 @@ function discGalerkinEdges!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
                     end
                 end
             end
+
+            println("edge $e")
+            println("w1 $w1")
+            println("w2 $w2")
+            println("adjacent sub cells")
+            println(adjacentSubCells)
+            println("eT1 $eT1")
+            println("eT2 $eT2")
+            println("subeT1 $subeT1")
+            println("subeT2 $subeT2")
 
             for j in 1:nCompoundPhiF
                 for i in 1:nCompoundPhiT
