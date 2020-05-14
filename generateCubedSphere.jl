@@ -60,6 +60,34 @@ function generateCubedSphere(n::Int,r::Float64,nz::Int=0,case::Symbol=:purser1) 
   NodeNumberBTpp=NodeNumber
   NodeNumber=getCubePoints!(coord,[1.0,1.0,0.0],3,NodeNumber,n,case)
   #Nodes
+  #=
+  NodeNumbermmm=NodeNumber
+  coord[:,NodeNumber]=[-1.0,-1.0,-1.0]
+  NodeNumber+=1
+  NodeNumberpmm=NodeNumber
+  coord[:,NodeNumber]=[1.0,-1.0,-1.0]
+  NodeNumber+=1
+  NodeNumbermpm=NodeNumber
+  coord[:,NodeNumber]=[-1.0,1.0,-1.0]
+  NodeNumber+=1
+  NodeNumberppm=NodeNumber
+  coord[:,NodeNumber]=[1.0,1.0,-1.0]
+  NodeNumber+=1
+  NodeNumbermmp=NodeNumber
+  coord[:,NodeNumber]=[-1.0,-1.0,1.0]
+  NodeNumber+=1
+  NodeNumberpmp=NodeNumber
+  coord[:,NodeNumber]=[1.0,-1.0,1.0]
+  NodeNumber+=1
+  NodeNumbermpp=NodeNumber
+  coord[:,NodeNumber]=[-1.0,1.0,1.0]
+  NodeNumber+=1
+  NodeNumberppp=NodeNumber
+  coord[:,NodeNumber]=[1.0,1.0,1.0]
+  NodeNumber+=1
+
+  =#
+  #Nodes
   NodeNumbermmm=NodeNumber
   coord[:,NodeNumber]=cubePoint([-1.0,-1.0,-1.0],[0,0,0],n,case)
   NodeNumber+=1
@@ -149,7 +177,7 @@ function generateCubedSphere(n::Int,r::Float64,nz::Int=0,case::Symbol=:purser1) 
   bE=spzeros(Int, size[2]);
   bV=spzeros(Int, size[1]);
 
-  coord=(r/sqrt(3)).*coord;
+  #coord=(r/sqrt(3)).*coord;
 
   #Initialisieren der Topologie, Geometrie und damit des Meshes
   n=Int[n,n,nz];
@@ -164,7 +192,7 @@ function generateCubedSphere(n::Int,r::Float64,nz::Int=0,case::Symbol=:purser1) 
   m.topology.offset["20"]=off;
 
   setOrientation!(m)
-  
+
   # Extension to 3 d
   #Extension3DPolyGrid(nz,PolyGrid,NumberOfNodesPlane,NumberOfEdgesPlane,NumberOfFacesPlane)
   return m;
@@ -193,9 +221,18 @@ end
 
 function cubePoint(p::Array{Float64,1},i::Array{Int,1},n::Int,case::Symbol)
   if case==:cube1
-    piFourth=atan(1.0);
-    d=2.0*piFourth/n;
-    return tan.(d.*i.-piFourth)
+    N=copy(p)
+    if i[1]>0
+      p[1]=tan(i[1]*pi/(2*n)-0.25*pi);
+    end
+    if i[2]>0
+      p[2]=tan(i[2]*pi/(2*n)-0.25*pi);
+    end
+    if i[3]>0
+      p[3]=tan(i[3]*pi/(2*n)-0.25*pi);
+    end
+    return N./norm(N).*sqrt(3);
+
   elseif case==:purser1
     xm=zeros(2);
     dd=2.0/n;
