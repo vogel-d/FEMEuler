@@ -223,13 +223,13 @@ function cubePoint(p::Array{Float64,1},i::Array{Int,1},n::Int,case::Symbol)
   if case==:cube1
     N=copy(p)
     if i[1]>0
-      p[1]=tan(i[1]*pi/(2*n)-0.25*pi);
+      N[1]=tan(i[1]*pi/(2*n)-0.25*pi);
     end
     if i[2]>0
-      p[2]=tan(i[2]*pi/(2*n)-0.25*pi);
+      N[2]=tan(i[2]*pi/(2*n)-0.25*pi);
     end
     if i[3]>0
-      p[3]=tan(i[3]*pi/(2*n)-0.25*pi);
+      N[3]=tan(i[3]*pi/(2*n)-0.25*pi);
     end
     return N./norm(N).*sqrt(3);
 
