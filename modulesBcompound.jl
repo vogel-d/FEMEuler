@@ -25,6 +25,7 @@ include("degF.jl");
 include("generateMesh.jl")
 include("refineMesh.jl")
 include("compoundData.jl")
+include("getCompoundElementProperties.jl")
 include("getSubCells.jl")
 include("assembleCompoundPhi.jl")
 include("femProblem.jl");

@@ -34,6 +34,7 @@ include("adaptGeometry.jl")
 include("additionalFunctions.jl")
 include("getDim.jl")
 include("getSpace.jl")
+include("orderAdjacentSubCells.jl");
 
 include("assembMassCompound.jl");
 include("assembLoadCompound.jl");
@@ -45,12 +46,13 @@ include("embed.jl")
 include("recovery.jl")
 include("projectAdvectionCompound.jl")
 include("advectionStiffCompound.jl")
+include("advectionStiffCompoundMatrix.jl")
 include("discGalerkinCellsCompound.jl")
 include("discGalerkinEdgesCompound.jl")
 include("MIS.jl")
 include("coordTrans.jl")
 include("getEdgeType.jl")
-include("setEdgeData.jl")
+include("setCompoundEdgeData.jl")
 include("advectionBA.jl")
 include("splitExplicitBA.jl")
 include("symplektischerEulerBA.jl")
