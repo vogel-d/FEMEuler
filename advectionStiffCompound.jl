@@ -12,14 +12,17 @@ function advectionStiff(degFT::degF{1,:H1}, phiTtrans::Array{Array{Array{Float64
     gradphiW=@views degFW.gradphi;
 
     sk=size(kubWeights);
+    nCompoundPhiT=compoundData.nCompoundPhi[degFT.femType];
+    nCompoundPhiF=compoundData.nCompoundPhi[degFF.femType];
+    nCompoundPhiW=compoundData.nCompoundPhi[degFW.femType];
 
-    globalNumT1=Array{Int64,1}(undef,length(phiT));
-    globalNumF1=Array{Int64,1}(undef,size(phiF,2));
-    globalNumW1=Array{Int64,1}(undef,length(phiW));
+    globalNumT1=Array{Int64,1}(undef,nCompoundPhiT);
+    globalNumF1=Array{Int64,1}(undef,nCompoundPhiF);
+    globalNumW1=Array{Int64,1}(undef,nCompoundPhiW);
 
-    globalNumT2=Array{Int64,1}(undef,length(phiT));
-    globalNumF2=Array{Int64,1}(undef,size(phiF,2));
-    globalNumW2=Array{Int64,1}(undef,length(phiW));
+    globalNumT2=Array{Int64,1}(undef,nCompoundPhiT);
+    globalNumF2=Array{Int64,1}(undef,nCompoundPhiF);
+    globalNumW2=Array{Int64,1}(undef,nCompoundPhiW);
 
     M=zeros(degFT.numB,1);
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
@@ -57,13 +60,17 @@ function advectionStiff(degFT::degF{2,:H1div}, phiTtrans::Array{Array{Array{Floa
 
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
-    globalNumT1=Array{Int64,1}(undef,size(phiT,2));
-    globalNumF1=Array{Int64,1}(undef,size(phiF,2));
-    globalNumW1=Array{Int64,1}(undef,size(phiW,2));
+    nCompoundPhiT=compoundData.nCompoundPhi[degFT.femType];
+    nCompoundPhiF=compoundData.nCompoundPhi[degFF.femType];
+    nCompoundPhiW=compoundData.nCompoundPhi[degFW.femType];
 
-    globalNumT2=Array{Int64,1}(undef,size(phiT,2));
-    globalNumF2=Array{Int64,1}(undef,size(phiF,2));
-    globalNumW2=Array{Int64,1}(undef,size(phiW,2));
+    globalNumT1=Array{Int64,1}(undef,nCompoundPhiT);
+    globalNumF1=Array{Int64,1}(undef,nCompoundPhiF);
+    globalNumW1=Array{Int64,1}(undef,nCompoundPhiW);
+
+    globalNumT2=Array{Int64,1}(undef,nCompoundPhiT);
+    globalNumF2=Array{Int64,1}(undef,nCompoundPhiF);
+    globalNumW2=Array{Int64,1}(undef,nCompoundPhiW);
 
     M=zeros(degFT.numB,1);
     discGalerkinCells!(M,degFT,phiT, globalNumT1, degFF,phiF, dphiF, fval, globalNumF1,
