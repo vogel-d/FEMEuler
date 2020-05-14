@@ -68,6 +68,7 @@ function assembStiffCompound(degFs::degF{1,:H1}, degFv::degF{2,:H1div}, m::mesh,
     nPhiT=length(phiT);
     nPhiF=length(divphiF);
     sk=size(kubWeights);
+    center=Array{Float64,1}(undef,2);
     nSubCells=compoundData.nSubCells;
     assembledPhiT=compoundData.assembledPhi[degFs.femType];
     assembledPhiF=compoundData.assembledPhi[degFv.femType];
@@ -76,6 +77,10 @@ function assembStiffCompound(degFs::degF{1,:H1}, degFv::degF{2,:H1div}, m::mesh,
     assembledPhiT=compoundData.assembledPhi[degFs.femType];
     assembledPhiF=compoundData.assembledPhi[degFv.femType];
     subcoord=Array{Array{Float64,2},1}(undef,nSubCells);
+    for i in 1:nSubCells
+        #fill! causes mutating all entries of subcoord when changing a single entry
+        subcoord[i]=Array{Float64,2}(undef,2,compoundData.nVerticesSubElement);
+    end
     mt=m.meshType;
 
     rows=Int64[];
@@ -94,16 +99,16 @@ function assembStiffCompound(degFs::degF{1,:H1}, degFv::degF{2,:H1div}, m::mesh,
     nquadPoints=compoundData.nquadPoints;
     quadWeights=compoundData.quadWeights;
     sq=length(quadWeights);
-    J1=initJacobi((m.geometry.dim,m.topology.dim),sq);
-    ddJ1=Array{Float64,1}(undef,sq);
-    jphiF1=initJacobi((m.geometry.dim,nPhiF),sq);
+    J_edge=initJacobi((m.geometry.dim,m.topology.dim),sq);
+    ddJ_edge=Array{Float64,1}(undef,sq);
+    jphiF_edge=initJacobi((m.geometry.dim,nPhiF),sq);
 
     for k in 1:nf
         coord= m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][k]:m.topology.offset["20"][k+1]-1]]
 
-        getSubCells!(subcoord, coord, compoundData);
+        getSubCells!(subcoord, coord, center, compoundData);
         assemblePhi!(assembledPhiT, subcoord, degFs, m, J, dJ, phiT, kubPoints, kubWeights, compoundData);
-        assemblePhi!(assembledPhiF, subcoord, m, divphiF, J1, ddJ1, jphiF1, nquadPhiF, nquadPoints, quadWeights, compoundData);
+        assemblePhi!(assembledPhiF, subcoord, m, divphiF, J_edge, ddJ_edge, jphiF_edge, nquadPhiF, nquadPoints, quadWeights, compoundData);
         globalNumT=l2g(degFs,k);
         globalNumF=l2g(degFv,k);
         for subCell in 1:nSubCells
@@ -111,9 +116,9 @@ function assembStiffCompound(degFs::degF{1,:H1}, degFv::degF{2,:H1div}, m::mesh,
                 for i in 1:nCompoundPhiT
                     currentval=0.0;
                     for subi in 1:nPhiT
-                        if assembledPhiT[i][subi,subCell]!=0
+                        if assembledPhiT[i][subi,subCell]!=0.0
                             for subj in 1:nPhiF
-                                if assembledPhiF[j][subj,subCell]!=0
+                                if assembledPhiF[j][subj,subCell]!=0.0
                                     for r in 1:sk[2]
                                         for l in 1:sk[1]
                                             currentval+=assembledPhiT[i][subi,subCell]*assembledPhiF[j][subj,subCell]*
@@ -146,12 +151,17 @@ function assembStiffCompound(degFs::degF{1,:H1}, degFv::degF{2,:H1div}, z::Array
     divphiF=degFv.divphi;
     nPhiT=length(phiT);
     nPhiF=size(phiF,2);
+    center=Array{Float64,1}(undef,2);
     nSubCells=compoundData.nSubCells;
     nCompoundPhiT=compoundData.nCompoundPhi[degFs.femType];
     nCompoundPhiF=compoundData.nCompoundPhi[degFv.femType];
     assembledPhiT=compoundData.assembledPhi[degFs.femType];
     assembledPhiF=compoundData.assembledPhi[degFv.femType];
     subcoord=Array{Array{Float64,2},1}(undef,nSubCells);
+    for i in 1:nSubCells
+        #fill! causes mutating all entries of subcoord when changing a single entry
+        subcoord[i]=Array{Float64,2}(undef,2,compoundData.nVerticesSubElement);
+    end
     mt=m.meshType;
 
     rows=Int64[];
@@ -168,9 +178,9 @@ function assembStiffCompound(degFs::degF{1,:H1}, degFv::degF{2,:H1div}, z::Array
     nquadPoints=compoundData.nquadPoints;
     quadWeights=compoundData.quadWeights;
     sq=length(quadWeights)
-    J1=initJacobi((m.geometry.dim,m.topology.dim),sq);
-    ddJ1=Array{Float64,1}(undef,sq);
-    jphiF1=initJacobi((m.geometry.dim,size(phiF,2)),sq);
+    J_edge=initJacobi((m.geometry.dim,m.topology.dim),sq);
+    ddJ_edge=Array{Float64,1}(undef,sq);
+    jphiF_edge=initJacobi((m.geometry.dim,size(phiF,2)),sq);
 
     lS=zeros(length(assembledPhiT),length(assembledPhiF));
 
@@ -180,18 +190,18 @@ function assembStiffCompound(degFs::degF{1,:H1}, degFv::degF{2,:H1div}, z::Array
         globalNumT=l2g(degFs,k);
         globalNumF=l2g(degFv,k);
 
-        getSubCells!(subcoord, coord, compoundData);
+        getSubCells!(subcoord, coord, center, compoundData);
         assemblePhi!(assembledPhiT, subcoord, degFs, m, J, ddJ, phiT, kubPoints, kubWeights, compoundData);
-        assemblePhi!(assembledPhiF, subcoord, m, divphiF, J1, ddJ1, jphiF1, nquadPhiF, nquadPoints, quadWeights, compoundData);
+        assemblePhi!(assembledPhiF, subcoord, m, divphiF, J_edge, ddJ_edge, jphiF_edge, nquadPhiF, nquadPoints, quadWeights, compoundData);
         for subCell in 1:nSubCells
             jacobi!(J,ddJ,jphiF,kubPoints,phiF,subcoord[subCell],mt);
             for i in 1:nCompoundPhiT
                 for j in 1:nCompoundPhiF
                     currentval=0.0;
                     for subi in 1:nPhiT
-                        if assembledPhiT[i][subi,subCell]!=0
+                        if assembledPhiT[i][subi,subCell]!=0.0
                             for subj in 1:nPhiF
-                                if assembledPhiF[j][subj,subCell]!=0
+                                if assembledPhiF[j][subj,subCell]!=0.0
                                     for r in 1:sk[2]
                                         for l in 1:sk[1]
                                             zjphi=0.0

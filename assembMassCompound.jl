@@ -34,15 +34,20 @@ function assembMassCompound(degF::degF{1,:H1}, m::mesh, kubPoints::Array{Float64
     coord=Array{Float64,2}(undef,m.geometry.dim,diff(m.topology.offset["20"][1:2])[1]);
     key="20";
     mt=m.meshType;
+    center=Array{Float64,1}(undef,2);
     nSubCells=compoundData.nSubCells;
     nCompoundPhi=compoundData.nCompoundPhi[degF.femType];
     assembledPhi=compoundData.assembledPhi[degF.femType];
     subcoord=Array{Array{Float64,2},1}(undef,nSubCells);
+    for i in 1:nSubCells
+        #fill! causes mutating all entries of subcoord when changing a single entry
+        subcoord[i]=Array{Float64,2}(undef,2,compoundData.nVerticesSubElement);
+    end
 
     for k in 1:m.topology.size[m.topology.dim+1]
         coord= m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][k]:m.topology.offset["20"][k+1]-1]]
 
-        getSubCells!(subcoord, coord, compoundData);
+        getSubCells!(subcoord, coord, center, compoundData);
         gvertices=l2g(degF,k);
         assemblePhi!(assembledPhi, subcoord, degF, m, J, dJ, phi, kubPoints, kubWeights, compoundData);
         for subCell in 1:nSubCells
@@ -51,9 +56,9 @@ function assembMassCompound(degF::degF{1,:H1}, m::mesh, kubPoints::Array{Float64
                 for i in 1:nCompoundPhi
                     currentval=0.0;
                     for subj in 1:nPhiSubElement
-                        if assembledPhi[j][subj,subCell]!=0
+                        if assembledPhi[j][subj,subCell]!=0.0
                             for subi in 1:nPhiSubElement
-                                if assembledPhi[i][subi,subCell]!=0
+                                if assembledPhi[i][subi,subCell]!=0.0
                                     for r in 1:sk[2]
                                         for l in 1:sk[1]
                                             currentval+=assembledPhi[i][subi,subCell]*assembledPhi[j][subj,subCell]*
@@ -92,6 +97,7 @@ function assembMassCompound(degF::degF{2,:H1div}, m::mesh, kubPoints::Array{Floa
     coord=Array{Float64,2}(undef,m.geometry.dim,diff(m.topology.offset["20"][1:2])[1]);
     key="20";
     mt=m.meshType;
+    center=Array{Float64,1}(undef,2);
     nSubCells=compoundData.nSubCells;
     nquadPhi=compoundData.nquadPhi[degF.femType];
     nquadPoints=compoundData.nquadPoints;
@@ -99,27 +105,31 @@ function assembMassCompound(degF::degF{2,:H1div}, m::mesh, kubPoints::Array{Floa
     nCompoundPhi=compoundData.nCompoundPhi[degF.femType];
     assembledPhi=compoundData.assembledPhi[degF.femType];
     subcoord=Array{Array{Float64,2},1}(undef,nSubCells);
+    for i in 1:nSubCells
+        #fill! causes mutating all entries of subcoord when changing a single entry
+        subcoord[i]=Array{Float64,2}(undef,2,compoundData.nVerticesSubElement);
+    end
 
     sq=length(quadWeights)
-    J1=initJacobi((m.geometry.dim,m.topology.dim),sq);
-    ddJ1=Array{Float64,1}(undef,sq);
-    jphi1=initJacobi((m.geometry.dim,size(phi,2)),sq);
+    J_edge=initJacobi((m.geometry.dim,m.topology.dim),sq);
+    ddJ_edge=Array{Float64,1}(undef,sq);
+    jphi_edge=initJacobi((m.geometry.dim,size(phi,2)),sq);
 
     for k in 1:m.topology.size[m.topology.dim+1]
         coord= m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][k]:m.topology.offset["20"][k+1]-1]]
 
-        getSubCells!(subcoord, coord, compoundData);
+        getSubCells!(subcoord, coord, center, compoundData);
         gvertices=l2g(degF,k);
-        assemblePhi!(assembledPhi, subcoord, m, divphi, J1, ddJ1, jphi1, nquadPhi, nquadPoints, quadWeights, compoundData);
+        assemblePhi!(assembledPhi, subcoord, m, divphi, J_edge, ddJ_edge, jphi_edge, nquadPhi, nquadPoints, quadWeights, compoundData);
         for subCell in 1:nSubCells
             jacobi!(J,ddJ,jphi,kubPoints,phi,subcoord[subCell],mt);
             for j in 1:nCompoundPhi
                 for i in 1:nCompoundPhi
                     currentval=0.0;
                     for subj in 1:nPhiSubElement
-                        if assembledPhi[j][subj,subCell]!=0
+                        if assembledPhi[j][subj,subCell]!=0.0
                             for subi in 1:nPhiSubElement
-                                if assembledPhi[i][subi,subCell]!=0
+                                if assembledPhi[i][subi,subCell]!=0.0
                                     for r in 1:sk[2]
                                         for l in 1:sk[1]
                                             dotp=0.0;
