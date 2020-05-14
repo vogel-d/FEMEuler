@@ -259,6 +259,34 @@ function MIS(s::Symbol)
         end
       end
 
+   elseif s==:MISRK2
+
+      nStage=2;
+      nPhiStage=zeros(nStage+1);
+      nPhi=1;
+
+      nPhiStageBeta=zeros(Int64,nStage+1);
+      nPhiStageBeta[2]= 0;
+      nPhiStageBeta[3]= 0;
+
+      nPhiStageGamma=zeros(Int64,nStage+1);
+      nPhiStageGamma[2]= 0;
+      nPhiStageGamma[3]= 0;
+
+      beta=zeros(nStage+1, nStage);
+      beta[2,1] = 0.5;
+      beta[3,2] = 1.0;
+
+      c=zeros(nStage+1);
+      c[2]=0.5;
+      c[3]=1.0;
+
+      alpha=zeros(nStage+1,nStage);
+
+      gamma=zeros(nStage+1, nStage);
+
+      d=c;
+
    else
       error("Keine implementierte MIS-Methode.")
    end
