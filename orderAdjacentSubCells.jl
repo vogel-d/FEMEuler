@@ -1,10 +1,6 @@
-function orderAdjacentSubCells!(adjacentSubCells::Array{Int64,2},m::mesh,subcoord1,subcoord2,adjacentSubCells1,adjacentSubCells2)
-    coordCell1= m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][inc1]:m.topology.offset["20"][inc1+1]-1]]
-    coordCell2= m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][inc2]:m.topology.offset["20"][inc2+1]-1]]
-    getSubCells!(subcoord1, coordCell1, compoundData);
-    getSubCells!(subcoord2, coordCell2, compoundData);
-
-    z=0;
+function orderAdjacentSubCells!(adjacentSubCells::Array{Int64,2},subcoord1,subcoord2,adjacentSubCells1,adjacentSubCells2)
+    fill!(adjacentSubCells,0); #just for safety, possibly removeable when working
+    z=1;
     for adjacentSubCell1 in adjacentSubCells1
         for adjacentSubCell2 in adjacentSubCells2
             if twocommonpoints(subcoord1[adjacentSubCell1],subcoord2[adjacentSubCell2])
@@ -15,14 +11,21 @@ function orderAdjacentSubCells!(adjacentSubCells::Array{Int64,2},m::mesh,subcoor
             end
         end
     end
+    in(0,adjacentSubCells) && @warn("ordering not successful.")
 end
 
-function twocommonpoints(coord1::Array{Float64,2},coord2::Array{Float64,2})
-    commonpoints=Int64[];
+function twocommonpoints(coord1::Array{Float64,2},coord2::Array{Float64,2},atol::Float64=0.0)
+    z=0;
     for i in 1:size(coord1,2)
-        for commonpoint in findall(coord1[:,i],coord2)
-            push!(commonpoints,commonpoint);
+        for j in 1:size(coord2,2)
+            if isapprox(coord1[1,i],coord2[1,j],atol=atol) && isapprox(coord1[2,i],coord2[2,j],atol=atol)
+                if z>0
+                    return true;
+                else
+                    z+=1;
+                end
+            end
         end
     end
-    return length(commonpoints)==2
+    return false
 end
