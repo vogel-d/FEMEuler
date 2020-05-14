@@ -415,11 +415,6 @@ function discGalerkinCells!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
                 end
             end
 
-            println("w $(globalNumW)")
-            println("val $(wval[globalNumW])")
-            println(w1)
-            println(w2)
-
             fill!(gradw11,0.0);
             fill!(gradw12,0.0);
             fill!(gradw21,0.0);
@@ -437,13 +432,6 @@ function discGalerkinCells!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
                 end
             end
 
-            println("gradw $(globalNumW)")
-            println("val $(wval[globalNumW])")
-            println(gradw11)
-            println(gradw12)
-            println(gradw21)
-            println(gradw22)
-
             jacobi!(ddJ,jphiT,kubPoints,phiT,subcoord[subCell],mt);
             for i in 1:nCompoundPhiT
                 for j in 1:nCompoundPhiF
@@ -460,7 +448,6 @@ function discGalerkinCells!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
                 end
             end
         end
-
         for i in 1:length(globalNumT)
             gi=globalNumT[i];
             for j in 1:length(globalNumF)
