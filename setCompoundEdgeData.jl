@@ -2,6 +2,7 @@ function setCompoundEdgeData!(p::femProblem, compVf::Symbol)
     m=p.mesh;
     degFVf=p.degFBoundary[p.femType[compVf][1]];
     mt=m.meshType;
+    nVertices_CompoundElement=diff(m.topology.offset["20"][1:2])[1];
     refBound, edgeTypes=getCompoundElementProperties(p.femType[compVf][1],p.compoundData);
     #if mt==4
     #    edgeTypes=Dict([1,2]=>1,[2,3]=>2,[3,4]=>3,[1,4]=>4)
@@ -24,6 +25,7 @@ function setCompoundEdgeData!(p::femProblem, compVf::Symbol)
     cells=Int64[];
     globv=Int64[];
     off=Int64[1];
+    periodic=Bool[];
     zo=1;
     for e in 1:m.topology.size[m.topology.dim]
         off1=offe[e];
@@ -63,17 +65,22 @@ function setCompoundEdgeData!(p::femProblem, compVf::Symbol)
         #compute centers of cells
         verticesInc1 = m.geometry.coordinates[:,incf[offf[inc[1]]:(offf[inc[1]+1]-1)]]
         verticesInc2 = m.geometry.coordinates[:,incf[offf[inc[2]]:(offf[inc[2]+1]-1)]]
-        centerInc1 = 1/(mt) * sum(verticesInc1,dims=2);
-        centerInc2 = 1/(mt) * sum(verticesInc2,dims=2);
+        centerInc1 = 1/(nVertices_CompoundElement) * sum(verticesInc1,dims=2);
+        centerInc2 = 1/(nVertices_CompoundElement) * sum(verticesInc2,dims=2);
 
         #define current normal pointing vom cell 1 to cell 2
-        currentNormal = centerInc2 .- centerInc1;
-
+        #old version
+        #currentNormal = centerInc2 .- centerInc1;
         #note: if edge e is on periodic boundary (h1=true) the computed "currentNormal" will have
         #the opposite direction of the actual current normal (which is pointing out of the grid), so:
-        if h1
-            currentNormal= -currentNormal;
-        end
+        #if h1
+        #    currentNormal= -currentNormal;
+        #end
+
+        #new version (better handling at periodic boundary)
+        #current normal is equivalent to a current normal pointing from the middle of the edge to cell 2
+        centerEdge = 0.5* (m.geometry.coordinates[:,edgeVertices[2]] .+ m.geometry.coordinates[:,edgeVertices[1]]);
+        currentNormal = centerInc2 .- centerEdge;
 
         #compare directions and switch inc if needed
         if dot(currentNormal, globalNormal)<0
@@ -108,15 +115,14 @@ function setCompoundEdgeData!(p::femProblem, compVf::Symbol)
         #    coordvn1[:,i]=t1(coordref[:,i])
         #    coordvn2[:,i]=t2(coordref[:,i])
         #end
-        coord1= @views m.geometry.coordinates[:,incf[offf[inc[1]]:(offf[inc[1]+1]-1)]];
-        coord2= @views m.geometry.coordinates[:,incf[offf[inc[2]]:(offf[inc[2]+1]-1)]];
-
+        coord1= m.geometry.coordinates[:,incf[offf[inc[1]]:(offf[inc[1]+1]-1)]];
+        coord2= m.geometry.coordinates[:,incf[offf[inc[2]]:(offf[inc[2]+1]-1)]];
 
         v1=findall(coordve[:,1],coord1,1e-10);
-        sort!(append!(v1, findall(coordve[:,2],coordvn1,1e-10)))
+        sort!(append!(v1, findall(coordve[:,2],coord1,1e-10)))
         eT1=edgeTypes[v1]
         v2=findall(coordv[:,1],coord2,1e-10);
-        sort!(append!(v2, findall(coordv[:,2],coordvn2,1e-10)))
+        sort!(append!(v2, findall(coordv[:,2],coord2,1e-10)))
         eT2=edgeTypes[v2]
         globalNumVf=l2g(degFVf,inc[1])
         rb=refBound[v1]
@@ -131,6 +137,7 @@ function setCompoundEdgeData!(p::femProblem, compVf::Symbol)
         push!(edgeType,eT1)
         push!(edgeType,eT2)
         push!(edgeNum,e)
+        push!(p.compoundData.isEdgePeriodic,h1)
     end
     p.edgeData=[edgeNum,cells,edgeType,globv,off];
     return nothing;
