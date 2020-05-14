@@ -138,7 +138,7 @@ function generateRectMesh(nx::Int, ny::Int, condEW::Symbol, condTB::Symbol, xl::
     r=Float64[xr,yr];
     mT=meshTopology(inc,off,n);
     mG=meshGeometry(coord,l,r);
-    m=mesh(mT,mG, bE, bV);
+    m=mesh(mT,mG, bE, bV,condEW,condTB);
 
     return m
 end
@@ -285,7 +285,7 @@ function generateTriMeshHalved(nx::Int, ny::Int, condEW::Symbol, condTB::Symbol,
     r=Float64[xr,yr];
     mT=meshTopology(inc,off,n);
     mG=meshGeometry(coord,l,r);
-    m=mesh(mT,mG, bE, bV);
+    m=mesh(mT,mG, bE, bV,condEW,condTB);
 
     return m
 end
@@ -466,7 +466,7 @@ function generateTriMeshQuartered(nx::Int, ny::Int, condEW::Symbol, condTB::Symb
     r=Float64[xr,yr];
     mT=meshTopology(inc,off,n);
     mG=meshGeometry(coord,l,r);
-    m=mesh(mT,mG, bE, bV);
+    m=mesh(mT,mG, bE, bV,condEW,condTB);
 
     return m
 end
@@ -597,7 +597,7 @@ function generateTriMeshEquilateral(xl::Float64, xr::Float64, yl::Float64, yr::F
     r=Float64[xR,yr];
     mT=meshTopology(inc,off,n);
     mG=meshGeometry(coord,l,r);
-    m=mesh(mT,mG, bE, bV);
+    m=mesh(mT,mG, bE, bV,condEW,condTB);
 
     return m
 end
@@ -932,7 +932,7 @@ function generateHexMesh(xl::Float64, xr::Float64, yl::Float64, yr::Float64, nro
     r=Float64[xR,yR];
     mT=meshTopology(inc,off,n);
     mG=meshGeometry(coord,l,r);
-    m=mesh(mT,mG, bE, bV, meshType);
+    m=mesh(mT,mG, bE, bV,condEW,condTB, meshType);
     return m
 end
 
@@ -1044,7 +1044,7 @@ function generateHexMesh2(nx::Int, ny::Int)
         mG=meshGeometry(coord,l,r);
         bE=spzeros(Int, size[2]);
         bV=spzeros(Int, size[1]);
-        m=mesh(mT,mG,bE,bV);
+        m=mesh(mT,mG,bE,bV,condEW,condTB);
 
         return m
     else
@@ -1262,7 +1262,7 @@ function generateCubMesh(nx::Int, ny::Int, nz::Int, condEW::Symbol, condTB::Symb
     r=Float64[xr,yr,zr];
     mT=meshTopology(inc,off,n);
     mG=meshGeometry(coord,l,r);
-    m=mesh(mT,mG, bE, bV);
+    m=mesh(mT,mG, bE, bV,condEW,condTB);
 
     return m
 end
