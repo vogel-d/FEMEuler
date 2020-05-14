@@ -85,8 +85,7 @@ function vtk(m::mesh, degF::degF{2}, sol::Array{Float64,1}, femType::Symbol, fil
     for k in 1:nf
         cLoc=sol[l2g(degF, k)]
         dJ=jacobi!(J,m,k,mx,my,coord);
-        fLoc=fComp
-        #fLoc=(1/dJ)*J*fComp
+        fLoc=(1/dJ)*J*fComp
         if printSpherical
             xyz=transformation(m,coord,mx,my)
             lon,lat,r=cart2sphere(xyz[1],xyz[2],xyz[3]);
