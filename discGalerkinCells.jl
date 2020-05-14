@@ -1,4 +1,52 @@
 function discGalerkinCells!(M::Array{Float64,2},
+                            degFT::degF{1,:H1},phiT::Array{Array{Float64,2},1}, gradphiT::Array{Array{Float64,2},2}, globalNumT::Array{Int64,1},
+                            degFF::degF{2,:H1div},phiF::Array{Array{Float64,2},2}, fval::SparseVector{Float64,Int64}, globalNumF::Array{Int64,1},
+                            degFW::degF{1,:H1},phiW::Array{Array{Float64,2},1}, wval::Array{Float64,1}, globalNumW::Array{Int64,1},
+                            m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2}, coord::Array{Float64,2})
+
+    sk=size(kubWeights);
+
+    w=zeros(sk);
+
+    J=initJacobi((m.geometry.dim,m.topology.dim),sk);
+    dJ=Array{Float64,2}(undef,sk);
+
+    for k in 1:m.topology.size[3]
+        l2g!(globalNumW,degFW,k);
+
+        jacobi!(J,dJ,m,k,kubPoints,coord);
+
+        fill!(w,0.0);
+        for i in 1:length(globalNumW)
+            @. w+=wval[globalNumW[i]]*phiW[i];
+        end
+
+        l2g!(globalNumF,degFF,k);
+        l2g!(globalNumT,degFT,k);
+
+        for i in 1:length(globalNumT)
+            gi=globalNumT[i];
+            z=0.0;
+            for j in 1:length(globalNumF)
+                gj=globalNumF[j];
+                for r in 1:size(kubWeights,2)
+                    for l in 1:size(kubWeights,1)
+                        phiFgradphiT=0.0;
+                        for d in 1:m.topology.dim
+                            phiFgradphiT+=phiF[d,j][l,r]*gradphiT[d,i][l,r]
+                        end
+                        z+=fval[gj]*kubWeights[l,r]*(abs(dJ[l,r])/dJ[l,r])*w[l,r]*phiFgradphiT;
+                    end
+                end
+            end
+            M[gi]-=z;
+        end
+    end
+
+    return nothing;
+end
+
+function discGalerkinCells!(M::Array{Float64,2},
                             degFT::degF{1,:H1},phiT::Array{Array{Float64,2},1}, globalNumT::Array{Int64,1},
                             degFF::degF{2,:H1div},phiF::Array{Array{Float64,2},2}, dphiF::Array{Array{Float64,2},1}, fval::SparseVector{Float64,Int64}, globalNumF::Array{Int64,1},
                             degFW::degF{1,:H1},phiW::Array{Array{Float64,2},1}, gradphiW::Array{Array{Float64,2},2}, wval::Array{Float64,1}, globalNumW::Array{Int64,1},
