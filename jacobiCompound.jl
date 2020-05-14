@@ -29,7 +29,7 @@ function jacobi!(J::Array{Array{Float64,2},2},dJ::Array{Float64,2},kubPoints::Ar
     return nothing;
 end
 
-function jacobi!(J::Array{Float64,2}, x::Float64, y::Float64, coord::Array{Float64,2})
+function jacobi!(J::Array{Float64,2}, x::Float64, y::Float64, coord::Array{Float64,2}, mt::Int64)
     if mt==3
         a=coord[:,2]-coord[:,1];
         b=coord[:,3]-coord[:,1];
