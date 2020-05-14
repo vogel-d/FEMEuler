@@ -177,7 +177,7 @@ function generateCubedSphere(n::Int,r::Float64,nz::Int=0,case::Symbol=:purser1) 
   bE=spzeros(Int, size[2]);
   bV=spzeros(Int, size[1]);
 
-  #coord=(r/sqrt(3)).*coord;
+  coord=(r/sqrt(3)).*coord;
 
   #Initialisieren der Topologie, Geometrie und damit des Meshes
   n=Int[n,n,nz];
