@@ -24,27 +24,6 @@ function setOrientation!(m::mesh)
             v1=inc[off[edges[ie]]];
             v2=inc[off[edges[ie]+1]-1];
             for je in ie+1:length(edges)
-                if v1==inc[off[edges[je]+1]-1]
-                    v=v1;
-                    vert[1]=inc[off[edges[ie]+1]-1]
-                    vert[3]=inc[off[edges[je]]];
-                    pedges[1]=edges[ie]
-                    pedges[4]=edges[je]
-                    re=setdiff(edges,pedges)
-                    ve=inc[off[re[1]]:off[re[1]+1]-1]
-                    se=(vert[1] .== ve)
-                    if sum(se)==1
-                        pedges[2]=re[1]
-                        pedges[3]=re[2]
-                        vert[2]=ve[findall(.!(se))[1]];
-                    else
-                        pedges[2]=re[2]
-                        pedges[3]=re[1]
-                        se=(vert[3] .!= ve)
-                        vert[2]=ve[findall(se)[1]];
-                    end
-                    break;
-                #=
                 if v1==inc[off[edges[je]]]
                     v=v1;
                     vert[1]=inc[off[edges[ie]+1]-1]
@@ -64,48 +43,38 @@ function setOrientation!(m::mesh)
                         se=(vert[3] .!= ve)
                         vert[2]=ve[findall(se)[1]];
                     end
-                    break;
-                if v2==inc[off[edges[je]]]
-                    v=v2;
-                    vert[1]=inc[off[edges[je]+1]-1];
-                    vert[3]=inc[off[edges[ie]]];
-                    pedges[1]=edges[je]
-                    pedges[4]=edges[ie]
-                    re=setdiff(edges,pedges)
-                    ve=inc[off[re[1]]:off[re[1]+1]-1]
-                    se=(vert[1] .== ve)
-                    if sum(se)==1
-                        pedges[2]=re[1]
-                        pedges[3]=re[2]
-                        vert[2]=ve[findall(.!(se))[1]];
-                    else
-                        pedges[2]=re[2]
-                        pedges[3]=re[1]
-                        se=(vert[3] .!= ve)
-                        vert[2]=ve[findall(se)[1]];
+                    pushfirst!(vert,v);
+                    coord=m.geometry.coordinates[:,vert]
+                    e0=coord[:,2]-coord[:,1];
+                    e1=coord[:,4]-coord[:,1];
+                    n1=cross(e0,e1)
+                    s=sign(dot(n1,coord[:,1]))
+                    if s<0.0
+                        vert=vert[[1,4,3,2]];
+                        pedges=pedges[[4,3,2,1]];
+
+                        coord=m.geometry.coordinates[:,vert]
+                        e0=coord[:,2]-coord[:,1];
+                        e1=coord[:,4]-coord[:,1];
+                        n1=cross(e0,e1)
+                        s=sign(dot(n1,coord[:,1]))
+
                     end
+                    append!(incfe,pedges);
+                    append!(incfv,vert);
+                    push!(m.orientation,s)
                     break;
-                =#
                 else
                     continue;
                 end
             end
             ie+=1;
         end
-        append!(incfe,pedges);
-        pushfirst!(vert,v);
-        coord=m.geometry.coordinates[:,vert]
-        e0=coord[:,2]-coord[:,1];
-        e1=coord[:,4]-coord[:,1];
-        n1=cross(e0,e1)
-        s=sign(dot(n1,coord[:,1]))
-        #n=transformation(m,coord,0.5,0.5)
-        append!(incfv,vert);
-        push!(m.orientation,s)
     end
     m.topology.incidence["20"]=incfv;
     m.topology.incidence["21"]=incfe;
     m.topology.incidence["12"]=incef;
+    setEdgeOrientation!(m)
     return nothing
 end
 
@@ -158,6 +127,26 @@ function setOrientation!(m::mesh,visited::BitArray{1},inc::Array{Int,1},e::Int,v
             end
             !visited[e2] && setOrientation!(m,visited,inc,e2,v2)
         end
+    end
+    return nothing
+end
+
+function setEdgeOrientation!(m::mesh)
+    @views offc=m.topology.offset["12"]
+    @views incc=m.topology.incidence["12"]
+    @views ince=m.topology.incidence["21"]
+    @views offe=m.topology.offset["21"]
+    perm=([1,2],[2,1])
+    for e in 1:m.topology.size[2]
+        cells=incc[offc[e]:offc[e+1]-1];
+        face=ince[offe[incc[offc[e]]]:offe[incc[offc[e]]+1]-1]
+        pos=(e .== face)
+        if pos[1] || pos[2]
+            ind=1
+        elseif pos[3] || pos[4]
+            ind=2
+        end
+        m.topology.incidence["12"][offc[e]:offc[e+1]-1]=cells[perm[ind]]
     end
     return nothing
 end

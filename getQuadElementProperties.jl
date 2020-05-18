@@ -179,13 +179,26 @@ function getQuadElementProperties(type::Symbol)
         cm=Dict([1,2]=>[0,0,0,0,0,0,0,0,0], [2,3]=>[0,0,0,0,0,0,0,0,0], [3,4]=>[0,0,0,0,0,0,0,0,0], [1,4]=>[0,0,0,0,0,0,0,0,0]);
 
     elseif type==:RT0
-
+        #=
         phi=[null h11_0 null h10_0;
              h0_10 null h0_11 null];
 
         divphi=[Dyh0_10, Dxh11_0, Dyh0_11, Dxh10_0];
         gradphi=[null null    Dxh11_0 null null null    Dxh10_0 null;
                  null Dyh0_10 null    null null Dyh0_11 null    null];
+        =#
+        mh0_10(x,y)=-h0_10(x,y)
+        mh0_11(x,y)=-h0_11(x,y)
+
+        mDyh0_10(x,y)=-Dyh0_10(x,y)
+        mDyh0_11(x,y)=-Dyh0_11(x,y)
+        
+        phi=[null h11_0 null h10_0;
+             mh0_10 null mh0_11 null];
+
+        divphi=[mDyh0_10, Dxh11_0, mDyh0_11, Dxh10_0];
+        gradphi=[null null    Dxh11_0 null null null    Dxh10_0 null;
+                 null mDyh0_10 null    null null mDyh0_11 null    null];
 
         nFace=0;
         nEdge=1;

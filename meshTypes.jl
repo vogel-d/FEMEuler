@@ -71,7 +71,16 @@ function mesh(topology::meshTopology, geometry::meshGeometry, bE::SparseVector{I
       z+=2;
   end
   #Viereck-Normalen fraglich (Richtung)
-  mt==4 ? n=[0.0 1.0 0.0 1.0;1.0 0.0 1.0 0.0] : n=[0.0 1.0 -1.0;-1.0 1.0 0.0];
+  #mt==4 ? n=[0.0 1.0 0.0 1.0;1.0 0.0 1.0 0.0] : n=[0.0 1.0 -1.0;-1.0 1.0 0.0];
+  if mt==4
+    if geometry.dim==3
+      n=[0.0 1.0 0.0 1.0;-1.0 0.0 -1.0 0.0]
+    else
+      n=[0.0 1.0 0.0 -1.0;-1.0 0.0 1.0 0.0]
+    end
+  else
+    n=[0.0 1.0 -1.0;-1.0 1.0 0.0];
+  end
   orientation=Float64[];
   mesh(topology, geometry, mt, l, n, bE, bV, orientation)
 end

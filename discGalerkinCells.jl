@@ -39,7 +39,7 @@ function discGalerkinCells!(M::Array{Float64,2},
                     end
                 end
             end
-            M[gi]-=z;
+            M[gi]+=z;
         end
     end
 
