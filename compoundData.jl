@@ -43,6 +43,7 @@ function createCompoundData(method::Symbol,femElements::Set{Symbol},m::mesh)
                                          quadWeights, nquadPhi, nquadPoints, boundary, Bool[],
                                          assemblePhiHexToKites(femElements), 4)
     elseif method==:HexToTris
+        boundary=Array{Dict{Int64,Int64},1}(undef,6)
         for edge in 1:6
             boundary[edge]=Dict((edge-1)*2+1=>1, edge*2=>1);
         end
@@ -50,6 +51,8 @@ function createCompoundData(method::Symbol,femElements::Set{Symbol},m::mesh)
         nquadPhi, nquadPoints=coordTrans(m.meshType, m.normals, [:RT0], 5);
         nCompoundPhi=Dict(:RT0=>6, :DG0=>1);
         femElements=Set([:RT0,:DG0]);
-        return compoundData{:HexToTris}(12,nCompoundPhi,initAssembledPhi(12,femElements,m.meshType,nCompoundPhi), quadWeights, nquadPhi, nquadPoints, boundary,Bool[])
+        return compoundData{:HexToTris}(12,nCompoundPhi,initAssembledPhi(12,femElements,m.meshType,nCompoundPhi),
+                                        quadWeights, nquadPhi, nquadPoints, boundary, Bool[],
+                                        assemblePhiHexToKites(femElements), 3)
     end
 end
