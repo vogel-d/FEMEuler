@@ -94,9 +94,9 @@ function discGalerkinEdges!(M::Array{Float64,2},
 
         #order adjacentSubCells to have adjacentSubCells[1,j] sharing an edge with adjacentSubCells[2,j]
         if compoundData.isEdgePeriodic[e] #periodic boundary edge
-            #make coordinates of edge equal in both elements
+            #make coordinates of current edge equal in both elements
             #has to be reversed to save correct edge direction
-            #fill coord1 with Inf to avoid other coordinates to being equal than the adjacent
+            #fill coord1 with Inf to avoid other coordinates being equal than the adjacent
             fill!(coord1,Inf);
             for d in 1:m.geometry.dim
                 #assuming local edge i connecting local vertices i and its cyclic next neighbour in coord
@@ -293,9 +293,9 @@ function discGalerkinEdges!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
 
         #order adjacentSubCells to have adjacentSubCells[1,j] sharing an edge with adjacentSubCells[2,j]
         if compoundData.isEdgePeriodic[e] #periodic boundary edge
-            #make coordinates of edge equal in both elements
+            #make coordinates of current edge equal in both elements
             #has to be reversed to save correct edge direction
-            #fill coord1 with Inf to avoid other coordinates to being equal than the adjacent
+            #fill coord1 with Inf to avoid other coordinates being equal than the adjacent
             fill!(coord1,Inf);
             for d in 1:m.geometry.dim
                 #assuming local edge i connecting local vertices i and its cyclic next neighbour in coord
@@ -517,14 +517,14 @@ function discGalerkinEdges!(M::Array{Float64,2},
 
         #order adjacentSubCells to have adjacentSubCells[1,j] sharing an edge with adjacentSubCells[2,j]
         if compoundData.isEdgePeriodic[e] #periodic boundary edge
-            #make coordinates of edge equal in both elements
+            #make coordinates of current edge equal in both elements
             #has to be reversed to save correct edge direction
-            #fill coord1 with Inf to avoid other coordinates to being equal than the adjacent
+            #fill coord1 with Inf to avoid other coordinates being equal than the adjacent
             fill!(coord1,Inf);
             for d in 1:m.geometry.dim
                 #assuming local edge i connecting local vertices i and its cyclic next neighbour in coord
-                coord1[d,eT1]=coord2[d,mod(eT2,nVertices_CompoundElement)+1];
-                coord1[d,mod(eT1,nVertices_CompoundElement)+1]=coord2[d,eT2];
+                coord1[d,eT1]=                                  coord2[d,mod(eT2,nVertices_CompoundElement)+1];
+                coord1[d,mod(eT1,nVertices_CompoundElement)+1]= coord2[d,eT2];
             end
             getSubCells!(subcoord1, coord1, center, compoundData);
             orderAdjacentSubCells!(adjacentSubCells,subcoord1,subcoord2,adjacentSubCells1,adjacentSubCells2);
@@ -571,7 +571,6 @@ function discGalerkinEdges!(M::Array{Float64,2},
 
             n1=m.normals[:,subeT1];
             n2=m.normals[:,subeT2];
-            le=(1/nEdgeParts)*m.edgeLength[edgeData[1][e]];
 
             correctNormalsCompound!(n1,n2,eT1,eT2,compoundData);
 
@@ -580,8 +579,8 @@ function discGalerkinEdges!(M::Array{Float64,2},
                 fill!(w2[d],0.0);
                 for i in 1:nCompoundPhiW
                     for subi in 1:nSubPhiW
-                        @. w1[d]+=assembledPhiW1[i][subi,subCell1]*wval[globalNumW1[i]]*jphiWn1[subi];
-                        @. w2[d]+=assembledPhiW2[i][subi,subCell2]*wval[globalNumW2[i]]*jphiWn2[subi];
+                        @. w1[d]+=assembledPhiW1[i][subi,subCell1]*wval[globalNumW1[i]]*jphiWn1[d,subi];
+                        @. w2[d]+=assembledPhiW2[i][subi,subCell2]*wval[globalNumW2[i]]*jphiWn2[d,subi];
                     end
                 end
             end
@@ -600,11 +599,11 @@ function discGalerkinEdges!(M::Array{Float64,2},
                                 end
                                 lM11[i,j]+=assembledPhiT1[i][subi,subCell1]*assembledPhiF1[j][subj,subCell1]*
                                            quadWeights[r]*ddJ1[r]*ddJ1[r]*(n1[1]*phiFn1[1,subj][r]+n1[2]*phiFn1[2,subj][r])*w1jphiTn1;
-                                lM12[i,j]+=assembledPhiT1[i][subi,subCell1]*assembledPhiF2[j][subj,subCell1]*
+                                lM12[i,j]+=assembledPhiT1[i][subi,subCell1]*assembledPhiF2[j][subj,subCell2]*
                                            quadWeights[r]*ddJ2[r]*ddJ1[r]*(n2[1]*phiFn2[1,subj][r]+n2[2]*phiFn2[2,subj][r])*w2jphiTn1;
-                                lM21[i,j]+=assembledPhiT2[i][subi,subCell1]*assembledPhiF1[j][subj,subCell1]*
+                                lM21[i,j]+=assembledPhiT2[i][subi,subCell2]*assembledPhiF1[j][subj,subCell1]*
                                            quadWeights[r]*ddJ1[r]*ddJ2[r]*(n1[1]*phiFn1[1,subj][r]+n1[2]*phiFn1[2,subj][r])*w1jphiTn2;
-                                lM22[i,j]+=assembledPhiT2[i][subi,subCell1]*assembledPhiF2[j][subj,subCell1]*
+                                lM22[i,j]+=assembledPhiT2[i][subi,subCell2]*assembledPhiF2[j][subj,subCell2]*
                                            quadWeights[r]*ddJ2[r]*ddJ2[r]*(n2[1]*phiFn2[1,subj][r]+n2[2]*phiFn2[2,subj][r])*w2jphiTn2;
                                 # piola: nphiF mit 1/Je = 1/Kantenlänge, phiW und phiT mit 1/dJ*J
                             end
@@ -619,10 +618,10 @@ function discGalerkinEdges!(M::Array{Float64,2},
         l2g!(globalNumF2,degFF,inc2);
         l2g!(globalNumT2,degFT,inc2);
 
-        for i in 1:length(globalNumT1)
+        for i in 1:nCompoundPhiT
             gi1=globalNumT1[i];
             gi2=globalNumT2[i];
-            for j in 1:length(globalNumF2)
+            for j in 1:nCompoundPhiF
                 gj1=globalNumF1[j];
                 gj2=globalNumF2[j];
                 M[gi1]+=(+0.5-gammaLoc)*lM11[i,j]*fval[gj1];
@@ -630,9 +629,7 @@ function discGalerkinEdges!(M::Array{Float64,2},
                 M[gi2]+=(+0.5+gammaLoc)*lM21[i,j]*fval[gj1];
                 M[gi2]+=(-0.5-gammaLoc)*lM22[i,j]*fval[gj2];
             end
-
         end
-
     end
     return nothing;
 end
@@ -654,7 +651,7 @@ function discGalerkinEdges!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
 
     mt=m.meshType;
 
-    center=Array{Float64,1}(undef,2);
+    center=Array{Float64,1}(undef,m.geometry.dim);
     nSubPhiT=size(phiT,2);
     nSubPhiF=size(phiF,2);
     nSubPhiW=size(phiW,2);
@@ -686,7 +683,7 @@ function discGalerkinEdges!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
     subcoord1=Array{Array{Float64,2},1}(undef,nSubCells);
     subcoord2=Array{Array{Float64,2},1}(undef,nSubCells);
     for i in 1:nSubCells
-        #fill! causes mutating all entries of subcoord when changing a single entry
+        #fill! causes mutating all entries of subcoord when changing one single entry
         subcoord1[i]=Array{Float64,2}(undef,2,compoundData.nVerticesSubElement);
         subcoord2[i]=Array{Float64,2}(undef,2,compoundData.nVerticesSubElement);
     end
@@ -746,14 +743,14 @@ function discGalerkinEdges!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
 
         #order adjacentSubCells to have adjacentSubCells[1,j] sharing an edge with adjacentSubCells[2,j]
         if compoundData.isEdgePeriodic[e] #periodic boundary edge
-            #make coordinates of edge equal in both elements
+            #make coordinates of current edge equal in both elements
             #has to be reversed to save correct edge direction
-            #fill coord1 with Inf to avoid other coordinates to being equal than the adjacent
+            #fill coord1 with Inf to avoid other coordinates being equal than the adjacent
             fill!(coord1,Inf);
             for d in 1:m.geometry.dim
                 #assuming local edge i connecting local vertices i and its cyclic next neighbour in coord
-                coord1[d,eT1]=coord2[d,mod(eT2,nVertices_CompoundElement)+1];
-                coord1[d,mod(eT1,nVertices_CompoundElement)+1]=coord2[d,eT2];
+                coord1[d,eT1]=                                  coord2[d,mod(eT2,nVertices_CompoundElement)+1];
+                coord1[d,mod(eT1,nVertices_CompoundElement)+1]= coord2[d,eT2];
             end
             getSubCells!(subcoord1, coord1, center, compoundData);
             orderAdjacentSubCells!(adjacentSubCells,subcoord1,subcoord2,adjacentSubCells1,adjacentSubCells2);
@@ -768,6 +765,10 @@ function discGalerkinEdges!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
 
         l2g!(globalNumW1,degFW,inc1);
         l2g!(globalNumW2,degFW,inc2);
+        l2g!(globalNumF1,degFF,inc1);
+        l2g!(globalNumF2,degFF,inc2);
+        l2g!(globalNumT1,degFT,inc1);
+        l2g!(globalNumT2,degFT,inc2);
 
         s=0.0;
         for i in globv
@@ -800,7 +801,6 @@ function discGalerkinEdges!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
 
             n1=m.normals[:,subeT1];
             n2=m.normals[:,subeT2];
-            le=(1/nEdgeParts)*m.edgeLength[edgeData[1][e]];
 
             correctNormalsCompound!(n1,n2,eT1,eT2,compoundData);
 
@@ -809,49 +809,46 @@ function discGalerkinEdges!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
                 fill!(w2[d],0.0);
                 for i in 1:nCompoundPhiW
                     for subi in 1:nSubPhiW
-                        @. w1[d]+=assembledPhiW1[i][subi,subCell1]*wval[globalNumW1[i]]*jphiWn1[subi];
-                        @. w2[d]+=assembledPhiW2[i][subi,subCell2]*wval[globalNumW2[i]]*jphiWn2[subi];
+                        @. w1[d]+=assembledPhiW1[i][subi,subCell1]*wval[globalNumW1[i]]*jphiWn1[d,subi];
+                        @. w2[d]+=assembledPhiW2[i][subi,subCell2]*wval[globalNumW2[i]]*jphiWn2[d,subi];
                     end
                 end
             end
 
             for j in 1:nCompoundPhiF
                 for i in 1:nCompoundPhiT
-                    for subj in 1:nSubPhiF
-                        for subi in 1:nSubPhiT
-                            for r in 1:sk
-                                w1jphiTn1=0.0; w2jphiTn1=0.0; w1jphiTn2=0.0; w2jphiTn2=0.0;
-                                for d in 1:m.geometry.dim
-                                    w1jphiTn1+=w1[d][r]*jphiTn1[d,subi][r];
-                                    w2jphiTn1+=w2[d][r]*jphiTn1[d,subi][r];
-                                    w1jphiTn2+=w1[d][r]*jphiTn2[d,subi][r];
-                                    w2jphiTn2+=w2[d][r]*jphiTn2[d,subi][r];
-                                end
-                                lM11[i,j]+=assembledPhiT1[i][subi,subCell1]*assembledPhiF1[j][subj,subCell1]*
-                                           quadWeights[r]*ddJ1[r]*ddJ1[r]*(n1[1]*phiFn1[1,subj][r]+n1[2]*phiFn1[2,subj][r])*w1jphiTn1;
-                                lM12[i,j]+=assembledPhiT1[i][subi,subCell1]*assembledPhiF2[j][subj,subCell1]*
-                                           quadWeights[r]*ddJ2[r]*ddJ1[r]*(n2[1]*phiFn2[1,subj][r]+n2[2]*phiFn2[2,subj][r])*w2jphiTn1;
-                                lM21[i,j]+=assembledPhiT2[i][subi,subCell1]*assembledPhiF1[j][subj,subCell1]*
-                                           quadWeights[r]*ddJ1[r]*ddJ2[r]*(n1[1]*phiFn1[1,subj][r]+n1[2]*phiFn1[2,subj][r])*w1jphiTn2;
-                                lM22[i,j]+=assembledPhiT2[i][subi,subCell1]*assembledPhiF2[j][subj,subCell1]*
-                                           quadWeights[r]*ddJ2[r]*ddJ2[r]*(n2[1]*phiFn2[1,subj][r]+n2[2]*phiFn2[2,subj][r])*w2jphiTn2;
-                                # piola: nphiF mit 1/Je = 1/Kantenlänge, phiW und phiT mit 1/dJ*J
+                    w1jphiTn1=0.0; w2jphiTn1=0.0; w1jphiTn2=0.0; w2jphiTn2=0.0;
+                    for subi in 1:nSubPhiT
+                        for r in 1:sk
+                            for d in 1:m.geometry.dim
+                                w1jphiTn1+=assembledPhiT1[i][subi,subCell1]*ddJ1[r]*w1[d][r]*jphiTn1[d,subi][r];
+                                w2jphiTn1+=assembledPhiT1[i][subi,subCell1]*ddJ1[r]*w2[d][r]*jphiTn1[d,subi][r];
+                                w1jphiTn2+=assembledPhiT2[i][subi,subCell2]*ddJ2[r]*w1[d][r]*jphiTn2[d,subi][r];
+                                w2jphiTn2+=assembledPhiT2[i][subi,subCell2]*ddJ2[r]*w2[d][r]*jphiTn2[d,subi][r];
                             end
+                        end
+                    end
+                    for subj in 1:nSubPhiF
+                        for r in 1:sk
+                            lM11[i,j]+=assembledPhiF1[j][subj,subCell1]*
+                                       quadWeights[r]*ddJ1[r]*(n1[1]*phiFn1[1,subj][r]+n1[2]*phiFn1[2,subj][r])*w1jphiTn1;
+                            lM12[i,j]+=assembledPhiF2[j][subj,subCell2]*
+                                       quadWeights[r]*ddJ2[r]*(n2[1]*phiFn2[1,subj][r]+n2[2]*phiFn2[2,subj][r])*w2jphiTn1;
+                            lM21[i,j]+=assembledPhiF1[j][subj,subCell1]*
+                                       quadWeights[r]*ddJ1[r]*(n1[1]*phiFn1[1,subj][r]+n1[2]*phiFn1[2,subj][r])*w1jphiTn2;
+                            lM22[i,j]+=assembledPhiF2[j][subj,subCell2]*
+                                       quadWeights[r]*ddJ2[r]*(n2[1]*phiFn2[1,subj][r]+n2[2]*phiFn2[2,subj][r])*w2jphiTn2;
+                            # piola: nphiF mit 1/Je = 1/Kantenlänge, phiW und phiT mit 1/dJ*J
                         end
                     end
                 end
             end
         end
 
-        l2g!(globalNumF1,degFF,inc1);
-        l2g!(globalNumT1,degFT,inc1);
-        l2g!(globalNumF2,degFF,inc2);
-        l2g!(globalNumT2,degFT,inc2);
-
-        for i in 1:length(globalNumT1)
+        for i in 1:nCompoundPhiT
             gi1=globalNumT1[i];
             gi2=globalNumT2[i];
-            for j in 1:length(globalNumF2)
+            for j in 1:nCompoundPhiF
                 gj1=globalNumF1[j];
                 gj2=globalNumF2[j];
 
@@ -871,9 +868,7 @@ function discGalerkinEdges!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
                 push!(cols,gj2);
                 push!(vals,(-0.5-gammaLoc)*lM22[i,j]);
             end
-
         end
-
     end
     return nothing;
 end
@@ -1045,3 +1040,56 @@ function discGalerkinEdges!(M::Array{Float64,2},
     end
     return nothing;
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#=
+for j in 1:nCompoundPhiF
+    for i in 1:nCompoundPhiT
+        for subj in 1:nSubPhiF
+            for subi in 1:nSubPhiT
+                for r in 1:sk
+                    w1jphiTn1=0.0; w2jphiTn1=0.0; w1jphiTn2=0.0; w2jphiTn2=0.0;
+                    for d in 1:m.geometry.dim
+                        w1jphiTn1+=w1[d][r]*jphiTn1[d,subi][r];
+                        w2jphiTn1+=w2[d][r]*jphiTn1[d,subi][r];
+                        w1jphiTn2+=w1[d][r]*jphiTn2[d,subi][r];
+                        w2jphiTn2+=w2[d][r]*jphiTn2[d,subi][r];
+                    end
+                    lM11[i,j]+=assembledPhiT1[i][subi,subCell1]*assembledPhiF1[j][subj,subCell1]*
+                               quadWeights[r]*ddJ1[r]*ddJ1[r]*(n1[1]*phiFn1[1,subj][r]+n1[2]*phiFn1[2,subj][r])*w1jphiTn1;
+                    lM12[i,j]+=assembledPhiT1[i][subi,subCell1]*assembledPhiF2[j][subj,subCell2]*
+                               quadWeights[r]*ddJ2[r]*ddJ1[r]*(n2[1]*phiFn2[1,subj][r]+n2[2]*phiFn2[2,subj][r])*w2jphiTn1;
+                    lM21[i,j]+=assembledPhiT2[i][subi,subCell2]*assembledPhiF1[j][subj,subCell1]*
+                               quadWeights[r]*ddJ1[r]*ddJ2[r]*(n1[1]*phiFn1[1,subj][r]+n1[2]*phiFn1[2,subj][r])*w1jphiTn2;
+                    lM22[i,j]+=assembledPhiT2[i][subi,subCell2]*assembledPhiF2[j][subj,subCell2]*
+                               quadWeights[r]*ddJ2[r]*ddJ2[r]*(n2[1]*phiFn2[1,subj][r]+n2[2]*phiFn2[2,subj][r])*w2jphiTn2;
+                    # piola: nphiF mit 1/Je = 1/Kantenlänge, phiW und phiT mit 1/dJ*J
+                end
+            end
+        end
+        if e==3 && edge_part==1
+            if i==1 && (j==2 || j==4)
+                #println(w1jphiTn1)
+                #println(w2jphiTn1)
+                println(i)
+                println(j)
+                println(lM11[i,j])
+                println(lM12[i,j])
+            end
+        end
+    end
+end
+=#
