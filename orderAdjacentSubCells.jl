@@ -1,4 +1,4 @@
-function orderAdjacentSubCells!(adjacentSubCells::Array{Int64,2},subcoord1,subcoord2,adjacentSubCells1,adjacentSubCells2)
+function orderAdjacentSubCells!(adjacentSubCells::Array{Int64,2},subcoord1::Array{Array{Float64,2},1},subcoord2::Array{Array{Float64,2},1},adjacentSubCells1::Array{Int64,1},adjacentSubCells2::Array{Int64,1})
     fill!(adjacentSubCells,0); #just for safety, possibly removeable when working
     z=1;
     for adjacentSubCell1 in adjacentSubCells1
@@ -11,7 +11,7 @@ function orderAdjacentSubCells!(adjacentSubCells::Array{Int64,2},subcoord1,subco
             end
         end
     end
-    in(0,adjacentSubCells) && @warn("ordering not successful.")
+    in(0,adjacentSubCells) && @error("ordering not successful.")
 end
 
 function twocommonpoints(coord1::Array{Float64,2},coord2::Array{Float64,2},atol::Float64=0.0)
