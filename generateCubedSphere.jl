@@ -59,34 +59,7 @@ function generateCubedSphere(n::Int,r::Float64,nz::Int=0,case::Symbol=:purser1) 
   NodeNumber=getCubePoints!(coord,[-1.0,1.0,0.0],3,NodeNumber,n,case)
   NodeNumberBTpp=NodeNumber
   NodeNumber=getCubePoints!(coord,[1.0,1.0,0.0],3,NodeNumber,n,case)
-  #Nodes
-  #=
-  NodeNumbermmm=NodeNumber
-  coord[:,NodeNumber]=[-1.0,-1.0,-1.0]
-  NodeNumber+=1
-  NodeNumberpmm=NodeNumber
-  coord[:,NodeNumber]=[1.0,-1.0,-1.0]
-  NodeNumber+=1
-  NodeNumbermpm=NodeNumber
-  coord[:,NodeNumber]=[-1.0,1.0,-1.0]
-  NodeNumber+=1
-  NodeNumberppm=NodeNumber
-  coord[:,NodeNumber]=[1.0,1.0,-1.0]
-  NodeNumber+=1
-  NodeNumbermmp=NodeNumber
-  coord[:,NodeNumber]=[-1.0,-1.0,1.0]
-  NodeNumber+=1
-  NodeNumberpmp=NodeNumber
-  coord[:,NodeNumber]=[1.0,-1.0,1.0]
-  NodeNumber+=1
-  NodeNumbermpp=NodeNumber
-  coord[:,NodeNumber]=[-1.0,1.0,1.0]
-  NodeNumber+=1
-  NodeNumberppp=NodeNumber
-  coord[:,NodeNumber]=[1.0,1.0,1.0]
-  NodeNumber+=1
 
-  =#
   #Nodes
   NodeNumbermmm=NodeNumber
   coord[:,NodeNumber]=cubePoint([-1.0,-1.0,-1.0],[0,0,0],n,case)
