@@ -2,12 +2,17 @@ include("modulesSphereAdv.jl")
 
 function testSphereAdv()
 
-    filename = "testSphereAdv";
+    filename = "testSphereAdvTRSH";
+
+    stencilOrder=2;
+    recoveryOrder=2;
+
+    recoverySpace=Symbol("R$recoveryOrder")
 
     #order: comp, compHigh, compRec, compDG
-    femType=Dict(:rho=>[:DG0, :DG0, :R1],
+    femType=Dict(:rho=>[:DG0, :DG0, recoverySpace],
                  :rhoV=>[:RT0, :RT0, :VecDG1S],
-                 :rhoTheta=>[:DG0, :DG0, :R1],
+                 :rhoTheta=>[:DG0, :DG0, recoverySpace],
                  :p=>[:DG0],
                  :v=>[:RT0],
                  :theta=>[:DG0]);
@@ -29,14 +34,16 @@ function testSphereAdv()
                  :theta=>[:DG1]);
     =#
 
-    taskRecovery=false;
-    advection=true;
+    taskRecovery=true;
+    adv=true;
 
     #m=generateCubedSphere(20,6300000.0)
     #m=generateCubedSphere(40,6300000.0)
     m=generateCubedSphere(15,sqrt(3.0),0,:cube1)
+    #m=generateCubedSphere(3,100*sqrt(3.0),0,:cube1)
 
-    p=femProblem(m, femType,t=:shallow, advection=advection, taskRecovery=taskRecovery);
+    p=femProblem(m, femType,t=:shallow, advection=adv,
+        taskRecovery=taskRecovery, g=4);
 
     #return p;
     gamma=0.5; #upwind
@@ -48,6 +55,7 @@ function testSphereAdv()
     #EndTime=40000.0
     #nIter=Int64(EndTime/dt);
     nIter=200;
+    #nIter=1;
 
     #start functions
     function frho(xyz::Array{Float64,1})
@@ -114,6 +122,18 @@ function testSphereAdv()
     #assembStiff!(p);
     applyStartValues!(p, f);
 
+    ha=zeros(Float64,m.topology.size[3])
+    #ha[5]=1.0
+    #ha[14]=1.0
+    ha[23]=1.0
+    #ha[32]=1.0
+    #=
+    for i in 1:9
+        ha[i]=Float64(i)
+    end
+    =#
+    #p.solution[0.0].theta=ha
+
     rho0=p.solution[0.0].rho;
     p.solution[0.0].rhoTheta=projectChi(p,rho0,p.solution[0.0].theta,:rho,:theta);
     p.solution[0.0].rhoV=projectChi(p,rho0,p.solution[0.0].v,:rho,:v);
@@ -142,18 +162,12 @@ function testSphereAdv()
     Vf=projectAdvection(p,V,Vfcomp);
     vtk(m,p.degFBoundary[Vfcomp],Vector(Vf),Vfcomp,"testVf", printSpherical=true)
     #return p
-    #taskRecovery ? pos=[1,3] : pos=[1];
+    taskRecovery ? pos=[1,3] : pos=[1];
     advectionTypes=Symbol[];
-    recoveryTypes=Symbol[];
     for i in [:rho,:rhoTheta,:rhoV]
-        push!(advectionTypes,femType[i][1]);
-        if i==:rhoV
-            taskRecovery && push!(advectionTypes,femType[i][3]);
-        else
-            taskRecovery && push!(recoveryTypes,femType[i][3]);
-        end
+        append!(advectionTypes,femType[i][pos]);
     end
-    nquadPhi, nquadPoints=coordTrans(m, m.normals, advectionTypes, recoveryTypes, size(p.kubWeights,2));
+    nquadPhi, nquadPoints=coordTrans(m, m.normals, advectionTypes, size(p.kubWeights,2));
     setEdgeData!(p, :v)
 
 
@@ -167,7 +181,22 @@ function testSphereAdv()
     FY=Array{solution,1}(undef,MISMethod.nStage);
     SthY=Array{SparseMatrixCSC{Float64,Int64},1}(undef,MISMethod.nStage);
     Time=0.0;
-
+    for i=1:nIter
+      ry=advection(p,gamma,y,Vf,Vfcomp,nquadPoints,nquadPhi,MrT,MrV);
+      yNeu=y+0.5*dt*ry
+      ry=advection(p,gamma,yNeu,Vf,Vfcomp,nquadPoints,nquadPhi,MrT,MrV);
+      y+=dt*ry;
+      Time+=dt
+      p.solution[Time]=y;
+      p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
+      p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
+      if mod(i,8)==0
+          p2=deepcopy(p);
+          unstructured_vtk(p2, Time, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename*"$i", printSpherical=true)
+      end
+      println(Time)
+    end
+    #=
     for i=1:nIter
       @time y=splitExplicit(y,Y,FY,SthY,p,Vfcomp,Vf,gamma,nquadPhi,nquadPoints,MrT,MrV,MISMethod,Time,dt,ns);
       Time+=dt
@@ -180,7 +209,7 @@ function testSphereAdv()
       end
       println(Time)
     end
-
+    =#
     #Speichern des Endzeitpunktes als vtu-Datei:
     #unstructured_vtk(p, EndTime, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename, printSpherical=true)
     #Speichern aller berechneten Zwischenwerte als vtz-Datei:

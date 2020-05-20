@@ -7,12 +7,7 @@ function advectionStiffR(degFT::degF{1,:H1}, phiTtrans::Array{Array{Array{Float6
     phiT=@views degFT.phi;
     gradphiT=@views degFT.gradphi;
     phiF=@views degFF.phi;
-    #dphiF=@views degFF.divphi;
-
-    phiW=getPhiRecovery([0.0,0.0],Val(recoverySpace));
-    #gradphiW=getGradPhiRecovery([0.0,0.0],Val(recoverySpace));
-    #gradphiW=getGradPhiRecovery([0.0,0.0],Val(Symbol(String(recoverySpace)*"S")));
-    #phiW, divphi, gradphiW, cm, nFace, nEdge, nVert=getRecoveryElementProperties(recoverySpace)
+    phiW=getPhiRecovery(Val(recoverySpace));
 
     sk=size(kubWeights);
 
@@ -27,11 +22,7 @@ function advectionStiffR(degFT::degF{1,:H1}, phiTtrans::Array{Array{Array{Float6
     M=zeros(degFT.numB,1);
     coord1=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
     coord2=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
-    #=
-    discGalerkinCellsR!(M,degFT,phiT, globalNumT1, degFF,phiF, dphiF, fval, globalNumF1,
-                       phiW, gradphiW, wval,
-                       m, kubPoints, kubWeights, coord1)
-    =#
+
     discGalerkinCellsR!(M,degFT,gradphiT,globalNumT1,
                        degFF,phiF,fval,globalNumF1,
                        phiW, wval,

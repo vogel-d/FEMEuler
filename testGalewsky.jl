@@ -23,10 +23,10 @@ function testGalewsky()
                  :theta=>[:DG1]);
     =#
 
-    taskRecovery=true;
+    taskRecovery=false;
     advection=true;
 
-    m=generateCubedSphere(100,6300000.0)
+    m=generateCubedSphere(50,6300000.0,0,:cube1)
 
     p=femProblem(m, femType,t=:shallow, advection=advection, taskRecovery=taskRecovery);
 
@@ -100,7 +100,7 @@ function testGalewsky()
     for i in [:rho,:rhoTheta,:rhoV]
         append!(advectionTypes,femType[i][pos]);
     end
-    nquadPhi, nquadPoints=coordTrans(m.meshType, m.normals, collect(Set(advectionTypes)), size(p.kubWeights,2));
+    nquadPhi, nquadPoints=coordTrans(m, m.normals, advectionTypes, size(p.kubWeights,2));
     setEdgeData!(p, :v)
 
     MrT=assembMass(p.degFBoundary[femType[:rhoTheta][1]], m, p.kubPoints, p.kubWeights);

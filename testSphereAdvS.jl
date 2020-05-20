@@ -2,12 +2,12 @@ include("modulesSphereAdv.jl")
 
 function testSphereAdvS()
 
-    filename = "testAdvSphS";
+    filename = "testAdvSphere";
 
     case=:zPanel
 
-    stencilOrder=1;
-    recoveryOrder=1;
+    stencilOrder=2;
+    recoveryOrder=2;
 
     recoverySpace=Symbol("R$recoveryOrder")
 
@@ -63,6 +63,25 @@ function testSphereAdvS()
         x=xyz[1]; y=xyz[2]; z=xyz[3];
         lat0=4.0*atan(1.0)
         lon0=2.0*atan(1.0) #1.25*atan(1.0) #1.5*atan(1.0)
+
+        #=
+        #y-
+        lat0=12.0*atan(1.0)
+        lon0=6.0*atan(1.0)
+        #x+
+        lat0=8.0*atan(1.0)
+        lon0=4.0*atan(1.0)
+        #x-
+        lat0=16.0*atan(1.0)
+        lon0=8.0*atan(1.0)
+        #z+
+        lat0=6.0*atan(1.0)
+        lon0=3.0*atan(1.0)
+        #z-
+        lat0=2.0*atan(1.0)
+        lon0=0.0*atan(1.0)
+        =#
+
         #r=sqrt(x*x+y*y+z*z)
         #lat=asin(z/r)
         #lon=atan(x,y)
@@ -139,18 +158,12 @@ function testSphereAdvS()
     Vfcomp=:RT0
     Vf=projectAdvection(p,V,Vfcomp);
 
-    #taskRecovery ? pos=[1,3] : pos=[1];
+    taskRecovery ? pos=[1,3] : pos=[1];
     advectionTypes=Symbol[];
-    recoveryTypes=Symbol[];
     for i in [:rho,:rhoTheta,:rhoV]
-        push!(advectionTypes,femType[i][1]);
-        if i==:rhoV
-            taskRecovery && push!(advectionTypes,femType[i][3]);
-        else
-            taskRecovery && push!(recoveryTypes,femType[i][3]);
-        end
+        append!(advectionTypes,femType[i][pos]);
     end
-    nquadPhi, nquadPoints=coordTrans(m, m.normals, advectionTypes, recoveryTypes, size(p.kubWeights,2));
+    nquadPhi, nquadPoints=coordTrans(m, m.normals, advectionTypes, size(p.kubWeights,2));
     setEdgeData!(p, :v)
 
 

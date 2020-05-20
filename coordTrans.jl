@@ -1,4 +1,4 @@
-function coordTrans(mesh::mesh, normals::Array{Float64,2}, type::Array{Symbol,1}, recoveryType::Array{Symbol,1}, n::Int64)
+function coordTrans(mesh::mesh, normals::Array{Float64,2}, type::Array{Symbol,1}, n::Int64)
     g=2*n-1;
     quadPoints, quadWeights=getQuad(g);
     sk=length(quadPoints);
@@ -61,27 +61,6 @@ function coordTrans(mesh::mesh, normals::Array{Float64,2}, type::Array{Symbol,1}
             nquadPhi[k][m]=quadPhi;
         end
     end
-    for k in recoveryType
-        nquadPhi[k]=Array{Array{Array{Float64,1},2},1}(undef, size(normals,2));
-        phi, psize =getElementProperties(k,mt,true);
-        for m in 1:size(normals,2)
-            quadPhi=Array{Array{Float64,1},2}(undef,psize[1], nf*psize[2]);
-            z=0;
-            for f in 1:nf
-                coord=@views mcoord[:,inc[off[f]:off[f+1]-1]]
-                mp=transformation(mesh, coord, 0.5, 0.5);
-                for n in 1:length(phi)
-                    quadVal=Array{Float64,1}(undef,sk);
-                    for i=1:sk
-                        quadVal[i]=phi[n](transformation(mesh, coord, nquadPoints[m][1,i], nquadPoints[m][2,i]), mp);
-                    end
-                    quadPhi[z+n]=quadVal;
-                end
-                z+=psize[2];
-            end
-            nquadPhi[k][m]=quadPhi;
-        end
 
-    end
     return nquadPhi, nquadPoints;
 end

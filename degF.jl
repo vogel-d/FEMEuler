@@ -29,11 +29,8 @@ function degF(m::mesh, femType::Symbol, ordEdgesB::Array{Int,1}, nebP::Int, nebC
     #Verallgemeinern durch Rauskürzen von nef und nvf und variablen Erstellen von off & Erweitern von getElementProperties
     nef=offfe[2]-offfe[1];
     nvf=offfv[2]-offfv[1];
-    if in(femType,[:R1,:R2, :R1S, :R2S])
-        phi, divphi,  gradphi, refFace, refEdge, refVert=getElementProperties(femType, kubPoints, m)
-    else
-        phi, divphi,  gradphi, refFace, refEdge, refVert=getElementProperties(femType, kubPoints, m.meshType)
-    end
+    phi, divphi,  gradphi, refFace, refEdge, refVert=getElementProperties(femType, kubPoints, m.meshType)
+
     ndegF=refFace+nef*refEdge+nvf*refVert
     inc=zeros(Int, nf*ndegF);
     off=collect(1:ndegF:nf*ndegF+1);
@@ -107,7 +104,7 @@ end
 
 function getSpace(femType::Symbol)
 
-    H1=Set([:DG0,:DG1,:DG2,:P1,:P2,:R1,:R2,:R1S,:R2S]);
+    H1=Set([:DG0,:DG1,:DG2,:P1,:P2]);
     H1div=Set([:RT0,:RT1,:RT0B,:RT1B]);
     H1xH1=Set([:VecDG1,:VecP1,:VecDG1S,:VecP1S]);
 
