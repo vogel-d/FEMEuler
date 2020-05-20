@@ -817,28 +817,26 @@ function discGalerkinEdges!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
 
             for j in 1:nCompoundPhiF
                 for i in 1:nCompoundPhiT
-                    w1jphiTn1=0.0; w2jphiTn1=0.0; w1jphiTn2=0.0; w2jphiTn2=0.0;
-                    for subi in 1:nSubPhiT
-                        for r in 1:sk
-                            for d in 1:m.geometry.dim
-                                w1jphiTn1+=assembledPhiT1[i][subi,subCell1]*ddJ1[r]*w1[d][r]*jphiTn1[d,subi][r];
-                                w2jphiTn1+=assembledPhiT1[i][subi,subCell1]*ddJ1[r]*w2[d][r]*jphiTn1[d,subi][r];
-                                w1jphiTn2+=assembledPhiT2[i][subi,subCell2]*ddJ2[r]*w1[d][r]*jphiTn2[d,subi][r];
-                                w2jphiTn2+=assembledPhiT2[i][subi,subCell2]*ddJ2[r]*w2[d][r]*jphiTn2[d,subi][r];
-                            end
-                        end
-                    end
                     for subj in 1:nSubPhiF
-                        for r in 1:sk
-                            lM11[i,j]+=assembledPhiF1[j][subj,subCell1]*
-                                       quadWeights[r]*ddJ1[r]*(n1[1]*phiFn1[1,subj][r]+n1[2]*phiFn1[2,subj][r])*w1jphiTn1;
-                            lM12[i,j]+=assembledPhiF2[j][subj,subCell2]*
-                                       quadWeights[r]*ddJ2[r]*(n2[1]*phiFn2[1,subj][r]+n2[2]*phiFn2[2,subj][r])*w2jphiTn1;
-                            lM21[i,j]+=assembledPhiF1[j][subj,subCell1]*
-                                       quadWeights[r]*ddJ1[r]*(n1[1]*phiFn1[1,subj][r]+n1[2]*phiFn1[2,subj][r])*w1jphiTn2;
-                            lM22[i,j]+=assembledPhiF2[j][subj,subCell2]*
-                                       quadWeights[r]*ddJ2[r]*(n2[1]*phiFn2[1,subj][r]+n2[2]*phiFn2[2,subj][r])*w2jphiTn2;
-                            # piola: nphiF mit 1/Je = 1/Kantenlänge, phiW und phiT mit 1/dJ*J
+                        for subi in 1:nSubPhiT
+                            for r in 1:sk
+                                w1jphiTn1=0.0; w2jphiTn1=0.0; w1jphiTn2=0.0; w2jphiTn2=0.0;
+                                for d in 1:m.geometry.dim
+                                    w1jphiTn1+=w1[d][r]*jphiTn1[d,subi][r];
+                                    w2jphiTn1+=w2[d][r]*jphiTn1[d,subi][r];
+                                    w1jphiTn2+=w1[d][r]*jphiTn2[d,subi][r];
+                                    w2jphiTn2+=w2[d][r]*jphiTn2[d,subi][r];
+                                end
+                                lM11[i,j]+=assembledPhiT1[i][subi,subCell1]*assembledPhiF1[j][subj,subCell1]*
+                                           quadWeights[r]*ddJ1[r]*ddJ1[r]*(n1[1]*phiFn1[1,subj][r]+n1[2]*phiFn1[2,subj][r])*w1jphiTn1;
+                                lM12[i,j]+=assembledPhiT1[i][subi,subCell1]*assembledPhiF2[j][subj,subCell2]*
+                                           quadWeights[r]*ddJ2[r]*ddJ1[r]*(n2[1]*phiFn2[1,subj][r]+n2[2]*phiFn2[2,subj][r])*w2jphiTn1;
+                                lM21[i,j]+=assembledPhiT2[i][subi,subCell2]*assembledPhiF1[j][subj,subCell1]*
+                                           quadWeights[r]*ddJ1[r]*ddJ2[r]*(n1[1]*phiFn1[1,subj][r]+n1[2]*phiFn1[2,subj][r])*w1jphiTn2;
+                                lM22[i,j]+=assembledPhiT2[i][subi,subCell2]*assembledPhiF2[j][subj,subCell2]*
+                                           quadWeights[r]*ddJ2[r]*ddJ2[r]*(n2[1]*phiFn2[1,subj][r]+n2[2]*phiFn2[2,subj][r])*w2jphiTn2;
+                                # piola: nphiF mit 1/Je = 1/Kantenlänge, phiW und phiT mit 1/dJ*J
+                            end
                         end
                     end
                 end
