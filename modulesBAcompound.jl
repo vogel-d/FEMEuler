@@ -52,6 +52,7 @@ include("discGalerkinEdgesCompound.jl")
 include("MIS.jl")
 include("coordTrans.jl")
 include("getEdgeType.jl")
+include("correctNormalsCompound.jl")
 include("setCompoundEdgeData.jl")
 include("advectionBA.jl")
 include("splitExplicitBA.jl")
@@ -61,6 +62,7 @@ include("plotSolution.jl");
 include("plotSolutionGif.jl");
 include("plotMesh.jl");
 include("plotFEM.jl")
+include("splitCompoundMesh.jl")
 include("vtkCompound.jl");
 include("vtkTest.jl");
 include("jld.jl");

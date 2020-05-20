@@ -46,6 +46,7 @@ include("plotSolution.jl");
 include("plotSolutionGif.jl");
 include("plotMesh.jl");
 include("plotFEM.jl")
+include("splitCompoundMesh.jl")
 include("vtkCompound.jl");
 include("vtkTest.jl");
 include("jld.jl");
