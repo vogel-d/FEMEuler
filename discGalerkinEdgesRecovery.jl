@@ -4,8 +4,6 @@ function discGalerkinEdgesR!(M::Array{Float64,2},
                             phiW::Array{Function,1}, wval::Array{Float64,1}, globalNumW1::UnitRange{Int64}, globalNumW2::UnitRange{Int64},
                             m::mesh, quadWeights::Array{Float64,1}, nquadPoints::Array{Array{Float64,2},1}, edgeData::Array{Array{Int64,1},1},gamma::Float64, coord1::Array{Float64,2}, coord2::Array{Float64,2})
 
-
-
     nT=length(phiT);
     nF=size(phiF,2);
     nW=length(phiW);
@@ -116,16 +114,15 @@ function discGalerkinEdgesR!(M::Array{Float64,2},
     return nothing;
 end
 
-function discGalerkinEdges!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Array{Float64,1},
+function discGalerkinEdgesR!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Array{Float64,1},
                             degFT::degF{1,:H1},phiT::Array{Array{Float64,2},1}, phiTtrans::Array{Array{Array{Float64,1},2},1}, globalNumT1::Array{Int64,1}, globalNumT2::Array{Int64,1},
                             degFF::degF{2,:H1div},phiF::Array{Array{Float64,2},2}, phiFtrans::Array{Array{Array{Float64,1},2},1}, fval::Array{Float64,1}, globalNumF1::Array{Int64,1}, globalNumF2::Array{Int64,1},
-                            degFW::degF{1,:H1},phiW::Array{Array{Float64,2},1}, phiWtrans::Array{Array{Array{Float64,1},2},1}, wval::Array{Float64,1}, globalNumW1::Array{Int64,1}, globalNumW2::Array{Int64,1},
-                            m::mesh, quadWeights::Array{Float64,1}, nquadPoints::Array{Array{Float64,2},1}, edgeData::Array{Array{Int64,1},1},gamma::Float64, coord::Array{Float64,2})
-
-
+                            phiW::Array{Function,1}, wval::Array{Float64,1}, globalNumW1::UnitRange{Int64}, globalNumW2::UnitRange{Int64},
+                            m::mesh, quadWeights::Array{Float64,1}, nquadPoints::Array{Array{Float64,2},1}, edgeData::Array{Array{Int64,1},1},gamma::Float64, coord1::Array{Float64,2}, coord2::Array{Float64,2})
 
     nT=length(phiT);
     nF=size(phiF,2);
+    nW=length(phiW);
     sk=length(quadWeights)
 
     ddJe1=Array{Float64,1}(undef,sk);
@@ -139,10 +136,11 @@ function discGalerkinEdges!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
     lM21=zeros(nT,nF);
     lM22=zeros(nT,nF);
 
+    mt=m.meshType;
     z=1;
     for e in 1:length(edgeData[1])
-        inc1=edgeData[2][z];
-        inc2=edgeData[2][z+1];
+        inc1=edgeData[2][z]; # <- lokal gegen Uhrzeigersinn nummeriert
+        inc2=edgeData[2][z+1]; # <- lokale Nummerierung variiert
         eT1=edgeData[3][z];
         eT2=edgeData[3][z+1];
         z+=2;
@@ -153,23 +151,28 @@ function discGalerkinEdges!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
 
         phiFn1=@views phiFtrans[eT1];
         phiTn1=@views phiTtrans[eT1];
-        phiWn1=@views phiWtrans[eT1];
         kubPn1=@views nquadPoints[eT1];
         phiFn2=@views phiFtrans[eT2];
         phiTn2=@views phiTtrans[eT2];
-        phiWn2=@views phiWtrans[eT2];
         kubPn2=@views nquadPoints[eT2];
 
-        jacobi!(ddJe1,m,inc1,n1,kubPn1,coord);
-        jacobi!(ddJe2,m,inc2,n2,kubPn2,coord);
+        jacobi!(ddJe1,m,inc1,n1,kubPn1,coord1);
+        jacobi!(ddJe2,m,inc2,n2,kubPn2,coord2);
+
+        xM1=transformation(m,coord1,0.5,0.5);
+        xM2=transformation(m,coord2,0.5,0.5);
+        t1,s1=getTangentialPlane(xM1)
+        t2,s2=getTangentialPlane(xM2)
 
         fill!(w1,0.0);
         fill!(w2,0.0);
-        l2g!(globalNumW1,degFW,inc1);
-        l2g!(globalNumW2,degFW,inc2);
-        for i in 1:length(globalNumW1)
-            @. w1+=wval[globalNumW1[i]]*phiWn1[i];
-            @. w2+=wval[globalNumW2[i]]*phiWn2[i];
+        globalNumW1=(nW*(inc1-1)+1):(nW*inc1)
+        globalNumW2=(nW*(inc2-1)+1):(nW*inc2)
+        for i in 1:nW
+            for r in 1:sk
+                w1[r]+=wval[globalNumW1[i]]*phiW[i](transformRecoveryCoord(xM1,t1,s1,transformation(m, coord1, nquadPoints[eT1][1,r], nquadPoints[eT1][2,r])));
+                w2[r]+=wval[globalNumW2[i]]*phiW[i](transformRecoveryCoord(xM2,t2,s2,transformation(m, coord2, nquadPoints[eT2][1,r], nquadPoints[eT2][2,r])));
+            end
         end
 
         s=0.0;
@@ -186,13 +189,20 @@ function discGalerkinEdges!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
         for j in 1:nF
             for i in 1:nT
                 for r in 1:sk
+                    lM11[i,j]+=quadWeights[r]*w1[r]*phiTn1[i][r]*(n1[1]*phiFn1[1,j][r]+n1[2]*phiFn1[2,j][r]);
+                    lM12[i,j]+=quadWeights[r]*w2[r]*phiTn1[i][r]*(n2[1]*phiFn2[1,j][r]+n2[2]*phiFn2[2,j][r]);
+                    lM21[i,j]+=quadWeights[r]*w1[r]*phiTn2[i][r]*(n1[1]*phiFn1[1,j][r]+n1[2]*phiFn1[2,j][r]);
+                    lM22[i,j]+=quadWeights[r]*w2[r]*phiTn2[i][r]*(n2[1]*phiFn2[1,j][r]+n2[2]*phiFn2[2,j][r]);
+                    #=
                     lM11[i,j]+=le*quadWeights[r]*w1[r]*phiTn1[i][r]*ddJe1[r]*(n1[1]*phiFn1[1,j][r]+n1[2]*phiFn1[2,j][r]);
                     lM12[i,j]+=le*quadWeights[r]*w2[r]*phiTn1[i][r]*ddJe2[r]*(n2[1]*phiFn2[1,j][r]+n2[2]*phiFn2[2,j][r]);
                     lM21[i,j]+=le*quadWeights[r]*w1[r]*phiTn2[i][r]*ddJe1[r]*(n1[1]*phiFn1[1,j][r]+n1[2]*phiFn1[2,j][r]);
                     lM22[i,j]+=le*quadWeights[r]*w2[r]*phiTn2[i][r]*ddJe2[r]*(n2[1]*phiFn2[1,j][r]+n2[2]*phiFn2[2,j][r]);
+                    =#
                 end
             end
         end
+
         l2g!(globalNumF1,degFF,inc1);
         l2g!(globalNumT1,degFT,inc1);
         l2g!(globalNumF2,degFF,inc2);
@@ -205,6 +215,7 @@ function discGalerkinEdges!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
                 gj1=globalNumF1[j];
                 gj2=globalNumF2[j];
 
+                #=
                 push!(rows,gi1);
                 push!(cols,gj1);
                 push!(vals,(+0.5-gammaLoc)*lM11[i,j]);
@@ -220,6 +231,23 @@ function discGalerkinEdges!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
                 push!(rows,gi2);
                 push!(cols,gj2);
                 push!(vals,(-0.5-gammaLoc)*lM22[i,j]);
+                =#
+
+                push!(rows,gi1);
+                push!(cols,gj1);
+                push!(vals,(-0.5-gammaLoc)*lM11[i,j]);
+
+                push!(rows,gi1);
+                push!(cols,gj2);
+                push!(vals,(-0.5+gammaLoc)*lM12[i,j]);
+
+                push!(rows,gi2);
+                push!(cols,gj1);
+                push!(vals,(+0.5+gammaLoc)*lM21[i,j]);
+
+                push!(rows,gi2);
+                push!(cols,gj2);
+                push!(vals,(+0.5-gammaLoc)*lM22[i,j]);;
             end
         end
 
