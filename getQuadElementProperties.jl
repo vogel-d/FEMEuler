@@ -116,6 +116,12 @@ function getQuadElementProperties(type::Symbol)
     Dyh10_22(x,y)=g10(x)*Dg22(y);
     Dyh11_22(x,y)=g11(x)*Dg22(y);
 
+    mh0_10(x,y)=-h0_10(x,y)
+    mh0_11(x,y)=-h0_11(x,y)
+
+    mDyh0_10(x,y)=-Dyh0_10(x,y)
+    mDyh0_11(x,y)=-Dyh0_11(x,y)
+
     if type==:DG0
         phi=[h0_0];
         divphi=[null];
@@ -186,13 +192,13 @@ function getQuadElementProperties(type::Symbol)
         divphi=[Dyh0_10, Dxh11_0, Dyh0_11, Dxh10_0];
         gradphi=[null null    Dxh11_0 null null null    Dxh10_0 null;
                  null Dyh0_10 null    null null Dyh0_11 null    null];
-        =#
+
         mh0_10(x,y)=-h0_10(x,y)
         mh0_11(x,y)=-h0_11(x,y)
 
         mDyh0_10(x,y)=-Dyh0_10(x,y)
         mDyh0_11(x,y)=-Dyh0_11(x,y)
-        
+        =#
         phi=[null h11_0 null h10_0;
              mh0_10 null mh0_11 null];
 
@@ -207,13 +213,26 @@ function getQuadElementProperties(type::Symbol)
         cm=Dict([1,2]=>[1,0,0,0], [2,3]=>[0,1,0,0], [3,4]=>[0,0,1,0], [1,4]=>[0,0,0,1]);
 
     elseif type==:RT0B #Broken RT0
-
+        #=
         phi=[null h11_0 null h10_0;
              h0_10 null h0_11 null];
 
         divphi=[Dyh0_10, Dxh11_0, Dyh0_11, Dxh10_0];
         gradphi=[null null    Dxh11_0 null null null    Dxh10_0 null;
                  null Dyh0_10 null    null null Dyh0_11 null    null];
+
+        mh0_10(x,y)=-h0_10(x,y)
+        mh0_11(x,y)=-h0_11(x,y)
+
+        mDyh0_10(x,y)=-Dyh0_10(x,y)
+        mDyh0_11(x,y)=-Dyh0_11(x,y)
+        =#
+        phi=[null h11_0 null h10_0;
+             mh0_10 null mh0_11 null];
+
+        divphi=[mDyh0_10, Dxh11_0, mDyh0_11, Dxh10_0];
+        gradphi=[null null    Dxh11_0 null null null    Dxh10_0 null;
+                 null mDyh0_10 null    null null mDyh0_11 null    null];
 
         nFace=4;
         nEdge=0;
