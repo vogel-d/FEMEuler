@@ -74,3 +74,15 @@ include("setOrientation.jl")
 include("cart2sphere.jl")
 include("simpson.jl")
 include("vel.jl")
+
+include("getStencil.jl")
+include("assembRecovery.jl")
+include("getPhiRecovery.jl")
+
+include("advectionStiffRecovery.jl")
+#include("advectionStiffMatrix.jl")
+include("discGalerkinCellsRecovery.jl")
+include("discGalerkinEdgesRecovery.jl")
+include("vtkRecovery.jl");
+include("transformRecoveryCoord.jl")
+include("getTangentialPlane.jl")

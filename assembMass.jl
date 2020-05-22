@@ -4,10 +4,10 @@ function assembMass!(p::femProblem)
     s=Array{Symbol,1}();
     if p.taskRecovery
         for i in collect(keys(p.femType))
-            if length(p.femType[i])==1
-                append!(s, p.femType[i])
-            else
+            if length(p.femType[i])==3
                 append!(s, p.femType[i][[1,2]])
+            else
+                append!(s, p.femType[i])
             end
         end
     else

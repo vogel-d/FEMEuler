@@ -78,7 +78,6 @@ include("projectAdvection.jl")
 
 include("getStencil.jl")
 include("assembRecovery.jl")
-include("getRecoveryElementProperties.jl")
 include("getPhiRecovery.jl")
 
 include("advectionStiffRecovery.jl")

@@ -16,12 +16,13 @@ mutable struct femProblem
     kubPoints::Array{Float64,2};
     taskRecovery::Bool;
     advection::Bool;
+    recoveryOrders::Tuple;
 end
 
 
 #Konstruktoren
 
-function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}};stencilOrder::Int=1,advection::Bool=true, taskRecovery::Bool=false, t::Symbol=:boussinesq, g::Int64=9)
+function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}};stencilOrder::Int=0,recoveryOrder::Int=0,advection::Bool=true, taskRecovery::Bool=false, t::Symbol=:boussinesq, g::Int64=9)
     sol=Dict{Float64, solution}()
     kubPoints, kubWeights=getKub(g, m.meshType);
     dF=Dict{Symbol, degF}()
@@ -30,17 +31,30 @@ function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}};stencilOrder
     ordVerticesB, nvbP, nvbC=getOrderBoundary(m.boundaryVertices);
 
     femElements=Set{Symbol}()
-    for k in collect(keys(femType))
-        for s in femType[k]
-            push!(femElements,s);
+    recoveryType=Dict{Symbol, Int}()
+    for k in keys(femType)
+        if length(femType[k])==3
+            recoveryType[k]=recoveryOrder
+            nFEM=2
+        else
+            recoveryType[k]=0
+            nFEM=length(femType[k])
         end
+        for s in 1:nFEM
+            push!(femElements,femType[k][s]);
+        end
+    end
+    if t==:boussinesq
+        recoveryOrders=(recoveryType[:p],recoveryType[:b],recoveryType[:v])
+    else
+        recoveryOrders=(recoveryType[:rhoTheta],recoveryType[:rhoV],recoveryType[:rho])
     end
 
     for k in femElements
         dF[k]=degF(m,k,ordEdgesB,nebP,nebC,ordVerticesB,nvbP,nvbC,kubPoints);
     end
 
-    if taskRecovery
+    if taskRecovery && !iszero(stencilOrder)
         stencil, stencilBoundary=getStencil(m,stencilOrder)
     else
         stencil=Array{Array{Int,1},1}();
@@ -55,5 +69,5 @@ function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}};stencilOrder
     bV=Dict();
     s=Set{Symbol}([:poisson,:boussinesq,:compressible,:shallow]);
     !in(t,s) && error("Die Methode $t ist keine zulässige Eingabe. Möglich sind $s");
-    femProblem(m,bV,dF,femType,edgeData,sol,massM,massMB,massMP,stiffM,stencil,stencilBoundary,t,kubWeights, kubPoints, taskRecovery, advection);
+    femProblem(m,bV,dF,femType,edgeData,sol,massM,massMB,massMP,stiffM,stencil,stencilBoundary,t,kubWeights, kubPoints, taskRecovery, advection, recoveryOrders);
 end

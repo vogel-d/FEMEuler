@@ -60,3 +60,15 @@ include("vtk.jl");
 include("vtkTest.jl");
 include("vtkRefined.jl");
 include("jld.jl");
+
+include("getStencil.jl")
+include("assembRecovery.jl")
+include("getPhiRecovery.jl")
+
+include("advectionStiffRecovery.jl")
+#include("advectionStiffMatrix.jl")
+include("discGalerkinCellsRecovery.jl")
+include("discGalerkinEdgesRecovery.jl")
+include("vtkRecovery.jl");
+include("transformRecoveryCoord.jl")
+include("getTangentialPlane.jl")
