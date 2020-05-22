@@ -87,9 +87,9 @@ function recovery(degFT::degF{1,:H1}, recoverySpace::Symbol, cval::Array{Float64
 end
 
 function recovery(degFT::degF{2,:H1div}, recoverySpace::Symbol, cval::Array{Float64,1},
-                  stencil, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
+                  stencil::Array{Array{Int,1},1}, stencilBoundary::SparseMatrixCSC{Int,Int}, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
     phiT=@views degFT.phi;
-    phiR=getPhiRecovery([0.0,0.0],Val(recoverySpace));
+    phiR=getPhiRecovery(Val(recoverySpace));
 
     nf=m.topology.size[3]
     mcoord=m.geometry.coordinates;
@@ -101,7 +101,7 @@ function recovery(degFT::degF{2,:H1div}, recoverySpace::Symbol, cval::Array{Floa
     sk=size(kubWeights);
 
     J=initJacobi((m.geometry.dim,m.topology.dim),sk);
-    dJ=Array{Float64,2}(undef,sk);
+    ddJ=Array{Float64,2}(undef,sk);
     jphiT=initJacobi((m.geometry.dim,nT),sk);
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
@@ -209,12 +209,16 @@ function recovery(p::femProblem, dim::Int64, comp::Array{Symbol,1}, cval::Array{
         cH[degF[comp[4]].num+1:end]=p.boundaryValues[(bcomp,comp[4])];
     end
 
+    #=
     n=m.topology.size[3]
-
     dim=Val{dim}();
     cR=embed(p,comp[2],comp[3],cH,n,dim);
     cEmbed=embed(p,comp[1],comp[3],cval,n,dim);
     cHPEmbed=embed(p,comp[4],comp[3],cHP,n,dim);
+    =#
+    cR=projectRecovery(degF[comp[3]],degF[comp[2]],cH,p.massMBoundary[comp[3]],m,kubPoints,kubWeights);
+    cEmbed=projectRecovery(degF[comp[3]],degF[comp[1]],cval,p.massMBoundary[comp[3]],m,kubPoints,kubWeights);
+    cHPEmbed=projectRecovery(degF[comp[3]],degF[comp[4]],cHP,p.massMBoundary[comp[3]],m,kubPoints,kubWeights);
 
     return cR+(cEmbed-cHPEmbed);
 end

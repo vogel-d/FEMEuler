@@ -98,7 +98,7 @@ end
 
 function getPhiRecovery(recoverySpace::Val{:VecR2})
 
-    #null(xyz) = 0.0
+    null(xyz) = 0.0
     phi1(xyz) = 1.0;
 
     phix(xyz) = xyz[1];
@@ -117,7 +117,7 @@ end
 
 function getPhiRecovery(recoverySpace::Val{:VecR2S})
 
-    #null(xyz) = 0.0
+    null(xyz) = 0.0
     phi1(xyz) = 1.0;
 
     phix(xyz) = xyz[1];
