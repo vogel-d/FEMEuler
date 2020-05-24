@@ -2,17 +2,30 @@ include("modulesSphere.jl")
 
 function testGalewsky()
 
-    filename = "galewskyI";
+    filename = "galewskyIL";
 
-    #order: comp, compHigh, compRec, compDG
+    stencilOrder=2;
+    recoveryOrder=2;
 
+    recoverySpace=Symbol("R$recoveryOrder")
+    recoverySpaceVec=Symbol("VecR$recoveryOrder")
+
+    #order: comp, compTest, recoverySpace
+    femType=Dict(:rho=>[:DG0, :DG0, recoverySpace],
+                 #:rhoV=>[:RT0, :RT0, recoverySpaceVec],
+                 :rhoV=>[:RT0, :VecP1S, :VecDG1S, :RT0B],
+                 :rhoTheta=>[:DG0, :DG0, recoverySpace],
+                 :p=>[:DG0],
+                 :v=>[:RT0],
+                 :theta=>[:DG0]);
+    #=
     femType=Dict(:rho=>[:DG0, :P1, :DG1, :DG0],
                  :rhoV=>[:RT0, :VecP1S, :VecDG1S, :RT0B],
                  :rhoTheta=>[:DG0, :P1, :DG1, :DG0],
                  :p=>[:DG0],
                  :v=>[:RT0],
                  :theta=>[:DG0]);
-
+    =#
     #higher spaces
     #=
     femType=Dict(:rho=>[:DG1, :P1, :DG1, :DG0],
@@ -23,18 +36,19 @@ function testGalewsky()
                  :theta=>[:DG1]);
     =#
 
-    taskRecovery=false;
+    taskRecovery=true;
     advection=true;
 
-    m=generateCubedSphere(50,6300000.0,0,:cube1)
+    m=generateCubedSphere(100,6300000.0,0,:cube1)
 
-    p=femProblem(m, femType,t=:shallow, advection=advection, taskRecovery=taskRecovery);
+    p=femProblem(m, femType,t=:shallow, advection=advection, taskRecovery=taskRecovery,
+    stencilOrder=stencilOrder, recoveryOrder=recoveryOrder,);
 
     gamma=0.5; #upwind
     MISMethod=MIS(:MIS4_4); #method of time integration
 
-    dt=200.0 #50.0 #1600.0;
-    ns=4;
+    dt=300.0 #200.0 #50.0 #1200.0;
+    ns=120;
     EndTime=6.0*86400.0;
     nIter=Int64(EndTime/dt);
 
@@ -95,13 +109,14 @@ function testGalewsky()
 
     unstructured_vtk(p, 0.0, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename*"0", printSpherical=true)
 
-    taskRecovery ? pos=[1,3] : pos=[1];
     advectionTypes=Symbol[];
     for i in [:rho,:rhoTheta,:rhoV]
-        append!(advectionTypes,femType[i][pos]);
+        push!(advectionTypes,femType[i][1]);
+        (taskRecovery && length(femType[i])==4) && push!(advectionTypes,femType[i][3]);
     end
     nquadPhi, nquadPoints=coordTrans(m, m.normals, advectionTypes, size(p.kubWeights,2));
     setEdgeData!(p, :v)
+    recoveryMatrix!(p)
 
     MrT=assembMass(p.degFBoundary[femType[:rhoTheta][1]], m, p.kubPoints, p.kubWeights);
     MrV=assembMass(p.degFBoundary[femType[:rhoV][1]], m, p.kubPoints, p.kubWeights);
@@ -118,7 +133,7 @@ function testGalewsky()
       p.solution[Time]=y;
       p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
-      if mod(i,4)==0
+      if mod(i,16)==0
           p2=deepcopy(p);
           unstructured_vtk(p2, Time, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename*"$i", printSpherical=true)
       end
