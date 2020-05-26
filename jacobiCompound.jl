@@ -227,7 +227,6 @@ end
 
 function jacobi!(J::Array{Array{Float64,1},2},ddJ::Array{Float64,1},jphi::Array{Array{Float64,1},2},jpsi::Array{Array{Float64,1},2},kubPoints::Array{Float64,2}, phi::Array{Array{Float64,1},2}, psi::Array{Array{Float64,1},2}, coord::Array{Float64,2}, mt::Int64)
     sk=size(kubPoints,2);
-
     if mt==3
         a=coord[:,2]-coord[:,1];
         b=coord[:,3]-coord[:,1];
