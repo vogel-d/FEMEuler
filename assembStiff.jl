@@ -38,6 +38,7 @@ function assembStiff!(p::femProblem)
         degF=p.degFBoundary;
         hkey=p.femType[:h][1];
         vkey=p.femType[:hV][1];
+        pkey=p.femType[:p][1];
 
         Spv=assembStiff(degF[pkey], degF[vkey], p.mesh, p.kubWeights, p.kubPoints);
         Svp = copy(-Spv');
