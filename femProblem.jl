@@ -47,8 +47,12 @@ function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}};stencilOrder
     end
     if t==:boussinesq
         recoveryOrders=(recoveryType[:p],recoveryType[:b],recoveryType[:v])
-    else
+    elseif t==:compressible
         recoveryOrders=(recoveryType[:rhoTheta],recoveryType[:rhoV],recoveryType[:rho])
+    elseif t==:shallow
+        recoveryOrders=(recoveryType[:h],recoveryType[:hV])
+    elseif t==:linshallow
+        recoveryOrders=(recoveryType[:h],recoveryType[:v])
     end
 
     for k in femElements
@@ -69,7 +73,7 @@ function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}};stencilOrder
     recoveryM=Dict();
     loadV=Dict();
     bV=Dict();
-    s=Set{Symbol}([:poisson,:boussinesq,:compressible,:shallow]);
+    s=Set{Symbol}([:poisson,:boussinesq,:compressible,:shallow,:linshallow]);
     !in(t,s) && error("Die Methode $t ist keine zulässige Eingabe. Möglich sind $s");
     femProblem(m,bV,dF,femType,edgeData,sol,massM,massMB,massMP,stiffM,recoveryM,stencil,stencilBoundary,t,kubWeights, kubPoints, taskRecovery, advection, recoveryOrders);
 end

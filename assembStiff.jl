@@ -36,18 +36,26 @@ function assembStiff!(p::femProblem)
 
     elseif p.type==:shallow
         degF=p.degFBoundary;
-        rhokey=p.femType[:rho][1];
-        vkey=p.femType[:rhoV][1];
-        pkey=p.femType[:p][1];
+        hkey=p.femType[:h][1];
+        vkey=p.femType[:hV][1];
 
         Spv=assembStiff(degF[pkey], degF[vkey], p.mesh, p.kubWeights, p.kubPoints);
         Svp = copy(-Spv');
         Sfv=assembStiff(degF[vkey],degF[vkey],p.mesh, p.kubWeights, p.kubPoints)
 
-        p.stiffM[:rho]=Spv[1:degF[rhokey].num,:];
+        p.stiffM[:h]=Spv[1:degF[hkey].num,:];
         p.stiffM[:vp]=Svp[1:degF[vkey].num,:];
         p.stiffM[:fv]=Sfv[1:degF[vkey].num,:];
+    elseif p.type==:linshallow
+        degF=p.degFBoundary;
+        hkey=p.femType[:h][1];
+        vkey=p.femType[:v][1];
 
+        Spv=assembStiff(degF[hkey], degF[vkey], p.mesh, p.kubWeights, p.kubPoints);
+        Svp = copy(-Spv');
+
+        p.stiffM[:div]=Spv[1:degF[hkey].num,:];
+        p.stiffM[:grad]=Svp[1:degF[vkey].num,:];
     else
         comp=Set{Symbol}()
         for i in collect(keys(p.femType))
