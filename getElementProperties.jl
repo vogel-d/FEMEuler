@@ -171,7 +171,7 @@ function getElementProperties(type::Symbol, mt::Int, mp::Array{Float64,1}, xyz)
 end
 
 function getElementProperties(type::Symbol, n::Array{Float64,1}, xyz)
-    phi=getPhiRecovery([0.0,0.0],Val(type));
+    phi=getPhiRecovery(Val(type));
     valPhi=similar(phi,Float64);
     t1,t2=getTangentialPlane(n);
     txyz=transformRecoveryCoord(n,t1,t2,xyz)

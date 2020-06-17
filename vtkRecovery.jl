@@ -1,4 +1,4 @@
-function vtkRecovery(m::mesh, r::Int, degF::degF{1}, sol::Array{Float64,1}, femType::Symbol, filename::String, name::String="Test")
+function vtkRecovery(m::mesh, r::Int, sol::Array{Float64,1}, femType::Symbol, ::Val{1}, filename::String, name::String="Test")
     if r==2
         refCoordE=[0.5 1.0 0.5 0.0;
                    0.0 0.5 1.0 0.5]
@@ -57,20 +57,29 @@ function vtkRecovery(m::mesh, r::Int, degF::degF{1}, sol::Array{Float64,1}, femT
         end
     end
 
+    phi=getPhiRecovery(Val(femType))
+    for i in 1:r^2
+        fComp[i]=similar(phi,Float64);
+    end
+    nPhi=length(phi)
     cvtk=zeros(Float64, nf*r^2)
-    cLoc=zeros(Float64, length(degF.phi))
+    cLoc=zeros(Float64, nPhi)
     zk=1
     for k in 1:nf
         coord=@views m.geometry.coordinates[:,inc[off[k]:off[k+1]-1]]
         mp=transformation(m, coord, mx, my)
         for i in 1:size(rcoord,2)
             mc=transformation(m, coord, rcoord[1,i],rcoord[2,i])
-            #fComp[i]=getElementProperties(femType,m.meshType,mp,mc);
-            fComp[i]=getElementProperties(femType,mp,mc);
+            t1,t2=getTangentialPlane(mp);
+            txyz=transformRecoveryCoord(mp,t1,t2,mc)
+            for l=1:nPhi
+                fComp[i][l]=phi[l](txyz);
+            end
+            #fComp[i]=getElementProperties(femType,mp,mc);
         end
         f=zk:(zk+r^2-1);
         zk+=r^2
-        cLoc=sol[l2g(degF, k)]
+        cLoc=sol[(nPhi*(k-1)+1):(nPhi*k)]
         for i in 1:length(f)
             cvtk[f[i]]=dot(fComp[i],cLoc);
         end
@@ -82,7 +91,7 @@ function vtkRecovery(m::mesh, r::Int, degF::degF{1}, sol::Array{Float64,1}, femT
     return outfiles::Vector{String}
 end
 
-function vtkRecovery(m::mesh, r::Int, degF::degF{2}, sol::Array{Float64,1}, femType::Symbol, filename::String, name::String="Test"; printSpherical::Bool=false)
+function vtkRecovery(m::mesh, r::Int, sol::Array{Float64,1}, femType::Symbol, ::Val{2}, filename::String, name::String="Test"; printSpherical::Bool=false)
     if r==2
         refCoordE=[0.5 1.0 0.5 0.0;
                    0.0 0.5 1.0 0.5]
@@ -128,7 +137,7 @@ function vtkRecovery(m::mesh, r::Int, degF::degF{2}, sol::Array{Float64,1}, femT
 
     J=Array{Float64,2}(undef,m.geometry.dim,m.topology.dim);
     dJ=0.0;
-    coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
+    jcoord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
     vtk_filename_noext = (@__DIR__)*"/VTK/"*filename;
     vtk = vtk_grid(vtk_filename_noext, pts, cells,compress=3)
@@ -143,21 +152,34 @@ function vtkRecovery(m::mesh, r::Int, degF::degF{2}, sol::Array{Float64,1}, femT
         end
     end
 
-    cvtk=zeros(Float64, nf*r^2)
-    cLoc=zeros(Float64, length(degF.phi))
+    phi=getPhiRecovery(Val(femType))
+    for i in 1:r^2
+        fComp[i]=similar(phi,Float64);
+    end
+    nPhi=size(phi,2)
+    lPhi=length(phi)
+    cvtk=zeros(Float64, m.geometry.dim,nf*r^2)
+    cLoc=zeros(Float64, nPhi)
     zk=1
     for k in 1:nf
+        coord=@views m.geometry.coordinates[:,inc[off[k]:off[k+1]-1]]
+        mp=transformation(m, coord, mx, my)
+        for i in 1:size(rcoord,2)
+            mc=transformation(m, coord, rcoord[1,i],rcoord[2,i])
+            t1,t2=getTangentialPlane(mp);
+            txyz=transformRecoveryCoord(mp,t1,t2,mc)
+            for l=1:lPhi
+                fComp[i][l]=phi[l](txyz);
+            end
+            #fComp[i]=getElementProperties(femType,mp,mc);
+        end
         f=zk:(zk+r^2-1);
         zk+=r^2
-        cLoc=sol[l2g(degF, k)]
+        cLoc=sol[(nPhi*(k-1)+1):(nPhi*k)]
         for i in 1:length(f)
-            dJ=jacobi!(J,m,k,rcoord[1,i],rcoord[2,i],coord);
-            mp=transformation(m, coord, mx, my)
-            for i in 1:size(rcoord,2)
-                mc=transformation(m, coord, rcoord[1,i],rcoord[2,i])
-                fComp[i]=getElementProperties(femType,m.meshType,mp,mc);
-            end
-            fLoc=(1/dJ)*J*fComp
+            dJ=jacobi!(J,m,k,rcoord[1,i],rcoord[2,i],jcoord);
+            #fLoc=(1/dJ)*J*fComp[i]
+            fLoc=fComp[i]
             if printSpherical
                 xyz=transformation(m,coord,rcoord[1,i],rcoord[2,i])
                 lon,lat,rad=cart2sphere(xyz[1],xyz[2],xyz[3]);
