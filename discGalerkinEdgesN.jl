@@ -94,10 +94,11 @@ function discGalerkinEdges!(M::Array{Float64,2},
                 gj1=globalNumF1[j];
                 gj2=globalNumF2[j];
 
-                M[gi1]+=(+0.5-gammaLoc)*lM11[i,j]*fval[gj1];
+                M[gi1]+=(-0.5-gammaLoc)*lM11[i,j]*fval[gj1];
                 M[gi1]+=(-0.5+gammaLoc)*lM12[i,j]*fval[gj2];
                 M[gi2]+=(+0.5+gammaLoc)*lM21[i,j]*fval[gj1];
-                M[gi2]+=(-0.5-gammaLoc)*lM22[i,j]*fval[gj2];
+                M[gi2]+=(+0.5-gammaLoc)*lM22[i,j]*fval[gj2];
+
             end
         end
     end
@@ -195,7 +196,7 @@ function discGalerkinEdges!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
 
                 push!(rows,gi1);
                 push!(cols,gj1);
-                push!(vals,(+0.5-gammaLoc)*lM11[i,j]);
+                push!(vals,(-0.5-gammaLoc)*lM11[i,j]);
 
                 push!(rows,gi1);
                 push!(cols,gj2);
@@ -207,7 +208,7 @@ function discGalerkinEdges!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
 
                 push!(rows,gi2);
                 push!(cols,gj2);
-                push!(vals,(-0.5-gammaLoc)*lM22[i,j]);
+                push!(vals,(+0.5-gammaLoc)*lM22[i,j]);
             end
         end
 
@@ -320,10 +321,11 @@ function discGalerkinEdges!(M::Array{Float64,2},
                 gj1=globalNumF1[j];
                 gj2=globalNumF2[j];
 
-                M[gi1]+=(+0.5-gammaLoc)*lM11[i,j]*fval[gj1];
+                M[gi1]+=(-0.5-gammaLoc)*lM11[i,j]*fval[gj1];
                 M[gi1]+=(-0.5+gammaLoc)*lM12[i,j]*fval[gj2];
                 M[gi2]+=(+0.5+gammaLoc)*lM21[i,j]*fval[gj1];
-                M[gi2]+=(-0.5-gammaLoc)*lM22[i,j]*fval[gj2];
+                M[gi2]+=(+0.5-gammaLoc)*lM22[i,j]*fval[gj2];
+
             end
 
         end
@@ -437,10 +439,11 @@ function discGalerkinEdges!(M::Array{Float64,2},
                 gj1=globalNumF1[j];
                 gj2=globalNumF2[j];
 
-                M[gi1]+=(+0.5-gammaLoc)*lM11[i,j]*fval[gj1];
+                M[gi1]+=(-0.5-gammaLoc)*lM11[i,j]*fval[gj1];
                 M[gi1]+=(-0.5+gammaLoc)*lM12[i,j]*fval[gj2];
                 M[gi2]+=(+0.5+gammaLoc)*lM21[i,j]*fval[gj1];
-                M[gi2]+=(-0.5-gammaLoc)*lM22[i,j]*fval[gj2];
+                M[gi2]+=(+0.5-gammaLoc)*lM22[i,j]*fval[gj2];
+            
             end
 
         end
