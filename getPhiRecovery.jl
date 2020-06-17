@@ -87,11 +87,10 @@ function getPhiRecovery(recoverySpace::Val{:VecR1S})
 
     phix(xyz) = xyz[1];
     phiy(xyz) = xyz[2];
-    phiz(xyz) = xyz[3];
 
-    phi=[phi1 phix phiy phiz null null null null null null null null;
-         null null null null phi1 phix phiy phiz null null null null;
-         null null null null null null null null phi1 phix phiy phiz]
+    phi=[phi1 phix phiy null null null null null null;
+         null null null phi1 phix phiy null null null;
+         null null null null null null phi1 phix phiy]
 
     return phi
 end
@@ -122,19 +121,15 @@ function getPhiRecovery(recoverySpace::Val{:VecR2S})
 
     phix(xyz) = xyz[1];
     phiy(xyz) = xyz[2];
-    phiz(xyz) = xyz[3];
 
     phixy(xyz) = xyz[1]*xyz[2]
-    phixz(xyz) = xyz[1]*xyz[3]
-    phiyz(xyz) = xyz[2]*xyz[3]
 
     phix2(xyz) = xyz[1]^2
     phiy2(xyz) = xyz[2]^2
-    phiz2(xyz) = xyz[3]^2
 
-    phi=[phi1 phix phiy phiz phixy phixz phiyz phix2 phiy2 phiz2 null null null null null null null null null null null null null null null null null null null null;
-         null null null null null null null null null null phi1 phix phiy phiz phixy phixz phiyz phix2 phiy2 phiz2 null null null null null null null null null null;
-         null null null null null null null null null null null null null null null null null null null null phi1 phix phiy phiz phixy phixz phiyz phix2 phiy2 phiz2]
+    phi=[phi1 phix phiy phixy phix2 phiy2 null null null null  null  null  null null null null  null  null;
+         null null null null  null  null  phi1 phix phiy phixy phix2 phiy2 null null null null  null  null;
+         null null null null  null  null  null null null null  null  null  phi1 phix phiy phixy phix2 phiy2]
 
     return phi
 end

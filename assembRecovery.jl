@@ -35,7 +35,7 @@ function assembRecovery(degFT::degF{1,:H1},degFF::degF{1,:H1},valF::Array{Float6
     end
     return cL;
 end
-
+#=
 function assembRecovery(degFT::degF{2,:H1div},degFF::degF{2,:H1div},valF::Array{Float64,1},m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
     phiT=@views degFT.phi;
     phiF=@views degFF.phi;
@@ -208,3 +208,4 @@ function assembRecovery(degFT::degF{2,:H1xH1},degFF::degF{2,:H1div},valF::Array{
     end
     return cL;
 end
+=#

@@ -84,6 +84,7 @@ end
 
 function recoveryMatrix(degFT::degF{2,:H1div}, recoverySpace::Symbol,
                   stencil::Array{Array{Int,1},1}, stencilBoundary::SparseMatrixCSC{Int,Int}, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
+
     phiT=@views degFT.phi;
     phiR=getPhiRecovery(Val(recoverySpace));
 
@@ -102,10 +103,7 @@ function recoveryMatrix(degFT::degF{2,:H1div}, recoverySpace::Symbol,
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
     dxy= @. (m.geometry.r-m.geometry.l)/m.topology.n
-
-    globalNumT=Array{Int64,1}(undef,nT);
-    lcval=Float64[]
-    cR=Float64[];
+    recoveryM=Array{QRPivoted{Float64,Array{Float64,2}},1}(undef,nf)
     for f in 1:nf
         fcoord=@views mcoord[:,inc[off[f]:off[f+1]-1]]
         n=transformation(m,fcoord,0.5,0.5);
@@ -156,13 +154,8 @@ function recoveryMatrix(degFT::degF{2,:H1div}, recoverySpace::Symbol,
                 end
                 z+=1;
             end
-            l2g!(globalNumT,degFT,k)
-            append!(lcval,w.*cval[globalNumT])
         end
-
-        qrM=qr(lM, Val(true))
-        append!(cR,qrM\lcval);
-        empty!(lcval);
+        recoveryM[f]=qr(lM, Val(true))
     end
-    return cR;
+    return recoveryM;
 end
