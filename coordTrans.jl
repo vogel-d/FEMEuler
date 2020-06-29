@@ -9,18 +9,22 @@ function coordTrans(mt::Int64, normals::Array{Float64,2}, type::Array{Symbol,1},
         #Kante 1
         nquadPoints[1]=zeros(2,sk);
         nquadPoints[1][1,:]=quadPoints;
+        #nquadPoints[1][1,:]=ones(sk).-quadPoints;
 
         #Kante 2
         nquadPoints[2]=ones(2,sk);
         nquadPoints[2][2,:]=quadPoints;
+        #nquadPoints[2][2,:]=ones(sk).-quadPoints;
 
         #Kante 3
         nquadPoints[3]=ones(2,sk);
         nquadPoints[3][1,:]=quadPoints;
+        #nquadPoints[3][1,:]=ones(sk).-quadPoints;
 
         #Kante 4
         nquadPoints[4]=zeros(2,sk);
         nquadPoints[4][2,:]=quadPoints;
+        #nquadPoints[4][2,:]=ones(sk).-quadPoints;
 
     elseif mt==3
         #Kante 1
