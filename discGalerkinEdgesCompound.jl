@@ -24,12 +24,12 @@ function discGalerkinEdges!(M::Array{Float64,2},
     assembledPhiT2=compoundData.assembledPhi[degFT.femType];
     assembledPhiF2=compoundData.assembledPhi[degFF.femType];
     assembledPhiW2=compoundData.assembledPhi[degFW.femType];
-    #assembledPhiT1=compoundData.assembledPhiSafe[degFT.femType];
-    #assembledPhiF1=compoundData.assembledPhiSafe[degFF.femType];
-    #assembledPhiW1=compoundData.assembledPhiSafe[degFW.femType];
-    #assembledPhiT2=compoundData.assembledPhiSafe[degFT.femType];
-    #assembledPhiF2=compoundData.assembledPhiSafe[degFF.femType];
-    #assembledPhiW2=compoundData.assembledPhiSafe[degFW.femType];
+    assembledPhiPreT1=compoundData.assembledPhiPre[degFT.femType];
+    assembledPhiPreF1=compoundData.assembledPhiPre[degFF.femType];
+    assembledPhiPreW1=compoundData.assembledPhiPre[degFW.femType];
+    assembledPhiPreT2=compoundData.assembledPhiPre[degFT.femType];
+    assembledPhiPreF2=compoundData.assembledPhiPre[degFF.femType];
+    assembledPhiPreW2=compoundData.assembledPhiPre[degFW.femType];
     nCompoundPhiT=length(assembledPhiT1);
     nCompoundPhiF=length(assembledPhiF1);
     nCompoundPhiW=length(assembledPhiW1);
@@ -85,12 +85,18 @@ function discGalerkinEdges!(M::Array{Float64,2},
         getSubCells!(subcoord1, coord1, center, compoundData);
         getSubCells!(subcoord2, coord2, center, compoundData);
 
-        assemblePhi!(assembledPhiT1, subcoord1, degFT, m, J, dJ, phiT, kubPoints, kubWeights, compoundData);
-        assemblePhi!(assembledPhiF1, subcoord1, m, divphiF, J_edge, ddJ_edge, jphiF_edge, nquadPhiF, nquadPoints, quadWeights, compoundData);
-        assemblePhi!(assembledPhiW1, subcoord1, degFW, m, J, dJ, phiW, kubPoints, kubWeights, compoundData);
-        assemblePhi!(assembledPhiT2, subcoord2, degFT, m, J, dJ, phiT, kubPoints, kubWeights, compoundData);
-        assemblePhi!(assembledPhiF2, subcoord2, m, divphiF, J_edge, ddJ_edge, jphiF_edge, nquadPhiF, nquadPoints, quadWeights, compoundData);
-        assemblePhi!(assembledPhiW2, subcoord2, degFW, m, J, dJ, phiW, kubPoints, kubWeights, compoundData);
+        #assemblePhi!(assembledPhiT1, compoundData);
+        #assemblePhi!(assembledPhiF1, subcoord1, m, divphiF, J_edge, ddJ_edge, jphiF_edge, nquadPhiF, nquadPoints, quadWeights, compoundData);
+        #assemblePhi!(assembledPhiW1, compoundData);
+        #assemblePhi!(assembledPhiT2, compoundData);
+        #assemblePhi!(assembledPhiF2, subcoord2, m, divphiF, J_edge, ddJ_edge, jphiF_edge, nquadPhiF, nquadPoints, quadWeights, compoundData);
+        #assemblePhi!(assembledPhiW2, compoundData);
+        assembledPhiT1=assembledPhiPreT1[inc1];
+        assembledPhiF1=assembledPhiPreF1[inc1];
+        assembledPhiW1=assembledPhiPreW1[inc1];
+        assembledPhiT2=assembledPhiPreT2[inc2];
+        assembledPhiF2=assembledPhiPreF2[inc2];
+        assembledPhiW2=assembledPhiPreW2[inc2];
 
         #order adjacentSubCells to have adjacentSubCells[1,j] sharing an edge with adjacentSubCells[2,j]
         if compoundData.isEdgePeriodic[e] #periodic boundary edge
@@ -203,7 +209,6 @@ function discGalerkinEdges!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
                             m::mesh, quadWeights::Array{Float64,1}, nquadPoints::Array{Array{Float64,2},1}, edgeData::Array{Array{Int64,1},1},gamma::Float64,
                             compoundData::compoundData)
 
-    println("ADVSTIFFMATRIX USED")
     sk=length(quadWeights)
     kubPoints=:nothing;
     kubWeights=:nothing;
@@ -223,12 +228,12 @@ function discGalerkinEdges!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
     assembledPhiT2=compoundData.assembledPhi[degFT.femType];
     assembledPhiF2=compoundData.assembledPhi[degFF.femType];
     assembledPhiW2=compoundData.assembledPhi[degFW.femType];
-    #assembledPhiT1=compoundData.assembledPhiSafe[degFT.femType];
-    #assembledPhiF1=compoundData.assembledPhiSafe[degFF.femType];
-    #assembledPhiW1=compoundData.assembledPhiSafe[degFW.femType];
-    #assembledPhiT2=compoundData.assembledPhiSafe[degFT.femType];
-    #assembledPhiF2=compoundData.assembledPhiSafe[degFF.femType];
-    #assembledPhiW2=compoundData.assembledPhiSafe[degFW.femType];
+    assembledPhiPreT1=compoundData.assembledPhiPre[degFT.femType];
+    assembledPhiPreF1=compoundData.assembledPhiPre[degFF.femType];
+    assembledPhiPreW1=compoundData.assembledPhiPre[degFW.femType];
+    assembledPhiPreT2=compoundData.assembledPhiPre[degFT.femType];
+    assembledPhiPreF2=compoundData.assembledPhiPre[degFF.femType];
+    assembledPhiPreW2=compoundData.assembledPhiPre[degFW.femType];
     nCompoundPhiT=length(assembledPhiT1);
     nCompoundPhiF=length(assembledPhiF1);
     nCompoundPhiW=length(assembledPhiW1);
@@ -284,12 +289,18 @@ function discGalerkinEdges!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
         getSubCells!(subcoord1, coord1, center, compoundData);
         getSubCells!(subcoord2, coord2, center, compoundData);
 
-        assemblePhi!(assembledPhiT1, subcoord1, degFT, m, J, dJ, phiT, kubPoints, kubWeights, compoundData);
-        assemblePhi!(assembledPhiF1, subcoord1, m, divphiF, J_edge, ddJ_edge, jphiF_edge, nquadPhiF, nquadPoints, quadWeights, compoundData);
-        assemblePhi!(assembledPhiW1, subcoord1, degFW, m, J, dJ, phiW, kubPoints, kubWeights, compoundData);
-        assemblePhi!(assembledPhiT2, subcoord2, degFT, m, J, dJ, phiT, kubPoints, kubWeights, compoundData);
-        assemblePhi!(assembledPhiF2, subcoord2, m, divphiF, J_edge, ddJ_edge, jphiF_edge, nquadPhiF, nquadPoints, quadWeights, compoundData);
-        assemblePhi!(assembledPhiW2, subcoord2, degFW, m, J, dJ, phiW, kubPoints, kubWeights, compoundData);
+        #assemblePhi!(assembledPhiT1, compoundData);
+        #assemblePhi!(assembledPhiF1, subcoord1, m, divphiF, J_edge, ddJ_edge, jphiF_edge, nquadPhiF, nquadPoints, quadWeights, compoundData);
+        #assemblePhi!(assembledPhiW1, compoundData);
+        #assemblePhi!(assembledPhiT2, compoundData);
+        #assemblePhi!(assembledPhiF2, subcoord2, m, divphiF, J_edge, ddJ_edge, jphiF_edge, nquadPhiF, nquadPoints, quadWeights, compoundData);
+        #assemblePhi!(assembledPhiW2, compoundData);
+        assembledPhiT1=assembledPhiPreT1[inc1];
+        assembledPhiF1=assembledPhiPreF1[inc1];
+        assembledPhiW1=assembledPhiPreW1[inc1];
+        assembledPhiT2=assembledPhiPreT2[inc2];
+        assembledPhiF2=assembledPhiPreF2[inc2];
+        assembledPhiW2=assembledPhiPreW2[inc2];
 
         #order adjacentSubCells to have adjacentSubCells[1,j] sharing an edge with adjacentSubCells[2,j]
         if compoundData.isEdgePeriodic[e] #periodic boundary edge
@@ -435,12 +446,12 @@ function discGalerkinEdges!(M::Array{Float64,2},
     assembledPhiT2=compoundData.assembledPhi[degFT.femType];
     assembledPhiF2=compoundData.assembledPhi[degFF.femType];
     assembledPhiW2=compoundData.assembledPhi[degFW.femType];
-    #assembledPhiT1=compoundData.assembledPhiSafe[degFT.femType];
-    #assembledPhiF1=compoundData.assembledPhiSafe[degFF.femType];
-    #assembledPhiW1=compoundData.assembledPhiSafe[degFW.femType];
-    #assembledPhiT2=compoundData.assembledPhiSafe[degFT.femType];
-    #assembledPhiF2=compoundData.assembledPhiSafe[degFF.femType];
-    #assembledPhiW2=compoundData.assembledPhiSafe[degFW.femType];
+    assembledPhiPreT1=compoundData.assembledPhiPre[degFT.femType];
+    assembledPhiPreF1=compoundData.assembledPhiPre[degFF.femType];
+    assembledPhiPreW1=compoundData.assembledPhiPre[degFW.femType];
+    assembledPhiPreT2=compoundData.assembledPhiPre[degFT.femType];
+    assembledPhiPreF2=compoundData.assembledPhiPre[degFF.femType];
+    assembledPhiPreW2=compoundData.assembledPhiPre[degFW.femType];
     nCompoundPhiT=length(assembledPhiT1);
     nCompoundPhiF=length(assembledPhiF1);
     nCompoundPhiW=length(assembledPhiW1);
@@ -508,12 +519,18 @@ function discGalerkinEdges!(M::Array{Float64,2},
         getSubCells!(subcoord1, coord1, center, compoundData);
         getSubCells!(subcoord2, coord2, center, compoundData);
 
-        assemblePhi!(assembledPhiT1, subcoord1, m, divphiT, J_edge, ddJ_edge, jphiT_edge, nquadPhiT, nquadPoints, quadWeights, compoundData);
-        assemblePhi!(assembledPhiF1, subcoord1, m, divphiF, J_edge, ddJ_edge, jphiF_edge, nquadPhiF, nquadPoints, quadWeights, compoundData);
-        assemblePhi!(assembledPhiW1, subcoord1, m, divphiW, J_edge, ddJ_edge, jphiW_edge, nquadPhiW, nquadPoints, quadWeights, compoundData);
-        assemblePhi!(assembledPhiT2, subcoord2, m, divphiT, J_edge, ddJ_edge, jphiT_edge, nquadPhiT, nquadPoints, quadWeights, compoundData);
-        assemblePhi!(assembledPhiF2, subcoord2, m, divphiF, J_edge, ddJ_edge, jphiF_edge, nquadPhiF, nquadPoints, quadWeights, compoundData);
-        assemblePhi!(assembledPhiW2, subcoord2, m, divphiW, J_edge, ddJ_edge, jphiW_edge, nquadPhiW, nquadPoints, quadWeights, compoundData);
+        #assemblePhi!(assembledPhiT1, subcoord1, m, divphiT, J_edge, ddJ_edge, jphiT_edge, nquadPhiT, nquadPoints, quadWeights, compoundData);
+        #assemblePhi!(assembledPhiF1, subcoord1, m, divphiF, J_edge, ddJ_edge, jphiF_edge, nquadPhiF, nquadPoints, quadWeights, compoundData);
+        #assemblePhi!(assembledPhiW1, subcoord1, m, divphiW, J_edge, ddJ_edge, jphiW_edge, nquadPhiW, nquadPoints, quadWeights, compoundData);
+        #assemblePhi!(assembledPhiT2, subcoord2, m, divphiT, J_edge, ddJ_edge, jphiT_edge, nquadPhiT, nquadPoints, quadWeights, compoundData);
+        #assemblePhi!(assembledPhiF2, subcoord2, m, divphiF, J_edge, ddJ_edge, jphiF_edge, nquadPhiF, nquadPoints, quadWeights, compoundData);
+        #assemblePhi!(assembledPhiW2, subcoord2, m, divphiW, J_edge, ddJ_edge, jphiW_edge, nquadPhiW, nquadPoints, quadWeights, compoundData);
+        assembledPhiT1=assembledPhiPreT1[inc1];
+        assembledPhiF1=assembledPhiPreF1[inc1];
+        assembledPhiW1=assembledPhiPreW1[inc1];
+        assembledPhiT2=assembledPhiPreT2[inc2];
+        assembledPhiF2=assembledPhiPreF2[inc2];
+        assembledPhiW2=assembledPhiPreW2[inc2];
 
         #order adjacentSubCells to have adjacentSubCells[1,j] sharing an edge with adjacentSubCells[2,j]
         if compoundData.isEdgePeriodic[e] #periodic boundary edge
@@ -557,14 +574,14 @@ function discGalerkinEdges!(M::Array{Float64,2},
             subeT1=compoundBoundary[eT1][subCell1];
             subeT2=compoundBoundary[eT2][subCell2];
 
-            phiFn1=@views phiFtrans[subeT1];
-            phiTn1=@views phiTtrans[subeT1];
-            phiWn1=@views phiWtrans[subeT1];
-            kubPn1=@views nquadPoints[subeT1];
-            phiFn2=@views phiFtrans[subeT2];
-            phiTn2=@views phiTtrans[subeT2];
-            phiWn2=@views phiWtrans[subeT2];
-            kubPn2=@views nquadPoints[subeT2];
+            phiFn1= phiFtrans[subeT1];
+            phiTn1= phiTtrans[subeT1];
+            phiWn1= phiWtrans[subeT1];
+            kubPn1= nquadPoints[subeT1];
+            phiFn2= phiFtrans[subeT2];
+            phiTn2= phiTtrans[subeT2];
+            phiWn2= phiWtrans[subeT2];
+            kubPn2= nquadPoints[subeT2];
 
             jacobi!(J1,ddJ1,jphiWn1,jphiTn1,kubPn1, phiWn1, phiTn1, subcoord1[subCell1], mt);
             jacobi!(J2,ddJ2,jphiWn2,jphiTn2,kubPn2, phiWn2, phiTn2, subcoord2[subCell2], mt);
@@ -651,22 +668,26 @@ function discGalerkinEdges!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
 
     mt=m.meshType;
 
+    sizeT=[size(phiT,1), size(phiT,2)];
+    sizeF=[size(phiF,1), size(phiF,2)];
+    sizeW=[size(phiW,1), size(phiW,2)];
+
     center=Array{Float64,1}(undef,m.geometry.dim);
-    nSubPhiT=size(phiT,2);
-    nSubPhiF=size(phiF,2);
-    nSubPhiW=size(phiW,2);
+    nSubPhiT=sizeT[2];
+    nSubPhiF=sizeF[2];
+    nSubPhiW=sizeW[2];
     assembledPhiT1=compoundData.assembledPhi[degFT.femType];
     assembledPhiF1=compoundData.assembledPhi[degFF.femType];
     assembledPhiW1=compoundData.assembledPhi[degFW.femType];
     assembledPhiT2=compoundData.assembledPhi[degFT.femType];
     assembledPhiF2=compoundData.assembledPhi[degFF.femType];
     assembledPhiW2=compoundData.assembledPhi[degFW.femType];
-    #assembledPhiT1=compoundData.assembledPhiSafe[degFT.femType];
-    #assembledPhiF1=compoundData.assembledPhiSafe[degFF.femType];
-    #assembledPhiW1=compoundData.assembledPhiSafe[degFW.femType];
-    #assembledPhiT2=compoundData.assembledPhiSafe[degFT.femType];
-    #assembledPhiF2=compoundData.assembledPhiSafe[degFF.femType];
-    #assembledPhiW2=compoundData.assembledPhiSafe[degFW.femType];
+    assembledPhiPreT1=compoundData.assembledPhiPre[degFT.femType];
+    assembledPhiPreF1=compoundData.assembledPhiPre[degFF.femType];
+    assembledPhiPreW1=compoundData.assembledPhiPre[degFW.femType];
+    assembledPhiPreT2=compoundData.assembledPhiPre[degFT.femType];
+    assembledPhiPreF2=compoundData.assembledPhiPre[degFF.femType];
+    assembledPhiPreW2=compoundData.assembledPhiPre[degFW.femType];
     nCompoundPhiT=length(assembledPhiT1);
     nCompoundPhiF=length(assembledPhiF1);
     nCompoundPhiW=length(assembledPhiW1);
@@ -690,13 +711,13 @@ function discGalerkinEdges!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
 
     J1=initJacobi((m.geometry.dim,m.topology.dim),sk);
     ddJ1=Array{Float64,1}(undef,sk);
-    jphiWn1=initJacobi((m.geometry.dim,size(phiW,2)),sk)
-    jphiTn1=initJacobi((m.geometry.dim,size(phiT,2)),sk)
+    jphiWn1=initJacobi((m.geometry.dim,sizeW[2]),sk)
+    jphiTn1=initJacobi((m.geometry.dim,sizeT[2]),sk)
 
     J2=initJacobi((m.geometry.dim,m.topology.dim),sk);
     ddJ2=Array{Float64,1}(undef,sk);
-    jphiWn2=initJacobi((m.geometry.dim,size(phiW,2)),sk)
-    jphiTn2=initJacobi((m.geometry.dim,size(phiT,2)),sk);
+    jphiWn2=initJacobi((m.geometry.dim,sizeW[2]),sk)
+    jphiTn2=initJacobi((m.geometry.dim,sizeT[2]),sk);
 
     #edge integrating for compound RT0
     divphiT=degFT.divphi;
@@ -710,14 +731,29 @@ function discGalerkinEdges!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
     sq=length(quadWeights)
     J_edge=initJacobi((m.geometry.dim,m.topology.dim),sq);
     ddJ_edge=Array{Float64,1}(undef,sq);
-    jphiT_edge=initJacobi((m.geometry.dim,size(phiT,2)),sq);
-    jphiF_edge=initJacobi((m.geometry.dim,size(phiF,2)),sq);
-    jphiW_edge=initJacobi((m.geometry.dim,size(phiW,2)),sq);
+    jphiT_edge=initJacobi((m.geometry.dim,sizeT[2]),sq);
+    jphiF_edge=initJacobi((m.geometry.dim,sizeF[2]),sq);
+    jphiW_edge=initJacobi((m.geometry.dim,sizeW[2]),sq);
 
     lM11=zeros(nCompoundPhiT,nCompoundPhiF);
     lM12=zeros(nCompoundPhiT,nCompoundPhiF);
     lM21=zeros(nCompoundPhiT,nCompoundPhiF);
     lM22=zeros(nCompoundPhiT,nCompoundPhiF);
+    lMB11=zeros(nCompoundPhiT,nCompoundPhiF);
+    lMB12=zeros(nCompoundPhiT,nCompoundPhiF);
+    lMB21=zeros(nCompoundPhiT,nCompoundPhiF);
+    lMB22=zeros(nCompoundPhiT,nCompoundPhiF);
+
+    #ez initializing
+    phiFn1= phiFtrans[1];
+    phiTn1= phiTtrans[1];
+    phiWn1= phiWtrans[1];
+    kubPn1= nquadPoints[1];
+    phiFn2= phiFtrans[1];
+    phiTn2= phiTtrans[1];
+    phiWn2= phiWtrans[1];
+    kubPn2= nquadPoints[1];
+
 
     z=1;
     for e in 1:length(edgeData[1])
@@ -734,12 +770,18 @@ function discGalerkinEdges!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
         getSubCells!(subcoord1, coord1, center, compoundData);
         getSubCells!(subcoord2, coord2, center, compoundData);
 
-        assemblePhi!(assembledPhiT1, subcoord1, m, divphiT, J_edge, ddJ_edge, jphiT_edge, nquadPhiT, nquadPoints, quadWeights, compoundData);
-        assemblePhi!(assembledPhiF1, subcoord1, m, divphiF, J_edge, ddJ_edge, jphiF_edge, nquadPhiF, nquadPoints, quadWeights, compoundData);
-        assemblePhi!(assembledPhiW1, subcoord1, m, divphiW, J_edge, ddJ_edge, jphiW_edge, nquadPhiW, nquadPoints, quadWeights, compoundData);
-        assemblePhi!(assembledPhiT2, subcoord2, m, divphiT, J_edge, ddJ_edge, jphiT_edge, nquadPhiT, nquadPoints, quadWeights, compoundData);
-        assemblePhi!(assembledPhiF2, subcoord2, m, divphiF, J_edge, ddJ_edge, jphiF_edge, nquadPhiF, nquadPoints, quadWeights, compoundData);
-        assemblePhi!(assembledPhiW2, subcoord2, m, divphiW, J_edge, ddJ_edge, jphiW_edge, nquadPhiW, nquadPoints, quadWeights, compoundData);
+        #assemblePhi!(assembledPhiT1, subcoord1, m, divphiT, J_edge, ddJ_edge, jphiT_edge, nquadPhiT, nquadPoints, quadWeights, compoundData);
+        #assemblePhi!(assembledPhiF1, subcoord1, m, divphiF, J_edge, ddJ_edge, jphiF_edge, nquadPhiF, nquadPoints, quadWeights, compoundData);
+        #assemblePhi!(assembledPhiW1, subcoord1, m, divphiW, J_edge, ddJ_edge, jphiW_edge, nquadPhiW, nquadPoints, quadWeights, compoundData);
+        #assemblePhi!(assembledPhiT2, subcoord2, m, divphiT, J_edge, ddJ_edge, jphiT_edge, nquadPhiT, nquadPoints, quadWeights, compoundData);
+        #assemblePhi!(assembledPhiF2, subcoord2, m, divphiF, J_edge, ddJ_edge, jphiF_edge, nquadPhiF, nquadPoints, quadWeights, compoundData);
+        #assemblePhi!(assembledPhiW2, subcoord2, m, divphiW, J_edge, ddJ_edge, jphiW_edge, nquadPhiW, nquadPoints, quadWeights, compoundData);
+        assembledPhiT1=assembledPhiPreT1[inc1];
+        assembledPhiF1=assembledPhiPreF1[inc1];
+        assembledPhiW1=assembledPhiPreW1[inc1];
+        assembledPhiT2=assembledPhiPreT2[inc2];
+        assembledPhiF2=assembledPhiPreF2[inc2];
+        assembledPhiW2=assembledPhiPreW2[inc2];
 
         #order adjacentSubCells to have adjacentSubCells[1,j] sharing an edge with adjacentSubCells[2,j]
         if compoundData.isEdgePeriodic[e] #periodic boundary edge
@@ -787,14 +829,27 @@ function discGalerkinEdges!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
             subeT1=compoundBoundary[eT1][subCell1];
             subeT2=compoundBoundary[eT2][subCell2];
 
-            phiFn1=@views phiFtrans[subeT1];
-            phiTn1=@views phiTtrans[subeT1];
-            phiWn1=@views phiWtrans[subeT1];
-            kubPn1=@views nquadPoints[subeT1];
-            phiFn2=@views phiFtrans[subeT2];
-            phiTn2=@views phiTtrans[subeT2];
-            phiWn2=@views phiWtrans[subeT2];
-            kubPn2=@views nquadPoints[subeT2];
+            phiFn1= phiFtrans[subeT1];
+            phiTn1= phiTtrans[subeT1];
+            phiWn1= phiWtrans[subeT1];
+            kubPn1= nquadPoints[subeT1];
+            phiFn2= phiFtrans[subeT2];
+            phiTn2= phiTtrans[subeT2];
+            phiWn2= phiWtrans[subeT2];
+            kubPn2= nquadPoints[subeT2];
+
+#=
+            applyEdge!(phiFn1,phiFtrans[subeT1],eT1,sk,sizeF,compoundData);
+            applyEdge!(phiTn1,phiTtrans[subeT1],eT1,sk,sizeT,compoundData);
+            applyEdge!(phiWn1,phiWtrans[subeT1],eT1,sk,sizeW,compoundData);
+            applyEdge!(kubPn1,nquadPoints[subeT1],eT1,sk,compoundData);
+            applyEdge!(phiFn2,phiFtrans[subeT2],eT2,sk,sizeF,compoundData);
+            applyEdge!(phiTn2,phiTtrans[subeT2],eT2,sk,sizeT,compoundData);
+            applyEdge!(phiWn2,phiWtrans[subeT2],eT2,sk,sizeW,compoundData);
+            applyEdge!(kubPn2,nquadPoints[subeT2],eT2,sk,compoundData);
+            #kubPn1= nquadPoints[subeT1];
+            #kubPn2= nquadPoints[subeT2];
+=#
 
             jacobi!(J1,ddJ1,jphiWn1,jphiTn1,kubPn1, phiWn1, phiTn1, subcoord1[subCell1], mt);
             jacobi!(J2,ddJ2,jphiWn2,jphiTn2,kubPn2, phiWn2, phiTn2, subcoord2[subCell2], mt);
@@ -803,7 +858,6 @@ function discGalerkinEdges!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
             n2=m.normals[:,subeT2];
 
             correctNormalsCompound!(n1,n2,eT1,eT2,compoundData);
-
             for d in 1:m.geometry.dim
                 fill!(w1[d],0.0);
                 fill!(w2[d],0.0);
@@ -827,6 +881,8 @@ function discGalerkinEdges!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
                                     w1jphiTn2+=w1[d][r]*jphiTn2[d,subi][r];
                                     w2jphiTn2+=w2[d][r]*jphiTn2[d,subi][r];
                                 end
+                                #w1jphiTn1=1.0; w2jphiTn1=1.0; w1jphiTn2=1.0; w2jphiTn2=1.0;
+
                                 lM11[i,j]+=assembledPhiT1[i][subi,subCell1]*assembledPhiF1[j][subj,subCell1]*
                                            quadWeights[r]*ddJ1[r]*ddJ1[r]*(n1[1]*phiFn1[1,subj][r]+n1[2]*phiFn1[2,subj][r])*w1jphiTn1;
                                 lM12[i,j]+=assembledPhiT1[i][subi,subCell1]*assembledPhiF2[j][subj,subCell2]*
@@ -1038,56 +1094,3 @@ function discGalerkinEdges!(M::Array{Float64,2},
     end
     return nothing;
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#=
-for j in 1:nCompoundPhiF
-    for i in 1:nCompoundPhiT
-        for subj in 1:nSubPhiF
-            for subi in 1:nSubPhiT
-                for r in 1:sk
-                    w1jphiTn1=0.0; w2jphiTn1=0.0; w1jphiTn2=0.0; w2jphiTn2=0.0;
-                    for d in 1:m.geometry.dim
-                        w1jphiTn1+=w1[d][r]*jphiTn1[d,subi][r];
-                        w2jphiTn1+=w2[d][r]*jphiTn1[d,subi][r];
-                        w1jphiTn2+=w1[d][r]*jphiTn2[d,subi][r];
-                        w2jphiTn2+=w2[d][r]*jphiTn2[d,subi][r];
-                    end
-                    lM11[i,j]+=assembledPhiT1[i][subi,subCell1]*assembledPhiF1[j][subj,subCell1]*
-                               quadWeights[r]*ddJ1[r]*ddJ1[r]*(n1[1]*phiFn1[1,subj][r]+n1[2]*phiFn1[2,subj][r])*w1jphiTn1;
-                    lM12[i,j]+=assembledPhiT1[i][subi,subCell1]*assembledPhiF2[j][subj,subCell2]*
-                               quadWeights[r]*ddJ2[r]*ddJ1[r]*(n2[1]*phiFn2[1,subj][r]+n2[2]*phiFn2[2,subj][r])*w2jphiTn1;
-                    lM21[i,j]+=assembledPhiT2[i][subi,subCell2]*assembledPhiF1[j][subj,subCell1]*
-                               quadWeights[r]*ddJ1[r]*ddJ2[r]*(n1[1]*phiFn1[1,subj][r]+n1[2]*phiFn1[2,subj][r])*w1jphiTn2;
-                    lM22[i,j]+=assembledPhiT2[i][subi,subCell2]*assembledPhiF2[j][subj,subCell2]*
-                               quadWeights[r]*ddJ2[r]*ddJ2[r]*(n2[1]*phiFn2[1,subj][r]+n2[2]*phiFn2[2,subj][r])*w2jphiTn2;
-                    # piola: nphiF mit 1/Je = 1/Kantenlänge, phiW und phiT mit 1/dJ*J
-                end
-            end
-        end
-        if e==3 && edge_part==1
-            if i==1 && (j==2 || j==4)
-                #println(w1jphiTn1)
-                #println(w2jphiTn1)
-                println(i)
-                println(j)
-                println(lM11[i,j])
-                println(lM12[i,j])
-            end
-        end
-    end
-end
-=#
