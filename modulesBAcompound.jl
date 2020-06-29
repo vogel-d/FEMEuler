@@ -24,8 +24,9 @@ include("refineMesh.jl")
 include("compoundData.jl")
 include("getCompoundElementProperties.jl")
 include("getSubCells.jl")
-include("assembleCompoundPhi.jl")
 include("femProblem.jl");
+include("assembleCompoundPhi.jl")
+include("assemblePhiPre.jl")
 
 include("l2g.jl")
 include("jacobiCompound.jl");
