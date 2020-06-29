@@ -75,6 +75,7 @@ function mesh(topology::meshTopology, geometry::meshGeometry, bE::SparseVector{I
   #Hier normale*Kantenlänge (beachte auch richtung der integration -> +-)
   #wegen discEdges, ist sozusagen transformation auf jeweilige Kante
   mt==4 ? n=[0.0 1.0 0.0 1.0;-1.0 0.0 -1.0 0.0] : n=[0.0 1.0 1.0;-1.0 1.0 0.0];
+  #mt==4 ? n=[0.0 1.0 0.0 -1.0;-1.0 0.0 1.0 0.0] : n=[0.0 1.0 1.0;-1.0 1.0 0.0];
 
   mesh(topology, geometry, mt, l, n, bE, bV, condEW, condTB)
 end
