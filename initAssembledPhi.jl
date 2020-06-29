@@ -9,3 +9,21 @@ function initAssembledPhi(nSubCells::Int64, femElements::Set{Symbol}, meshType::
     end
     return assembledPhi;
 end
+
+function initAssembledPhiPre(mesh::mesh, nSubCells::Int64, femElements::Set{Symbol}, nCompoundPhi::Dict{Symbol,Int64})
+    meshType=mesh.meshType;
+    nCells=mesh.topology.size[mesh.topology.dim+1];
+    assembledPhiPre=Dict();
+
+    for femElement in femElements
+        phi,size=getElementProperties(femElement,meshType);
+        assembledPhiPre[femElement]=Array{Array{Array{Float64,2},1},1}(undef,nCells);
+        for Cell in 1:nCells
+            assembledPhiPre[femElement][Cell]=Array{Array{Float64,2},1}(undef,nCompoundPhi[femElement])
+            for i in 1:nCompoundPhi[femElement]
+                assembledPhiPre[femElement][Cell][i]=Array{Float64,2}(undef,size[2],nSubCells)
+            end
+        end
+    end
+    return assembledPhiPre;
+end
