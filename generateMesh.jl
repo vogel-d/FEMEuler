@@ -1,7 +1,7 @@
 #Funktion zum Generieren von zweidimensionalen Rechteck-Gittern
 #Input: nx bzw. ny ist die Anzahl der Gitterelemente in x- bzw. y-Richtung, also die Feinheit des Meshes
 #       xl bzw. yl ist die Länge des Meshes in x- bzw. y-Richtung, als Default ist die Länge nx bzw. ny
-function generateRectMesh(nx::Int, ny::Int, condEW::Symbol, condTB::Symbol, xl::Float64=0.0, xr::Float64=Float64(nx), yl::Float64=0.0, yr::Float64=Float64(ny))
+function generateRectMesh(nx::Int, ny::Int, condEW::Symbol, condTB::Symbol, xl::Float64=0.0, xr::Float64=Float64(nx), yl::Float64=0.0, yr::Float64=Float64(ny); meshType::Int64=4)
 
     #Berechnen der Anzahl der Entitäten für die verschiedenen Dimensionen
     size=[(ny+1)*(nx+1), ny*(nx+1)+nx*(ny+1), nx*ny];
@@ -138,7 +138,7 @@ function generateRectMesh(nx::Int, ny::Int, condEW::Symbol, condTB::Symbol, xl::
     r=Float64[xr,yr];
     mT=meshTopology(inc,off,n);
     mG=meshGeometry(coord,l,r);
-    m=mesh(mT,mG, bE, bV,condEW,condTB);
+    m=mesh(mT,mG, bE, bV,condEW,condTB,meshType);
 
     return m
 end
@@ -732,7 +732,7 @@ function generateTriMeshIsosceles(nx::Int, ny::Int, xl::Float64=0.0, yl::Float64
 end
 
 function generateHexMesh(xl::Float64, xr::Float64, yl::Float64, yr::Float64, nrows::Int64, condEW::Symbol, condTB::Symbol; meshType::Int64=4)
-    condTB==:periodic && error("periodic boundary only possible for x-direction.")
+    (isodd(nrows) && condTB==:periodic) && error("vertical periodic boundary only possible for even nrows.")
 
     l = ((yr-yl)/nrows) * (2/3);
 
@@ -843,7 +843,7 @@ function generateHexMesh(xl::Float64, xr::Float64, yl::Float64, yr::Float64, nro
         bV[2:(2*nx)].=1.0;
         bV[(size[1]-2*nx+1):(size[1]-1)].=1.0;
     elseif condTB==:periodic
-        bV[2:(2*nx)]=-(size[1]-2*nx+1):-1:-(size[1]-1);
+        bV[2:(2*nx)]=-(size[1]-2*nx+2):-1:-(size[1]);
     end
 
     if condEW==:constant
@@ -904,6 +904,15 @@ function generateHexMesh(xl::Float64, xr::Float64, yl::Float64, yr::Float64, nro
             vertex_west+=2*nx+1;
             bV[vertex_west]=-vertex_east;
         end
+    end
+
+    if condTB==:periodic && condEW==:periodic
+        #glue corners together
+        bV[1]=0;
+        bV[2*nx+1]=-1;
+        bV[size[1]-2*nx+1]=-1;
+        bV[2*nx]=-size[1];
+        bV[size[1]-2*nx]=-size[1];
     end
 
     #boundary Vektor für die Randkanten
@@ -925,6 +934,11 @@ function generateHexMesh(xl::Float64, xr::Float64, yl::Float64, yr::Float64, nro
     elseif condEW==:periodic
         bE[1:(nx+1):(nVertical-nx)]=-(1+nx):-(nx+1):-nVertical
         bE[(nVertical+(2*nx+1)):(2*nx+1):(size[2]-4*nx)]=-(nVertical+(2*nx+1)+2*nx):-(2*nx+1):-(size[2]-4*nx+2*nx)
+    end
+
+    if condTB==:periodic && condEW==:periodic
+        #glue corners together
+        bE[size[2]-2*nx+1]=-(nVertical+2*nx)
     end
 
     n=Int[nx,nrows];
