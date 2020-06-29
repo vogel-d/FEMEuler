@@ -7,14 +7,16 @@ function testCompoundAcoustic()
     femType=Dict(:p=>[:DG0], :v=>[:RT0], :b=>[:DG0]);
     #femType=Dict(:p=>[:DG1], :v=>[:RT1], :b=>[:DG1]);
 
-    m=generateHexMesh(0.0,100000.0,0.0,100000.0,100,:periodic,:constant,meshType=3); #(east/west, top/bottom)
-    #m=generateHexMesh(0.0,1.0,0.0,1.0,2,:periodic,:constant,meshType=3); #(east/west, top/bottom)
+    m=generateHexMesh(0.0,100000.0,0.0,100000.0,100,:periodic,:constant,meshType=4); #(east/west, top/bottom)
+    #m=generateHexMesh(0.0,1.0,0.0,1.0,1,:periodic,:constant,meshType=3); #(east/west, top/bottom)
     #m=generateRectMesh(30,30,:periodic,:periodic,0.0,2.0,0.0,2.0); #(east/west, top/bottom)
-    p=femProblem(m, femType, compoundMethod=:HexToTris);
+    p=femProblem(m, femType, compoundMethod=:HexToKites);
     #p=femProblem(m, femType, compoundMethod=:HexToKites);
 
-    adaptGeometry!(p.mesh,300.0);
+    #adaptGeometry!(p.mesh,300.0);
     #adaptGeometry!(p.mesh,9,[0.9,0.25]);
+
+    assemblePhiPre!(p);
 
     method=:euler;
     #method=:rk4;

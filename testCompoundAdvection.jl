@@ -2,7 +2,7 @@ include("modulesBACompound.jl")
 include("symplektischerEulerA.jl")
 
 function testCompoundAdvection()
-  filename = "test"
+  filename = "testVecPlus"
 
   #order: comp, compHigh, compRec, compDG
   femType=Dict(:p=>[:DG0, :P1, :DG1, :DG0], :v=>[:RT0, :VecP1, :VecDG1, :RT0B], :b=>[:DG0, :P1, :DG1, :DG0]);
@@ -14,26 +14,33 @@ function testCompoundAdvection()
   taskRecovery=false;
 
   #m=generateHexMesh(0.0,300000.0,0.0,10000.0,10,:periodic,:constant,meshType=3); #(east/west, top/bottom)
-  #m=generateHexMesh(0.0,300000.0,0.0,10000.0,10,:periodic,:constant,meshType=4); #(east/west, top/bottom)
+  m=generateHexMesh(0.0,300000.0,0.0,10000.0,10,:periodic,:constant,meshType=4); #(east/west, top/bottom)
+  #m=generateHexMesh(110000.0,190000.0,0.0,10000.0,20,:periodic,:constant,meshType=4); #(east/west, top/bottom)
+  #m=generateHexMesh(-10000.0,10000.0,0.0,10000.0,20,:periodic,:constant,meshType=4); #(east/west, top/bottom)
+  #m=generateHexMesh(0.0,10000.0,0.0,10000.0,20,:periodic,:periodic,meshType=4); #(east/west, top/bottom)
   #m=generateRectMesh(300,10,:periodic,:constant,0.0,300000.0,0.0,10000.0); #(east/west, top/bottom)
-  m=generateRectMesh(2,2,:periodic,:constant); #(east/west, top/bottom)
+  #m=generateRectMesh(80,40,:periodic,:periodic,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
+  #m=generateRectMesh(2,2,:periodic,:constant); #(east/west, top/bottom)
   #m=generateRectMesh(3,3,:periodic,:constant,0.0,300000.0,0.0,10000.0); #(east/west, top/bottom)
   #m=generateHexMesh(0.0,1.0,0.0,1.0,2,:periodic,:constant,meshType=4); #(east/west, top/bottom)
+  p=femProblem(m, femType, compoundMethod=:HexToKites);
   #p=femProblem(m, femType, compoundMethod=:HexToTris);
-  p=femProblem(m, femType, compoundMethod=:RectToKites);
+  #p=femProblem(m, femType, compoundMethod=:RectToKites);
 
-  #gamma=0.5;
-  gamma=0.0;
-  #UMax=20.0; #UMax determines the advection in x direction
-  UMax=1.0;
-  #MISMethod=MIS(:MIS4_4);
-  MISMethod=MIS(:MIS_Euler);
+  assemblePhiPre!(p);
 
-  dt=1.0;
-  #dt=20.0;
+  gamma=0.5;
+  #gamma=0.0;
+  UMax=-20.0; #UMax determines the advection in x direction
+  #UMax=1.0;
+  MISMethod=MIS(:MIS4_4);
+  #MISMethod=MIS(:MIS_Euler);
+
+  #dt=1.0;
+  dt=20.0;
   ns=19;
-  #EndTime=600.0;
-  EndTime=1*dt;
+  EndTime=1500.0;
+  #EndTime=20*dt;
   nIter=Int64(EndTime/dt);
   #nIter=1;
 
@@ -41,6 +48,7 @@ function testCompoundAdvection()
   xR=m.geometry.r[1]; xL=m.geometry.l[1]; zR=m.geometry.r[2]; zL=m.geometry.l[2]
   b0=0.01; H=10000; A=5000; r0=2000.0;
   xM=0.5*(xL+xR); zM=0.5*(zL+zR);
+
   function fb1(xz::Array{Float64,1})
         x=xz[1]; z=xz[2];
         return b0*sin(pi*z/H)/(1+((x-xM)/A)^2);
@@ -50,10 +58,10 @@ function testCompoundAdvection()
   #  rad=sqrt((x-xM)^2+(z-zM)^2);
   #  return 0.0+(rad<r0)*(2.0*cos(0.5*pi*rad/r0)^2);
   #end
-  #function fb2(xz::Array{Float64,1})
-  #  x=xz[1]; z=xz[2];
-  #  return (x>1 && x<2 && z>1 && z<2)*1.0
-  #end
+  function fb2(xz::Array{Float64,1})
+    x=xz[1]; z=xz[2];
+    return (x>145000.0 && x<155000.0 && z>4000.0 && z<6000.0)*1.0
+  end
   #fb(x,y)=1.0;
   function fv1(xz::Array{Float64,1})
     return 1
@@ -62,7 +70,7 @@ function testCompoundAdvection()
     return 0
   end
   #f=Dict(:b=>fb1)
-  #f=Dict(:b=>fb1,:v=>[fv2,fb1])
+  #f=Dict(:b=>fb2,:v=>[fb2,fv2])
   f=Dict(:v=>[fb1,fv2])
 
   assembMassCompound!(p);
@@ -70,7 +78,9 @@ function testCompoundAdvection()
   applyStartValuesCompound!(p,f);
 
   v1(xz::Array{Float64,1})=UMax;
+  #v1(xz::Array{Float64,1})=0.0; @warn("v1 not UMax!")
   v2(xz::Array{Float64,1})=0.0;
+  #v2(xz::Array{Float64,1})=-UMax; @warn("UMax in x and y!")
   V=[v1, v2];
   #V=[v2, v1];
   Vf=projectAdvectionCompound(p,V,Vfcomp);
