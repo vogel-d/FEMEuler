@@ -37,12 +37,26 @@ function advection(p::femProblem, gamma::Float64, Vfval::SparseVector{Float64,In
                      p.degFBoundary[fTb[1]],nquadPhi[fTb[1]],cval.b,
                      gamma,p.mesh,p.kubPoints,p.kubWeights,
                      nquadPoints,p.edgeData,p.compoundData);
+
+             #global SMATRIXB=advectionStiffMatrix(p.degFBoundary[fTb[1]],nquadPhi[fTb[1]],
+            #                  p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vector(Vfval),
+            #                  p.degFBoundary[fTb[1]],nquadPhi[fTb[1]],cval.b,
+            #                  gamma,p.mesh,p.kubPoints,p.kubWeights,
+            #                  nquadPoints,p.edgeData,p.compoundData);
+
     rCb=Fb\S;
     S=advectionStiff(p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],
                      p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
                      p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],cval.v,
                      gamma,p.mesh,p.kubPoints,p.kubWeights,
                      nquadPoints,p.edgeData,p.compoundData);
+
+       #global SMATRIX=advectionStiffMatrix(p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],
+        #                p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
+        #                p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],cval.v,
+        #                gamma,p.mesh,p.kubPoints,p.kubWeights,
+        #                nquadPoints,p.edgeData,p.compoundData);
+
     rCv=Fv\S;
   end
   f=createSolution(length(cval.v),length(cval.p),length(cval.b));

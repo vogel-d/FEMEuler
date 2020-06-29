@@ -44,7 +44,7 @@ function advectionStiffMatrix(degFT::degF{1,:H1}, phiTtrans::Array{Array{Array{F
                        degFF,phiF, phiFtrans, fval, globalNumF1, globalNumF2,
                        degFW,phiW, phiWtrans, wval, globalNumW1,globalNumW2,
                        m, quadWeights, nquadPoints, edgeData,gamma,compoundData)
-                       
+
     return sparse(rows,cols,vals)[1:degFT.num,:]
 end
 
