@@ -38,6 +38,7 @@ function assembMassCompound(degF::degF{1,:H1}, m::mesh, kubPoints::Array{Float64
     nSubCells=compoundData.nSubCells;
     nCompoundPhi=compoundData.nCompoundPhi[degF.femType];
     assembledPhi=compoundData.assembledPhi[degF.femType];
+    assembledPhiPre=compoundData.assembledPhiPre[degF.femType];
     subcoord=Array{Array{Float64,2},1}(undef,nSubCells);
     for i in 1:nSubCells
         #fill! causes mutating all entries of subcoord when changing a single entry
@@ -49,7 +50,8 @@ function assembMassCompound(degF::degF{1,:H1}, m::mesh, kubPoints::Array{Float64
 
         getSubCells!(subcoord, coord, center, compoundData);
         gvertices=l2g(degF,k);
-        assemblePhi!(assembledPhi, subcoord, degF, m, J, dJ, phi, kubPoints, kubWeights, compoundData);
+        #assemblePhi!(assembledPhi, compoundData);
+        assembledPhi=assembledPhiPre[k];
         for subCell in 1:nSubCells
             jacobi!(J,dJ,kubPoints,subcoord[subCell],mt);
             for j in 1:nCompoundPhi
@@ -104,6 +106,7 @@ function assembMassCompound(degF::degF{2,:H1div}, m::mesh, kubPoints::Array{Floa
     quadWeights=compoundData.quadWeights;
     nCompoundPhi=compoundData.nCompoundPhi[degF.femType];
     assembledPhi=compoundData.assembledPhi[degF.femType];
+    assembledPhiPre=compoundData.assembledPhiPre[degF.femType];
     subcoord=Array{Array{Float64,2},1}(undef,nSubCells);
     for i in 1:nSubCells
         #fill! causes mutating all entries of subcoord when changing a single entry
@@ -120,7 +123,8 @@ function assembMassCompound(degF::degF{2,:H1div}, m::mesh, kubPoints::Array{Floa
 
         getSubCells!(subcoord, coord, center, compoundData);
         gvertices=l2g(degF,k);
-        assemblePhi!(assembledPhi, subcoord, m, divphi, J_edge, ddJ_edge, jphi_edge, nquadPhi, nquadPoints, quadWeights, compoundData);
+        #assemblePhi!(assembledPhi, subcoord, m, divphi, J_edge, ddJ_edge, jphi_edge, nquadPhi, nquadPoints, quadWeights, compoundData);
+        assembledPhi=assembledPhiPre[k];
         for subCell in 1:nSubCells
             jacobi!(J,ddJ,jphi,kubPoints,phi,subcoord[subCell],mt);
             for j in 1:nCompoundPhi
