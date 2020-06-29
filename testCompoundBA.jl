@@ -1,7 +1,7 @@
 include("modulesBAcompound.jl")
 
 function testCompoundBA()
-  filename = "testiiiUMax0"
+  filename = "test"
 
   #order: comp, compHigh, compRec, compDG
   femType=Dict(:p=>[:DG0, :P1, :DG1, :DG0], :v=>[:RT0, :VecP1, :VecDG1, :RT0B], :b=>[:DG0, :P1, :DG1, :DG0]);
