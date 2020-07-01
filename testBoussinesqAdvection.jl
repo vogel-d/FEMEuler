@@ -1,10 +1,21 @@
 include("modulesBA.jl")
+#include("advectionStiffN.jl")
+
+stencilOrder=2;
+recoveryOrder=2;
+
+recoverySpace=Symbol("R$recoveryOrder")
+recoverySpaceVec=Symbol("VecR$(recoveryOrder)")
+
+@recovery(recoverySpace,recoverySpaceVec)
 
 function testBoussinesqAdvection()
-  filename = "test"
+  filename = "boussinesqAdvection"
+
+  femType=Dict(:p=>[:DG0, :DG0, recoverySpace], :v=>[:RT0, :RT0, recoverySpaceVec], :b=>[:DG0, :DG0, recoverySpace]);
 
   #order: comp, compHigh, compRec, compDG
-  femType=Dict(:p=>[:DG0, :P1, :DG1, :DG0], :v=>[:RT0, :VecP1, :VecDG1, :RT0B], :b=>[:DG0, :P1, :DG1, :DG0]);
+  #femType=Dict(:p=>[:DG0, :P1, :DG1, :DG0], :v=>[:RT0, :VecP1, :VecDG1, :RT0B], :b=>[:DG0, :P1, :DG1, :DG0]);
   #femType=Dict(:p=>[:DG0, :P1, :DG1, :DG0], :v=>[:RT0, :VecP1, :VecDG1, :RT0B], :b=>[:P1, :P1, :DG1, :DG1]);
   #femType=Dict(:p=>[:DG1, :P1, :DG1, :DG0], :v=>[:RT1, :VecP1, :VecDG1, :RT0B], :b=>[:DG1, :P1, :DG1, :DG0]);
   Vfcomp=:RT0
@@ -15,17 +26,16 @@ function testBoussinesqAdvection()
   m=generateRectMesh(300,10,:periodic,:constant,0.0,300000.0,0.0,10000.0); #(east/west, top/bottom)
   #m=generateRectMesh(3,3,:periodic,:periodic); #(east/west, top/bottom)
   #adaptGeometry!(m,(0.3,0.3),false); #sin perbutation
-  p=femProblem(m, femType, taskRecovery=taskRecovery);
+  p=femProblem(m, femType, taskRecovery=taskRecovery,
+    stencilOrder=stencilOrder, recoveryOrder=recoveryOrder,);
 
   gamma=0.5;
   UMax=20.0; #UMax determines the advection in x direction
   #UMax=0.0;
   MISMethod=MIS(:MIS4_4);
 
-  #dt=1.0;
   dt=20.0;
   ns=19;
-  #EndTime=2*dt;
   EndTime=3000.0;
   nIter=Int64(EndTime/dt);
 
@@ -47,18 +57,19 @@ function testBoussinesqAdvection()
   assembStiff!(p);
   applyStartValues!(p, f);
 
-  v1(xz)=UMax
-  v2(xz)=0
-  V=[v1, v2];
+  unstructured_vtk(p, 0.0, [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesqAdvection/"*filename*"0")
+
+  V(xz::Array{Float64,1})=[UMax, 0.0];
   Vf=projectAdvection(p,V,Vfcomp);
 
-  taskRecovery ? pos=[1,3] : pos=[1];
   advectionTypes=Symbol[Vfcomp];
   for i in keys(femType)
-      append!(advectionTypes,femType[i][pos]);
+      push!(advectionTypes,femType[i][1]);
+      (taskRecovery && length(femType[i])==4) && push!(advectionTypes,femType[i][3]);
   end
-  nquadPhi, nquadPoints=coordTrans(m.meshType, m.normals, collect(Set(advectionTypes)), size(p.kubWeights,2));
-  setEdgeData!(p, :v);
+  nquadPhi, nquadPoints=coordTrans(m, m.normals, advectionTypes, size(p.kubWeights,2));
+  setEdgeData!(p, :v)
+  recoveryMatrix!(p)
 
   y=p.solution[0.0];
   Time=0.0;
@@ -72,7 +83,7 @@ function testBoussinesqAdvection()
   #Speichern des Endzeitpunktes als vtu-Datei:
   unstructured_vtk(p, EndTime, [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesqAdvection/"*filename)
   #Speichern aller berechneten Zwischenwerte als vtz-Datei:
-  unstructured_vtk(p, sort(collect(keys(p.solution))), [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesqAdvection/"*filename)
+  #unstructured_vtk(p, sort(collect(keys(p.solution))), [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesqAdvection/"*filename)
 
   return p
 end
