@@ -65,7 +65,7 @@ function refined_vtk(p::femProblem, r::Int, tend::Float64, comp::Array{Symbol,1}
     for l in 1:length(comp)
         solc=getfield(sol,comp[l]);
         for i in 1:size(rcoord,2)
-                fComp[i]=getElementProperties(p.femType[comp[l]][1],m.meshType,rcoord[1,i],rcoord[2,i]);
+                fComp[i]=getElementProperties(p.femType[comp[l]][1],m.meshType,m.geometry.dim,rcoord[1,i],rcoord[2,i]);
         end
         if isa(p.degFBoundary[p.femType[comp[l]][1]],degF{1})
             cvtk=zeros(Float64, nf*r^2)
@@ -188,7 +188,7 @@ function refined_vtk(p::femProblem, rx::Int, ry::Int, t::Array{Float64,1}, comp:
             for l in 1:length(comp)
                 solc=getfield(sol,comp[l]);
                 for i in 1:size(rcoord,2)
-                        fComp[i]=getElementProperties(p.femType[comp[l]][1],m.meshType,rcoord[1,i],rcoord[2,i]);
+                        fComp[i]=getElementProperties(p.femType[comp[l]][1],m.meshType,m.geometry.dim,rcoord[1,i],rcoord[2,i]);
                 end
                 if isa(p.degFBoundary[p.femType[comp[l]][1]],degF{1})
                     cvtk=zeros(Float64, nf*r^2)

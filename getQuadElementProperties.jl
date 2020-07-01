@@ -116,12 +116,6 @@ function getQuadElementProperties(type::Symbol)
     Dyh10_22(x,y)=g10(x)*Dg22(y);
     Dyh11_22(x,y)=g11(x)*Dg22(y);
 
-    mh0_10(x,y)=-h0_10(x,y)
-    mh0_11(x,y)=-h0_11(x,y)
-
-    mDyh0_10(x,y)=-Dyh0_10(x,y)
-    mDyh0_11(x,y)=-Dyh0_11(x,y)
-
     if type==:DG0
         phi=[h0_0];
         divphi=[null];
@@ -185,26 +179,13 @@ function getQuadElementProperties(type::Symbol)
         cm=Dict([1,2]=>[0,0,0,0,0,0,0,0,0], [2,3]=>[0,0,0,0,0,0,0,0,0], [3,4]=>[0,0,0,0,0,0,0,0,0], [1,4]=>[0,0,0,0,0,0,0,0,0]);
 
     elseif type==:RT0
-        #=
+
         phi=[null h11_0 null h10_0;
              h0_10 null h0_11 null];
 
         divphi=[Dyh0_10, Dxh11_0, Dyh0_11, Dxh10_0];
         gradphi=[null null    Dxh11_0 null null null    Dxh10_0 null;
                  null Dyh0_10 null    null null Dyh0_11 null    null];
-
-        mh0_10(x,y)=-h0_10(x,y)
-        mh0_11(x,y)=-h0_11(x,y)
-
-        mDyh0_10(x,y)=-Dyh0_10(x,y)
-        mDyh0_11(x,y)=-Dyh0_11(x,y)
-        =#
-        phi=[null h11_0 null h10_0;
-             mh0_10 null mh0_11 null];
-
-        divphi=[mDyh0_10, Dxh11_0, mDyh0_11, Dxh10_0];
-        gradphi=[null null    Dxh11_0 null null null    Dxh10_0 null;
-                 null mDyh0_10 null    null null mDyh0_11 null    null];
 
         nFace=0;
         nEdge=1;
@@ -213,26 +194,13 @@ function getQuadElementProperties(type::Symbol)
         cm=Dict([1,2]=>[1,0,0,0], [2,3]=>[0,1,0,0], [3,4]=>[0,0,1,0], [1,4]=>[0,0,0,1]);
 
     elseif type==:RT0B #Broken RT0
-        #=
+
         phi=[null h11_0 null h10_0;
              h0_10 null h0_11 null];
 
         divphi=[Dyh0_10, Dxh11_0, Dyh0_11, Dxh10_0];
         gradphi=[null null    Dxh11_0 null null null    Dxh10_0 null;
                  null Dyh0_10 null    null null Dyh0_11 null    null];
-
-        mh0_10(x,y)=-h0_10(x,y)
-        mh0_11(x,y)=-h0_11(x,y)
-
-        mDyh0_10(x,y)=-Dyh0_10(x,y)
-        mDyh0_11(x,y)=-Dyh0_11(x,y)
-        =#
-        phi=[null h11_0 null h10_0;
-             mh0_10 null mh0_11 null];
-
-        divphi=[mDyh0_10, Dxh11_0, mDyh0_11, Dxh10_0];
-        gradphi=[null null    Dxh11_0 null null null    Dxh10_0 null;
-                 null mDyh0_10 null    null null mDyh0_11 null    null];
 
         nFace=4;
         nEdge=0;
@@ -371,107 +339,6 @@ function getQuadElementProperties(type::Symbol)
 
         cm=Dict([1,2]=>[0,0,0,0,0,0,0,0], [2,3]=>[0,0,0,0,0,0,0,0], [3,4]=>[0,0,0,0,0,0,0,0], [1,4]=>[0,0,0,0,0,0,0,0]);
 
-    elseif type==:VecP1S
-
-        phi=[h10_10 null    null    h11_10  null    null    h11_11  null    null    h10_11  null    null;
-             null   h10_10  null    null    h11_10  null    null    h11_11  null    null    h10_11  null;
-             null   null    h10_10  null    null    h11_10  null    null    h11_11  null    null    h10_11]
-        divphi=[Dxh10_10,Dyh10_10,null,Dxh11_10,Dyh11_10,null,Dxh11_11,Dyh11_11,null,Dxh10_11,Dyh10_11,null]; #Evtl. falsche Divergenz für dritte Komponente
-        gradphi=Matrix(undef, 3, 24)
-        gradphi[1:3, 1: 2]=[Dxh10_10 Dyh10_10;
-                            null     null;
-                            null     null]
-        gradphi[1:3, 3: 4]=[null     null
-                            Dxh10_10 Dyh10_10;
-                            null     null]
-        gradphi[1:3, 5: 6]=[null     null;
-                            null     null;
-                            Dxh10_10 Dyh10_10]
-        gradphi[1:3, 7: 8]=[Dxh11_10 Dyh11_10;
-                            null     null;
-                            null     null]
-        gradphi[1:3, 9:10]=[null     null;
-                            Dxh11_10 Dyh11_10;
-                            null     null]
-        gradphi[1:3,11:12]=[null     null;
-                            null     null;
-                            Dxh11_10 Dyh11_10]
-        gradphi[1:3,13:14]=[Dxh11_11 Dyh11_11;
-                            null     null;
-                            null     null]
-        gradphi[1:3,15:16]=[null     null;
-                            Dxh11_11 Dyh11_11;
-                            null     null]
-        gradphi[1:3,17:18]=[null     null;
-                            null     null;
-                            Dxh11_11 Dyh11_11]
-        gradphi[1:3,19:20]=[Dxh10_11 Dyh10_11;
-                            null     null;
-                            null     null]
-        gradphi[1:3,21:22]=[null     null;
-                            Dxh10_11 Dyh10_11;
-                            null     null]
-        gradphi[1:3,23:24]=[null     null;
-                            null     null;
-                            Dxh10_11 Dyh10_11]
-
-        nFace=0;
-        nEdge=0;
-        nVert=3;
-
-        cm=Dict([1,2]=>[0,1, 0 ,0,1, 0 ,0,0, 0 ,0,0, 0], [2,3]=>[0,0, 0 ,1,0, 0 ,1,0, 0 ,0,0, 0],
-                [3,4]=>[0,0, 0 ,0,0, 0 ,0,1, 0 ,0,1, 0], [1,4]=>[1,0, 0 ,0,0, 0 ,0,0, 0 ,1,0, 0]);
-
-    elseif type==:VecDG1S
-
-        phi=[h10_10 null    null    h11_10  null    null    h11_11  null    null    h10_11  null    null;
-             null   h10_10  null    null    h11_10  null    null    h11_11  null    null    h10_11  null;
-             null   null    h10_10  null    null    h11_10  null    null    h11_11  null    null    h10_11]
-        divphi=[Dxh10_10,Dyh10_10,null,Dxh11_10,Dyh11_10,null,Dxh11_11,Dyh11_11,null,Dxh10_11,Dyh10_11,null]; #Evtl. falsche Divergenz für dritte Komponente
-        gradphi=Matrix(undef, 3, 24)
-        gradphi[1:3, 1: 2]=[Dxh10_10 Dyh10_10;
-                            null     null;
-                            null     null]
-        gradphi[1:3, 3: 4]=[null     null
-                            Dxh10_10 Dyh10_10;
-                            null     null]
-        gradphi[1:3, 5: 6]=[null     null;
-                            null     null;
-                            Dxh10_10 Dyh10_10]
-        gradphi[1:3, 7: 8]=[Dxh11_10 Dyh11_10;
-                            null     null;
-                            null     null]
-        gradphi[1:3, 9:10]=[null     null;
-                            Dxh11_10 Dyh11_10;
-                            null     null]
-        gradphi[1:3,11:12]=[null     null;
-                            null     null;
-                            Dxh11_10 Dyh11_10]
-        gradphi[1:3,13:14]=[Dxh11_11 Dyh11_11;
-                            null     null;
-                            null     null]
-        gradphi[1:3,15:16]=[null     null;
-                            Dxh11_11 Dyh11_11;
-                            null     null]
-        gradphi[1:3,17:18]=[null     null;
-                            null     null;
-                            Dxh11_11 Dyh11_11]
-        gradphi[1:3,19:20]=[Dxh10_11 Dyh10_11;
-                            null     null;
-                            null     null]
-        gradphi[1:3,21:22]=[null     null;
-                            Dxh10_11 Dyh10_11;
-                            null     null]
-        gradphi[1:3,23:24]=[null     null;
-                            null     null;
-                            Dxh10_11 Dyh10_11]
-
-        nFace=12;
-        nEdge=0;
-        nVert=0;
-
-        cm=Dict([1,2]=>[0,0,0,0,0,0,0,0,0,0,0,0], [2,3]=>[0,0,0,0,0,0,0,0,0,0,0,0], [3,4]=>[0,0,0,0,0,0,0,0,0,0,0,0], [1,4]=>[0,0,0,0,0,0,0,0,0,0,0,0]);
-
     elseif type==:VecP2
 
         phi=[h21_21 null   h21_20 null   h22_21 null   h21_22 null   h20_21 null   h20_20 null  h22_20 null   h22_22 null   h20_22 null  ;
@@ -565,198 +432,6 @@ function getQuadElementProperties(type::Symbol)
                            null     null]
         gradphi[1:2,35:36]=[null     null
                            Dxh20_22 Dyh20_22]
-
-        nFace=18;
-        nEdge=0;
-        nVert=0;
-
-        cm=Dict([1,2]=>[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [2,3]=>[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [3,4]=>[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [1,4]=>[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
-
-    elseif type==:VecP2S
-
-        phi=[h21_21 null   null   h21_20 null   null   h22_21 null   null   h21_22 null   null   h20_21 null   null   h20_20 null   null   h22_20 null   null   h22_22 null   null   h20_22 null   null  ;
-             null   h21_21 null   null   h21_20 null   null   h22_21 null   null   h21_22 null   null   h20_21 null   null   h20_20 null   null   h22_20 null   null   h22_22 null   null   h20_22 null  ;
-             null   null   h21_21 null   null   h21_20 null   null   h22_21 null   null   h21_22 null   null   h20_21 null   null   h20_20 null   null   h22_20 null   null   h22_22 null   null   h20_22]
-        divphi=[Dxh21_21,Dyh21_21,null,Dxh21_20,Dyh21_20,null,Dxh22_21,Dyh22_21,null,Dxh21_22,Dyh21_22,null,Dxh20_21,Dyh20_21,null,
-               Dxh20_20,Dyh20_20,null,Dxh22_20,Dyh22_20,null,Dxh22_22,Dyh22_22,null,Dxh20_22,Dyh20_22,null];
-        gradphi=Matrix(undef, 3, 54)
-        gradphi[1:3, 1: 2]=[Dxh21_21 Dyh21_21;
-                            null     null;
-                            null     null]
-        gradphi[1:3, 3: 4]=[null     null;
-                            Dxh21_21 Dyh21_21;
-                            null     null]
-        gradphi[1:3, 5: 6]=[null     null;
-                            null     null;
-                            Dxh21_21 Dyh21_21]
-        gradphi[1:3, 7: 8]=[Dxh21_20 Dyh21_20;
-                            null     null;
-                            null     null]
-        gradphi[1:3, 9:10]=[null     null;
-                            Dxh21_20 Dyh21_20;
-                            null     null]
-        gradphi[1:3,11:12]=[null     null;
-                            null     null;
-                            Dxh21_20 Dyh21_20]
-        gradphi[1:3,13:14]=[Dxh22_21 Dyh22_21;
-                            null     null;
-                            null     null]
-        gradphi[1:3,15:16]=[null     null;
-                            Dxh22_21 Dyh22_21;
-                            null     null]
-        gradphi[1:3,17:18]=[null     null;
-                            null     null;
-                            Dxh22_21 Dyh22_21]
-        gradphi[1:3,19:20]=[Dxh21_22 Dyh21_22;
-                            null     null;
-                            null     null]
-        gradphi[1:3,21:22]=[null     null;
-                            Dxh21_22 Dyh21_22;
-                            null     null]
-        gradphi[1:3,23:24]=[null     null;
-                            null     null;
-                            Dxh21_22 Dyh21_22]
-        gradphi[1:3,25:26]=[Dxh20_21 Dyh20_21;
-                            null     null;
-                            null     null]
-        gradphi[1:3,27:28]=[null     null;
-                            Dxh20_21 Dyh20_21;
-                            null     null]
-        gradphi[1:3,29:30]=[null     null;
-                            null     null;
-                            Dxh20_21 Dyh20_21]
-        gradphi[1:3,31:32]=[Dxh20_20 Dyh20_20;
-                            null     null;
-                            null     null]
-        gradphi[1:3,33:34]=[null     null;
-                            Dxh20_20 Dyh20_20;
-                            null     null]
-        gradphi[1:3,35:36]=[null     null;
-                            null     null;
-                            Dxh20_20 Dyh20_20]
-        gradphi[1:3,37:38]=[Dxh22_20 Dyh22_20;
-                            null     null;
-                            null     null]
-        gradphi[1:3,39:40]=[null     null;
-                            Dxh22_20 Dyh22_20;
-                            null     null]
-        gradphi[1:3,41:42]=[null     null;
-                            null     null;
-                            Dxh22_20 Dyh22_20]
-        gradphi[1:3,43:44]=[Dxh22_22 Dyh22_22;
-                            null     null;
-                            null     null]
-        gradphi[1:3,45:46]=[null     null;
-                            Dxh22_22 Dyh22_22;
-                            null     null]
-        gradphi[1:3,47:48]=[null     null;
-                            null     null;
-                            Dxh22_22 Dyh22_22]
-        gradphi[1:3,49:50]=[Dxh20_22 Dyh20_22;
-                            null     null;
-                            null     null]
-        gradphi[1:3,51:52]=[null     null;
-                            Dxh20_22 Dyh20_22;
-                            null     null]
-        gradphi[1:3,53:54]=[null     null;
-                            null     null;
-                            Dxh20_22 Dyh20_22]
-
-        nFace=2;
-        nEdge=2;
-        nVert=2;
-
-        cm=Dict([1,2]=>[0,0,1,1,0,0,0,0,0,0,1,1,1,1,0,0,0,0], [2,3]=>[0,0,0,0,1,1,0,0,0,0,0,0,1,1,1,1,0,0], [3,4]=>[0,0,0,0,0,0,1,1,0,0,0,0,0,0,1,1,1,1], [1,4]=>[0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,1,1]);
-
-    elseif type==:VecDG2S
-
-        phi=[h21_21 null   null   h21_20 null   null   h22_21 null   null   h21_22 null   null   h20_21 null   null   h20_20 null   null   h22_20 null   null   h22_22 null   null   h20_22 null   null  ;
-             null   h21_21 null   null   h21_20 null   null   h22_21 null   null   h21_22 null   null   h20_21 null   null   h20_20 null   null   h22_20 null   null   h22_22 null   null   h20_22 null  ;
-             null   null   h21_21 null   null   h21_20 null   null   h22_21 null   null   h21_22 null   null   h20_21 null   null   h20_20 null   null   h22_20 null   null   h22_22 null   null   h20_22]
-        divphi=[Dxh21_21,Dyh21_21,null,Dxh21_20,Dyh21_20,null,Dxh22_21,Dyh22_21,null,Dxh21_22,Dyh21_22,null,Dxh20_21,Dyh20_21,null,
-               Dxh20_20,Dyh20_20,null,Dxh22_20,Dyh22_20,null,Dxh22_22,Dyh22_22,null,Dxh20_22,Dyh20_22,null];
-        gradphi=Matrix(undef, 3, 54)
-        gradphi[1:3, 1: 2]=[Dxh21_21 Dyh21_21;
-                            null     null;
-                            null     null]
-        gradphi[1:3, 3: 4]=[null     null;
-                            Dxh21_21 Dyh21_21;
-                            null     null]
-        gradphi[1:3, 5: 6]=[null     null;
-                            null     null;
-                            Dxh21_21 Dyh21_21]
-        gradphi[1:3, 7: 8]=[Dxh21_20 Dyh21_20;
-                            null     null;
-                            null     null]
-        gradphi[1:3, 9:10]=[null     null;
-                            Dxh21_20 Dyh21_20;
-                            null     null]
-        gradphi[1:3,11:12]=[null     null;
-                            null     null;
-                            Dxh21_20 Dyh21_20]
-        gradphi[1:3,13:14]=[Dxh22_21 Dyh22_21;
-                            null     null;
-                            null     null]
-        gradphi[1:3,15:16]=[null     null;
-                            Dxh22_21 Dyh22_21;
-                            null     null]
-        gradphi[1:3,17:18]=[null     null;
-                            null     null;
-                            Dxh22_21 Dyh22_21]
-        gradphi[1:3,19:20]=[Dxh21_22 Dyh21_22;
-                            null     null;
-                            null     null]
-        gradphi[1:3,21:22]=[null     null;
-                            Dxh21_22 Dyh21_22;
-                            null     null]
-        gradphi[1:3,23:24]=[null     null;
-                            null     null;
-                            Dxh21_22 Dyh21_22]
-        gradphi[1:3,25:26]=[Dxh20_21 Dyh20_21;
-                            null     null;
-                            null     null]
-        gradphi[1:3,27:28]=[null     null;
-                            Dxh20_21 Dyh20_21;
-                            null     null]
-        gradphi[1:3,29:30]=[null     null;
-                            null     null;
-                            Dxh20_21 Dyh20_21]
-        gradphi[1:3,31:32]=[Dxh20_20 Dyh20_20;
-                            null     null;
-                            null     null]
-        gradphi[1:3,33:34]=[null     null;
-                            Dxh20_20 Dyh20_20;
-                            null     null]
-        gradphi[1:3,35:36]=[null     null;
-                            null     null;
-                            Dxh20_20 Dyh20_20]
-        gradphi[1:3,37:38]=[Dxh22_20 Dyh22_20;
-                            null     null;
-                            null     null]
-        gradphi[1:3,39:40]=[null     null;
-                            Dxh22_20 Dyh22_20;
-                            null     null]
-        gradphi[1:3,41:42]=[null     null;
-                            null     null;
-                            Dxh22_20 Dyh22_20]
-        gradphi[1:3,43:44]=[Dxh22_22 Dyh22_22;
-                            null     null;
-                            null     null]
-        gradphi[1:3,45:46]=[null     null;
-                            Dxh22_22 Dyh22_22;
-                            null     null]
-        gradphi[1:3,47:48]=[null     null;
-                            null     null;
-                            Dxh22_22 Dyh22_22]
-        gradphi[1:3,49:50]=[Dxh20_22 Dyh20_22;
-                            null     null;
-                            null     null]
-        gradphi[1:3,51:52]=[null     null;
-                            Dxh20_22 Dyh20_22;
-                            null     null]
-        gradphi[1:3,53:54]=[null     null;
-                            null     null;
-                            Dxh20_22 Dyh20_22]
 
         nFace=18;
         nEdge=0;

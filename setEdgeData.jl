@@ -2,7 +2,7 @@ function setEdgeData!(p::femProblem, compVf::Symbol)
     m=p.mesh;
     degFVf=p.degFBoundary[p.femType[compVf][1]];
     mt=m.meshType;
-    refBound=getElementProperties(mt,p.femType[compVf][1]);
+    refBound=getElementProperties(mt,p.femType[compVf][1],m.geometry.dim);
     if mt==4
         edgeTypes=Dict([1,2]=>1,[2,3]=>2,[3,4]=>3,[1,4]=>4)
         coordref=[0.0 1.0 1.0 0.0; 0.0 0.0 1.0 1.0]

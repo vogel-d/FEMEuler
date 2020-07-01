@@ -37,7 +37,7 @@ function unstructured_vtkSphere(p::femProblem, tend::Float64, comp::Array{Symbol
 
     fComp=Array{Array{Float64},1}(undef, length(comp))
     for l in 1:length(comp)
-        fComp[l]=getElementProperties(p.femType[comp[l]][1],m.meshType,mx,my);
+        fComp[l]=getElementProperties(p.femType[comp[l]][1],m.meshType,m.geometry.dim,mx,my);
     end
     J=Array{Float64,2}(undef,m.geometry.dim,m.topology.dim);
     dJ=0.0;

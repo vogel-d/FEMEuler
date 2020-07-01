@@ -48,7 +48,7 @@ function coordTrans(mesh::mesh, normals::Array{Float64,2}, type::Array{Symbol,1}
 
     for k in type
         nquadPhi[k]=Array{Array{Array{Float64,1},2},1}(undef, size(normals,2));
-        phi, psize =getElementProperties(k,mt);
+        phi, psize =getElementProperties(k,mt,mesh.geometry.dim);
         for m in 1:size(normals,2)
             quadPhi=Array{Array{Float64,1},2}(undef,psize[1], psize[2]);
             for n in 1:length(phi)

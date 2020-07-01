@@ -32,7 +32,7 @@ function unstructured_vtk(p::femProblem, tend::Float64, comp::Array{Symbol,1}, n
     end
     fComp=Array{Array{Float64},1}(undef, length(comp))
     for l in 1:length(comp)
-        fComp[l]=getElementProperties(p.femType[comp[l]][1],m.meshType,mx,my);
+        fComp[l]=getElementProperties(p.femType[comp[l]][1],m.meshType,m.geometry.dim,mx,my);
     end
     J=Array{Float64,2}(undef,m.geometry.dim,m.topology.dim);
     dJ=0.0;
@@ -113,7 +113,7 @@ function unstructured_vtk(p::femProblem, t::Array{Float64,1}, comp::Array{Symbol
     end
     fComp=Array{Array{Float64},1}(undef, length(comp))
     for l in 1:length(comp)
-        fComp[l]=getElementProperties(p.femType[comp[l]][1],m.meshType,mx,my);
+        fComp[l]=getElementProperties(p.femType[comp[l]][1],m.meshType,m.geometry.dim,mx,my);
     end
     J=Array{Float64,2}(undef,m.geometry.dim,m.topology.dim);
     dJ=0.0;
@@ -229,7 +229,7 @@ function unstructured_vtk(p::femProblem, rx::Int, ry::Int, tend::Float64, comp::
     for l in 1:length(comp)
         solc=getfield(sol,comp[l]);
         for i in 1:size(rcoord,2)
-                fComp[i]=getElementProperties(p.femType[comp[l]][1],mf.meshType,rcoord[1,i],rcoord[2,i]);
+                fComp[i]=getElementProperties(p.femType[comp[l]][1],mf.meshType,m.geometry.dim,rcoord[1,i],rcoord[2,i]);
         end
         if isa(p.degFBoundary[p.femType[comp[l]][1]],degF{1})
             cvtk=zeros(Float64, nf)
@@ -339,7 +339,7 @@ function unstructured_vtk(p::femProblem, rx::Int, ry::Int, t::Array{Float64,1}, 
             for l in 1:length(comp)
                 solc=getfield(sol,comp[l]);
                 for i in 1:size(rcoord,2)
-                        fComp[i]=getElementProperties(p.femType[comp[l]][1],mf.meshType,rcoord[1,i],rcoord[2,i]);
+                        fComp[i]=getElementProperties(p.femType[comp[l]][1],mf.meshType,m.geometry.dim,rcoord[1,i],rcoord[2,i]);
                 end
                 if isa(p.degFBoundary[p.femType[comp[l]][1]],degF{1})
                     cvtk=zeros(Float64, nf)
