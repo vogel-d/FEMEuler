@@ -11,7 +11,7 @@ function recovery(p::femProblem, comp::Array{Symbol,1}, cval::Array{Float64,1},i
 end
 
 function recovery(degFT::degF{1,:H1}, cval::Array{Float64,1},
-                  stencil::Array{Array{Int,1},1}, recoveryM::Array{QRPivoted{Float64,Array{Float64,2}},1}, nf::Int)
+                  stencil::Array{Array{Int,1},1}, recoveryM::Array{Any,1}, nf::Int)
     phiT=@views degFT.phi;
     nT=length(phiT)
 
@@ -24,14 +24,14 @@ function recovery(degFT::degF{1,:H1}, cval::Array{Float64,1},
             l2g!(globalNumT,degFT,k)
             append!(lcval,w.*cval[globalNumT])
         end
-        append!(cR,recoveryM[f]\lcval);
+        append!(cR,recoveryM[f]\lcval)
         empty!(lcval);
     end
     return cR;
 end
 
 function recovery(degFT::degF{2,:H1div}, degFF::degF{2,:H1div}, cval::Array{Float64,1},
-                  stencil::Array{Array{Int,1},1}, recoveryM::Array{QRPivoted{Float64,Array{Float64,2}},1}, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
+                  stencil::Array{Array{Int,1},1}, recoveryM::Array{Any,1}, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
     phiT=@views degFT.phi;
     phiF=@views degFF.phi;
 
@@ -81,8 +81,7 @@ function recovery(degFT::degF{2,:H1div}, degFF::degF{2,:H1div}, cval::Array{Floa
                 z+=1;
             end
         end
-        
-        append!(cR,recoveryM[f]\lcval);
+        append!(cR,recoveryM[f]\lcval)
         empty!(lcval);
     end
     return cR;

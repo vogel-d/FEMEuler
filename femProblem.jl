@@ -9,7 +9,7 @@ mutable struct femProblem
     massMBoundary::Dict{Symbol, SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64}};
     massMProjection::Dict{Symbol, SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64}};
     stiffM::Dict{Symbol, SparseMatrixCSC{Float64,Int64}};
-    recoveryM::Dict{Tuple{Symbol,Symbol}, Array{QRPivoted{Float64,Array{Float64,2}},1}};
+    recoveryM::Dict{Tuple{Symbol,Symbol}, Array{Any,1}};
     stencil::Array{Array{Int,1},1}
     stencilBoundary::SparseMatrixCSC{Int,Int}
     type::Symbol;

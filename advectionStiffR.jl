@@ -7,17 +7,16 @@ function advectionStiffR(degFT::degF{1,:H1}, phiTtrans::Array{Array{Array{Float6
     phiT=@views degFT.phi;
     gradphiT=@views degFT.gradphi;
     phiF=@views degFF.phi;
-    phiW=getPhiRecovery(Val(recoverySpace));
+
+    nW=getPhiRecoveryLength(recoverySpace)
 
     sk=size(kubWeights);
 
     globalNumT1=Array{Int64,1}(undef,length(phiT));
     globalNumF1=Array{Int64,1}(undef,size(phiF,2));
-    globalNumW1=UnitRange{Int64}(1,length(phiW));
 
     globalNumT2=Array{Int64,1}(undef,length(phiT));
     globalNumF2=Array{Int64,1}(undef,size(phiF,2));
-    globalNumW2=UnitRange{Int64}(1,length(phiW));
 
     M=zeros(degFT.numB,1);
     coord1=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
@@ -25,7 +24,7 @@ function advectionStiffR(degFT::degF{1,:H1}, phiTtrans::Array{Array{Array{Float6
 
     discGalerkinCellsR!(M,degFT,gradphiT,globalNumT1,
                        degFF,phiF,fval,globalNumF1,
-                       phiW, wval,
+                       wval,nW,
                        m, kubPoints, kubWeights, coord1)
     if sk[1]==1
         quadPoints, quadWeights=getQuad(sk[2]+1); #TODO: find better way to handle g (argument of getQuad)
@@ -35,7 +34,7 @@ function advectionStiffR(degFT::degF{1,:H1}, phiTtrans::Array{Array{Array{Float6
 
     discGalerkinEdgesR!(M,degFT,phiT, phiTtrans,globalNumT1, globalNumT2,
                        degFF,phiF, phiFtrans, fval, globalNumF1, globalNumF2,
-                       phiW, wval, globalNumW1, globalNumW2,
+                       wval,nW,
                        m, quadWeights, nquadPoints, edgeData,gamma, coord1, coord2)
     return M[1:degFT.num]
 end
@@ -49,17 +48,16 @@ function advectionStiffMatrixR(degFT::degF{1,:H1}, phiTtrans::Array{Array{Array{
     phiT=@views degFT.phi;
     gradphiT=@views degFT.gradphi;
     phiF=@views degFF.phi;
-    phiW=getPhiRecovery(Val(recoverySpace));
+
+    nW=getPhiRecoveryLength(recoverySpace)
 
     sk=size(kubWeights);
 
     globalNumT1=Array{Int64,1}(undef,length(phiT));
     globalNumF1=Array{Int64,1}(undef,size(phiF,2));
-    globalNumW1=UnitRange{Int64}(1,length(phiW));
 
     globalNumT2=Array{Int64,1}(undef,length(phiT));
     globalNumF2=Array{Int64,1}(undef,size(phiF,2));
-    globalNumW2=UnitRange{Int64}(1,length(phiW));
 
     rows=Int64[];
     cols=Int64[];
@@ -71,7 +69,7 @@ function advectionStiffMatrixR(degFT::degF{1,:H1}, phiTtrans::Array{Array{Array{
     discGalerkinCellsR!(rows, cols, vals,
                        degFT, gradphiT, globalNumT1,
                        degFF, phiF, fval, globalNumF1,
-                       phiW, wval,
+                       wval, nW,
                        m, kubPoints, kubWeights, coord1)
 
     if sk[1]==1
@@ -83,7 +81,7 @@ function advectionStiffMatrixR(degFT::degF{1,:H1}, phiTtrans::Array{Array{Array{
     discGalerkinEdgesR!(rows, cols, vals,
                        degFT,phiT, phiTtrans,globalNumT1, globalNumT2,
                        degFF,phiF, phiFtrans, fval, globalNumF1, globalNumF2,
-                       phiW, wval, globalNumW1,globalNumW2,
+                       wval, nW,
                        m, quadWeights, nquadPoints, edgeData,gamma, coord1, coord2)
 
     return sparse(rows,cols,vals)[1:degFT.num,:]
@@ -98,7 +96,8 @@ function advectionStiffR(degFT::degF{2,:H1div}, phiTtrans::Array{Array{Array{Flo
     phiT=@views degFT.phi;
     gradphiT=@views degFT.gradphi;
     phiF=@views degFF.phi;
-    phiW=getPhiRecovery(Val(recoverySpace));
+
+    nW=getPhiRecoveryLength(recoverySpace)
 
     sk=size(kubWeights);
 
@@ -108,27 +107,24 @@ function advectionStiffR(degFT::degF{2,:H1div}, phiTtrans::Array{Array{Array{Flo
         quadPoints, quadWeights=getQuad(2*sk[1]-1);
     end
 
-
     coord1=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
     coord2=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
     globalNumT1=Array{Int64,1}(undef,size(phiT,2));
     globalNumF1=Array{Int64,1}(undef,size(phiF,2));
-    globalNumW1=UnitRange{Int64}(1,size(phiW,2));
 
     globalNumT2=Array{Int64,1}(undef,size(phiT,2));
     globalNumF2=Array{Int64,1}(undef,size(phiF,2));
-    globalNumW2=UnitRange{Int64}(1,size(phiW,2));
 
     M=zeros(degFT.numB,1);
     discGalerkinCellsR!(M,degFT,gradphiT,globalNumT1,
                        degFF,phiF,fval,globalNumF1,
-                       phiW,wval,globalNumW1,
+                       wval,nW,
                        m, kubPoints, kubWeights, coord1)
 
     discGalerkinEdgesR!(M, degFT, phiT, phiTtrans, globalNumT1, globalNumT2,
                        degFF, phiF, phiFtrans, fval, globalNumF1, globalNumF2,
-                       phiW, wval, globalNumW1, globalNumW2,
+                       wval, nW,
                        m, quadWeights, nquadPoints, edgeData, gamma, coord1, coord2)
 
     return M[1:degFT.num];

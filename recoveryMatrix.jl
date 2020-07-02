@@ -11,15 +11,14 @@ end
 function recoveryMatrix(degFT::degF{1,:H1}, recoverySpace::Symbol, stencil::Array{Array{Int,1},1},
                   stencilBoundary::SparseMatrixCSC{Int,Int}, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
     phiT=@views degFT.phi;
-    phiR=getPhiRecovery(Val(recoverySpace));
+    nR=getPhiRecoveryLength(recoverySpace)
+    nT=length(phiT)
+    phiR=zeros(nR);
 
     nf=m.topology.size[3]
     mcoord=m.geometry.coordinates;
     inc=m.topology.incidence["20"];
     off=m.topology.offset["20"];
-
-    nR=length(phiR)
-    nT=length(phiT)
 
     sk=size(kubWeights);
 
@@ -27,12 +26,22 @@ function recoveryMatrix(degFT::degF{1,:H1}, recoverySpace::Symbol, stencil::Arra
     dJ=Array{Float64,2}(undef,sk);
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
+    n=zeros(m.geometry.dim)
+    t1=zeros(m.geometry.dim)
+    t2=zeros(m.geometry.dim)
+    kubP=zeros(m.geometry.dim)
+    recP=zeros(m.topology.dim)
+
+    ind=[1,2,3]
+    A=zeros(3,3)
+
     dxy= @. (m.geometry.r-m.geometry.l)/m.topology.n
-    recoveryM=Array{QRPivoted{Float64,Array{Float64,2}},1}(undef,nf)
+    recoveryM=Array{Any,1}(undef,nf)
+    #recoveryM=Array{LinearAlgebra.QRCompactWY{Float64,Array{Float64,2}},1}(undef,nf)
     for f in 1:nf
         fcoord=@views mcoord[:,inc[off[f]:off[f+1]-1]]
-        n=transformation(m,fcoord,0.5,0.5);
-        t1,t2=getTangentialPlane(n)
+        transformation!(n,m,fcoord,0.5,0.5);
+        getTangentialPlane!(t1,t2,n,ind)
 
         nS=length(stencil[f])
         lM=zeros(nS*nT,nR)
@@ -68,8 +77,11 @@ function recoveryMatrix(degFT::degF{1,:H1}, recoverySpace::Symbol, stencil::Arra
                     currentval=0.0;
                     for r in 1:sk[2]
                         for l in 1:sk[1]
+                            transformation!(kubP,m,kcoord,kubPoints[1,l],kubPoints[2,r])
+                            transformRecoveryCoord!(recP,n,t1,t2,kubP,A)
+                            getPhiRecovery!(phiR,recP)
                             currentval+=kubWeights[l,r]*abs(dJ[l,r])*phiT[i][l,r]*
-                                phiR[j](transformRecoveryCoord(n,t1,t2,transformation(m,kcoord,kubPoints[1,l],kubPoints[2,r])));
+                                phiR[j];
                         end
                     end
                     lM[z,j]+=w*currentval;
@@ -77,7 +89,7 @@ function recoveryMatrix(degFT::degF{1,:H1}, recoverySpace::Symbol, stencil::Arra
                 z+=1;
             end
         end
-        recoveryM[f]=qr(lM, Val(true))
+        recoveryM[f]=qr(lM, Val(false))
     end
     return recoveryM;
 end
@@ -86,15 +98,15 @@ function recoveryMatrix(degFT::degF{2,:H1div}, recoverySpace::Symbol,
                   stencil::Array{Array{Int,1},1}, stencilBoundary::SparseMatrixCSC{Int,Int}, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
 
     phiT=@views degFT.phi;
-    phiR=getPhiRecovery(Val(recoverySpace));
+    nR=getPhiRecoveryLength(recoverySpace)
+    nT=size(phiT,2)
+    phiR=zeros(m.geometry.dim,nR);
 
     nf=m.topology.size[3]
     mcoord=m.geometry.coordinates;
     inc=m.topology.incidence["20"];
     off=m.topology.offset["20"];
 
-    nT=size(phiT,2)
-    nR=size(phiR,2)
     sk=size(kubWeights);
 
     J=initJacobi((m.geometry.dim,m.topology.dim),sk);
@@ -102,12 +114,21 @@ function recoveryMatrix(degFT::degF{2,:H1div}, recoverySpace::Symbol,
     jphiT=initJacobi((m.geometry.dim,nT),sk);
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
+    n=zeros(m.geometry.dim)
+    t1=zeros(m.geometry.dim)
+    t2=zeros(m.geometry.dim)
+    kubP=zeros(m.geometry.dim)
+    recP=zeros(m.topology.dim)
+
+    ind=[1,2,3]
+    A=zeros(3,3)
+
     dxy= @. (m.geometry.r-m.geometry.l)/m.topology.n
-    recoveryM=Array{QRPivoted{Float64,Array{Float64,2}},1}(undef,nf)
+    recoveryM=Array{Any,1}(undef,nf)
     for f in 1:nf
         fcoord=@views mcoord[:,inc[off[f]:off[f+1]-1]]
-        n=transformation(m,fcoord,0.5,0.5);
-        t1,t2=getTangentialPlane(n)
+        transformation!(n,m,fcoord,0.5,0.5);
+        getTangentialPlane!(t1,t2,n,ind)
 
         nS=length(stencil[f])
         lM=zeros(nS*nT,nR)
@@ -143,9 +164,12 @@ function recoveryMatrix(degFT::degF{2,:H1div}, recoverySpace::Symbol,
                     currentval=0.0;
                     for r in 1:sk[2]
                         for l in 1:sk[1]
+                            transformation!(kubP,m,kcoord,kubPoints[1,l],kubPoints[2,r])
+                            transformRecoveryCoord!(recP,n,t1,t2,kubP,A)
+                            getPhiRecovery!(phiR,recP)
                             vecdot=0.0
                             for d in 1:m.geometry.dim
-                                vecdot+=jphiT[d,i][l,r]*phiR[d,j](transformRecoveryCoord(n,t1,t2,transformation(m,kcoord,kubPoints[1,l],kubPoints[2,r])));
+                                vecdot+=jphiT[d,i][l,r]*phiR[d,j];
                             end
                             currentval+=kubWeights[l,r]*ddJ[l,r]/abs(ddJ[l,r])*vecdot;
                         end
@@ -155,7 +179,7 @@ function recoveryMatrix(degFT::degF{2,:H1div}, recoverySpace::Symbol,
                 z+=1;
             end
         end
-        recoveryM[f]=qr(lM, Val(true))
+        recoveryM[f]=qr(lM, Val(false))
     end
     return recoveryM;
 end

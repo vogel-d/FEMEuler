@@ -1,32 +1,43 @@
 function discGalerkinCellsR!(M::Array{Float64,2},
                             degFT::degF{1,:H1}, gradphiT::Array{Array{Float64,2},2}, globalNumT::Array{Int64,1},
                             degFF::degF{2,:H1div},phiF::Array{Array{Float64,2},2}, fval::SparseVector{Float64,Int64}, globalNumF::Array{Int64,1},
-                            phiW::Array{Function,1}, wval::Array{Float64,1},
+                            wval::Array{Float64,1}, nW::Int,
                             m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2}, coord::Array{Float64,2})
 
     sk=size(kubWeights);
-    nW=length(phiW)
+
+    phiW=zeros(nW);
 
     w=zeros(sk);
 
     J=initJacobi((m.geometry.dim,m.topology.dim),sk);
     dJ=Array{Float64,2}(undef,sk);
 
-    zf=1
+    n=zeros(m.geometry.dim)
+    t1=zeros(m.geometry.dim)
+    t2=zeros(m.geometry.dim)
+    kubP=zeros(m.geometry.dim)
+    recP=zeros(m.topology.dim)
+
+    ind=[1,2,3]
+    A=zeros(3,3)
+
     for k in 1:m.topology.size[3]
         jacobi!(J,dJ,m,k,kubPoints,coord);
 
-        n=transformation(m,coord,0.5,0.5);
-        t1,t2=getTangentialPlane(n)
+        transformation!(n,m,coord,0.5,0.5);
+        getTangentialPlane!(t1,t2,n,ind)
 
         fill!(w,0.0);
-        for i in 1:nW
-            for r in 1:size(kubWeights,2)
-                for l in 1:size(kubWeights,1)
-                    w[l,r]+=wval[zf]*phiW[i](transformRecoveryCoord(n,t1,t2,transformation(m,coord,kubPoints[1,l],kubPoints[2,r])));
+        for r in 1:size(kubWeights,2)
+            for l in 1:size(kubWeights,1)
+                transformation!(kubP,m,coord,kubPoints[1,l],kubPoints[2,r])
+                transformRecoveryCoord!(recP,n,t1,t2,kubP,A)
+                getPhiRecovery!(phiW,recP)
+                for i in 1:nW
+                    w[l,r]+=wval[nW*(k-1)+i].*phiW[i];
                 end
             end
-            zf+=1
         end
 
         l2g!(globalNumF,degFF,k);
@@ -57,35 +68,46 @@ end
 function discGalerkinCellsR!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Array{Float64,1},
                             degFT::degF{1,:H1}, gradphiT::Array{Array{Float64,2},2}, globalNumT::Array{Int64,1},
                             degFF::degF{2,:H1div}, phiF::Array{Array{Float64,2},2}, fval::Array{Float64,1}, globalNumF::Array{Int64,1},
-                            phiW::Array{Function,1}, wval::Array{Float64,1},
+                            wval::Array{Float64,1}, nW::Int,
                             m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2}, coord::Array{Float64,2})
 
     sk=size(kubWeights);
-    nW=length(phiW)
     nT=length(globalNumT);
     nF=length(globalNumF);
+
+    phiW=zeros(nW);
 
     w=zeros(sk);
 
     J=initJacobi((m.geometry.dim,m.topology.dim),sk);
     dJ=Array{Float64,2}(undef,sk);
 
+    n=zeros(m.geometry.dim)
+    t1=zeros(m.geometry.dim)
+    t2=zeros(m.geometry.dim)
+    kubP=zeros(m.geometry.dim)
+    recP=zeros(m.topology.dim)
+
+    ind=[1,2,3]
+    A=zeros(3,3)
+
     lM=zeros(nT,nF);
-    zf=1
     for k in 1:m.topology.size[3]
         jacobi!(J,dJ,m,k,kubPoints,coord);
 
-        n=transformation(m,coord,0.5,0.5);
-        t1,t2=getTangentialPlane(n)
+        transformation!(n,m,coord,0.5,0.5);
+        getTangentialPlane!(t1,t2,n,ind)
 
         fill!(w,0.0);
-        for i in 1:nW
-            for r in 1:size(kubWeights,2)
-                for l in 1:size(kubWeights,1)
-                    w[l,r]+=wval[zf]*phiW[i](transformRecoveryCoord(n,t1,t2,transformation(m,coord,kubPoints[1,l],kubPoints[2,r])));
+        for r in 1:size(kubWeights,2)
+            for l in 1:size(kubWeights,1)
+                transformation!(kubP,m,coord,kubPoints[1,l],kubPoints[2,r])
+                transformRecoveryCoord!(recP,n,t1,t2,kubP,A)
+                getPhiRecovery!(phiW,recP)
+                for i in 1:nW
+                    w[l,r]+=wval[nW*(k-1)+i].*phiW[i];
                 end
             end
-            zf+=1
         end
 
 
@@ -123,30 +145,43 @@ end
 function discGalerkinCellsR!(M::Array{Float64,2},
                             degFT::degF{2,:H1div}, gradphiT::Array{Array{Float64,2},2}, globalNumT::Array{Int64,1},
                             degFF::degF{2,:H1div}, phiF::Array{Array{Float64,2},2}, fval::SparseVector{Float64,Int64}, globalNumF::Array{Int64,1},
-                            phiW::Array{Function,2}, wval::Array{Float64,1}, globalNumW::UnitRange{Int64},
+                            wval::Array{Float64,1}, nW::Int,
                             m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2}, coord::Array{Float64,2})
 
     sk=size(kubWeights);
-    nW=size(phiW,2)
+
+    phiW=zeros(m.geometry.dim,nW);
 
     J=initJacobi((m.geometry.dim,m.topology.dim),sk);
     dJ=Array{Float64,2}(undef,sk);
 
     w=[zeros(sk) for d in 1:m.geometry.dim]
 
+    n=zeros(m.geometry.dim)
+    t1=zeros(m.geometry.dim)
+    t2=zeros(m.geometry.dim)
+    kubP=zeros(m.geometry.dim)
+    recP=zeros(m.topology.dim)
+
+    ind=[1,2,3]
+    A=zeros(3,3)
+
     for k in 1:m.topology.size[3]
         jacobi!(J,dJ,m,k,kubPoints,coord);
 
-        n=transformation(m,coord,0.5,0.5);
-        t1,t2=getTangentialPlane(n)
+        transformation!(n,m,coord,0.5,0.5);
+        getTangentialPlane!(t1,t2,n,ind)
 
-        globalNumW=(nW*(k-1)+1):(nW*k)
-        for d in 1:m.geometry.dim
-            fill!(w[d], 0.0)
-            for i in 1:nW
-                for r in 1:size(kubWeights,2)
-                    for l in 1:size(kubWeights,1)
-                        w[d][l,r]+=wval[globalNumW[i]]*phiW[d,i](transformRecoveryCoord(n,t1,t2,transformation(m,coord,kubPoints[1,l],kubPoints[2,r])));
+        for r in 1:size(kubWeights,2)
+            for l in 1:size(kubWeights,1)
+                transformation!(kubP,m,coord,kubPoints[1,l],kubPoints[2,r])
+                transformRecoveryCoord!(recP,n,t1,t2,kubP,A)
+                getPhiRecovery!(phiW,recP)
+                for d in 1:m.geometry.dim
+                    w[d][l,r]=0.0;
+                    for i in 1:nW
+                        w[d][l,r]+=wval[nW*(k-1)+i].*phiW[d,i];
+                        #w[d][l,r]+=wval[globalNumW[i]]*phiW[d,i](transformRecoveryCoord(n,t1,t2,transformation(m,coord,kubPoints[1,l],kubPoints[2,r])));
                     end
                 end
             end
