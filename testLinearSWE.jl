@@ -5,7 +5,7 @@ function testLinearSWE()
     filename = "linearSWE";
 
     #order: comp, compTest, recoverySpace
-    femType=Dict(:h=>[:DG0], :v=>[:RT0]);
+    femType=Dict(:h=>[:DG0], :v=>[:RT0], :f=>[:P1]);
     #higher spaces
     #femType=Dict(:h=>[:DG1],:v=>[:RT1]);
 
@@ -57,14 +57,12 @@ function testLinearSWE()
     elseif intMethod==:RungeKutta
         for i=1:nIter
           rh=p.massM[femType[:h][1]]\(p.stiffM[:div]*y.v);
-          vtk(p.mesh,p.degFBoundary[p.femType[:h][1]],rh,p.femType[:h][1],"divU")
-          println(hviiouz)
-          rVel=p.massM[femType[:v][1]]\(p.stiffM[:grad]*y.h);
+          rVel=p.massM[femType[:v][1]]\(p.stiffM[:grad]*y.h+p.stiffM[:coriolis]*y.v);
           hNeu=y.h+0.5*dt*rh;
           VelNeu=y.v+0.5*dt*rVel;
 
           rh=p.massM[femType[:h][1]]\(p.stiffM[:div]*VelNeu);
-          rVel=p.massM[femType[:v][1]]\(p.stiffM[:grad]*hNeu);
+          rVel=p.massM[femType[:v][1]]\(p.stiffM[:grad]*hNeu+p.stiffM[:coriolis]*VelNeu);
 
           y.h+=dt*rh;
           y.v+=dt*rVel;
