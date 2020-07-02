@@ -70,13 +70,11 @@ function mesh(topology::meshTopology, geometry::meshGeometry, bE::SparseVector{I
       l[i]=sqrt(sum((c[:,1].-c[:,2]).^2));
       z+=2;
   end
-  #Viereck-Normalen fraglich (Richtung)
-  #mt==4 ? n=[0.0 1.0 0.0 1.0;1.0 0.0 1.0 0.0] : n=[0.0 1.0 -1.0;-1.0 1.0 0.0];
   if mt==4
     if geometry.dim==3
       n=[0.0 1.0 0.0 1.0;-1.0 0.0 -1.0 0.0]
     else
-      n=[0.0 1.0 0.0 -1.0;-1.0 0.0 1.0 0.0]
+      n=[0.0 1.0 0.0 1.0;1.0 0.0 1.0 0.0]
     end
   else
     n=[0.0 1.0 -1.0;-1.0 1.0 0.0];
