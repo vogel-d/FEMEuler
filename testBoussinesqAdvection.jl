@@ -1,11 +1,11 @@
 include("modulesBA.jl")
 #include("advectionStiffN.jl")
 
-stencilOrder=2;
-recoveryOrder=2;
+const stencilOrder=2;
+const recoveryOrder=2;
 
-recoverySpace=Symbol("R$recoveryOrder")
-recoverySpaceVec=Symbol("VecR$(recoveryOrder)")
+const recoverySpace=Symbol("R$recoveryOrder")
+const recoverySpaceVec=Symbol("VecR$(recoveryOrder)")
 
 @recovery(recoverySpace,recoverySpaceVec)
 

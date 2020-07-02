@@ -1,5 +1,5 @@
 function splitExplicit(y0::solution,Y::Array{solution,1},FY::Array{solution,1},SthY::Array{SparseMatrixCSC{Float64,Int64},1},
-                      p::femProblem, gamma, Sth::SparseMatrixCSC{Float64,Int64},
+                      p::femProblem, gamma, #Sth::SparseMatrixCSC{Float64,Int64},
                       nquadPhi::Dict{Symbol, Array{Array{Array{Float64,1},2},1}},
                       nquadPoints::Array{Array{Float64,2},1},MrT::SparseMatrixCSC{Float64,Int64}, MrV::SparseMatrixCSC{Float64,Int64},
                       MIS::MIS,t0::Float64,dt::Float64,ns::Int64)
@@ -25,10 +25,9 @@ function splitExplicit(y0::solution,Y::Array{solution,1},FY::Array{solution,1},S
     for j in 1:i
       Y[i+1]=MIS.alpha[i+1,j]*(Y[j]-y0)+Y[i+1];
     end
-
-    #FY[i], SthY[i]=advection(p,gamma,Y[i],nquadPoints,nquadPhi,MrT,MrV);
-    FY[i]=advection(p,gamma,Y[i],nquadPoints,nquadPhi,MrT,MrV);
-    SthY[i]=Sth;
+    FY[i], SthY[i]=advection(p,gamma,Y[i],nquadPoints,nquadPhi,MrT,MrV);
+    #FY[i]=advection(p,gamma,Y[i],nquadPoints,nquadPhi,MrT,MrV);
+    #SthY[i]=Sth;
 
     fSlow=createSolution(length(y0.rho),length(y0.rhoV),length(y0.rhoTheta),length(y0.v),length(y0.theta));
     SthSlow=spzeros(size(SthY[i],1),size(SthY[i],2))

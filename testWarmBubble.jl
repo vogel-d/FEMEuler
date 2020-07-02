@@ -1,10 +1,25 @@
 include("modulesCE.jl")
+#include("advectionStiffN.jl")
+
+const stencilOrder=2;
+const recoveryOrder=2;
+
+const recoverySpace=Symbol("R$recoveryOrder")
+const recoverySpaceVec=Symbol("VecR$(recoveryOrder)")
+
+@recovery(recoverySpace,recoverySpaceVec)
 
 function testWarmBubble()
     filename = "warmBubble";
 
     #order: comp, compHigh, compRec, compDG
-
+    femType=Dict(:rho=>[:DG0, :DG0, recoverySpace],
+                 :rhoV=>[:RT0, :RT0, recoverySpaceVec],
+                 :rhoTheta=>[:DG0, :DG0, recoverySpace],
+                 :p=>[:DG0],
+                 :v=>[:RT0],
+                 :theta=>[:DG0]);
+    #=
     femType=Dict(:rho=>[:DG0, :P1, :DG1, :DG0],
                  :rhoV=>[:RT0, :VecP1, :VecDG1, :RT0B],
                  :rhoTheta=>[:DG0, :P1, :DG1, :DG0],
@@ -13,7 +28,7 @@ function testWarmBubble()
                  :theta=>[:DG0]);
 
     #higher spaces
-    #=
+
     femType=Dict(:rho=>[:DG1, :P1, :DG1, :DG0],
                  :rhoV=>[:RT1, :VecP1, :VecDG1, :RT0B],
                  :rhoTheta=>[:DG1, :P1, :DG1, :DG0],
@@ -30,7 +45,8 @@ function testWarmBubble()
 
     #adaptGeometry!(m,(0.3,0.3),false); #sin perbutation
 
-    p=femProblem(m, femType,t=:compressible, advection=advection, taskRecovery=taskRecovery);
+    p=femProblem(m, femType,t=:compressible, advection=advection, taskRecovery=taskRecovery,
+    stencilOrder=stencilOrder, recoveryOrder=recoveryOrder,);
 
     gamma=0.5; #upwind
     UMax=20.0; #UMax determines the advection in x direction
@@ -58,27 +74,30 @@ function testWarmBubble()
         rad=sqrt((x-xCM)^2+(z-zCM)^2);
         return th0+(rad<r0)*(DeltaTh1*cos(0.5*pi*rad/r0)^2);
     end
-    fv1(xz::Array{Float64,1})=UMax;
-    fv2(xz::Array{Float64,1})=0.0;
-    fvel=[fv1, fv2];
+    function fvel(xz::Array{Float64,1})
+        return [UMax, 0.0]
+    end
     f=Dict(:rho=>frho,:theta=>ftheta,:v=>fvel);
 
     assembMass!(p);
     assembStiff!(p);
-    p.boundaryValues[(:theta,:P1)]=300.0*ones(p.degFBoundary[:P1].numB-p.degFBoundary[:P1].num);
+    #p.boundaryValues[(:theta,:P1)]=300.0*ones(p.degFBoundary[:P1].numB-p.degFBoundary[:P1].num);
     applyStartValues!(p, f);
 
     rho0=p.solution[0.0].rho;
     p.solution[0.0].rhoTheta=projectChi(p,rho0,p.solution[0.0].theta,:rho,:theta);
     p.solution[0.0].rhoV=projectChi(p,rho0,p.solution[0.0].v,:rho,:v);
 
-    taskRecovery ? pos=[1,3] : pos=[1];
+    unstructured_vtk(p, 0.0, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename*"0")
+
     advectionTypes=Symbol[];
     for i in [:rho,:rhoTheta,:rhoV]
-        append!(advectionTypes,femType[i][pos]);
+        push!(advectionTypes,femType[i][1]);
+        (taskRecovery && length(femType[i])==4) && push!(advectionTypes,femType[i][3]);
     end
-    nquadPhi, nquadPoints=coordTrans(m.meshType, m.normals, collect(Set(advectionTypes)), size(p.kubWeights,2));
+    nquadPhi, nquadPoints=coordTrans(m, m.normals, advectionTypes, size(p.kubWeights,2));
     setEdgeData!(p, :v)
+    recoveryMatrix!(p)
 
     MrT=assembMass(p.degFBoundary[femType[:rhoTheta][1]], m, p.kubPoints, p.kubWeights);
     MrV=assembMass(p.degFBoundary[femType[:rhoV][1]], m, p.kubPoints, p.kubWeights);
