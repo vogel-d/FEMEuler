@@ -17,13 +17,13 @@ include("transformation.jl")
 
 include("getOrderBoundary.jl")
 include("CompoundData.jl")
-include("splitCompoundMesh.jl")
-include("initAssembledPhi.jl")
 include("getElementProperties.jl")
 include("degF.jl");
 include("generateMesh.jl")
 include("refineMesh.jl")
 include("femProblem.jl");
+include("splitCompoundMesh.jl")
+include("initAssembledPhi.jl")
 
 include("l2g.jl")
 include("jacobi.jl");

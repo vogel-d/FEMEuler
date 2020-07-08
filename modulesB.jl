@@ -18,8 +18,6 @@ include("transformation.jl")
 include("getSpace.jl")
 
 include("compoundData.jl")
-include("splitCompoundMesh.jl")
-include("initAssembledPhi.jl")
 
 include("getOrderBoundary.jl")
 include("getElementProperties.jl")
@@ -27,6 +25,8 @@ include("degF.jl");
 include("generateMesh.jl")
 include("refineMesh.jl")
 include("femProblem.jl");
+include("splitCompoundMesh.jl")
+include("initAssembledPhi.jl")
 
 include("l2g.jl")
 include("jacobi.jl");
