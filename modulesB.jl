@@ -18,6 +18,8 @@ include("transformation.jl")
 include("getSpace.jl")
 
 include("compoundData.jl")
+include("splitCompoundMesh.jl")
+include("initAssembledPhi.jl")
 
 include("getOrderBoundary.jl")
 include("getElementProperties.jl")

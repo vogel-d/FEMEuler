@@ -15,6 +15,9 @@ include("meshFunctions.jl");
 include("findall.jl");
 include("transformation.jl")
 
+include("compoundData.jl")
+include("splitCompoundMesh.jl")
+include("initAssembledPhi.jl")
 include("getOrderBoundary.jl")
 include("getElementProperties.jl")
 include("degF.jl");
