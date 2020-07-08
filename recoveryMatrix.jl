@@ -89,7 +89,7 @@ function recoveryMatrix(degFT::degF{1,:H1}, recoverySpace::Symbol, stencil::Arra
                 z+=1;
             end
         end
-        recoveryM[f]=qr(lM, Val(false))
+        recoveryM[f]=qr(lM, Val(true))
     end
     return recoveryM;
 end
@@ -179,7 +179,7 @@ function recoveryMatrix(degFT::degF{2,:H1div}, recoverySpace::Symbol,
                 z+=1;
             end
         end
-        recoveryM[f]=qr(lM, Val(false))
+        recoveryM[f]=qr(lM, Val(true))
     end
     return recoveryM;
 end

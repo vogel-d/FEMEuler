@@ -181,7 +181,6 @@ function discGalerkinCellsR!(M::Array{Float64,2},
                     w[d][l,r]=0.0;
                     for i in 1:nW
                         w[d][l,r]+=wval[nW*(k-1)+i].*phiW[d,i];
-                        #w[d][l,r]+=wval[globalNumW[i]]*phiW[d,i](transformRecoveryCoord(n,t1,t2,transformation(m,coord,kubPoints[1,l],kubPoints[2,r])));
                     end
                 end
             end

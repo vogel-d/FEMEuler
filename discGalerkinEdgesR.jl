@@ -94,16 +94,16 @@ function discGalerkinEdgesR!(M::Array{Float64,2},
         for j in 1:nF
             for i in 1:nT
                 for r in 1:sk
+                    #=
                     lM11[i,j]+=quadWeights[r]*w1[r]*phiTn1[i][r]*(n1[1]*phiFn1[1,j][r]+n1[2]*phiFn1[2,j][r]);
                     lM12[i,j]+=quadWeights[r]*w2[r]*phiTn1[i][r]*(n2[1]*phiFn2[1,j][r]+n2[2]*phiFn2[2,j][r]);
                     lM21[i,j]+=quadWeights[r]*w1[r]*phiTn2[i][r]*(n1[1]*phiFn1[1,j][r]+n1[2]*phiFn1[2,j][r]);
                     lM22[i,j]+=quadWeights[r]*w2[r]*phiTn2[i][r]*(n2[1]*phiFn2[1,j][r]+n2[2]*phiFn2[2,j][r]);
-                    #=
+                    =#
                     lM11[i,j]+=le*quadWeights[r]*w1[r]*phiTn1[i][r]*ddJe1[r]*(n1[1]*phiFn1[1,j][r]+n1[2]*phiFn1[2,j][r]);
                     lM12[i,j]+=le*quadWeights[r]*w2[r]*phiTn1[i][r]*ddJe2[r]*(n2[1]*phiFn2[1,j][r]+n2[2]*phiFn2[2,j][r]);
                     lM21[i,j]+=le*quadWeights[r]*w1[r]*phiTn2[i][r]*ddJe1[r]*(n1[1]*phiFn1[1,j][r]+n1[2]*phiFn1[2,j][r]);
                     lM22[i,j]+=le*quadWeights[r]*w2[r]*phiTn2[i][r]*ddJe2[r]*(n2[1]*phiFn2[1,j][r]+n2[2]*phiFn2[2,j][r]);
-                    =#
                 end
             end
         end
@@ -228,16 +228,16 @@ function discGalerkinEdgesR!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::A
         for j in 1:nF
             for i in 1:nT
                 for r in 1:sk
+                    #=
                     lM11[i,j]+=quadWeights[r]*w1[r]*phiTn1[i][r]*(n1[1]*phiFn1[1,j][r]+n1[2]*phiFn1[2,j][r]);
                     lM12[i,j]+=quadWeights[r]*w2[r]*phiTn1[i][r]*(n2[1]*phiFn2[1,j][r]+n2[2]*phiFn2[2,j][r]);
                     lM21[i,j]+=quadWeights[r]*w1[r]*phiTn2[i][r]*(n1[1]*phiFn1[1,j][r]+n1[2]*phiFn1[2,j][r]);
                     lM22[i,j]+=quadWeights[r]*w2[r]*phiTn2[i][r]*(n2[1]*phiFn2[1,j][r]+n2[2]*phiFn2[2,j][r]);
-                    #=
+                    =#
                     lM11[i,j]+=le*quadWeights[r]*w1[r]*phiTn1[i][r]*ddJe1[r]*(n1[1]*phiFn1[1,j][r]+n1[2]*phiFn1[2,j][r]);
                     lM12[i,j]+=le*quadWeights[r]*w2[r]*phiTn1[i][r]*ddJe2[r]*(n2[1]*phiFn2[1,j][r]+n2[2]*phiFn2[2,j][r]);
                     lM21[i,j]+=le*quadWeights[r]*w1[r]*phiTn2[i][r]*ddJe1[r]*(n1[1]*phiFn1[1,j][r]+n1[2]*phiFn1[2,j][r]);
                     lM22[i,j]+=le*quadWeights[r]*w2[r]*phiTn2[i][r]*ddJe2[r]*(n2[1]*phiFn2[1,j][r]+n2[2]*phiFn2[2,j][r]);
-                    =#
                 end
             end
         end
