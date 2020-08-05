@@ -26,7 +26,7 @@ function vtk(m::mesh, degF::degF{1}, sol::Array{Float64,1}, femType::Symbol, fil
         inds=inc[off[k]:off[k+1]-1];
         push!(cells, MeshCell(celltype, inds))
     end
-    fComp=getElementProperties(femType,m.meshType,mx,my);
+    fComp=getElementProperties(femType,m.meshType,m.geometry.dim,mx,my);
     J=Array{Float64,2}(undef,m.geometry.dim,m.topology.dim);
     dJ=0.0;
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
@@ -73,7 +73,7 @@ function vtk(m::mesh, degF::degF{2}, sol::Array{Float64,1}, femType::Symbol, fil
         inds=inc[off[k]:off[k+1]-1];
         push!(cells, MeshCell(celltype, inds))
     end
-    fComp=getElementProperties(femType,m.meshType,mx,my);
+    fComp=getElementProperties(femType,m.meshType,m.geometry.dim,mx,my);
     J=Array{Float64,2}(undef,m.geometry.dim,m.topology.dim);
     dJ=0.0;
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
@@ -161,7 +161,7 @@ function vtk(m::mesh, rx::Int, ry::Int, degF::degF{1}, sol::Array{Float64,1}, fe
         end
     end
     for i in 1:size(rcoord,2)
-        fComp[i]=getElementProperties(femType,mf.meshType,rcoord[1,i],rcoord[2,i]);
+        fComp[i]=getElementProperties(femType,mf.meshType,mf.geometry.dim,rcoord[1,i],rcoord[2,i]);
     end
     incm=mf.topology.incidence["CF"]
     offm=mf.topology.offset["CF"]
@@ -233,7 +233,7 @@ function vtk(m::mesh, rx::Int, ry::Int, degF::degF{2}, sol::Array{Float64,1}, fe
         end
     end
     for i in 1:size(rcoord,2)
-        fComp[i]=getElementProperties(femType,mf.meshType,rcoord[1,i],rcoord[2,i]);
+        fComp[i]=getElementProperties(femType,mf.meshType,mf.geometry.dim,rcoord[1,i],rcoord[2,i]);
     end
     incm=mf.topology.incidence["CF"]
     offm=mf.topology.offset["CF"]
