@@ -2,25 +2,25 @@ include("modulesSphere.jl")
 
 function testGalewsky()
 
-    filename = "galewskyIL";
+    filename = "galewskyII";
 
     stencilOrder=2;
     recoveryOrder=2;
 
     recoverySpace=Symbol("R$recoveryOrder")
-    recoverySpaceVec=Symbol("VecR$recoveryOrder")
+    recoverySpaceVec=Symbol("VecR$(recoveryOrder)S")
 
     #order: comp, compTest, recoverySpace
     femType=Dict(:rho=>[:DG0, :DG0, recoverySpace],
                  #:rhoV=>[:RT0, :RT0, recoverySpaceVec],
-                 :rhoV=>[:RT0, :VecP1S, :VecDG1S, :RT0B],
+                 :rhoV=>[:RT0, :VecP1, :VecDG1, :RT0B],
                  :rhoTheta=>[:DG0, :DG0, recoverySpace],
                  :p=>[:DG0],
                  :v=>[:RT0],
                  :theta=>[:DG0]);
     #=
     femType=Dict(:rho=>[:DG0, :P1, :DG1, :DG0],
-                 :rhoV=>[:RT0, :VecP1S, :VecDG1S, :RT0B],
+                 :rhoV=>[:RT0, :VecP1, :VecDG1, :RT0B],
                  :rhoTheta=>[:DG0, :P1, :DG1, :DG0],
                  :p=>[:DG0],
                  :v=>[:RT0],
@@ -37,17 +37,17 @@ function testGalewsky()
     =#
 
     taskRecovery=true;
-    advection=true;
+    adv=true;
 
-    m=generateCubedSphere(100,6300000.0,0,:cube1)
+    m=generateCubedSphere(80,6300000.0,0,:cube1)
 
-    p=femProblem(m, femType,t=:shallow, advection=advection, taskRecovery=taskRecovery,
+    p=femProblem(m, femType,t=:shallow, advection=adv, taskRecovery=taskRecovery,
     stencilOrder=stencilOrder, recoveryOrder=recoveryOrder,);
 
     gamma=0.5; #upwind
     MISMethod=MIS(:MIS4_4); #method of time integration
 
-    dt=300.0 #200.0 #50.0 #1200.0;
+    dt=200.0 #200.0 #50.0 #1200.0;
     ns=120;
     EndTime=6.0*86400.0;
     nIter=Int64(EndTime/dt);
@@ -126,14 +126,15 @@ function testGalewsky()
     FY=Array{solution,1}(undef,MISMethod.nStage);
     SthY=Array{SparseMatrixCSC{Float64,Int64},1}(undef,MISMethod.nStage);
     Time=0.0;
-    println(isapprox(y.rhoTheta,y.rho))
+
+    Sth=advection(p,gamma,y,nquadPoints,nquadPhi,MrT)
     for i=1:nIter
-      @time y=splitExplicit(y,Y,FY,SthY,p,gamma,nquadPhi,nquadPoints,MrT,MrV,MISMethod,Time,dt,ns);
+      @time y=splitExplicit(y,Y,FY,SthY,p,gamma,Sth,nquadPhi,nquadPoints,MrT,MrV,MISMethod,Time,dt,ns);
       Time+=dt
       p.solution[Time]=y;
       p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
-      if mod(i,16)==0
+      if mod(i,8)==0
           p2=deepcopy(p);
           unstructured_vtk(p2, Time, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename*"$i", printSpherical=true)
       end

@@ -1,20 +1,22 @@
 include("modulesSphereAdv.jl")
+include("advectionStiffN.jl")
 
-function testSphereAdvS()
+stencilOrder=2;
+recoveryOrder=2;
 
-    filename = "testSphereAdvS";
+recoverySpace=Symbol("R$recoveryOrder")
+recoverySpaceVec=Symbol("VecR$(recoveryOrder)S")
 
-    case=:zPanel
+@recovery(recoverySpace,recoverySpaceVec)
 
-    stencilOrder=1;
-    recoveryOrder=1;
+function testSphereAdv2()
 
-    recoverySpace=Symbol("R$recoveryOrder")
-    recoverySpaceVec=Symbol("VecR$(recoveryOrder)S")
+    filename = "testSphereVecTROldSNNSS";
 
-    #order: comp, compHigh, compRec, compDG
+    #order: comp, compTest, recoverySpace
     femType=Dict(:rho=>[:DG0, :DG0, recoverySpace],
                  :rhoV=>[:RT0, :RT0, recoverySpaceVec],
+                 #:rhoV=>[:RT0, :VecP1, :VecDG1, :RT0B],
                  :rhoTheta=>[:DG0, :DG0, recoverySpace],
                  :p=>[:DG0],
                  :v=>[:RT0],
@@ -26,9 +28,9 @@ function testSphereAdvS()
                  :p=>[:DG0],
                  :v=>[:RT0],
                  :theta=>[:DG0]);
-
+                 =#
     #higher spaces
-
+    #=
     femType=Dict(:rho=>[:DG1, :P1, :DG1, :DG0],
                  :rhoV=>[:RT1, :VecP1, :VecDG1, :RT0B],
                  :rhoTheta=>[:DG1, :P1, :DG1, :DG0],
@@ -38,65 +40,48 @@ function testSphereAdvS()
     =#
 
     taskRecovery=true;
-    advection=true;
+    adv=true;
 
-    #m=generateCubedSphere(20,6300000.0)
-    #m=generateCubedSphere(5,6300000.0)
-    m=generateCubedSphere(3,1.0)
+    #m=generateCubedSphere(40,6300000.0,0,:cube1)
+    #m=generateCubedSphere(40,6300000.0)
+    m=generateCubedSphere(15,6300000.0,0,:cube1)
+    #m=generateCubedSphere(3,6300000.0,0,:cube1)
 
-    p=femProblem(m, femType,t=:shallow, advection=advection, taskRecovery=taskRecovery, stencilOrder=stencilOrder);
-    #return p;
+    p=femProblem(m, femType,t=:compressible, advection=adv,
+        taskRecovery=taskRecovery, g=4, recoveryOrder=recoveryOrder,stencilOrder=stencilOrder);
+
     gamma=0.5; #upwind
-    UMax=10.0; #UMax determines the advection in x direction
-    MISMethod=MIS(:MIS2); #method of time integration
+    UMax=100.0; #UMax determines the advection in x direction
+    MISMethod=MIS(:MISRK2); #method of time integration
 
-    dt=50.0;
-    ns=10;
-    EndTime=50.0
+    dt=500.0 #500.0#2000.0
+    ns=15;
+    EndTime=80000.0
     nIter=Int64(EndTime/dt);
+    #nIter=1
 
     #start functions
-    Rad=6300000.0
     function frho(xyz::Array{Float64,1})
         return 1.0
     end
     function ftheta(xyz::Array{Float64,1})
         x=xyz[1]; y=xyz[2]; z=xyz[3];
+
+        #y+
         lat0=4.0*atan(1.0)
-        lon0=2.0*atan(1.0) #1.25*atan(1.0) #1.5*atan(1.0)
+        lon0=2.0*atan(1.0)
 
-        #=
-        #y-
-        lat0=12.0*atan(1.0)
-        lon0=6.0*atan(1.0)
-        #x+
-        lat0=8.0*atan(1.0)
-        lon0=4.0*atan(1.0)
-        #x-
-        lat0=16.0*atan(1.0)
-        lon0=8.0*atan(1.0)
-        #z+
-        lat0=6.0*atan(1.0)
-        lon0=3.0*atan(1.0)
-        #z-
-        lat0=2.0*atan(1.0)
-        lon0=0.0*atan(1.0)
-        =#
-
-        #r=sqrt(x*x+y*y+z*z)
-        #lat=asin(z/r)
-        #lon=atan(x,y)
         lon,lat,r=cart2sphere(x,y,z);
         d=acos(sin(lat0)*sin(lat)+cos(lat0)*cos(lat)*cos(lon-lon0))
-        if abs(d)<=0.1 #0.8 #0.1
+        if abs(d)<=0.8
+        #if abs(d)<=0.4 #0.8 #0.1
             conc=1.0
         else
-            conc=0.0
+            conc=0.1
         end
         return conc;
-
-        #return 1.0;
     end
+
     function fvel(xyz::Array{Float64,1})
         x=xyz[1]; y=xyz[2]; z=xyz[3];
         lon,lat,r=cart2sphere(x,y,z);
@@ -118,10 +103,10 @@ function testSphereAdvS()
             lat0=4.0*atan(1.0)
             lon0=2.0*atan(1.0) #1.25*atan(1.0) #1.5*atan(1.0)
             d=acos(sin(lat0)*sin(lat)+cos(lat0)*cos(lat)*cos(lon-lon0))
-            if abs(d)<=0.1 #0.8 #0.1
+            if abs(d)<=0.8 #0.8 #0.1
                 uS=1.0
             else
-                uS=0.0
+                uS=0.1
             end
             return velCa([uS,0.0,0.0],lon,lat)
         #end
@@ -129,43 +114,52 @@ function testSphereAdvS()
     f=Dict(:rho=>frho,:theta=>ftheta,:v=>fvel);
 
     assembMass!(p);
-    assembStiff!(p);
+    #assembStiff!(p);
     applyStartValues!(p, f);
 
     ha=zeros(Float64,m.topology.size[3])
-    if case==:zPanel
-        ha[[46,49,52]].=3.0
-        ha[[47,50,53]].=2.0
-        ha[[48,51,54]].=1.0
-    elseif case==:xPanel
-        ha[[19,22,25]].=3.0
-        ha[[20,23,26]].=2.0
-        ha[[21,24,27]].=1.0
+    #ha[5]=1.0
+    #ha[14]=1.0
+    ha[23]=1.0
+    #ha[32]=1.0
+    #=
+    for i in 1:9
+        ha[i]=Float64(i)
     end
-    p.solution[0.0].theta=ha
+    =#
+    #p.solution[0.0].theta=ha
+
 
     rho0=p.solution[0.0].rho;
     p.solution[0.0].rhoTheta=projectChi(p,rho0,p.solution[0.0].theta,:rho,:theta);
     p.solution[0.0].rhoV=projectChi(p,rho0,p.solution[0.0].v,:rho,:v);
 
+    #refined_vtk(p, 2, 0.0, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename*"RF", printSpherical=true)
+
     unstructured_vtk(p, 0.0, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename*"0", printSpherical=true)
 
     function V(xyz::Array{Float64,1})
       x=xyz[1]; y=xyz[2]; z=xyz[3];
-      lon,lat,r=cart2sphere(x,y,z);
-      uS=UMax*cos(lat)
-      return velCa([uS,0.0,0.0],lon,lat)
+      λ,θ,r=cart2sphere(x,y,z);
+      α=0.0 #0.0, 0.05, pi/2-0.05, pi/2
+      uS=UMax*(cos(θ)*cos(α)+sin(θ)*cos(λ)*sin(α))
+      vS=-UMax*sin(λ)*sin(α)
+      return velCa([uS,vS,0.0],λ,θ)
     end
+
     Vfcomp=:RT0
     Vf=projectAdvection(p,V,Vfcomp);
+    #vtk(m,p.degFBoundary[Vfcomp],Vector(Vf),Vfcomp,"testVf", printSpherical=true)
 
-    taskRecovery ? pos=[1,3] : pos=[1];
     advectionTypes=Symbol[];
     for i in [:rho,:rhoTheta,:rhoV]
-        append!(advectionTypes,femType[i][pos]);
+        push!(advectionTypes,femType[i][1]);
+        (taskRecovery && length(femType[i])==4) && push!(advectionTypes,femType[i][3]);
     end
     nquadPhi, nquadPoints=coordTrans(m, m.normals, advectionTypes, size(p.kubWeights,2));
     setEdgeData!(p, :v)
+    recoveryMatrix!(p)
+
 
 
     MrT=assembMass(p.degFBoundary[femType[:rhoTheta][1]], m, p.kubPoints, p.kubWeights);
@@ -178,6 +172,23 @@ function testSphereAdvS()
     FY=Array{solution,1}(undef,MISMethod.nStage);
     SthY=Array{SparseMatrixCSC{Float64,Int64},1}(undef,MISMethod.nStage);
     Time=0.0;
+    #=
+    for i=1:nIter
+      ry=advection(p,gamma,y,Vf,Vfcomp,nquadPoints,nquadPhi,MrT,MrV);
+      yNeu=y+0.5*dt*ry
+      ry=advection(p,gamma,yNeu,Vf,Vfcomp,nquadPoints,nquadPhi,MrT,MrV);
+      y+=dt*ry;
+      Time+=dt
+      p.solution[Time]=y;
+      p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
+      p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
+      if mod(i,8)==0
+          p2=deepcopy(p);
+          unstructured_vtk(p2, Time, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename*"$i", printSpherical=true)
+      end
+      println(Time)
+    end
+    =#
 
     for i=1:nIter
       @time y=splitExplicit(y,Y,FY,SthY,p,Vfcomp,Vf,gamma,nquadPhi,nquadPoints,MrT,MrV,MISMethod,Time,dt,ns);
@@ -185,7 +196,7 @@ function testSphereAdvS()
       p.solution[Time]=y;
       p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
-      if mod(i,4)==0
+      if mod(i,8)==0
           p2=deepcopy(p);
           unstructured_vtk(p2, Time, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename*"$i", printSpherical=true)
       end

@@ -1,26 +1,27 @@
 include("modulesSphereAdv.jl")
+include("advectionStiffN.jl")
 
 function testSphereAdv()
 
-    filename = "testSphereAdvTRSH";
+    filename = "testSphereAdv";
 
-    stencilOrder=2;
-    recoveryOrder=2;
+    stencilOrder=1;
+    recoveryOrder=1;
 
     recoverySpace=Symbol("R$recoveryOrder")
-    recoverySpaceVec=Symbol("VecR$recoveryOrder")
+    recoverySpaceVec=Symbol("VecR$(recoveryOrder)S")
 
     #order: comp, compTest, recoverySpace
     femType=Dict(:rho=>[:DG0, :DG0, recoverySpace],
-                 #:rhoV=>[:RT0, :RT0, recoverySpaceVec],
-                 :rhoV=>[:RT0, :VecP1S, :VecDG1S, :RT0B],
+                 :rhoV=>[:RT0, :RT0, recoverySpaceVec],
+                 #:rhoV=>[:RT0, :VecP1, :VecDG1, :RT0B],
                  :rhoTheta=>[:DG0, :DG0, recoverySpace],
                  :p=>[:DG0],
                  :v=>[:RT0],
                  :theta=>[:DG0]);
     #=
     femType=Dict(:rho=>[:DG0, :P1, :DG1, :DG0],
-                 :rhoV=>[:RT0, :VecP1S, :VecDG1S, :RT0B],
+                 :rhoV=>[:RT0, :VecP1, :VecDG1, :RT0B],
                  :rhoTheta=>[:DG0, :P1, :DG1, :DG0],
                  :p=>[:DG0],
                  :v=>[:RT0],
@@ -39,9 +40,9 @@ function testSphereAdv()
     taskRecovery=true;
     adv=true;
 
-    m=generateCubedSphere(15,sqrt(3.0),0,:cube1)
+    m=generateCubedSphere(30,sqrt(3.0),0,:cube1)
 
-    p=femProblem(m, femType,t=:shallow, advection=adv,
+    p=femProblem(m, femType,t=:compressible, advection=adv,
         taskRecovery=taskRecovery, stencilOrder=stencilOrder,
         recoveryOrder=recoveryOrder, g=4);
 
@@ -95,9 +96,9 @@ function testSphereAdv()
         elseif caseVel==:BlobS
         =#
             lat0=4.0*atan(1.0)
-            lon0=1.8*atan(1.0) #1.25*atan(1.0) #1.5*atan(1.0)
+            lon0=2.0*atan(1.0)   #3.0*atan(1.0)
             d=acos(sin(lat0)*sin(lat)+cos(lat0)*cos(lat)*cos(lon-lon0))
-            if abs(d)<=0.4 #0.8 #0.1
+            if abs(d)<=0.8 #0.8 #0.1
                 uS=1.0
             else
                 uS=0.1
@@ -137,6 +138,7 @@ function testSphereAdv()
     end
     nquadPhi, nquadPoints=coordTrans(m, m.normals, advectionTypes, size(p.kubWeights,2));
     setEdgeData!(p, :v)
+    recoveryMatrix!(p)
 
     MrT=assembMass(p.degFBoundary[femType[:rhoTheta][1]], m, p.kubPoints, p.kubWeights);
     MrV=assembMass(p.degFBoundary[femType[:rhoV][1]], m, p.kubPoints, p.kubWeights);
@@ -155,7 +157,7 @@ function testSphereAdv()
       p.solution[Time]=y;
       p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
-      if mod(i,8)==0
+      if mod(i,4)==0
           p2=deepcopy(p);
           unstructured_vtk(p2, Time, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename*"$i", printSpherical=true)
       end

@@ -13,15 +13,15 @@ function testAdvectionVelocity()
 
     #order: comp, compTest, recoverySpace
     femType=Dict(:rho=>[:DG0, :DG0, recoverySpace],
-                 #:rhoV=>[:RT0, :RT0, recoverySpaceVec],
-                 :rhoV=>[:RT0, :VecP1S, :VecDG1S, :RT0B],
+                 :rhoV=>[:RT0, :RT0, recoverySpaceVec],
+                 #:rhoV=>[:RT0, :VecP1, :VecDG1, :RT0B],
                  :rhoTheta=>[:DG0, :DG0, recoverySpace],
                  :p=>[:DG0],
                  :v=>[:RT0],
                  :theta=>[:DG0]);
     #=
     femType=Dict(:rho=>[:DG0, :P1, :DG1, :DG0],
-                 :rhoV=>[:RT0, :VecP1S, :VecDG1S, :RT0B],
+                 :rhoV=>[:RT0, :VecP1, :VecDG1, :RT0B],
                  :rhoTheta=>[:DG0, :P1, :DG1, :DG0],
                  :p=>[:DG0],
                  :v=>[:RT0],
