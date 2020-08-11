@@ -71,3 +71,20 @@ function getStencil(m::mesh, order::Int)
     end
     return stencil, stencilBoundary
 end
+
+function getStencil(m::mesh, order::Float64)
+    stencil=Array{Array{Int,1},1}(undef,m.topology.size[3]);
+    stencilBoundary=spzeros(Int,m.topology.dim,m.topology.size[3])
+    meshConnectivity!(m,2,2)
+    inc=m.topology.incidence["22"]
+    off=m.topology.offset["22"]
+
+    cells=Int[];
+    for f in 1:m.topology.size[3]
+        empty!(cells)
+        push!(cells,f)
+        append!(cells,inc[off[f]:off[f+1]-1])
+        stencil[f]=cells;
+    end
+    return stencil, stencilBoundary
+end
