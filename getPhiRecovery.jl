@@ -3,10 +3,25 @@ macro recovery(recoverySpace, recoverySpaceVec)
     quote
         rS = $(esc(recoverySpace))
         rSV = $(esc(recoverySpaceVec))
-        if rS==:R1
+        if rS==:DG1
             function $(esc(fname))(phi::Array{Float64,1},xyz::Array{Float64,1})
 
-                phi[:]=[1.0, xyz[1], xyz[2]]
+                #phi[:]=[1.0, xyz[1], xyz[2]]
+                phi[:]=[(1-xyz[1])*(1-xyz[2]), xyz[1]*(1-xyz[2]), xyz[1]*xyz[2], (1-xyz[1])*xyz[2]]
+
+                return nothing
+            end
+        elseif rS==:DGLin
+            function $(esc(fname))(phi::Array{Float64,1},xyz::Array{Float64,1})
+
+                phi[:]=[1.0, xyz[1]-0.5, xyz[2]-0.5]
+
+                return nothing
+            end
+        elseif rS==:DGQuad
+            function $(esc(fname))(phi::Array{Float64,1},xyz::Array{Float64,1})
+
+                phi[:]=[1.0, xyz[1]-0.5, xyz[2]-0.5, (xyz[1]-0.5)*(xyz[2]-0.5), (xyz[1]-0.5)^2, (xyz[2]-0.5)^2]
 
                 return nothing
             end
@@ -19,11 +34,12 @@ macro recovery(recoverySpace, recoverySpaceVec)
             end
         end
 
-        if rSV==:VecR1
+        if rSV==:VecDG1
             function $(esc(fname))(phi::Array{Float64,2},xyz::Array{Float64,1})
 
-                phi[:]=[1.0 xyz[1] xyz[2] 0.0 0.0 0.0;
-                     0.0 0.0 0.0 1.0 xyz[1] xyz[2]]
+                phi[:]=[(1-xyz[1])*(1-xyz[2]) 0.0    0.0    xyz[1]*(1-xyz[2])  0.0    0.0    xyz[1]*xyz[2]  0.0    0.0    (1-xyz[1])*xyz[2]  0.0    0.0;
+                     0.0   (1-xyz[1])*(1-xyz[2])  0.0    0.0    xyz[1]*(1-xyz[2])  0.0    0.0    xyz[1]*xyz[2]  0.0    0.0    (1-xyz[1])*xyz[2]  0.0;
+                     0.0   0.0    (1-xyz[1])*(1-xyz[2])  0.0    0.0    xyz[1]*(1-xyz[2])  0.0    0.0    xyz[1]*xyz[2]  0.0    0.0    (1-xyz[1])*xyz[2]]
 
                 return nothing
             end
@@ -60,12 +76,18 @@ end
 
 
 function getPhiRecoveryLength(recoverySpace::Symbol)
-    if recoverySpace==:R1
+    if recoverySpace==:DG1
+        #nW=3;
+        nW=4
+    elseif recoverySpace==:DGLin
         nW=3;
+    elseif recoverySpace==:DGQuad
+        nW=6;
     elseif recoverySpace==:R2
         nW=6;
-    elseif recoverySpace==:VecR1
-        nW=6;
+    elseif recoverySpace==:VecDG1
+        #nW=6;
+        nW=12
     elseif recoverySpace==:VecR1S
         nW=9;
     elseif recoverySpace==:VecR2

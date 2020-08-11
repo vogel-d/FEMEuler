@@ -122,6 +122,14 @@ function getSphereElementProperties(type::Symbol)
     mDyh0_10(x,y)=-Dyh0_10(x,y)
     mDyh0_11(x,y)=-Dyh0_11(x,y)
 
+
+    f1(x,y)=1.0
+    fx(x,y)=x-0.5
+    fy(x,y)=y-0.5
+    fxy(x,y)=(x-0.5)*(y-0.5)
+    fx2(x,y)=(x-0.5)^2
+    fy2(x,y)=(y-0.5)^2
+
     if type==:DG0
         phi=[h0_0];
         divphi=[null];
@@ -157,6 +165,32 @@ function getSphereElementProperties(type::Symbol)
         nVert=0;
 
         cm=Dict([1,2]=>[0,0,0,0], [2,3]=>[0,0,0,0], [3,4]=>[0,0,0,0], [1,4]=>[0,0,0,0]);
+
+    elseif type==:DGLin
+        phi=[f1,fx,fy];
+        divphi=[null, null, null];
+        gradphi=[null f1 null;
+                 null null f1];
+
+        nFace=3;
+        nEdge=0;
+        nVert=0;
+
+        cm=Dict([1,2]=>[0,0,0], [2,3]=>[0,0,0], [3,4]=>[0,0,0], [1,4]=>[0,0,0]);
+
+    elseif type==:DGQuad
+        phi=[f1,fx,fy,fxy,fx2,fy2];
+        divphi=[null, null, null, null, null, null];
+        dxfx2(x,y)=2*(x-0.5)
+        dyfy2(x,y)=2*(y-0.5)
+        gradphi=[null f1 null fy dxfx2 null;
+                 null null f1 fy null dyfy2];
+
+        nFace=6;
+        nEdge=0;
+        nVert=0;
+
+        cm=Dict([1,2]=>[0,0,0,0,0,0], [2,3]=>[0,0,0,0,0,0], [3,4]=>[0,0,0,0,0,0], [1,4]=>[0,0,0,0,0,0]);
 
     elseif type==:P2
         phi=[h21_21, h21_20, h22_21, h21_22, h20_21, h20_20, h22_20, h22_22, h20_22]
