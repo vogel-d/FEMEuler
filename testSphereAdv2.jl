@@ -1,17 +1,20 @@
 include("modulesSphereAdv.jl")
-include("advectionStiffN.jl")
+#include("advectionStiffN.jl")
 
 stencilOrder=2;
-recoveryOrder=2;
+recoveryOrder=1;
 
-recoverySpace=Symbol("R$recoveryOrder")
-recoverySpaceVec=Symbol("VecR$(recoveryOrder)S")
+#recoverySpace=Symbol("R$recoveryOrder")
+#recoverySpaceVec=Symbol("VecR$(recoveryOrder)S")
+
+recoverySpace=Symbol("DGQuad")
+recoverySpaceVec=Symbol("VecDG$(recoveryOrder)")
 
 @recovery(recoverySpace,recoverySpaceVec)
 
 function testSphereAdv2()
 
-    filename = "testSphereVecTROldSNNSS";
+    filename = "testSphereVecNRecoveryQuadStencil";
 
     #order: comp, compTest, recoverySpace
     femType=Dict(:rho=>[:DG0, :DG0, recoverySpace],
@@ -48,7 +51,7 @@ function testSphereAdv2()
     #m=generateCubedSphere(3,6300000.0,0,:cube1)
 
     p=femProblem(m, femType,t=:compressible, advection=adv,
-        taskRecovery=taskRecovery, g=4, recoveryOrder=recoveryOrder,stencilOrder=stencilOrder);
+        taskRecovery=taskRecovery, recoveryOrder=recoveryOrder,stencilOrder=stencilOrder);
 
     gamma=0.5; #upwind
     UMax=100.0; #UMax determines the advection in x direction
@@ -58,7 +61,6 @@ function testSphereAdv2()
     ns=15;
     EndTime=80000.0
     nIter=Int64(EndTime/dt);
-    #nIter=1
 
     #start functions
     function frho(xyz::Array{Float64,1})
@@ -154,7 +156,8 @@ function testSphereAdv2()
     advectionTypes=Symbol[];
     for i in [:rho,:rhoTheta,:rhoV]
         push!(advectionTypes,femType[i][1]);
-        (taskRecovery && length(femType[i])==4) && push!(advectionTypes,femType[i][3]);
+        #(taskRecovery && length(femType[i])==4) && push!(advectionTypes,femType[i][3]);
+        push!(advectionTypes,femType[i][3]);
     end
     nquadPhi, nquadPoints=coordTrans(m, m.normals, advectionTypes, size(p.kubWeights,2));
     setEdgeData!(p, :v)
