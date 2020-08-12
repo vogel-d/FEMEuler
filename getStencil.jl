@@ -78,13 +78,10 @@ function getStencil(m::mesh, order::Float64)
     meshConnectivity!(m,2,2)
     inc=m.topology.incidence["22"]
     off=m.topology.offset["22"]
-
-    cells=Int[];
     for f in 1:m.topology.size[3]
-        empty!(cells)
-        push!(cells,f)
-        append!(cells,inc[off[f]:off[f+1]-1])
-        stencil[f]=cells;
+        stencil[f]=Int[]
+        push!(stencil[f],f)
+        append!(stencil[f],inc[off[f]:off[f+1]-1])
     end
     return stencil, stencilBoundary
 end
