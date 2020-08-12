@@ -14,7 +14,7 @@ recoverySpaceVec=Symbol("VecDG$(recoveryOrder)")
 
 function testSphereAdv2()
 
-    filename = "testSphereVecNRecoveryQuadStencil";
+    filename = "testSphereVecAdvRN";
 
     #order: comp, compTest, recoverySpace
     femType=Dict(:rho=>[:DG0, :DG0, recoverySpace],
@@ -44,23 +44,28 @@ function testSphereAdv2()
 
     taskRecovery=true;
     adv=true;
-
+    n=10
+    Rad=1.0
+    UMax=1.0
     #m=generateCubedSphere(40,6300000.0,0,:cube1)
     #m=generateCubedSphere(40,6300000.0)
-    m=generateCubedSphere(15,6300000.0,0,:cube1)
+    #m=generateCubedSphere(15,6300000.0,0,:cube1)
+    m=generateCubedSphere(n,Rad,0,:cube1)
     #m=generateCubedSphere(3,6300000.0,0,:cube1)
 
     p=femProblem(m, femType,t=:compressible, advection=adv,
         taskRecovery=taskRecovery, recoveryOrder=recoveryOrder,stencilOrder=stencilOrder);
 
     gamma=0.5; #upwind
-    UMax=100.0; #UMax determines the advection in x direction
+    #UMax=100.0; #UMax determines the advection in x direction
     MISMethod=MIS(:MISRK2); #method of time integration
 
-    dt=500.0 #500.0#2000.0
+    CFL=0.25
+    dt=CFL*2*pi/(4*n)/UMax*Rad
     ns=15;
     EndTime=80000.0
-    nIter=Int64(EndTime/dt);
+    #nIter=Int64(EndTime/dt);
+    nIter=200
 
     #start functions
     function frho(xyz::Array{Float64,1})
@@ -142,16 +147,12 @@ function testSphereAdv2()
 
     function V(xyz::Array{Float64,1})
       x=xyz[1]; y=xyz[2]; z=xyz[3];
-      λ,θ,r=cart2sphere(x,y,z);
-      α=0.0 #0.0, 0.05, pi/2-0.05, pi/2
-      uS=UMax*(cos(θ)*cos(α)+sin(θ)*cos(λ)*sin(α))
-      vS=-UMax*sin(λ)*sin(α)
-      return velCa([uS,vS,0.0],λ,θ)
+      return [-y,x,0.0]
     end
 
     Vfcomp=:RT0
     Vf=projectAdvection(p,V,Vfcomp);
-    #vtk(m,p.degFBoundary[Vfcomp],Vector(Vf),Vfcomp,"testVf", printSpherical=true)
+    vtk(m,p.degFBoundary[Vfcomp],Vector(Vf),Vfcomp,"testVf", printSpherical=false)
 
     advectionTypes=Symbol[];
     for i in [:rho,:rhoTheta,:rhoV]
@@ -189,7 +190,6 @@ function testSphereAdv2()
           p2=deepcopy(p);
           unstructured_vtk(p2, Time, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename*"$i", printSpherical=true)
       end
-      println(Time)
     end
     =#
 
@@ -199,11 +199,15 @@ function testSphereAdv2()
       p.solution[Time]=y;
       p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
-      if mod(i,8)==0
+      if mod(i,4)==0
           p2=deepcopy(p);
           unstructured_vtk(p2, Time, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename*"$i", printSpherical=true)
       end
       println(Time)
+      println("Time ",Time," dt ",dt)
+      if Time>=0.5*pi
+          break
+      end
     end
 
     #Speichern des Endzeitpunktes als vtu-Datei:
