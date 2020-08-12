@@ -25,6 +25,7 @@ function recoveryMatrix(degFT::degF{1,:H1}, recoverySpace::Symbol, stencil::Arra
     J=initJacobi((m.geometry.dim,m.topology.dim),sk);
     dJ=Array{Float64,2}(undef,sk);
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
+    kubP=zeros(m.geometry.dim)
 
     ind=[1,2,3]
     A=zeros(3,3)
@@ -66,16 +67,14 @@ function recoveryMatrix(degFT::degF{1,:H1}, recoverySpace::Symbol, stencil::Arra
                 kcoord[:,inds2]=fcoord[:,inds2]
                 @. kcoord[dir,inds2]=fcoord[dir,inds2]-dxy[dir]
             end
-            kpoint=0.25*(kcoord[:,1]+kcoord[:,2]+kcoord[:,3]+kcoord[:,4]);
-            kpoint=kpoint/norm(kpoint)*norm(kcoord[:,1]);
-
-            ksi,eta=intersect(kcoord,kpoint,Ji,x);
 
             for i in 1:nT
                 for j in 1:nR
                     currentval=0.0;
                     for r in 1:sk[2]
                         for l in 1:sk[1]
+                            transformation!(kubP,m,kcoord,kubPoints[1,l],kubPoints[2,r])
+                            ksi,eta=intersect(fcoord,kubP,Ji,x);
                             getPhiRecovery!(phiR,[ksi,eta])
                             currentval+=kubWeights[l,r]*abs(dJ[l,r])*phiT[i][l,r]*
                                 phiR[j];
@@ -110,6 +109,7 @@ function recoveryMatrix(degFT::degF{2,:H1div}, recoverySpace::Symbol,
     ddJ=Array{Float64,2}(undef,sk);
     jphiT=initJacobi((m.geometry.dim,nT),sk);
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
+    kubP=zeros(m.geometry.dim)
 
     ind=[1,2,3]
     A=zeros(3,3)
@@ -150,16 +150,14 @@ function recoveryMatrix(degFT::degF{2,:H1div}, recoverySpace::Symbol,
                 kcoord[:,inds2]=fcoord[:,inds2]
                 @. kcoord[dir,inds2]=fcoord[dir,inds2]-dxy[dir]
             end
-            kpoint=0.25*(kcoord[:,1]+kcoord[:,2]+kcoord[:,3]+kcoord[:,4]);
-            kpoint=kpoint/norm(kpoint)*norm(kcoord[:,1]);
-
-            ksi,eta=intersect(kcoord,kpoint,Ji,x);
 
             for i in 1:nT
                 for j in 1:nR
                     currentval=0.0;
                     for r in 1:sk[2]
                         for l in 1:sk[1]
+                            transformation!(kubP,m,kcoord,kubPoints[1,l],kubPoints[2,r])
+                            ksi,eta=intersect(fcoord,kubP,Ji,x);
                             getPhiRecovery!(phiR,[ksi,eta])
                             vecdot=0.0
                             for d in 1:m.geometry.dim
@@ -180,21 +178,16 @@ end
 
 import Base.intersect
 function intersect(pcoord,p,J,x)
-    ksi=0.0;
-    eta=0.0;
-    t=1;
-    #J=zeros(3,3);
-    #x=zeros(3);
     x[1]=0.5;
     x[2]=0.5;
-    x[3]=t;
-    for i=1:20
+    x[3]=1.0;
+    for i=1:5
       f=fun(x[1],x[2],x[3],pcoord[:,1],pcoord[:,2],pcoord[:,3],pcoord[:,4],p);
       jacobi!(J,x[1],x[2],x[3],pcoord[:,1],pcoord[:,2],pcoord[:,3],pcoord[:,4],p);
       x-=-J\f
     end
     #Newton method
-    return ksi,eta
+    return x[1],x[2]
 end
 
 function fun(ksi,eta,t,p1,p2,p3,p4,p)
