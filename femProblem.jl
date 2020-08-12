@@ -23,7 +23,7 @@ end
 
 #Konstruktoren
 
-function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}};stencilOrder=0,recoveryOrder::Int=0,advection::Bool=true, taskRecovery::Bool=false, t::Symbol=:boussinesq, g::Int64=9)
+function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}};stencilOrder=0,recoveryOrder::Int=0,advection::Bool=true, taskRecovery::Bool=false, t::Symbol=:boussinesq, g::Int64=6)
     sol=Dict{Float64, solution}()
     kubPoints, kubWeights=getKub(g, m.meshType);
     dF=Dict{Symbol, degF}()
