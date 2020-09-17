@@ -173,7 +173,7 @@ function vtkRecovery(m::mesh, r::Int, sol::Array{Float64,1}, femType::Symbol, ::
     if size(cvtk,1)==2
         vtk_cell_data(vtk, cvtk[1,:], name*" x")
         vtk_cell_data(vtk, cvtk[2,:], name*" z")
-        vtk_cell_data(vtk, (cvtk[1,:],cvtk[2,:],zeros(Float64,nf)), name)
+        vtk_cell_data(vtk, (cvtk[1,:],cvtk[2,:],zeros(Float64,length(cvtk[1,:]))), name)
     else
         vtk_cell_data(vtk, cvtk[1,:], name*" x")
         vtk_cell_data(vtk, cvtk[2,:], name*" y")
