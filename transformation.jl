@@ -14,7 +14,6 @@ function transformation!(r::Array{Float64,1}, m::mesh, coord, x::Float64, y::Flo
             end
             return nothing
         else
-            k=copy(r)
             for i in 1:length(r)
                 r[i]=coord[i,1]+(coord[i,2]-coord[i,1])*x+(coord[i,4]-coord[i,1])*y+(coord[i,3]-coord[i,4]-coord[i,2]+coord[i,1])*x*y;
             end
