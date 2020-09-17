@@ -4,15 +4,15 @@ include("modulesSWE.jl")
 const stencilOrder=2;
 const recoveryOrder=2;
 
-#const recoverySpace=Symbol("R$recoveryOrder")
-const recoverySpaceVec=Symbol("VecR$(recoveryOrder)S")
+const recoverySpace=Symbol("DGQuad")
+const recoverySpaceVec=Symbol("VecDGQuadS")
 
 @recovery(recoverySpace,recoverySpaceVec)
 
 function testGalewsky()
 
-    filename = "galewskyIISWETR200K";
-    nNodes=200
+    filename = "galewskyIISWETRNF";
+    nNodes=92
     #order: comp, compTest, recoverySpace
 
     femType=Dict(:h=>[:DG0],
@@ -40,7 +40,7 @@ function testGalewsky()
     taskRecovery=true;
     adv=true;
 
-    m=generateCubedSphere(183,6300000.0,0,:cube1)
+    m=generateCubedSphere(130,6300000.0,0,:cube1)
 
     p=femProblem(m, femType,t=:shallow, advection=adv, taskRecovery=taskRecovery,
     stencilOrder=stencilOrder, recoveryOrder=recoveryOrder,);
@@ -48,7 +48,7 @@ function testGalewsky()
     gamma=0.5; #upwind
     MISMethod=MIS(:MIS2); #method of time integration
 
-    dt=80.0 #200.0 #50.0 #1200.0;
+    dt=120.0 #200.0 #50.0 #1200.0;
     ns=6;
     EndTime=6.0*24*60*60;
     nIter=Int64(EndTime/dt);
@@ -79,7 +79,7 @@ function testGalewsky()
     function fh(xyz::Array{Float64,1})
         x=xyz[1]; y=xyz[2]; z=xyz[3];
         lon,lat,r=cart2sphere(x,y,z);
-        return (Grav*H0G-(simpson(-0.5*pi,lat,r,pi/100.0,integrandG)))/Grav+hH*cos(lat)*exp(-((lon-pi)/alphaG)^2.0)*exp(-((pi/4.0-lat)/betaG)^2.0)
+        return (Grav*H0G-(simpson(-0.5*pi,lat,r,pi/100.0,integrandG)))/Grav#+hH*cos(lat)*exp(-((lon-pi)/alphaG)^2.0)*exp(-((pi/4.0-lat)/betaG)^2.0)
     end
     uM=80.0
     lat0G=pi/7.0
@@ -104,12 +104,13 @@ function testGalewsky()
     h0=p.solution[0.0].h;
     p.solution[0.0].hV=projectChi(p,h0,p.solution[0.0].v,:h,:v);
 
-    unstructured_vtk(p, 0.0, [:h, :hV, :v], ["h", "hV", "Velocity"], "testSphere$(nNodes)k/"*filename*"0", printSpherical=true)
+    unstructured_vtk(p, 0.0, [:h, :hV, :v], ["h", "hV", "Velocity"], "testSphere/"*filename*"0", printSpherical=true)
 
     advectionTypes=Symbol[];
     for i in [:h,:hV]
         push!(advectionTypes,femType[i][1]);
-        (taskRecovery && length(femType[i])==4) && push!(advectionTypes,femType[i][3]);
+        #(taskRecovery && length(femType[i])==4) && push!(advectionTypes,femType[i][3]);
+        (taskRecovery && length(femType[i])==3) && push!(advectionTypes,femType[i][3]);
     end
     nquadPhi, nquadPoints=coordTrans(m, m.normals, advectionTypes, size(p.kubWeights,2));
     setEdgeData!(p, :v)
@@ -122,7 +123,8 @@ function testGalewsky()
     FY=Array{solution,1}(undef,MISMethod.nStage);
     Time=0.0;
 
-    nVTK=6*60*60/dt;
+    nVTK=24*60*60/dt;
+    #nVTK=2
     for i=1:nIter
         @time y=splitExplicit(y,Y,FY,p,gamma,nquadPhi,nquadPoints,MrV,MISMethod,Time,dt,ns);
         Time+=dt
@@ -130,13 +132,13 @@ function testGalewsky()
         p.solution[Time].v=projectRhoChi(p,p.solution[Time].h,p.solution[Time].hV,:h,:hV,MrV)
         if mod(i,nVTK)==0
             p2=deepcopy(p);
-            unstructured_vtk(p2, Time, [:h, :hV, :v], ["h", "hV", "Velocity"], "testSphere$(nNodes)k/"*filename*"$i", printSpherical=false)
+            unstructured_vtk(p2, Time, [:h, :hV, :v], ["h", "hV", "Velocity"], "testSphere/"*filename*"$i", printSpherical=false)
         end
         println(Time)
     end
 
     #Speichern des Endzeitpunktes als vtu-Datei:
-    unstructured_vtk(p, EndTime, [:h, :hV, :v], ["h", "hV", "Velocity"], "testSphere$(nNodes)k/"*filename, printSpherical=true)
+    unstructured_vtk(p, EndTime, [:h, :hV, :v], ["h", "hV", "Velocity"], "testSphere/"*filename, printSpherical=true)
     #Speichern aller berechneten Zwischenwerte als vtz-Datei:
     #unstructured_vtk(p, sort(collect(keys(p.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename)
 
