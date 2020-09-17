@@ -4,13 +4,13 @@ include("modulesCE.jl")
 const stencilOrder=2;
 const recoveryOrder=2;
 
-const recoverySpace=Symbol("R$recoveryOrder")
-const recoverySpaceVec=Symbol("VecR$(recoveryOrder)")
+recoverySpace=Symbol("DGQuad")
+recoverySpaceVec=Symbol("VecDGQuad")
 
 @recovery(recoverySpace,recoverySpaceVec)
 
 function testWarmBubble()
-    filename = "warmBubble";
+    filename = "warmBubbleFinalNoAdvTRQuad";
 
     #order: comp, compHigh, compRec, compDG
     femType=Dict(:rho=>[:DG0, :DG0, recoverySpace],
@@ -49,10 +49,10 @@ function testWarmBubble()
     stencilOrder=stencilOrder, recoveryOrder=recoveryOrder,);
 
     gamma=0.5; #upwind
-    UMax=20.0; #UMax determines the advection in x direction
+    UMax=0.0; #UMax determines the advection in x direction
     MISMethod=MIS(:MIS2); #method of time integration
 
-    dt=2.0; #Coarse: 2.0
+    dt=1.0; #Coarse: 2.0
     #dt=0.5; #Coarse: 1.0
     ns=15;
     EndTime=1000.0;
@@ -93,7 +93,8 @@ function testWarmBubble()
     advectionTypes=Symbol[];
     for i in [:rho,:rhoTheta,:rhoV]
         push!(advectionTypes,femType[i][1]);
-        (taskRecovery && length(femType[i])==4) && push!(advectionTypes,femType[i][3]);
+        #(taskRecovery && length(femType[i])==4) && push!(advectionTypes,femType[i][3]);
+        push!(advectionTypes,femType[i][3]);
     end
     nquadPhi, nquadPoints=coordTrans(m, m.normals, advectionTypes, size(p.kubWeights,2));
     setEdgeData!(p, :v)
@@ -113,6 +114,7 @@ function testWarmBubble()
       p.solution[Time]=y;
       p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
+      mod(i,8)==0 && unstructured_vtk(p, Time, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename*"$i")
       println(Time)
     end
 

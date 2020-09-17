@@ -7,14 +7,14 @@ recoveryOrder=1;
 #recoverySpace=Symbol("R$recoveryOrder")
 #recoverySpaceVec=Symbol("VecR$(recoveryOrder)S")
 
-recoverySpace=Symbol("DGQuad")
-recoverySpaceVec=Symbol("VecDG$(recoveryOrder)")
+recoverySpace=Symbol("DG1")
+recoverySpaceVec=Symbol("VecDGLinS")
 
 @recovery(recoverySpace,recoverySpaceVec)
 
 function testSphereAdv2()
 
-    filename = "testSphereVecAdvRN";
+    filename = "testSphereVecAdvQuadBNDN";
 
     #order: comp, compTest, recoverySpace
     femType=Dict(:rho=>[:DG0, :DG0, recoverySpace],
@@ -44,7 +44,7 @@ function testSphereAdv2()
 
     taskRecovery=true;
     adv=true;
-    n=10
+    n=20
     Rad=1.0
     UMax=1.0
     #m=generateCubedSphere(40,6300000.0,0,:cube1)
@@ -73,7 +73,6 @@ function testSphereAdv2()
     end
     function ftheta(xyz::Array{Float64,1})
         x=xyz[1]; y=xyz[2]; z=xyz[3];
-
         #y+
         lat0=4.0*atan(1.0)
         lon0=2.0*atan(1.0)
@@ -82,7 +81,7 @@ function testSphereAdv2()
         d=acos(sin(lat0)*sin(lat)+cos(lat0)*cos(lat)*cos(lon-lon0))
         if abs(d)<=0.8
         #if abs(d)<=0.4 #0.8 #0.1
-            conc=1.0
+            conc=cos(pi/2*d/0.8)^2
         else
             conc=0.1
         end
@@ -111,11 +110,13 @@ function testSphereAdv2()
             lon0=2.0*atan(1.0) #1.25*atan(1.0) #1.5*atan(1.0)
             d=acos(sin(lat0)*sin(lat)+cos(lat0)*cos(lat)*cos(lon-lon0))
             if abs(d)<=0.8 #0.8 #0.1
-                uS=1.0
+                uS=cos(pi/2*d/0.8)^2
             else
                 uS=0.1
             end
             return velCa([uS,0.0,0.0],lon,lat)
+
+            #return [-y,x,0.0]
         #end
     end
     f=Dict(:rho=>frho,:theta=>ftheta,:v=>fvel);
@@ -123,7 +124,7 @@ function testSphereAdv2()
     assembMass!(p);
     #assembStiff!(p);
     applyStartValues!(p, f);
-
+    #return p;
     ha=zeros(Float64,m.topology.size[3])
     #ha[5]=1.0
     #ha[14]=1.0
@@ -162,8 +163,7 @@ function testSphereAdv2()
     end
     nquadPhi, nquadPoints=coordTrans(m, m.normals, advectionTypes, size(p.kubWeights,2));
     setEdgeData!(p, :v)
-    recoveryMatrix!(p)
-
+    @time recoveryMatrix!(p)
 
 
     MrT=assembMass(p.degFBoundary[femType[:rhoTheta][1]], m, p.kubPoints, p.kubWeights);
@@ -204,7 +204,7 @@ function testSphereAdv2()
           unstructured_vtk(p2, Time, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename*"$i", printSpherical=true)
       end
       println(Time)
-      println("Time ",Time," dt ",dt)
+      #println("Time ",Time," dt ",dt)
       if Time>=0.5*pi
           break
       end
