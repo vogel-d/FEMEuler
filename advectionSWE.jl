@@ -18,12 +18,20 @@ function advection(p::femProblem, gamma, y::solution,
                           nquadPoints,p.edgeData);
 
       else
+        cR=recovery(p,fTv,cR);
+        Sv=advectionStiff(p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],
+                          p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],sparse(y.hV),
+                          p.degFBoundary[fTv[3]],nquadPhi[fTv[3]],cR,
+                          gamma,p.mesh,p.kubPoints,p.kubWeights,
+                          nquadPoints,p.edgeData);
+        #=
         cR=recovery(p,fTv,cR,2);
         Sv=advectionStiffR(p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],
                           p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],sparse(y.hV),
                           fTv[3],cR,
                           gamma,p.mesh,p.kubPoints,p.kubWeights,
                           nquadPoints,p.edgeData);
+        =#
       end
     else
       Sv=advectionStiff(p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],

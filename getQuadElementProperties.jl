@@ -116,6 +116,15 @@ function getQuadElementProperties(type::Symbol)
     Dyh10_22(x,y)=g10(x)*Dg22(y);
     Dyh11_22(x,y)=g11(x)*Dg22(y);
 
+    f1(x,y)=1.0
+    fx(x,y)=x-0.5
+    fy(x,y)=y-0.5
+    fxy(x,y)=(x-0.5)*(y-0.5)
+    fx2(x,y)=(x-0.5)^2
+    fy2(x,y)=(y-0.5)^2
+    dxfx2(x,y)=2*(x-0.5)
+    dyfy2(x,y)=2*(y-0.5)
+
     if type==:DG0
         phi=[h0_0];
         divphi=[null];
@@ -151,6 +160,30 @@ function getQuadElementProperties(type::Symbol)
         nVert=0;
 
         cm=Dict([1,2]=>[0,0,0,0], [2,3]=>[0,0,0,0], [3,4]=>[0,0,0,0], [1,4]=>[0,0,0,0]);
+
+    elseif type==:DGLin
+        phi=[f1,fx,fy];
+        divphi=[null, null, null];
+        gradphi=[null f1 null;
+                 null null f1];
+
+        nFace=3;
+        nEdge=0;
+        nVert=0;
+
+        cm=Dict([1,2]=>[0,0,0], [2,3]=>[0,0,0], [3,4]=>[0,0,0], [1,4]=>[0,0,0]);
+
+    elseif type==:DGQuad
+        phi=[f1,fx,fy,fxy,fx2,fy2];
+        divphi=[null, null, null, null, null, null];
+        gradphi=[null f1 null fx dxfx2 null;
+                 null null f1 fy null dyfy2];
+
+        nFace=6;
+        nEdge=0;
+        nVert=0;
+
+        cm=Dict([1,2]=>[0,0,0,0,0,0], [2,3]=>[0,0,0,0,0,0], [3,4]=>[0,0,0,0,0,0], [1,4]=>[0,0,0,0,0,0]);
 
     elseif type==:P2
         phi=[h21_21, h21_20, h22_21, h21_22, h20_21, h20_20, h22_20, h22_22, h20_22]
@@ -338,6 +371,68 @@ function getQuadElementProperties(type::Symbol)
         nVert=0;
 
         cm=Dict([1,2]=>[0,0,0,0,0,0,0,0], [2,3]=>[0,0,0,0,0,0,0,0], [3,4]=>[0,0,0,0,0,0,0,0], [1,4]=>[0,0,0,0,0,0,0,0]);
+
+    elseif type==:VecDGLin
+        phi=[f1     fx      fy    null   null    null;
+             null   null    null  f1     fx      fy];
+        divphi=[null, f1, null,null,null,f1];
+        gradphi=[null f1 null;
+                 null null f1];
+        gradphi=Matrix(undef, 2, 12)
+        gradphi[1:2, 1: 2]=[null     null;
+                            null     null]
+        gradphi[1:2, 3: 4]=[f1       null;
+                            null     null]
+        gradphi[1:2, 5: 6]=[null     f1;
+                            null     null]
+        gradphi[1:2, 7: 8]=[null     null;
+                            null     null]
+        gradphi[1:2, 9:10]=[null     null;
+                            f1       null]
+        gradphi[1:2,11:12]=[null     null;
+                            null     f1]
+
+        nFace=6;
+        nEdge=0;
+        nVert=0;
+
+        cm=Dict([1,2]=>[0,0,0,0,0,0], [2,3]=>[0,0,0,0,0,0], [3,4]=>[0,0,0,0,0,0], [1,4]=>[0,0,0,0,0,0]);
+
+    elseif type==:VecDGQuad
+        phi=[f1     fx     fy     fxy     fx2    fy2    null   null   null   null    null   null;
+             null   null   null   null    null   null   f1     fx     fy     fxy    fx2     fy2];
+        divphi=[null, f1, null, fy, dxfx2, null, null,null,f1,fx,null,dyfy2];
+        gradphi=Matrix(undef, 2, 24)
+        gradphi[1:2, 1: 2]=[null     null;
+                            null     null]
+        gradphi[1:2, 3: 4]=[f1       null;
+                            null     null]
+        gradphi[1:2, 5: 6]=[null     f1;
+                            null     null]
+        gradphi[1:2, 7: 8]=[fx       fy;
+                            null     null]
+        gradphi[1:2, 9:10]=[dxfx2    null;
+                            null     null]
+        gradphi[1:2,11:12]=[null     dyfy2;
+                            null     null]
+        gradphi[1:2,13:14]=[null     null;
+                            null     null]
+        gradphi[1:2,15:16]=[null     null;
+                            f1       null]
+        gradphi[1:2,17:18]=[null     null;
+                            null     f1]
+        gradphi[1:2,19:20]=[null     null;
+                            fx       fy]
+        gradphi[1:2,21:22]=[null     null;
+                            dxfx2    null]
+        gradphi[1:2,23:24]=[null     null;
+                            null     dyfy2]
+        nFace=12;
+        nEdge=0;
+        nVert=0;
+
+        cm=Dict([1,2]=>[0,0,0,0,0,0,0,0,0,0,0,0], [2,3]=>[0,0,0,0,0,0,0,0,0,0,0,0], [3,4]=>[0,0,0,0,0,0,0,0,0,0,0,0], [1,4]=>[0,0,0,0,0,0,0,0,0,0,0,0]);
+
 
     elseif type==:VecP2
 

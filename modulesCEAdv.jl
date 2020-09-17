@@ -73,3 +73,4 @@ include("discGalerkinEdgesR.jl")
 include("vtkRecovery.jl");
 include("transformRecoveryCoord.jl")
 include("getTangentialPlane.jl")
+include("intersectPlane.jl")

@@ -108,7 +108,7 @@ function getSpace(femType::Symbol)
 
     H1=Set([:DG0,:DG1,:DG2,:DGLin,:DGQuad,:P1,:P2]);
     H1div=Set([:RT0,:RT1,:RT0B,:RT1B]);
-    H1xH1=Set([:VecDG1,:VecP1,:VecDG1S,:VecP1S]);
+    H1xH1=Set([:VecDG1,:VecDGLin,:VecDGQuad,:VecDG1S,:VecDGLinS,:VecDGQuadS,:VecP1,:VecDG1S,:VecP1S]);
 
     if in(femType,H1)
         return :H1
