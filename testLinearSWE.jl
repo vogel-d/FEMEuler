@@ -2,7 +2,7 @@ include("modulesLinSWE.jl")
 
 function testLinearSWE()
 
-    filename = "linearSWE";
+    filename = "linearSWEFinalF";
 
     #order: comp, compTest, recoverySpace
     femType=Dict(:h=>[:DG0], :v=>[:RT0], :f=>[:P1]);
@@ -12,12 +12,12 @@ function testLinearSWE()
     taskRecovery=false;
     adv=false;
 
-    n=20;
+    n=30;
     m=generateCubedSphere(n,1.0,0,:cube1)
 
     p=femProblem(m, femType,t=:linshallow, advection=adv, taskRecovery=taskRecovery);
 
-    dt=0.0025;
+    dt=0.001;
     EndTime=10.0;
     nIter=Int64(EndTime/dt);
 

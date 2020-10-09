@@ -10,8 +10,8 @@ recoverySpaceVec=Symbol("VecDGQuad")
 @recovery(recoverySpace,recoverySpaceVec)
 
 function testWarmBubble()
-    filename = "warmBubbleFinalNoAdvTRQuad";
-
+    filename = "warmBubbleFinalAdvNoTRH";
+    #=
     #order: comp, compHigh, compRec, compDG
     femType=Dict(:rho=>[:DG0, :DG0, recoverySpace],
                  :rhoV=>[:RT0, :RT0, recoverySpaceVec],
@@ -19,14 +19,14 @@ function testWarmBubble()
                  :p=>[:DG0],
                  :v=>[:RT0],
                  :theta=>[:DG0]);
-    #=
+
     femType=Dict(:rho=>[:DG0, :P1, :DG1, :DG0],
                  :rhoV=>[:RT0, :VecP1, :VecDG1, :RT0B],
                  :rhoTheta=>[:DG0, :P1, :DG1, :DG0],
                  :p=>[:DG0],
                  :v=>[:RT0],
                  :theta=>[:DG0]);
-
+    =#
     #higher spaces
 
     femType=Dict(:rho=>[:DG1, :P1, :DG1, :DG0],
@@ -35,13 +35,13 @@ function testWarmBubble()
                  :p=>[:DG1],
                  :v=>[:RT1],
                  :theta=>[:DG1]);
-    =#
+
 
     taskRecovery=true;
     advection=true;
 
-    m=generateRectMesh(160,80,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
-    #m=generateRectMesh(80,40,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
+    #m=generateRectMesh(160,80,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
+    m=generateRectMesh(80,40,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
 
     #adaptGeometry!(m,(0.3,0.3),false); #sin perbutation
 
@@ -49,7 +49,7 @@ function testWarmBubble()
     stencilOrder=stencilOrder, recoveryOrder=recoveryOrder,);
 
     gamma=0.5; #upwind
-    UMax=0.0; #UMax determines the advection in x direction
+    UMax=20.0; #UMax determines the advection in x direction
     MISMethod=MIS(:MIS2); #method of time integration
 
     dt=1.0; #Coarse: 2.0
@@ -114,7 +114,7 @@ function testWarmBubble()
       p.solution[Time]=y;
       p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
-      mod(i,8)==0 && unstructured_vtk(p, Time, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename*"$i")
+      mod(i,25)==0 && unstructured_vtk(p, Time, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename*"$i")
       println(Time)
     end
 

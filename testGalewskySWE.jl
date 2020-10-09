@@ -40,7 +40,7 @@ function testGalewsky()
     taskRecovery=true;
     adv=true;
 
-    m=generateCubedSphere(130,6300000.0,0,:cube1)
+    m=generateCubedSphere(183,6300000.0,0,:cube1)
 
     p=femProblem(m, femType,t=:shallow, advection=adv, taskRecovery=taskRecovery,
     stencilOrder=stencilOrder, recoveryOrder=recoveryOrder,);
@@ -48,7 +48,7 @@ function testGalewsky()
     gamma=0.5; #upwind
     MISMethod=MIS(:MIS2); #method of time integration
 
-    dt=120.0 #200.0 #50.0 #1200.0;
+    dt=160.0 #200.0 #50.0 #1200.0;
     ns=6;
     EndTime=6.0*24*60*60;
     nIter=Int64(EndTime/dt);
@@ -79,7 +79,7 @@ function testGalewsky()
     function fh(xyz::Array{Float64,1})
         x=xyz[1]; y=xyz[2]; z=xyz[3];
         lon,lat,r=cart2sphere(x,y,z);
-        return (Grav*H0G-(simpson(-0.5*pi,lat,r,pi/100.0,integrandG)))/Grav#+hH*cos(lat)*exp(-((lon-pi)/alphaG)^2.0)*exp(-((pi/4.0-lat)/betaG)^2.0)
+        return (Grav*H0G-(simpson(-0.5*pi,lat,r,pi/100.0,integrandG)))/Grav+hH*cos(lat)*exp(-((lon-pi)/alphaG)^2.0)*exp(-((pi/4.0-lat)/betaG)^2.0)
     end
     uM=80.0
     lat0G=pi/7.0
