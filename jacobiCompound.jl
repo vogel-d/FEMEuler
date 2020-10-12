@@ -39,10 +39,19 @@ function jacobi!(J::Array{Float64,2}, x::Float64, y::Float64, coord::Array{Float
         J[2,1]=a[2];
         J[2,2]=b[2];
     elseif mt==4
+        #=
+        @warn("x and y reversed in jacobi routine")
         J[1,1]=(coord[1,2]-coord[1,1])+(coord[1,3]-coord[1,4]-coord[1,2]+coord[1,1])*x;
         J[2,1]=(coord[2,2]-coord[2,1])+(coord[2,3]-coord[2,4]-coord[2,2]+coord[2,1])*x;
         J[1,2]=(coord[1,4]-coord[1,1])+(coord[1,3]-coord[1,4]-coord[1,2]+coord[1,1])*y;
         J[2,2]=(coord[2,4]-coord[2,1])+(coord[2,3]-coord[2,4]-coord[2,2]+coord[2,1])*y;
+        =#
+        
+        J[1,1]=(coord[1,2]-coord[1,1])+(coord[1,3]-coord[1,4]-coord[1,2]+coord[1,1])*y;
+        J[2,1]=(coord[2,2]-coord[2,1])+(coord[2,3]-coord[2,4]-coord[2,2]+coord[2,1])*y;
+        J[1,2]=(coord[1,4]-coord[1,1])+(coord[1,3]-coord[1,4]-coord[1,2]+coord[1,1])*x;
+        J[2,2]=(coord[2,4]-coord[2,1])+(coord[2,3]-coord[2,4]-coord[2,2]+coord[2,1])*x;
+
         dJ=abs(J[1,1]*J[2,2]-J[2,1]*J[1,2]);
     end
     return dJ;
