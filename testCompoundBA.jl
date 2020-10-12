@@ -1,7 +1,7 @@
 include("modulesBAcompound.jl")
 
 function testCompoundBA()
-  filename = "test"
+  filename = "bachelor_boussinesqA_HexToTri"
 
   #order: comp, compHigh, compRec, compDG
   femType=Dict(:p=>[:DG0, :P1, :DG1, :DG0], :v=>[:RT0, :VecP1, :VecDG1, :RT0B], :b=>[:DG0, :P1, :DG1, :DG0]);
@@ -12,13 +12,14 @@ function testCompoundBA()
 
   taskRecovery=false;
 
-  #m=generateHexMesh(0.0,300000.0,0.0,10000.0,10,:periodic,:constant,meshType=3); #(east/west, top/bottom)
-  m=generateHexMesh(0.0,300000.0,0.0,10000.0,10,:periodic,:constant,meshType=4); #(east/west, top/bottom)
+  m=generateHexMesh(0.0,300000.0,0.0,10000.0,10,:periodic,:constant,meshType=3); #(east/west, top/bottom)
+  #m=generateHexMesh(0.0,300000.0,0.0,10000.0,10,:periodic,:constant,meshType=4); #(east/west, top/bottom)
+  #m=generateHexMesh(100000.0,200000.0,0.0,10000.0,11,:periodic,:constant,meshType=4); #(east/west, top/bottom)
   #m=generateRectMesh(300,10,:periodic,:constant,0.0,300000.0,0.0,10000.0); #(east/west, top/bottom)
   #m=generateRectMesh(300,10,:periodic,:constant,0.0,300000.0,0.0,10000.0,meshType=3); #(east/west, top/bottom)
 
-  #p=femProblem(m, femType, compoundMethod=:HexToTris);
-  p=femProblem(m, femType, compoundMethod=:HexToKites);
+  p=femProblem(m, femType, compoundMethod=:HexToTris);
+  #p=femProblem(m, femType, compoundMethod=:HexToKites);
   #p=femProblem(m, femType, compoundMethod=:RectToKites);
   #p=femProblem(m, femType, compoundMethod=:RectToTris);
 
@@ -33,12 +34,13 @@ function testCompoundBA()
   #dt=1.0;
   dt=20.0;
   ns=19;
+  #EndTime=20*dt;
   EndTime=3000.0;
   nIter=Int64(EndTime/dt);
 
   #start function
   xR=m.geometry.r[1]; xL=m.geometry.l[1]; yR=m.geometry.r[2]; yL=m.geometry.l[2]
-  b0=0.01; H=10000; A=5000;
+  b0=0.01; H=yR; A=5000;
   xM=0.5*(xL+xR);
   function fb(xz::Array{Float64,1})
     x=xz[1]; z=xz[2];
@@ -70,8 +72,8 @@ function testCompoundBA()
     Time=Time+dt
     p.solution[Time]=y;
     if mod(i,10)==0
-      p2=deepcopy(p)
-      compound_unstructured_vtk(p2, sort(collect(keys(p2.solution))), [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testCompoundBA/"*filename)
+      #p2=deepcopy(p)
+      #compound_unstructured_vtk(p2, sort(collect(keys(p2.solution))), [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testCompoundBA/"*filename)
     end
     println(Time)
   end
@@ -79,7 +81,8 @@ function testCompoundBA()
   #Speichern des Endzeitpunktes als vtu-Datei:
   #compound_unstructured_vtk(p, EndTime, [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testCompoundBA/"*filename)
   #Speichern aller berechneten Zwischenwerte als vtz-Datei:
-  compound_unstructured_vtk(p, sort(collect(keys(p.solution))), [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testCompoundBA/"*filename)
+  #compound_unstructured_vtk(p, sort(collect(keys(p.solution))), [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testCompoundBA/"*filename)
+  compound_unstructured_vtk(p, [0.0,500.0,1000.0,3000.0], [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testCompoundBA/"*filename)
 
   return p
 end

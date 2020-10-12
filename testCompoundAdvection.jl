@@ -2,7 +2,7 @@ include("modulesBACompound.jl")
 include("symplektischerEulerA.jl")
 
 function testCompoundAdvection()
-  filename = "testVecPlus"
+  filename = "OSWVGLCOMP"
 
   #order: comp, compHigh, compRec, compDG
   femType=Dict(:p=>[:DG0, :P1, :DG1, :DG0], :v=>[:RT0, :VecP1, :VecDG1, :RT0B], :b=>[:DG0, :P1, :DG1, :DG0]);
@@ -13,8 +13,10 @@ function testCompoundAdvection()
 
   taskRecovery=false;
 
+  m=generateHexMesh(0.0,10000.0,0.0,10000.0,50,:periodic,:constant,meshType=4); #(east/west, top/bottom)
   #m=generateHexMesh(0.0,300000.0,0.0,10000.0,10,:periodic,:constant,meshType=3); #(east/west, top/bottom)
-  m=generateHexMesh(0.0,300000.0,0.0,10000.0,10,:periodic,:constant,meshType=4); #(east/west, top/bottom)
+  #m=generateHexMesh(0.0,300000.0,0.0,10000.0,10,:periodic,:constant,meshType=4); #(east/west, top/bottom)
+  #m=generateHexMesh(100000.0,200000.0,0.0,10000.0,11,:periodic,:constant,meshType=4); #(east/west, top/bottom)
   #m=generateHexMesh(110000.0,190000.0,0.0,10000.0,20,:periodic,:constant,meshType=4); #(east/west, top/bottom)
   #m=generateHexMesh(-10000.0,10000.0,0.0,10000.0,20,:periodic,:constant,meshType=4); #(east/west, top/bottom)
   #m=generateHexMesh(0.0,10000.0,0.0,10000.0,20,:periodic,:periodic,meshType=4); #(east/west, top/bottom)
@@ -31,7 +33,7 @@ function testCompoundAdvection()
 
   gamma=0.5;
   #gamma=0.0;
-  UMax=-20.0; #UMax determines the advection in x direction
+  UMax=20.0; #UMax determines the advection in x direction
   #UMax=1.0;
   MISMethod=MIS(:MIS4_4);
   #MISMethod=MIS(:MIS_Euler);
@@ -39,14 +41,14 @@ function testCompoundAdvection()
   #dt=1.0;
   dt=20.0;
   ns=19;
-  EndTime=1500.0;
-  #EndTime=20*dt;
+  #EndTime=1500.0;
+  EndTime=1*dt;
   nIter=Int64(EndTime/dt);
   #nIter=1;
 
   #start function
   xR=m.geometry.r[1]; xL=m.geometry.l[1]; zR=m.geometry.r[2]; zL=m.geometry.l[2]
-  b0=0.01; H=10000; A=5000; r0=2000.0;
+  b0=0.01; H=zR; A=5000; r0=2000.0;
   xM=0.5*(xL+xR); zM=0.5*(zL+zR);
 
   function fb1(xz::Array{Float64,1})
@@ -58,9 +60,13 @@ function testCompoundAdvection()
   #  rad=sqrt((x-xM)^2+(z-zM)^2);
   #  return 0.0+(rad<r0)*(2.0*cos(0.5*pi*rad/r0)^2);
   #end
-  function fb2(xz::Array{Float64,1})
+  #function fb2(xz::Array{Float64,1})
+  #  x=xz[1]; z=xz[2];
+  #  return (x>145000.0 && x<155000.0 && z>4000.0 && z<6000.0)*1.0
+  #end
+  function fbstripe(xz::Array{Float64,1})
     x=xz[1]; z=xz[2];
-    return (x>145000.0 && x<155000.0 && z>4000.0 && z<6000.0)*1.0
+    return (x>3000 && x<7000.0 && z>3000.0 && z<7000.0)*1.0
   end
   #fb(x,y)=1.0;
   function fv1(xz::Array{Float64,1})
@@ -70,8 +76,8 @@ function testCompoundAdvection()
     return 0
   end
   #f=Dict(:b=>fb1)
-  #f=Dict(:b=>fb2,:v=>[fb2,fv2])
-  f=Dict(:v=>[fb1,fv2])
+  f=Dict(:v=>[fbstripe,fv2])
+  #f=Dict(:v=>[fb1,fv2])
 
   assembMassCompound!(p);
   assembStiffCompound!(p);
