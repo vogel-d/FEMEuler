@@ -2,15 +2,15 @@ include("modulesCE.jl")
 #include("advectionStiffN.jl")
 
 const stencilOrder=2;
-const recoveryOrder=2;
+#const recoveryOrder=2;
 
-recoverySpace=Symbol("DGQuad")
-recoverySpaceVec=Symbol("VecDGQuad")
+recoverySpace=Symbol("DGTri")
+recoverySpaceVec=Symbol("VecDGTri")
 
 @recovery(recoverySpace,recoverySpaceVec)
 
 function testWarmBubble()
-    filename = "warmBubbleFinalAdvNoTRH";
+    filename = "warmBubbleFinalAdvTRTriH";
     #=
     #order: comp, compHigh, compRec, compDG
     femType=Dict(:rho=>[:DG0, :DG0, recoverySpace],
@@ -29,15 +29,15 @@ function testWarmBubble()
     =#
     #higher spaces
 
-    femType=Dict(:rho=>[:DG1, :P1, :DG1, :DG0],
-                 :rhoV=>[:RT1, :VecP1, :VecDG1, :RT0B],
-                 :rhoTheta=>[:DG1, :P1, :DG1, :DG0],
+    femType=Dict(:rho=>[:DG1, :DG1, recoverySpace],
+                 :rhoV=>[:RT1, :RT1, recoverySpaceVec],
+                 :rhoTheta=>[:DG1, :DG1, recoverySpace],
                  :p=>[:DG1],
                  :v=>[:RT1],
                  :theta=>[:DG1]);
 
 
-    taskRecovery=true;
+    taskRecovery=true
     advection=true;
 
     #m=generateRectMesh(160,80,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
