@@ -11,7 +11,7 @@ mutable struct femProblem
     stiffM::Dict{Symbol, SparseMatrixCSC{Float64,Int64}};
     recoveryM::Dict{Tuple{Symbol,Symbol}, Array{Any,1}};
     stencil::Array{Array{Int,1},1}
-    stencilBoundary::SparseMatrixCSC{Int,Int}
+    stencilBoundary::SparseVector{Int64,Int64}
     type::Symbol;
     kubWeights::Array{Float64,2};
     kubPoints::Array{Float64,2};
@@ -36,7 +36,6 @@ function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}};stencilOrder
     for k in keys(femType)
         if length(femType[k])==3
             recoveryType[k]=recoveryOrder
-            #nFEM=2
             nFEM=3
         else
             recoveryType[k]=0
@@ -64,7 +63,7 @@ function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}};stencilOrder
         stencil, stencilBoundary=getStencil(m,stencilOrder)
     else
         stencil=Array{Array{Int,1},1}();
-        stencilBoundary=spzeros(Int,0,0)
+        stencilBoundary=spzeros(Int,0)
     end
     edgeData=Array{Array{Int64,1},1}();
     massM=Dict();

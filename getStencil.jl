@@ -1,6 +1,6 @@
 function getStencil(m::mesh, order::Int)
     stencil=Array{Array{Int,1},1}(undef,m.topology.size[3]);
-    stencilBoundary=spzeros(Int,m.topology.dim,m.topology.size[3])
+    stencilBoundary=spzeros(Int,m.topology.size[3])
     meshConnectivity!(m,2,1)
     meshConnectivity!(m,1,2)
     ince=m.topology.incidence["21"]
@@ -9,12 +9,14 @@ function getStencil(m::mesh, order::Int)
     offf=m.topology.offset["12"]
     incv=m.topology.incidence["10"]
     offv=m.topology.offset["10"]
-    coord=m.geometry.coordinates;
+    mcoord=m.geometry.coordinates;
     bE=copy(m.boundaryEdges);
 
     edges=Set{Int}();
     ch=Int[]
     cells=Set{Int}();
+    boundcells=Set{Int}()
+    boundind=Int[]
     ocells=Int[];
     for f in 1:m.topology.size[3]
         empty!(cells)
@@ -38,23 +40,23 @@ function getStencil(m::mesh, order::Int)
                             if bE[e]<0
                                 e2=-bE[e]
                                 bE[e2]=-e
+                                push!(edges,e2)
                                 push!(cells,incf[offf[e2]])
                                 push!(ch,incf[offf[e2]])
-                                push!(edges,e2)
-
-                                coord=@views m.geometry.coordinates[:,incv[offv[e]:offv[e+1]-1]]
-                                coord2=@views m.geometry.coordinates[:,incv[offv[e2]:offv[e2+1]-1]]
+                                push!(boundcells,incf[offf[e2]])
+                                coord=@views mcoord[:,incv[offv[e]:offv[e+1]-1]]
+                                coord2=@views mcoord[:,incv[offv[e2]:offv[e2+1]-1]]
                                 if coord[2,1]==coord[2,2]
                                     if coord[2,1]<coord2[2,1]
-                                        stencilBoundary[1,f]=-incf[offf[e2]]
+                                        stencilBoundary[c]=-1
                                     elseif coord[2,1]>coord2[2,1]
-                                        stencilBoundary[1,f]=incf[offf[e2]]
+                                        stencilBoundary[c]=1
                                     end
                                 elseif coord[1,1]==coord[1,2]
                                     if coord[1,1]<coord2[1,1]
-                                        stencilBoundary[2,f]=-incf[offf[e2]]
+                                        stencilBoundary[c]=-2
                                     elseif coord[1,1]>coord2[1,1]
-                                        stencilBoundary[2,f]=incf[offf[e2]]
+                                        stencilBoundary[c]=2
                                     end
                                 end
                             end
@@ -67,6 +69,11 @@ function getStencil(m::mesh, order::Int)
             empty!(ch);
         end
         stencil[f]=collect(cells);
+        for c in boundcells
+            boundind=findall(c,stencil[f])
+            @. stencil[f][boundind] *= -1
+        end
+        empty!(boundcells)
         empty!(edges);
     end
     return stencil, stencilBoundary
@@ -74,7 +81,7 @@ end
 
 function getStencil(m::mesh, order::Float64)
     stencil=Array{Array{Int,1},1}(undef,m.topology.size[3]);
-    stencilBoundary=spzeros(Int,m.topology.dim,m.topology.size[3])
+    stencilBoundary=spzeros(Int,m.topology.size[3])
     meshConnectivity!(m,2,2)
     inc=m.topology.incidence["22"]
     off=m.topology.offset["22"]

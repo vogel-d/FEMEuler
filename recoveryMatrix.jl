@@ -5,11 +5,12 @@ function recoveryMatrix!(p::femProblem)
             p.recoveryM[(p.femType[i][2],p.femType[i][3])]=recoveryMatrix(p.degFBoundary[p.femType[i][2]],p.degFBoundary[p.femType[i][3]],p.femType[i][3],p.stencil,p.stencilBoundary,p.mesh,p.kubPoints,p.kubWeights)
         end
     end
+    p.stencil=abs.(p.stencil)
     return nothing
 end
 
 function recoveryMatrix(degFT::degF{1,:H1}, degFR::degF{1,:H1}, recoverySpace::Symbol, stencil::Array{Array{Int,1},1},
-                  stencilBoundary::SparseMatrixCSC{Int,Int}, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
+                  stencilBoundary::SparseVector{Int,Int}, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
     phiT=@views degFT.phi;
     nR=getPhiRecoveryLength(recoverySpace)
     nT=length(phiT)
@@ -28,14 +29,13 @@ function recoveryMatrix(degFT::degF{1,:H1}, degFR::degF{1,:H1}, recoverySpace::S
     J=initJacobi((m.geometry.dim,m.topology.dim),sk);
     dJ=Array{Float64,2}(undef,sk);
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
+    kcoord=similar(coord)
     kubP=zeros(m.geometry.dim)
 
     ind=[1,2,3]
     Ji=zeros(3,3)
     x=zeros(3)
     kpoint=zeros(m.geometry.dim)
-
-    dxy= @. (m.geometry.r-m.geometry.l)/m.topology.n
 
     lM=zeros(nT,nR)
     recoveryM=Array{Any,1}(undef,nf)
@@ -50,30 +50,28 @@ function recoveryMatrix(degFT::degF{1,:H1}, degFR::degF{1,:H1}, recoverySpace::S
         l2g!(globalNumR,degFR,f);
         z=1;
         for k in stencil[f]
-            jacobi!(J,dJ,m,k,kubPoints,coord);
-            k==f ? w=10.0^8 : w=1.0;
-            b = @. (k==abs(stencilBoundary[:,f]))
-            if iszero(b)
-                kcoord=@views mcoord[:,inc[off[k]:off[k+1]-1]]
-            else
-                kcoord=similar(fcoord);
-                if b[1]==1
-                    if stencilBoundary[1,f]<0
-                        dir=2; inds1=[4,3]; inds2=[1,2]
-                    else
-                        dir=2; inds1=[1,2]; inds2=[4,3]
+            copyto!(kcoord, mcoord[:,inc[off[abs(k)]:off[abs(k)+1]-1]])
+            if !iszero(stencilBoundary[abs(k)]) && k<0
+                k=-k
+                if abs(stencilBoundary[k])==1
+                    dir=2
+                    if stencilBoundary[k]<0 #down
+                        fac=1
+                    else #up
+                        fac=-1
                     end
                 else
-                    if stencilBoundary[2,f]<0
-                        dir=1; inds1=[2,3]; inds2=[1,4]
-                    else
-                        dir=1; inds1=[1,4]; inds2=[2,3]
+                    dir=1
+                    if stencilBoundary[k]<0 #left
+                        fac=1
+                    else #right
+                        fac=-1
                     end
                 end
-                kcoord[:,inds1]=fcoord[:,inds2]
-                kcoord[:,inds2]=fcoord[:,inds2]
-                @. kcoord[dir,inds2]=fcoord[dir,inds2]-dxy[dir]
+                @. kcoord[dir,:]+=fac*(m.geometry.r[dir]-m.geometry.l[dir])
             end
+            jacobi!(J,dJ,m,k,kubPoints,coord);
+            k==f ? w=10.0^8 : w=1.0;
             l2g!(globalNumT,degFT,k);
             fill!(lM,0.0)
             for r in 1:sk[2]
@@ -94,24 +92,6 @@ function recoveryMatrix(degFT::degF{1,:H1}, degFR::degF{1,:H1}, recoverySpace::S
                 cols[z]=globalNumR[j]
                 z+=1
             end
-            #=
-            for i in 1:nT
-                for j in 1:nR
-                    for r in 1:sk[2]
-                        for l in 1:sk[1]
-                            transformation!(kubP,m,kcoord,kubPoints[1,l],kubPoints[2,r])
-                            ksi,eta=intersect(fcoord,kubP,Ji,x);
-                            getPhiRecovery!(phiR,[ksi,eta])
-                            lM[i,j]+=kubWeights[l,r]*abs(dJ[l,r])*phiT[i][l,r]*phiR[j];
-                        end
-                    end
-                    vals[z]=w*lM[i,j]
-                    rows[z]=globalNumT[i]
-                    cols[z]=globalNumR[j]
-                    z+=1
-                end
-            end
-            =#
         end
         M=sparse(rows,cols,vals)
         unique!(rows)
@@ -132,7 +112,7 @@ function recoveryMatrix(degFT::degF{1,:H1}, degFR::degF{1,:H1}, recoverySpace::S
 end
 
 function recoveryMatrix(degFT::degF{2,:H1div}, degFR::degF{2,:H1xH1}, recoverySpace::Symbol,
-                  stencil::Array{Array{Int,1},1}, stencilBoundary::SparseMatrixCSC{Int,Int}, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
+                  stencil::Array{Array{Int,1},1}, stencilBoundary::SparseVector{Int,Int}, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
 
     phiT=@views degFT.phi;
     nR=getPhiRecoveryLength(recoverySpace)
@@ -153,6 +133,7 @@ function recoveryMatrix(degFT::degF{2,:H1div}, degFR::degF{2,:H1xH1}, recoverySp
     ddJ=Array{Float64,2}(undef,sk);
     jphiT=initJacobi((m.geometry.dim,nT),sk);
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
+    kcoord=similar(coord)
 
     n=zeros(m.geometry.dim)
     kubP=zeros(m.geometry.dim)
@@ -161,8 +142,6 @@ function recoveryMatrix(degFT::degF{2,:H1div}, degFR::degF{2,:H1xH1}, recoverySp
     Ji=zeros(3,3)
     x=zeros(3)
     kpoint=zeros(m.geometry.dim)
-
-    dxy= @. (m.geometry.r-m.geometry.l)/m.topology.n
 
     lM=zeros(nT,nR)
     recoveryM=Array{Any,1}(undef,nf)
@@ -178,30 +157,28 @@ function recoveryMatrix(degFT::degF{2,:H1div}, degFR::degF{2,:H1xH1}, recoverySp
         z=1;
         zk=1;
         for k in stencil[f]
-            jacobi!(J,ddJ,jphiT,m,k,kubPoints,phiT,coord);
-            k==f ? w=10.0^8 : w=1.0;
-            b = @. (k==abs(stencilBoundary[:,f]))
-            if iszero(b)
-                kcoord=@views mcoord[:,inc[off[k]:off[k+1]-1]]
-            else
-                kcoord=similar(fcoord);
-                if b[1]==1
-                    if stencilBoundary[1,f]<0
-                        dir=2; inds1=[4,3]; inds2=[1,2]
-                    else
-                        dir=2; inds1=[1,2]; inds2=[4,3]
+            copyto!(kcoord, mcoord[:,inc[off[abs(k)]:off[abs(k)+1]-1]])
+            if !iszero(stencilBoundary[abs(k)]) && k<0
+                k=-k
+                if abs(stencilBoundary[k])==1
+                    dir=2
+                    if stencilBoundary[k]<0 #down
+                        fac=1
+                    else #up
+                        fac=-1
                     end
                 else
-                    if stencilBoundary[2,f]<0
-                        dir=1; inds1=[2,3]; inds2=[1,4]
-                    else
-                        dir=1; inds1=[1,4]; inds2=[2,3]
+                    dir=1
+                    if stencilBoundary[k]<0 #left
+                        fac=1
+                    else #right
+                        fac=-1
                     end
                 end
-                kcoord[:,inds1]=fcoord[:,inds2]
-                kcoord[:,inds2]=fcoord[:,inds2]
-                @. kcoord[dir,inds2]=fcoord[dir,inds2]-dxy[dir]
+                @. kcoord[dir,:]+=fac*(m.geometry.r[dir]-m.geometry.l[dir])
             end
+            jacobi!(J,ddJ,jphiT,m,k,kubPoints,phiT,coord);
+            k==f ? w=10.0^8 : w=1.0;
             l2g!(globalNumT,degFT,k);
             fill!(lM,0.0)
 
@@ -227,28 +204,6 @@ function recoveryMatrix(degFT::degF{2,:H1div}, degFR::degF{2,:H1xH1}, recoverySp
                 cols[z]=globalNumR[j]
                 z+=1
             end
-            #=
-            for i in 1:nT
-                for j in 1:nR
-                    for r in 1:sk[2]
-                        for l in 1:sk[1]
-                            transformation!(kubP,m,kcoord,kubPoints[1,l],kubPoints[2,r])
-                            ksi,eta=intersect(fcoord,kubP,Ji,x);
-                            getPhiRecovery!(phiR,[ksi,eta])
-                            vecdot=0.0
-                            for d in 1:m.geometry.dim
-                                vecdot+=jphiT[d,i][l,r]*phiR[d,j];
-                            end
-                            lM[i,j]+=kubWeights[l,r]*ddJ[l,r]/abs(ddJ[l,r])*vecdot;
-                        end
-                    end
-                    vals[z]=w*lM[i,j]
-                    rows[z]=globalNumT[i]
-                    cols[z]=globalNumR[j]
-                    z+=1
-                end
-            end
-            =#
             if m.geometry.dim==3
                 transformation!(n,m,fcoord,0.5,0.5);
                 transformation!(kubP,m,kcoord,0.5,0.5)
@@ -271,17 +226,6 @@ function recoveryMatrix(degFT::degF{2,:H1div}, degFR::degF{2,:H1xH1}, recoverySp
                 end
             end
         end
-        #=
-        M=Matrix(Ms[rows,cols])
-        for k in stencil[f]
-            kcoord=@views mcoord[:,inc[off[k]:off[k+1]-1]]
-            transformation!(n,m,fcoord,0.5,0.5);
-            transformation!(kubP,m,kcoord,0.5,0.5)
-            ksi,eta=intersect(fcoord,kubP,Ji,x);
-            getPhiRecovery!(phiR,[ksi,eta])
-            M=vcat(M,n'*phiR)
-        end
-        =#
         if m.geometry.dim==3
             recoveryM[f]=(qr(vcat(Matrix(Ms[rows,cols]),normB), Val(true)),rows)
         else
