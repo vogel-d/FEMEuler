@@ -1,5 +1,6 @@
 #rx, /ry ist die Anzahl der Unterteilung einer Zelle des meshes m in x/y-Richtung
 function refineRectMesh(m::mesh,rx::Int,ry::Int,condEW::Symbol, condTB::Symbol)
+    m.meshType!=4 && error("rectangular mesh needed");
     nx=m.topology.n[1]; ny=m.topology.n[2]
     inc=Int[];
     off=collect(1:rx*ry:m.topology.size[3]*rx*ry+1) #statt 4 n?

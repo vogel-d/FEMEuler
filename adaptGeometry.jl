@@ -63,6 +63,8 @@ function adaptGeometry!(m::mesh,r::Float64,adaptBoundary::Bool=false)
 end
 
 function adaptGeometry!(m::mesh,pert::Tuple{Float64,Float64},adaptBoundary::Bool=false)
+    #error because dx and dy make sense for quadrilaterals only
+    m.meshType!=4 && @error("sinus mesh pertubation available for quadrilaterals only")
     coord=m.geometry.coordinates;
     xR=m.geometry.r[1]; xL=m.geometry.l[1]; yR=m.geometry.r[2]; yL=m.geometry.l[2]
     dx=(xR-xL)/m.topology.n[1];
