@@ -7,7 +7,6 @@ function testSphereAdvS()
     case=:zPanel
 
     stencilOrder=1;
-    recoveryOrder=1;
 
     recoverySpace=Symbol("R$recoveryOrder")
     recoverySpaceVec=Symbol("VecR$(recoveryOrder)S")

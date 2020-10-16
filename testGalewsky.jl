@@ -5,7 +5,6 @@ function testGalewsky()
     filename = "galewskyII";
 
     stencilOrder=2;
-    recoveryOrder=2;
 
     recoverySpace=Symbol("R$recoveryOrder")
     recoverySpaceVec=Symbol("VecR$(recoveryOrder)S")
@@ -42,7 +41,7 @@ function testGalewsky()
     m=generateCubedSphere(80,6300000.0,0,:cube1)
 
     p=femProblem(m, femType,t=:shallow, advection=adv, taskRecovery=taskRecovery,
-    stencilOrder=stencilOrder, recoveryOrder=recoveryOrder,);
+    stencilOrder=stencilOrder);
 
     gamma=0.5; #upwind
     MISMethod=MIS(:MIS4_4); #method of time integration

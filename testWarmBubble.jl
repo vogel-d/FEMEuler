@@ -2,7 +2,6 @@ include("modulesCE.jl")
 #include("advectionStiffN.jl")
 
 const stencilOrder=2;
-#const recoveryOrder=2;
 
 recoverySpace=Symbol("DGTri")
 recoverySpaceVec=Symbol("VecDGTri")
@@ -10,7 +9,7 @@ recoverySpaceVec=Symbol("VecDGTri")
 @recovery(recoverySpace,recoverySpaceVec)
 
 function testWarmBubble()
-    filename = "warmBubbleFinalAdvTRTriH";
+    filename = "warmBubbleFinalAdvTRTriHFE";
     #=
     #order: comp, compHigh, compRec, compDG
     femType=Dict(:rho=>[:DG0, :DG0, recoverySpace],
@@ -46,7 +45,7 @@ function testWarmBubble()
     #adaptGeometry!(m,(0.3,0.3),false); #sin perbutation
 
     p=femProblem(m, femType,t=:compressible, advection=advection, taskRecovery=taskRecovery,
-    stencilOrder=stencilOrder, recoveryOrder=recoveryOrder,);
+    stencilOrder=stencilOrder);
 
     gamma=0.5; #upwind
     UMax=20.0; #UMax determines the advection in x direction
@@ -114,7 +113,7 @@ function testWarmBubble()
       p.solution[Time]=y;
       p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
-      mod(i,25)==0 && unstructured_vtk(p, Time, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename*"$i")
+      mod(i,1)==0 && unstructured_vtk(p, Time, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename*"$i")
       println(Time)
     end
 

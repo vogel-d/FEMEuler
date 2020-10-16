@@ -2,7 +2,6 @@ include("modulesSWE.jl")
 #include("advectionStiffN.jl")
 
 const stencilOrder=2;
-const recoveryOrder=2;
 
 const recoverySpace=Symbol("DGQuad")
 const recoverySpaceVec=Symbol("VecDGQuadS")
@@ -43,7 +42,7 @@ function testGalewsky()
     m=generateCubedSphere(183,6300000.0,0,:cube1)
 
     p=femProblem(m, femType,t=:shallow, advection=adv, taskRecovery=taskRecovery,
-    stencilOrder=stencilOrder, recoveryOrder=recoveryOrder,);
+    stencilOrder=stencilOrder);
 
     gamma=0.5; #upwind
     MISMethod=MIS(:MIS2); #method of time integration

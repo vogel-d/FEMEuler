@@ -2,7 +2,6 @@ include("modulesSphereAdv.jl")
 #include("advectionStiffN.jl")
 
 stencilOrder=2;
-recoveryOrder=1;
 
 #recoverySpace=Symbol("R$recoveryOrder")
 #recoverySpaceVec=Symbol("VecR$(recoveryOrder)S")
@@ -54,7 +53,7 @@ function testSphereAdv2()
     #m=generateCubedSphere(3,6300000.0,0,:cube1)
 
     p=femProblem(m, femType,t=:compressible, advection=adv,
-        taskRecovery=taskRecovery, recoveryOrder=recoveryOrder,stencilOrder=stencilOrder);
+        taskRecovery=taskRecovery, stencilOrder=stencilOrder);
 
     gamma=0.5; #upwind
     #UMax=100.0; #UMax determines the advection in x direction

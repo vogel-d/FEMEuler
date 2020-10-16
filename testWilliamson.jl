@@ -1,7 +1,6 @@
 include("modulesSphereAdv.jl")
 
 stencilOrder=1;
-recoveryOrder=1;
 
 #recoverySpace=Symbol("R$recoveryOrder")
 #recoverySpaceVec=Symbol("VecR$(recoveryOrder)S")
@@ -51,7 +50,7 @@ function testWilliamson()
     #m=generateCubedSphere(20,6300000.0)
     m=generateCubedSphere(n,Rad)
 
-    p=femProblem(m, femType,t=:compressible, advection=advection, taskRecovery=taskRecovery, recoveryOrder=recoveryOrder,stencilOrder=stencilOrder);
+    p=femProblem(m, femType,t=:compressible, advection=advection, taskRecovery=taskRecovery, stencilOrder=stencilOrder);
 
     gamma=0.5; #upwind
     MISMethod=MIS(:MIS2); #method of time integration
