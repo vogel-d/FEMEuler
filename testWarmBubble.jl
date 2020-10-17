@@ -1,7 +1,7 @@
 include("modulesCE.jl")
 
 function testWarmBubble()
-    filename = "warmBubble";
+    filename = "testWarmBubble";
 
     #order: comp, compHigh, compRec, compDG
 
@@ -33,7 +33,7 @@ function testWarmBubble()
     p=femProblem(m, femType,t=:compressible, advection=advection, taskRecovery=taskRecovery);
 
     gamma=0.5; #upwind
-    UMax=20.0; #UMax determines the advection in x direction
+    UMax=0.0; #UMax determines the advection in x direction
     MISMethod=MIS(:MIS2); #method of time integration
 
     dt=2.0; #Coarse: 2.0
@@ -94,6 +94,7 @@ function testWarmBubble()
       p.solution[Time]=y;
       p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
+      #mod(i,50)==0 && unstructured_vtk(p, sort(collect(keys(p.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
       println(Time)
     end
 

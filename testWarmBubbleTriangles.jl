@@ -1,7 +1,7 @@
 include("modulesCE.jl")
 
 function testWarmBubbleTri()
-    filename = "test";
+    filename = "testWarmBubbleTri";
 
     #order: comp, compHigh, compRec, compDG
 
@@ -25,8 +25,11 @@ function testWarmBubbleTri()
     taskRecovery=true;
     advection=true;
 
-    m=generateTriMesh(160,80,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
-    #m=generateTriMesh(80,40,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
+    #m=generateTriMeshQuartered(160,80,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
+    #m=generateTriMeshHalved(160,80,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
+    #m=generateRectMesh(1,1,:constant,:constant,0.0,3.0,0.0,3.0); #(east/west, top/bottom)
+    #m=generateTriMeshQuartered(80,40,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
+    m=generateTriMeshEquilateral(-10000.0,10000.0,0.0,10000.0,80,:periodic,:constant)
 
     #adaptGeometry!(m,(0.3,0.3),false); #sin perbutation
 
@@ -43,7 +46,7 @@ function testWarmBubbleTri()
     nIter=Int64(EndTime/dt);
 
     #start functions
-    xCM=0.0; zCM=2000.0;
+    xCM=0; zCM=2000.0;
     r0=2000.0; th0=300.0;
     DeltaTh1=2;
     function frho(xz::Array{Float64,1})
@@ -94,14 +97,15 @@ function testWarmBubbleTri()
       p.solution[Time]=y;
       p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
-      mod(i,100)==0 && unstructured_vtk(p, sort(collect(keys(p.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEulerTriangles/"*filename)
+      #mod(i,100)==0 && unstructured_vtk(p, sort(collect(keys(p.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEulerTriangles/"*filename)
       println(Time)
     end
 
     #Speichern des Endzeitpunktes als vtu-Datei:
-    #unstructured_vtk(p, EndTime, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEulerTriangles/"*filename)
+    unstructured_vtk(p, EndTime, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEulerTriangles/"*filename)
     #Speichern aller berechneten Zwischenwerte als vtz-Datei:
-    unstructured_vtk(p, sort(collect(keys(p.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEulerTriangles/"*filename)
+    #unstructured_vtk(p, sort(collect(keys(p.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEulerTriangles/"*filename)
+    #unstructured_vtk(p, [0.0,100.0,500.0,1000.0,3000.0]], [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEulerTriangles/"*filename)
 
     return p
 end
