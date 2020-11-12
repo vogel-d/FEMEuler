@@ -257,9 +257,13 @@ function generateTriMeshHalved(nx::Int, ny::Int, condEW::Symbol, condTB::Symbol,
                 bE[i]=1;
             elseif (b1==0 && b2<0) || (b1<0 && b2==0) || (b1<0 && b2<0)
                 if coord[1,v1]==coord[1,v2]
-                    bE[i]=-i-nx;
+                    #bE[i]=-i-nx;
+                    #top=-bottom correction for global edge order
+                    bE[i+nx]=-i;
                 elseif coord[2,v1]==coord[2,v2]
-                    bE[i]=-i-ny;
+                    #bE[i]=-i-ny;
+                    #top=-bottom correction for global edge order
+                    bE[i+ny]=-i;
                 end
             end
         elseif (b1!=0 && b2!=0) || in(v1,corners) || in(v2,corners)
@@ -271,9 +275,13 @@ function generateTriMeshHalved(nx::Int, ny::Int, condEW::Symbol, condTB::Symbol,
                 end
             elseif b1<0 && b2<0
                 if coord[1,v1]==coord[1,v2]
-                    bE[i]=-i-nx;
+                    #bE[i]=-i-nx;
+                    #top=-bottom correction for global edge order
+                    bE[i+nx]=-i;
                 elseif coord[2,v1]==coord[2,v2]
-                    bE[i]=-i-ny;
+                    #bE[i]=-i-ny;
+                    #top=-bottom correction for global edge order
+                    bE[i+ny]=-i;
                 end
             end
         end
@@ -287,6 +295,75 @@ function generateTriMeshHalved(nx::Int, ny::Int, condEW::Symbol, condTB::Symbol,
     mG=meshGeometry(coord,l,r);
     m=mesh(mT,mG, bE, bV,condEW,condTB);
 
+    #make sure global orientation is right ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    meshConnectivity!(m,1,2);
+    offe=m.topology.offset["12"];
+    ince=m.topology.incidence["12"];
+    offv=m.topology.offset["10"];
+    incv=m.topology.incidence["10"];
+    offf=m.topology.offset["20"];
+    incf=m.topology.incidence["20"];
+    mt=m.meshType;
+    clockwiseRotation = [0 1; -1 0];
+    for e in 1:m.topology.size[m.topology.dim]
+        off1=offe[e];
+        off2=offe[e+1];
+        h1=false;
+        if (off2-off1)==1
+            e1=m.boundaryEdges[e];
+            if e1<0
+                e1=-e1
+                inc=[ince[offe[e1]], ince[off1]];
+                h1=true;
+            else
+                continue;
+            end
+        else
+            inc=(ince[off1:(off2-1)]);
+        end
+
+        #(so that global edge-normal points from inc[1] to inc[2])
+        #(global edge-normal is the vector
+        # from lower-number-vertex to higher-number-vertex
+        # rotated 90° clockwise)
+        # -> switch inc1 and inc2 if needed
+
+        #get numbers of vertices
+        edgeVertices = incv[offv[e]:offv[e]+1];
+        #create vector pointing from vertex lower number to vertex higher number
+        # (with respect to global edge orientation)
+        sort!(edgeVertices);
+        globalNormal = m.geometry.coordinates[:,edgeVertices[2]] .- m.geometry.coordinates[:,edgeVertices[1]]
+        #rotate it clockwise (becomes global normal)
+        globalNormal = clockwiseRotation*globalNormal;
+
+        #compute centers of cells
+        verticesInc1 = m.geometry.coordinates[:,incf[offf[inc[1]]:(offf[inc[1]+1]-1)]]
+        verticesInc2 = m.geometry.coordinates[:,incf[offf[inc[2]]:(offf[inc[2]+1]-1)]]
+        centerInc1 = 1/(mt) * sum(verticesInc1,dims=2);
+        centerInc2 = 1/(mt) * sum(verticesInc2,dims=2);
+
+        #define current normal pointing vom cell 1 to cell 2
+        currentNormal = centerInc2 .- centerInc1;
+
+        #note: if edge e is on periodic boundary (h1=true) the computed "currentNormal" will have
+        #the opposite direction of the actual current normal (which is pointing out of the grid), so:
+        if h1
+            currentNormal= -currentNormal;
+        end
+
+        #compare directions and switch inc if needed
+        if dot(currentNormal, globalNormal)<0
+            inc=inc[[2,1]];
+            switched = true
+        end
+
+        if !h1
+            ince[off1]=inc[1];
+            ince[off1+1]=inc[2];
+        end
+    end
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     return m
 end
 
@@ -439,9 +516,13 @@ function generateTriMeshQuartered(nx::Int, ny::Int, condEW::Symbol, condTB::Symb
                 bE[i]=1;
             elseif (b1==0 && b2<0) || (b1<0 && b2==0) || (b1<0 && b2<0)
                 if coord[1,v1]==coord[1,v2]
-                    bE[i]=-i-nx;
+                    #bE[i]=-i-nx;
+                    #top=-bottom correction for global edge order
+                    bE[i+nx]=-i;
                 elseif coord[2,v1]==coord[2,v2]
-                    bE[i]=-i-ny;
+                    #bE[i]=-i-ny;
+                    #top=-bottom correction for global edge order
+                    bE[i+ny]=-i;
                 end
             end
         elseif (b1!=0 && b2!=0) || in(v1,corners) || in(v2,corners)
@@ -451,9 +532,13 @@ function generateTriMeshQuartered(nx::Int, ny::Int, condEW::Symbol, condTB::Symb
                 bE[i]=1;
             elseif b1<0 && b2<0
                 if coord[1,v1]==coord[1,v2]
-                    bE[i]=-i-nx;
+                    #bE[i]=-i-nx;
+                    #top=-bottom correction for global edge order
+                    bE[i+nx]=-i;
                 elseif coord[2,v1]==coord[2,v2]
-                    bE[i]=-i-ny;
+                    #bE[i]=-i-ny;
+                    #top=-bottom correction for global edge order
+                    bE[i+ny]=-i;
                 end
             end
         end
@@ -468,6 +553,75 @@ function generateTriMeshQuartered(nx::Int, ny::Int, condEW::Symbol, condTB::Symb
     mG=meshGeometry(coord,l,r);
     m=mesh(mT,mG, bE, bV,condEW,condTB);
 
+    #make sure global orientation is right ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    meshConnectivity!(m,1,2);
+    offe=m.topology.offset["12"];
+    ince=m.topology.incidence["12"];
+    offv=m.topology.offset["10"];
+    incv=m.topology.incidence["10"];
+    offf=m.topology.offset["20"];
+    incf=m.topology.incidence["20"];
+    mt=m.meshType;
+    clockwiseRotation = [0 1; -1 0];
+    for e in 1:m.topology.size[m.topology.dim]
+        off1=offe[e];
+        off2=offe[e+1];
+        h1=false;
+        if (off2-off1)==1
+            e1=m.boundaryEdges[e];
+            if e1<0
+                e1=-e1
+                inc=[ince[offe[e1]], ince[off1]];
+                h1=true;
+            else
+                continue;
+            end
+        else
+            inc=(ince[off1:(off2-1)]);
+        end
+
+        #(so that global edge-normal points from inc[1] to inc[2])
+        #(global edge-normal is the vector
+        # from lower-number-vertex to higher-number-vertex
+        # rotated 90° clockwise)
+        # -> switch inc1 and inc2 if needed
+
+        #get numbers of vertices
+        edgeVertices = incv[offv[e]:offv[e]+1];
+        #create vector pointing from vertex lower number to vertex higher number
+        # (with respect to global edge orientation)
+        sort!(edgeVertices);
+        globalNormal = m.geometry.coordinates[:,edgeVertices[2]] .- m.geometry.coordinates[:,edgeVertices[1]]
+        #rotate it clockwise (becomes global normal)
+        globalNormal = clockwiseRotation*globalNormal;
+
+        #compute centers of cells
+        verticesInc1 = m.geometry.coordinates[:,incf[offf[inc[1]]:(offf[inc[1]+1]-1)]]
+        verticesInc2 = m.geometry.coordinates[:,incf[offf[inc[2]]:(offf[inc[2]+1]-1)]]
+        centerInc1 = 1/(mt) * sum(verticesInc1,dims=2);
+        centerInc2 = 1/(mt) * sum(verticesInc2,dims=2);
+
+        #define current normal pointing vom cell 1 to cell 2
+        currentNormal = centerInc2 .- centerInc1;
+
+        #note: if edge e is on periodic boundary (h1=true) the computed "currentNormal" will have
+        #the opposite direction of the actual current normal (which is pointing out of the grid), so:
+        if h1
+            currentNormal= -currentNormal;
+        end
+
+        #compare directions and switch inc if needed
+        if dot(currentNormal, globalNormal)<0
+            inc=inc[[2,1]];
+            switched = true
+        end
+
+        if !h1
+            ince[off1]=inc[1];
+            ince[off1+1]=inc[2];
+        end
+    end
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     return m
 end
 
@@ -475,6 +629,7 @@ end
 #Input: nx bzw. ny ist die Anzahl der Gitterelemente in x- bzw. y-Richtung, also die Feinheit des Meshes
 #       xl bzw. yl ist die Länge des Meshes in x- bzw. y-Richtung, als Default ist die Länge nx bzw. ny
 function generateTriMeshEquilateral(xl::Float64, xr::Float64, yl::Float64, yr::Float64, nrows::Int64, condEW::Symbol, condTB::Symbol)
+    (isodd(nrows) && condTB==:periodic) && error("periodic boundary conditions for even nrows only")
     l = (2*(yr-yl))/(nrows*sqrt(3));
     height=(yr-yl)/nrows;
     nx=Int64(div(xr-xl-0.5*l,l)+1); #smallest nx so that nx*l+0.5*l>yr
@@ -580,7 +735,9 @@ function generateTriMeshEquilateral(xl::Float64, xr::Float64, yl::Float64, yr::F
         bE[1:nx]=ones(nx);
         bE[(nrows*nx+1):((nrows+1)*nx)]=ones(nx);
     elseif condTB==:periodic
-        bE[1:nx]=-(nrows*nx+1):-1:-((nrows+1)*nx);
+        #setEdgeData uses this (top=-bottom) order
+        #changing to bottom=-top will generate problems inc["12"]
+        bE[(nrows*nx+1):((nrows+1)*nx)]=-1:-1:-nx;
     end
 
     if condEW==:constant
@@ -599,6 +756,75 @@ function generateTriMeshEquilateral(xl::Float64, xr::Float64, yl::Float64, yr::F
     mG=meshGeometry(coord,l,r);
     m=mesh(mT,mG, bE, bV,condEW,condTB);
 
+    #make sure global orientation is right ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    meshConnectivity!(m,1,2);
+    offe=m.topology.offset["12"];
+    ince=m.topology.incidence["12"];
+    offv=m.topology.offset["10"];
+    incv=m.topology.incidence["10"];
+    offf=m.topology.offset["20"];
+    incf=m.topology.incidence["20"];
+    mt=m.meshType;
+    clockwiseRotation = [0 1; -1 0];
+    for e in 1:m.topology.size[m.topology.dim]
+        off1=offe[e];
+        off2=offe[e+1];
+        h1=false;
+        if (off2-off1)==1
+            e1=m.boundaryEdges[e];
+            if e1<0
+                e1=-e1
+                inc=[ince[offe[e1]], ince[off1]];
+                h1=true;
+            else
+                continue;
+            end
+        else
+            inc=(ince[off1:(off2-1)]);
+        end
+
+        #(so that global edge-normal points from inc[1] to inc[2])
+        #(global edge-normal is the vector
+        # from lower-number-vertex to higher-number-vertex
+        # rotated 90° clockwise)
+        # -> switch inc1 and inc2 if needed
+
+        #get numbers of vertices
+        edgeVertices = incv[offv[e]:offv[e]+1];
+        #create vector pointing from vertex lower number to vertex higher number
+        # (with respect to global edge orientation)
+        sort!(edgeVertices);
+        globalNormal = m.geometry.coordinates[:,edgeVertices[2]] .- m.geometry.coordinates[:,edgeVertices[1]]
+        #rotate it clockwise (becomes global normal)
+        globalNormal = clockwiseRotation*globalNormal;
+
+        #compute centers of cells
+        verticesInc1 = m.geometry.coordinates[:,incf[offf[inc[1]]:(offf[inc[1]+1]-1)]]
+        verticesInc2 = m.geometry.coordinates[:,incf[offf[inc[2]]:(offf[inc[2]+1]-1)]]
+        centerInc1 = 1/(mt) * sum(verticesInc1,dims=2);
+        centerInc2 = 1/(mt) * sum(verticesInc2,dims=2);
+
+        #define current normal pointing vom cell 1 to cell 2
+        currentNormal = centerInc2 .- centerInc1;
+
+        #note: if edge e is on periodic boundary (h1=true) the computed "currentNormal" will have
+        #the opposite direction of the actual current normal (which is pointing out of the grid), so:
+        if h1
+            currentNormal= -currentNormal;
+        end
+
+        #compare directions and switch inc if needed
+        if dot(currentNormal, globalNormal)<0
+            inc=inc[[2,1]];
+            switched = true
+        end
+
+        if !h1
+            ince[off1]=inc[1];
+            ince[off1+1]=inc[2];
+        end
+    end
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     return m
 end
 
@@ -607,6 +833,7 @@ end
 #Input: nx bzw. ny ist die Anzahl der Gitterelemente in x- bzw. y-Richtung, also die Feinheit des Meshes
 #       xl bzw. yl ist die Länge des Meshes in x- bzw. y-Richtung, als Default ist die Länge nx bzw. ny
 function generateTriMeshIsosceles(nx::Int, ny::Int, xl::Float64=0.0, yl::Float64=0.0, xr::Float64=Float64(nx), yr::Float64=Float64(ny))
+    @error("no boundary vectors implemented yet")
     if iseven(ny)
         #Berechnen der Anzahl der Entitäten für die verschiedenen Dimensionen
         nf=ny*(2*nx-1);
