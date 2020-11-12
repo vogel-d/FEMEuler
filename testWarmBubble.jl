@@ -9,7 +9,7 @@ recoverySpaceVec=Symbol("VecDGTri")
 @recovery(recoverySpace,recoverySpaceVec)
 
 function testWarmBubble()
-    filename = "warmBubbleFinalAdvTRTriHFE";
+    filename = "warmBubbleFinalAdvTRTriHF";
     #=
     #order: comp, compHigh, compRec, compDG
     femType=Dict(:rho=>[:DG0, :DG0, recoverySpace],
@@ -39,8 +39,8 @@ function testWarmBubble()
     taskRecovery=true
     advection=true;
 
-    #m=generateRectMesh(160,80,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
-    m=generateRectMesh(80,40,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
+    m=generateRectMesh(160,80,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
+    #m=generateRectMesh(80,40,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
 
     #adaptGeometry!(m,(0.3,0.3),false); #sin perbutation
 
@@ -51,8 +51,8 @@ function testWarmBubble()
     UMax=20.0; #UMax determines the advection in x direction
     MISMethod=MIS(:MIS2); #method of time integration
 
-    dt=1.0; #Coarse: 2.0
-    #dt=0.5; #Coarse: 1.0
+    #dt=1.0; #Coarse: 2.0
+    dt=0.5; #Coarse: 1.0
     ns=15;
     EndTime=1000.0;
     nIter=Int64(EndTime/dt);
@@ -92,7 +92,6 @@ function testWarmBubble()
     advectionTypes=Symbol[];
     for i in [:rho,:rhoTheta,:rhoV]
         push!(advectionTypes,femType[i][1]);
-        #(taskRecovery && length(femType[i])==4) && push!(advectionTypes,femType[i][3]);
         push!(advectionTypes,femType[i][3]);
     end
     nquadPhi, nquadPoints=coordTrans(m, m.normals, advectionTypes, size(p.kubWeights,2));
@@ -113,7 +112,7 @@ function testWarmBubble()
       p.solution[Time]=y;
       p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
-      mod(i,1)==0 && unstructured_vtk(p, Time, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename*"$i")
+      mod(i,25)==0 && unstructured_vtk(p, Time, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename*"$i")
       println(Time)
     end
 

@@ -1,16 +1,14 @@
 include("modulesCE.jl")
-#include("advectionStiffN.jl")
 
-const stencilOrder=1;
-const recoveryOrder=1;
+const stencilOrder=2;
 
-const recoverySpace=Symbol("R$recoveryOrder")
-const recoverySpaceVec=Symbol("VecR$(recoveryOrder)")
+recoverySpace=Symbol("DGQuad")
+recoverySpaceVec=Symbol("VecDGQuad")
 
 @recovery(recoverySpace,recoverySpaceVec)
 
 function testColdMountainBubble()
-    filename = "coldMountainBubble";
+    filename = "coldMountainBubbleTRQuad";
 
     #order: comp, compHigh, compRec, compDG
     femType=Dict(:rho=>[:DG0, :DG0, recoverySpace],
@@ -26,12 +24,12 @@ function testColdMountainBubble()
                  :p=>[:DG0],
                  :v=>[:RT0],
                  :theta=>[:DG0]);
-
+    =#
     #higher spaces
-
-    femType=Dict(:rho=>[:DG1, :P1, :DG1, :DG0],
-                 :rhoV=>[:RT1, :VecP1, :VecDG1, :RT0B],
-                 :rhoTheta=>[:DG1, :P1, :DG1, :DG0],
+    #=
+    femType=Dict(:rho=>[:DG1, :DG1, recoverySpace],
+                 :rhoV=>[:RT1, :RT1, recoverySpaceVec],
+                 :rhoTheta=>[:DG1, :DG1, recoverySpace],
                  :p=>[:DG1],
                  :v=>[:RT1],
                  :theta=>[:DG1]);
@@ -43,7 +41,7 @@ function testColdMountainBubble()
     m=generateRectMesh(360,64,:periodic,:constant,-18000.0,18000.0,0.0,6400.0); #(east/west, top/bottom)
     #m=generateRectMesh(180,32,:periodic,:constant,-18000.0,18000.0,0.0,6400.0); #(east/west, top/bottom)
     p=femProblem(m, femType, t=:compressible, advection=advection, taskRecovery=taskRecovery,
-    stencilOrder=stencilOrder, recoveryOrder=recoveryOrder,);
+    stencilOrder=stencilOrder);
 
     adaptGeometry!(m,1000.0,2000.0); #witch of agnesi with Gall-Chen and Sommerville transformation
 
@@ -100,7 +98,7 @@ function testColdMountainBubble()
     advectionTypes=Symbol[];
     for i in [:rho,:rhoTheta,:rhoV]
         push!(advectionTypes,femType[i][1]);
-        (taskRecovery && length(femType[i])==4) && push!(advectionTypes,femType[i][3]);
+        push!(advectionTypes,femType[i][3]);
     end
     nquadPhi, nquadPoints=coordTrans(m, m.normals, advectionTypes, size(p.kubWeights,2));
     setEdgeData!(p, :v)
