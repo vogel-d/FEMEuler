@@ -1,24 +1,32 @@
 include("modulesCE.jl")
 
+const stencilOrder=2;
+
+recoverySpace=Symbol("DGQuad")
+recoverySpaceVec=Symbol("VecDGQuad")
+
+@recovery(recoverySpace,recoverySpaceVec)
+
 function testSchaer()
-    filename = "mountainSchaer";
+    filename = "mountainSchaerTRQuad";
 
     #order: comp, compHigh, compRec, compDG
-    femType=Dict(:rho=>[:DG0, :P1, :DG1, :DG0],
-                 :rhoV=>[:RT0, :VecP1, :VecDG1, :RT0B],
-                 :rhoTheta=>[:DG0, :P1, :DG1, :DG0],
+    femType=Dict(:rho=>[:DG0, :DG0, recoverySpace],
+                 :rhoV=>[:RT0, :RT0, recoverySpaceVec],
+                 :rhoTheta=>[:DG0, :DG0, recoverySpace],
                  :p=>[:DG0],
                  :v=>[:RT0],
                  :theta=>[:DG0]);
 
-    taskRecovery=false;
+    taskRecovery=true;
     advection=true;
 
     m=generateRectMesh(400,65,:periodic,:constant,-100000.0,100000.0,0.0,19500.0); #(east/west, top/bottom)
 
     adaptGeometry!(m,250.0,5000.0,4000.0); #Schaer mountain with SLEVE transformation
 
-    p=femProblem(m, femType, t=:compressible, advection=advection, taskRecovery=taskRecovery);
+    p=femProblem(m, femType, t=:compressible, advection=advection, taskRecovery=taskRecovery,
+    stencilOrder=stencilOrder);
 
     gamma=0.5; #upwind
     UMax=10.0; #UMax determines the advection in x direction
@@ -30,7 +38,7 @@ function testSchaer()
     nIter=Int64(EndTime/dt);
 
     #start functions
-    th0=288.0; 
+    th0=288.0;
     function frho(xz::Array{Float64,1})
         x=xz[1]; z=xz[2];
         s=N*N/Grav
@@ -42,16 +50,15 @@ function testSchaer()
         x=xz[1]; z=xz[2];
         return th0*exp(z*N*N/Grav)
     end
-
-    fv1(xz::Array{Float64,1})=UMax;
-    fv2(xz::Array{Float64,1})=0.0;
-    fvel=[fv1, fv2];
+    function fvel(xz::Array{Float64,1})
+        return [UMax, 0.0]
+    end
     f=Dict(:rho=>frho,:theta=>ftheta,:v=>fvel);
 
     assembMass!(p);
     assembStiff!(p);
     println("Matrizen berechnet")
-    p.boundaryValues[(:theta,:P1)]=300*ones(p.degFBoundary[:P1].numB-p.degFBoundary[:P1].num);
+    #p.boundaryValues[(:theta,:P1)]=300*ones(p.degFBoundary[:P1].numB-p.degFBoundary[:P1].num);
     applyStartValues!(p, f);
     unstructured_vtk(p, 0.0, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
 
@@ -60,13 +67,16 @@ function testSchaer()
     p.solution[0.0].rhoV=projectChi(p,rho0,p.solution[0.0].v,:rho,:v);
     println("Startwerte proijziert")
 
-    taskRecovery ? pos=[1,3] : pos=[1];
+    unstructured_vtk(p, 0.0, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename*"0")
+
     advectionTypes=Symbol[];
     for i in [:rho,:rhoTheta,:rhoV]
-        append!(advectionTypes,femType[i][pos]);
+        push!(advectionTypes,femType[i][1]);
+        push!(advectionTypes,femType[i][3]);
     end
-    nquadPhi, nquadPoints=coordTrans(m.meshType, m.normals, collect(Set(advectionTypes)), size(p.kubWeights,2));
+    nquadPhi, nquadPoints=coordTrans(m, m.normals, advectionTypes, size(p.kubWeights,2));
     setEdgeData!(p, :v)
+    recoveryMatrix!(p)
 
     MrT=assembMass(p.degFBoundary[femType[:rhoTheta][1]], m, p.kubPoints, p.kubWeights);
     MrV=assembMass(p.degFBoundary[femType[:rhoV][1]], m, p.kubPoints, p.kubWeights);
@@ -84,7 +94,7 @@ function testSchaer()
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
       if mod(i,50)==0
         p2=deepcopy(p);
-        unstructured_vtk(p2, maximum(collect(keys(p2.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
+        unstructured_vtk(p2, maximum(collect(keys(p2.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename*"$i")
       end
       println(Time)
     end

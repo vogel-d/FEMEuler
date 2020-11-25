@@ -70,7 +70,7 @@ function projectPressureSWE(degFP::degF{1,:H1},massMP::SuiteSparse.UMFPACK.Umfpa
             @. cl+=valRT[globalNumRT[i]]*phiRT[i];
         end
 
-        @. cl=2*Grav*cl^2;
+        @. cl=0.5*Grav*cl^2;
 
         for j in 1:length(phiP)
             for r in 1:sk[2]

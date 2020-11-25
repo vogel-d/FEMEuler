@@ -14,7 +14,8 @@ struct degF{N,Space}
 end
 
 
-function degF(m::mesh, femType::Symbol, ordEdgesB::Array{Int,1}, nebP::Int, nebC::Int, ordVerticesB::Array{Int,1}, nvbP::Int, nvbC::Int, kubPoints::Array{Float64,2})
+function degF(m::mesh, femType::Symbol, ordEdgesB::Array{Int,1}, nebP::Int, nebC::Int,
+        ordVerticesB::Array{Int,1}, nvbP::Int, nvbC::Int, kubPoints::Array{Float64,2})
     nf=m.topology.size[3];
     ne=m.topology.size[2];
     nv=m.topology.size[1];
@@ -29,8 +30,8 @@ function degF(m::mesh, femType::Symbol, ordEdgesB::Array{Int,1}, nebP::Int, nebC
     #Verallgemeinern durch Rauskürzen von nef und nvf und variablen Erstellen von off & Erweitern von getElementProperties
     nef=offfe[2]-offfe[1];
     nvf=offfv[2]-offfv[1];
+    phi, divphi,  gradphi, refFace, refEdge, refVert=getElementProperties(femType, kubPoints, m.meshType, m.geometry.dim)
 
-    phi, divphi,  gradphi, refFace, refEdge, refVert=getElementProperties(femType, kubPoints, m.meshType)
     ndegF=refFace+nef*refEdge+nvf*refVert
     inc=zeros(Int, nf*ndegF);
     off=collect(1:ndegF:nf*ndegF+1);
@@ -56,28 +57,32 @@ function degF(m::mesh, femType::Symbol, ordEdgesB::Array{Int,1}, nebP::Int, nebC
         end
 
         edges=incfe[offfe[f]:offfe[f+1]-1];
-        #Sortieren von edges in  richtige Reigenforge nach Knoten
-        push!(vert,vert[1]);
-        ind=zeros(Int,length(edges)); #ALLOCATION
-        for i in 1:length(edges)
-            ve=incev[offev[edges[i]]:offev[edges[i]+1]-1];
-            for j in 1:length(vert)-1
-                if ve[1]==vert[j]
-                    if ve[2]==vert[j+1]
-                        ind[j]=i;
-                    else
-                        continue;
-                    end
-                elseif ve[1]==vert[j+1]
-                    if ve[2]==vert[j]
-                        ind[j]=i;
-                    else
-                        continue;
+
+        if m.topology.dim==m.geometry.dim
+            #Sortieren von edges in  richtige Reigenforge nach Knoten
+            push!(vert,vert[1]);
+            ind=zeros(Int,length(edges)); #ALLOCATION
+            for i in 1:length(edges)
+                ve=incev[offev[edges[i]]:offev[edges[i]+1]-1];
+                for j in 1:length(vert)-1
+                    if ve[1]==vert[j]
+                        if ve[2]==vert[j+1]
+                            ind[j]=i;
+                        else
+                            continue;
+                        end
+                    elseif ve[1]==vert[j+1]
+                        if ve[2]==vert[j]
+                            ind[j]=i;
+                        else
+                            continue;
+                        end
                     end
                 end
             end
+            edges=edges[ind];
         end
-        edges=edges[ind];
+
         ze=off[f]+refFace;
         for e in edges
             if m.boundaryEdges[e]>=0
@@ -95,5 +100,22 @@ function degF(m::mesh, femType::Symbol, ordEdgesB::Array{Int,1}, nebP::Int, nebC
     end
     nb=nf*refFace+(ne-nebP)*refEdge+(nv-nvbP)*refVert;
     n=nb-nebC*refEdge-nvbC*refVert;
-    degF{ndims(phi),getSpace(femType)}(femType,nb,n, inc, off, phi, divphi, gradphi);
+    degF{ndims(phi),getSpace(femType)}(femType, nb, n, inc, off, phi, divphi, gradphi);
+end
+
+function getSpace(femType::Symbol)
+
+    H1=Set([:DG0,:DG1,:DG2,:DGLin,:DGQuad,:DGTri,:P1,:P2]);
+    H1div=Set([:RT0,:RT1,:RT0B,:RT1B]);
+    H1xH1=Set([:VecDG1,:VecDGLin,:VecDGQuad,:VecDGTri,:VecDG1S,:VecDGLinS,:VecDGQuadS,:VecDGTriS,:VecP1,:VecDG1S,:VecP1S]);
+
+    if in(femType,H1)
+        return :H1
+    elseif in(femType,H1div)
+        return :H1div
+    elseif in(femType,H1xH1)
+        return :H1xH1
+    else
+        error("Bitte für $femType Raum spezifizieren.")
+    end
 end

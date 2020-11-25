@@ -4,7 +4,11 @@ function assembMass!(p::femProblem)
     s=Array{Symbol,1}();
     if p.taskRecovery
         for i in collect(keys(p.femType))
-            append!(s, p.femType[i])
+            if length(p.femType[i])==3
+                append!(s, p.femType[i][[1,2]])
+            else
+                append!(s, p.femType[i])
+            end
         end
     else
         for i in collect(keys(p.femType))
@@ -104,7 +108,6 @@ function assembMass(degF::degF{2,:H1xH1}, m::mesh, kubPoints::Array{Float64,2}, 
     sk=size(kubWeights)
     J=initJacobi((m.geometry.dim,m.topology.dim),sk);
     dJ=Array{Float64,2}(undef,sk);
-    jphiRef=initJacobi((m.geometry.dim,iter),sk);
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
     for k in 1:m.topology.size[m.topology.dim+1]
         jacobi!(J,dJ,m,k,kubPoints,coord);

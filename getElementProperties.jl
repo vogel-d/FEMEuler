@@ -1,9 +1,14 @@
 include("getQuadElementProperties.jl")
+include("getSphereElementProperties.jl")
 include("getTriElementProperties.jl")
 
-function getElementProperties(type::Symbol, kubPoints::Array{Float64,2}, mt::Int)
+function getElementProperties(type::Symbol, kubPoints::Array{Float64,2}, mt::Int, dim::Int)
     if mt==4
-        phi, divphi, gradphi, cm, nFace, nEdge, nVert=getQuadElementProperties(type);
+        if dim==2
+            phi, divphi, gradphi, cm, nFace, nEdge, nVert=getQuadElementProperties(type);
+        elseif dim==3
+            phi, divphi, gradphi, cm, nFace, nEdge, nVert=getSphereElementProperties(type);
+        end
 
         sk=size(kubPoints,2);
         kubPhi=Array{Array{Float64,2},ndims(phi)}(undef,size(phi));
@@ -75,9 +80,13 @@ function getElementProperties(type::Symbol, kubPoints::Array{Float64,2}, mt::Int
     return kubPhi, kubDiv,  kubGrad, nFace, nEdge, nVert
 end
 
-function getElementProperties(type::Symbol, mt::Int)
+function getElementProperties(type::Symbol, mt::Int, dim::Int)
     if mt==4
-        phi, divphi, gradphi, cm, nFace, nEdge, nVert=getQuadElementProperties(type);
+        if dim==2
+            phi, divphi, gradphi, cm, nFace, nEdge, nVert=getQuadElementProperties(type);
+        elseif dim==3
+            phi, divphi, gradphi, cm, nFace, nEdge, nVert=getSphereElementProperties(type);
+        end
     elseif mt==3
         phi, divphi, gradphi, cm, nFace, nEdge, nVert=getTriElementProperties(type);
     end
@@ -85,18 +94,26 @@ function getElementProperties(type::Symbol, mt::Int)
     return phi, s
 end
 
-function getElementProperties(mt::Int, type::Symbol)
+function getElementProperties(mt::Int, type::Symbol, dim::Int)
     if mt==4
-        phi, divphi, gradphi, cm, nFace, nEdge, nVert=getQuadElementProperties(type);
+        if dim==2
+            phi, divphi, gradphi, cm, nFace, nEdge, nVert=getQuadElementProperties(type);
+        elseif dim==3
+            phi, divphi, gradphi, cm, nFace, nEdge, nVert=getSphereElementProperties(type);
+        end
     elseif mt==3
         phi, divphi, gradphi, cm, nFace, nEdge, nVert=getTriElementProperties(type);
     end
     return cm
 end
 
-function getElementProperties(type::Symbol, mt::Int, x, y)
+function getElementProperties(type::Symbol, mt::Int, dim::Int, x, y)
     if mt==4
-        phi, divphi, gradphi, cm, nFace, nEdge, nVert=getQuadElementProperties(type);
+        if dim==2
+            phi, divphi, gradphi, cm, nFace, nEdge, nVert=getQuadElementProperties(type);
+        elseif dim==3
+            phi, divphi, gradphi, cm, nFace, nEdge, nVert=getSphereElementProperties(type);
+        end
     elseif mt==3
         phi, divphi, gradphi, cm, nFace, nEdge, nVert=getTriElementProperties(type);
     end
@@ -106,3 +123,27 @@ function getElementProperties(type::Symbol, mt::Int, x, y)
     end
     return valPhi
 end
+
+function getElementProperties(type::Symbol, n::Array{Float64,1}, xyz)
+    phi=getPhiRecovery(Val(type));
+    valPhi=similar(phi,Float64);
+    t1,t2=getTangentialPlane(n);
+    txyz=transformRecoveryCoord(n,t1,t2,xyz)
+    for k=1:length(phi)
+        valPhi[k]=phi[k](txyz);
+    end
+    return valPhi
+end
+#=
+function getElementProperties(type::Symbol, n::Array{Float64,1}, xyz)
+    phi=getPhiRecovery([0.0,0.0],Val(type));
+    valPhi=similar(phi,Float64);
+    n2=copy(n)
+    t1,t2=getTangentialPlane(n2);
+    txyz=transformRecoveryCoord(n2,t1,t2,xyz)
+    for k=1:length(phi)
+        valPhi[k]=phi[k](txyz);
+    end
+    return valPhi
+end
+=#

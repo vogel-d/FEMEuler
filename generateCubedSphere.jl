@@ -59,6 +59,7 @@ function generateCubedSphere(n::Int,r::Float64,nz::Int=0,case::Symbol=:purser1) 
   NodeNumber=getCubePoints!(coord,[-1.0,1.0,0.0],3,NodeNumber,n,case)
   NodeNumberBTpp=NodeNumber
   NodeNumber=getCubePoints!(coord,[1.0,1.0,0.0],3,NodeNumber,n,case)
+
   #Nodes
   NodeNumbermmm=NodeNumber
   coord[:,NodeNumber]=cubePoint([-1.0,-1.0,-1.0],[0,0,0],n,case)
@@ -124,7 +125,7 @@ function generateCubedSphere(n::Int,r::Float64,nz::Int=0,case::Symbol=:purser1) 
   NumberOfFacesPlane=6*n*n
   #Inzidenz 2->1
   incfe=Int[];
-  FaceNumber=1
+
   # Faces
   # West
   insertFaceFace!(incfe,EdgeNumberW1,EdgeNumberW2,EdgeNumberSNmm,EdgeNumberSNmp,EdgeNumberBTmm,EdgeNumberBTmp,n)
@@ -138,7 +139,6 @@ function generateCubedSphere(n::Int,r::Float64,nz::Int=0,case::Symbol=:purser1) 
   insertFaceFace!(incfe,EdgeNumberB1,EdgeNumberB2,EdgeNumberWEmm,EdgeNumberWEpm,EdgeNumberSNmm,EdgeNumberSNpm,n)
   # Top
   insertFaceFace!(incfe,EdgeNumberT1,EdgeNumberT2,EdgeNumberWEmp,EdgeNumberWEpp,EdgeNumberSNmp,EdgeNumberSNpp,n)
-
   #Initialisieren des Offsets mit den Einträgen "21" und "10"
   off=Dict("21"=>collect(1:4:(4*NumberOfFacesPlane+1)),"10"=>collect(1:2:(2*NumberOfEdgesPlane+1)));
 
@@ -158,7 +158,7 @@ function generateCubedSphere(n::Int,r::Float64,nz::Int=0,case::Symbol=:purser1) 
   r=Float64[r,r,r];
   mT=meshTopology(inc,off,size,2,n);
   mG=meshGeometry(coord,l,r);
-  m=mesh(mT,mG,bE,bV,4);
+  m=mesh(mT,mG,bE,bV,:none,:none,4);
 
   inc,off=faceVertices(m);
   m.topology.incidence["20"]=inc;
@@ -168,7 +168,6 @@ function generateCubedSphere(n::Int,r::Float64,nz::Int=0,case::Symbol=:purser1) 
 
   # Extension to 3 d
   #Extension3DPolyGrid(nz,PolyGrid,NumberOfNodesPlane,NumberOfEdgesPlane,NumberOfFacesPlane)
-
   return m;
 end
 
@@ -195,9 +194,18 @@ end
 
 function cubePoint(p::Array{Float64,1},i::Array{Int,1},n::Int,case::Symbol)
   if case==:cube1
-    piFourth=atan(1.0);
-    d=2.0*piFourth/n;
-    return tan.(d.*i.-piFourth)
+    N=copy(p)
+    if i[1]>0
+      N[1]=tan(i[1]*pi/(2*n)-0.25*pi);
+    end
+    if i[2]>0
+      N[2]=tan(i[2]*pi/(2*n)-0.25*pi);
+    end
+    if i[3]>0
+      N[3]=tan(i[3]*pi/(2*n)-0.25*pi);
+    end
+    return N./norm(N).*sqrt(3);
+
   elseif case==:purser1
     xm=zeros(2);
     dd=2.0/n;

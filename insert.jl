@@ -18,19 +18,19 @@ function insertFaceFace!(incfe::Array{Int,1},EdgeNumberStart1::Int,EdgeNumberSta
       #Face(FaceNumber)%Boundary=1
 
       e=Int[EdgeNumber1-n, EdgeNumber1, EdgeNumber2-1, EdgeNumber2];
-      if (j==1)
+      if j==1
         e[1]=EdgeNumberEW1
         EdgeNumberEW1+=1
       end
-      if (j==n)
+      if j==n
         e[2]=EdgeNumberEW2
         EdgeNumberEW2+=1
       end
-      if (i==1)
+      if i==1
         e[3]=EdgeNumberSN1
         EdgeNumberSN1+=1
       end
-      if (i==n)
+      if i==n
         e[4]=EdgeNumberSN2
         EdgeNumberSN2+=1
         EdgeNumber2-=1
@@ -38,9 +38,9 @@ function insertFaceFace!(incfe::Array{Int,1},EdgeNumberStart1::Int,EdgeNumberSta
       append!(incfe,e)
       EdgeNumber1+=1
       EdgeNumber2+=1
-      #FaceNumber+=1
     end
   end
+  return nothing;
 end
 
 function insertFaceEdge!(ince::Array{Int,1},NodeNumberStart::Int, NodeNumberE1Start1::Int, NodeNumberE2Start1::Int, NodeNumberE1Start2::Int,
@@ -49,15 +49,15 @@ function insertFaceEdge!(ince::Array{Int,1},NodeNumberStart::Int, NodeNumberE1St
   NodeNumber=NodeNumberStart
   NodeNumberE1=NodeNumberE1Start1
   NodeNumberE2=NodeNumberE2Start1
-  EdgeNumberStart1=copy(EdgeNumber);
+  EdgeNumberStart1=EdgeNumber;
   for j in 1:n-1
     for i in 1:n
       e=Int[NodeNumber-1, NodeNumber]
-      if (i==1)
+      if i==1
         e[1]=NodeNumberE1
         NodeNumberE1+=1
       end
-      if (i==n)
+      if i==n
         e[2]=NodeNumberE2
         NodeNumberE2+=1
         NodeNumber-=1
@@ -70,15 +70,15 @@ function insertFaceEdge!(ince::Array{Int,1},NodeNumberStart::Int, NodeNumberE1St
   NodeNumber=NodeNumberStart
   NodeNumberE1=NodeNumberE1Start2
   NodeNumberE2=NodeNumberE2Start2
-  EdgeNumberStart2=copy(EdgeNumber);
+  EdgeNumberStart2=EdgeNumber;
   for j in 1:n
     for i in 1:n-1
       e=Int[NodeNumber-(n-1), NodeNumber]
-      if (j==1)
+      if j==1
         e[1]=NodeNumberE1
         NodeNumberE1+=1
       end
-      if (j==n)
+      if j==n
         e[2]=NodeNumberE2
         NodeNumberE2+=1
       end
@@ -92,13 +92,13 @@ end
 
 function insertEdgeEdge!(ince::Array{Int,1},NodeNumberStart::Int, NodeNumberE1::Int, NodeNumberE2::Int, EdgeNumber::Int, n::Int)
   NodeNumber=NodeNumberStart
-  EdgeNumberStart=copy(EdgeNumber)
+  EdgeNumberStart=EdgeNumber
   for i in 1:n
     e=Int[NodeNumber-1, NodeNumber]
-    if (i==1)
+    if i==1
       e[1]=NodeNumberE1
     end
-    if (i==n)
+    if i==n
       e[2]=NodeNumberE2
     end
     append!(ince,e)

@@ -5,7 +5,6 @@ function getQuadElementProperties(type::Symbol)
     g0(x)=1.0;
     g10(x)=(x-1.0)/(0.0-1.0);
     g11(x)=(x-0.0)/(1.0-0.0);
-    g11(x)=x;
     g20(x)=(x-0.5)*(x-1.0)/((0.0-0.5)*(0.0-1.0));
     g21(x)=(x-0.0)*(x-1.0)/((0.5-0.0)*(0.5-1.0));
     g22(x)=(x-0.0)*(x-0.5)/((1.0-0.0)*(1.0-0.5));
@@ -130,6 +129,23 @@ function getQuadElementProperties(type::Symbol)
     Dyh10_22(x,y)=g10(x)*Dg22(y);
     Dyh11_22(x,y)=g11(x)*Dg22(y);
 
+    f1(x,y)=1.0
+    fx(x,y)=x-0.5
+    fy(x,y)=y-0.5
+    fxy(x,y)=(x-0.5)*(y-0.5)
+    fx2(x,y)=(x-0.5)^2
+    fy2(x,y)=(y-0.5)^2
+    fx2y(x,y)=(x-0.5)^2*(y-0.5)
+    fxy2(x,y)=(x-0.5)*(y-0.5)^2
+    fx3(x,y)=(x-0.5)^3
+    fy3(x,y)=(y-0.5)^3
+    dxfx2(x,y)=2*(x-0.5)
+    dyfy2(x,y)=2*(y-0.5)
+    dxfx2y(x,y)=2*(x-0.5)*(y-0.5)
+    dyfxy2(x,y)=(x-0.5)*2*(y-0.5)
+    dxfx3(x,y)=3*(x-0.5)^2
+    dyfy3(x,y)=3*(y-0.5)^2
+
     if type==:DG0
         phi=[h0_0];
         divphi=[null];
@@ -165,6 +181,42 @@ function getQuadElementProperties(type::Symbol)
         nVert=0;
 
         cm=Dict([1,2]=>[0,0,0,0], [2,3]=>[0,0,0,0], [3,4]=>[0,0,0,0], [1,4]=>[0,0,0,0]);
+
+    elseif type==:DGLin
+        phi=[f1,fx,fy];
+        divphi=[null, null, null];
+        gradphi=[null f1 null;
+                 null null f1];
+
+        nFace=3;
+        nEdge=0;
+        nVert=0;
+
+        cm=Dict([1,2]=>[0,0,0], [2,3]=>[0,0,0], [3,4]=>[0,0,0], [1,4]=>[0,0,0]);
+
+    elseif type==:DGQuad
+        phi=[f1,fx,fy,fxy,fx2,fy2];
+        divphi=[null, null, null, null, null, null];
+        gradphi=[null f1 null fy dxfx2 null;
+                 null null f1 fx null dyfy2];
+
+        nFace=6;
+        nEdge=0;
+        nVert=0;
+
+        cm=Dict([1,2]=>[0,0,0,0,0,0], [2,3]=>[0,0,0,0,0,0], [3,4]=>[0,0,0,0,0,0], [1,4]=>[0,0,0,0,0,0]);
+
+    elseif type==:DGTri
+        phi=[f1,fx,fy,fxy,fx2,fy2,fx2y,fxy2,fx3,fy3];
+        divphi=[null, null, null, null, null, null, null, null, null, null];
+        gradphi=[null f1 null fy dxfx2 null dxfx2y fy2    dxfx3 null;
+                 null null f1 fx null dyfy2 fx2    dyfxy2 null  dyfy3];
+
+        nFace=10;
+        nEdge=0;
+        nVert=0;
+
+        cm=Dict([1,2]=>[0,0,0,0,0,0,0,0,0,0], [2,3]=>[0,0,0,0,0,0,0,0,0,0], [3,4]=>[0,0,0,0,0,0,0,0,0,0], [1,4]=>[0,0,0,0,0,0,0,0,0,0]);
 
     elseif type==:P2
         phi=[h21_21, h21_20, h22_21, h21_22, h20_21, h20_20, h22_20, h22_22, h20_22]
@@ -353,6 +405,118 @@ function getQuadElementProperties(type::Symbol)
 
         cm=Dict([1,2]=>[0,0,0,0,0,0,0,0], [2,3]=>[0,0,0,0,0,0,0,0], [3,4]=>[0,0,0,0,0,0,0,0], [1,4]=>[0,0,0,0,0,0,0,0]);
 
+    elseif type==:VecDGLin
+        phi=[f1     fx      fy    null   null    null;
+             null   null    null  f1     fx      fy];
+        divphi=[null, f1, null,null,null,f1];
+        gradphi=[null f1 null;
+                 null null f1];
+        gradphi=Matrix(undef, 2, 12)
+        gradphi[1:2, 1: 2]=[null     null;
+                            null     null]
+        gradphi[1:2, 3: 4]=[f1       null;
+                            null     null]
+        gradphi[1:2, 5: 6]=[null     f1;
+                            null     null]
+        gradphi[1:2, 7: 8]=[null     null;
+                            null     null]
+        gradphi[1:2, 9:10]=[null     null;
+                            f1       null]
+        gradphi[1:2,11:12]=[null     null;
+                            null     f1]
+
+        nFace=6;
+        nEdge=0;
+        nVert=0;
+
+        cm=Dict([1,2]=>[0,0,0,0,0,0], [2,3]=>[0,0,0,0,0,0], [3,4]=>[0,0,0,0,0,0], [1,4]=>[0,0,0,0,0,0]);
+
+    elseif type==:VecDGQuad
+        phi=[f1     fx     fy     fxy     fx2    fy2    null   null   null   null    null   null;
+             null   null   null   null    null   null   f1     fx     fy     fxy    fx2     fy2];
+        divphi=[null, f1, null, fy, dxfx2, null, null,null,f1,fx,null,dyfy2];
+        gradphi=Matrix(undef, 2, 24)
+        gradphi[1:2, 1: 2]=[null     null;
+                            null     null]
+        gradphi[1:2, 3: 4]=[f1       null;
+                            null     null]
+        gradphi[1:2, 5: 6]=[null     f1;
+                            null     null]
+        gradphi[1:2, 7: 8]=[fy       fx;
+                            null     null]
+        gradphi[1:2, 9:10]=[dxfx2    null;
+                            null     null]
+        gradphi[1:2,11:12]=[null     dyfy2;
+                            null     null]
+        gradphi[1:2,13:14]=[null     null;
+                            null     null]
+        gradphi[1:2,15:16]=[null     null;
+                            f1       null]
+        gradphi[1:2,17:18]=[null     null;
+                            null     f1]
+        gradphi[1:2,19:20]=[null     null;
+                            fy       fx]
+        gradphi[1:2,21:22]=[null     null;
+                            dxfx2    null]
+        gradphi[1:2,23:24]=[null     null;
+                            null     dyfy2]
+        nFace=12;
+        nEdge=0;
+        nVert=0;
+
+        cm=Dict([1,2]=>[0,0,0,0,0,0,0,0,0,0,0,0], [2,3]=>[0,0,0,0,0,0,0,0,0,0,0,0], [3,4]=>[0,0,0,0,0,0,0,0,0,0,0,0], [1,4]=>[0,0,0,0,0,0,0,0,0,0,0,0]);
+
+    elseif type==:VecDGTri
+        phi=[f1     fx     fy     fxy     fx2    fy2    fx2y   fxy2   fx3    fy3    null   null   null   null    null   null   null   null   null   null;
+             null   null   null   null    null   null   null   null   null   null   f1     fx     fy     fxy    fx2     fy2    fx2y   fxy2   fx3    fy3];
+        divphi=[null, f1, null, fy, dxfx2, null, dxfx2y, fy2, dxfx3, null, null, null, f1, fx, null, dyfy2, fx2, dyfxy2, null, dyfy3];
+        gradphi=Matrix(undef, 2, 40)
+        gradphi[1:2, 1: 2]=[null     null;
+                            null     null]
+        gradphi[1:2, 3: 4]=[f1       null;
+                            null     null]
+        gradphi[1:2, 5: 6]=[null     f1;
+                            null     null]
+        gradphi[1:2, 7: 8]=[fy       fx;
+                            null     null]
+        gradphi[1:2, 9:10]=[dxfx2    null;
+                            null     null]
+        gradphi[1:2,11:12]=[null     dyfy2;
+                            null     null]
+        gradphi[1:2,13:14]=[dxfx2y   fx2;
+                            null     null]
+        gradphi[1:2,15:16]=[fy2      dyfxy2;
+                            null     null]
+        gradphi[1:2,17:18]=[dxfx3    null;
+                            null     null]
+        gradphi[1:2,19:20]=[null     dyfy3;
+                            null     null]
+        gradphi[1:2,21:22]=[null     null;
+                            null     null]
+        gradphi[1:2,23:24]=[null     null;
+                            f1       null]
+        gradphi[1:2,25:26]=[null     null;
+                            null     f1]
+        gradphi[1:2,27:28]=[null     null;
+                            fy       fx]
+        gradphi[1:2,29:30]=[null     null;
+                            dxfx2    null]
+        gradphi[1:2,31:32]=[null     null;
+                            null     dyfy2]
+        gradphi[1:2,33:34]=[null     null;
+                            dxfx2y   fx2]
+        gradphi[1:2,35:36]=[null     null;
+                            fy2      dyfxy2]
+        gradphi[1:2,37:38]=[null     null;
+                            dxfx3    null]
+        gradphi[1:2,39:40]=[null     null;
+                            null     dyfy3]
+
+        nFace=20;
+        nEdge=0;
+        nVert=0;
+
+        cm=Dict([1,2]=>[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [2,3]=>[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [3,4]=>[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], [1,4]=>[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
     elseif type==:VecP2
 
         phi=[h21_21 null   h21_20 null   h22_21 null   h21_22 null   h20_21 null   h20_20 null  h22_20 null   h22_22 null   h20_22 null  ;

@@ -45,7 +45,6 @@ include("discGalerkinCells.jl")
 include("discGalerkinEdges.jl")
 include("MIS.jl")
 include("coordTrans.jl")
-include("getEdgeType.jl")
 include("setEdgeData.jl")
 include("advectionCE.jl")
 include("splitExplicitCE.jl")
@@ -61,4 +60,5 @@ include("plotMesh.jl");
 include("plotFEM.jl")
 include("vtk.jl");
 include("vtkTest.jl");
+include("vtkRefined.jl");
 include("jld.jl");

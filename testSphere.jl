@@ -2,7 +2,7 @@ include("modulesSphere.jl")
 
 function testSphere()
 
-    filename = "cubedSphereConstant";
+    filename = "cubedSphereBB";
 
     #order: comp, compHigh, compRec, compDG
 
@@ -23,10 +23,10 @@ function testSphere()
                  :theta=>[:DG1]);
     =#
 
-    taskRecovery=true;
+    taskRecovery=false;
     advection=true;
 
-    m=generateCubedSphere(3,3600.0)
+    m=generateCubedSphere(36,6300000.0)
 
     p=femProblem(m, femType,t=:shallow, advection=advection, taskRecovery=taskRecovery);
     #return p;
@@ -34,38 +34,53 @@ function testSphere()
     UMax=0.0; #UMax determines the advection in x direction
     MISMethod=MIS(:MIS2); #method of time integration
 
-    dt=1.0;
-    ns=15;
-    EndTime=10.0;
+    dt=50.0;
+    ns=10;
+    EndTime=1000000.0;
     nIter=Int64(EndTime/dt);
 
     #start functions
-    Rad=3600.0
+    Rad=6300000.0
     function frho(xyz::Array{Float64,1})
         #=
         x=xyz[1]; y=xyz[2]; z=xyz[3];
         lon,lat,r=cart2sphere(x,y,z);
         rd=distCircle(lon,lat,0.5*pi,0.0,Rad)
         R=Rad/3.0;
-        rd<=R ? rhoLoc=10.0  : rhoLoc=0.0; #rhoLoc=1000.0/2.0*(1.0+cos(pi*rd/R))
+        rd<=R ? rhoLoc=1000.0/2.0*(1.0+cos(pi*rd/R))  : rhoLoc=0.0; #rhoLoc=1000.0/2.0*(1.0+cos(pi*rd/R))
         return rhoLoc+1.0;
         =#
-        return 2.0
+        x=xyz[1]; y=xyz[2]; z=xyz[3];
+        lat0=4.0*atan(1.0)
+        lon0=2.0*atan(1.0)
+        r=sqrt(x*x+y*y+z*z)
+        lat=asin(z/r)
+        lon=atan(x,y)
+        d=acos(sin(lat0)*sin(lat)+cos(lat0)*cos(lat)*cos(lon-lon0))
+        if abs(d)<=0.8
+            conc=1.0
+        else
+            conc=0.1
+        end
+        return conc;
+        #return 2.0
     end
     function ftheta(xyz::Array{Float64,1})
         return 1.0;
     end
-    fv1(xyz::Array{Float64,1})=UMax;
-    fv2(xyz::Array{Float64,1})=0.0;
-    fv3(xyz::Array{Float64,1})=0.0;
-    fvel=[fv1, fv2, fv3];
+    function fvel(xyz::Array{Float64,1})
+        x=xyz[1]; y=xyz[2]; z=xyz[3];
+        lon,lat,r=cart2sphere(x,y,z);
+        uS=UMax*cos(lat)
+        return velCa([uS,0.0,0.0],lon,lat)
+    end
     f=Dict(:rho=>frho,:theta=>ftheta,:v=>fvel);
 
     assembMass!(p);
     assembStiff!(p);
     applyStartValues!(p, f);
 
-    unstructured_vtk3D(p, 0.0, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename*"0")
+    unstructured_vtk(p, 0.0, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename*"0")
 
     rho0=p.solution[0.0].rho;
     p.solution[0.0].rhoTheta=projectChi(p,rho0,p.solution[0.0].theta,:rho,:theta);
@@ -94,15 +109,15 @@ function testSphere()
       p.solution[Time]=y;
       p.solution[Time].theta=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoTheta,:rho,:rhoTheta,MrT);
       p.solution[Time].v=projectRhoChi(p,p.solution[Time].rho,p.solution[Time].rhoV,:rho,:rhoV,MrV)
-      p2=deepcopy(p);
-      unstructured_vtk3D(p2, Time, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename*"$i")
+      #p2=deepcopy(p);
+      #unstructured_vtk(p2, Time, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename*"$i")
       println(Time)
     end
 
     #Speichern des Endzeitpunktes als vtu-Datei:
-    unstructured_vtk3D(p, EndTime, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename)
+    unstructured_vtk(p, EndTime, [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename)
     #Speichern aller berechneten Zwischenwerte als vtz-Datei:
-    #unstructured_vtk3D(p, sort(collect(keys(p.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
+    #unstructured_vtk(p, sort(collect(keys(p.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["h", "hV", "hTheta", "Velocity", "Theta"], "testSphere/"*filename)
 
     return p;
 end

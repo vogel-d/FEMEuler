@@ -1,12 +1,19 @@
 include("modulesCEd.jl")
 
+const stencilOrder=2;
+
+recoverySpace=Symbol("DGQuad")
+recoverySpaceVec=Symbol("VecDGQuad")
+
+@recovery(recoverySpace,recoverySpaceVec)
+
 function testMountainWaves()
     filename = "mountainWavesd";
 
     #order: comp, compHigh, compRec, compDG
-    femType=Dict(:rho=>[:DG0, :P1, :DG1, :DG0],
-                 :rhoV=>[:RT0, :VecP1, :VecDG1, :RT0B],
-                 :rhoTheta=>[:DG0, :P1, :DG1, :DG0],
+    femType=Dict(:rho=>[:DG0, :DG0, recoverySpace],
+                 :rhoV=>[:RT0, :RT0, recoverySpaceVec],
+                 :rhoTheta=>[:DG0, :DG0, recoverySpace],
                  :p=>[:DG0],
                  :v=>[:RT0],
                  :theta=>[:DG0],
@@ -22,7 +29,8 @@ function testMountainWaves()
 
     adaptGeometry!(m,400.0,1000.0); #witch of agnesi with Gall-Chen and Sommerville transformation
 
-    p=femProblem(m, femType, t=:compressible, advection=advection, taskRecovery=taskRecovery);
+    p=femProblem(m, femType, t=:compressible, advection=advection, taskRecovery=taskRecovery,
+    stencilOrder=stencilOrder);
 
     gamma=0.5; #upwind
     UMax=10.0; #UMax determines the advection in x direction
@@ -36,7 +44,7 @@ function testMountainWaves()
     EndTime=nIter*dt;
 
     #start functions
-    th0=300.0; 
+    th0=300.0;
     function frho(xz::Array{Float64,1})
         x=xz[1]; z=xz[2];
         s=N*N/Grav
@@ -53,16 +61,15 @@ function testMountainWaves()
         x=xz[1]; z=xz[2];
         return th0*exp(z*N*N/Grav)
     end
-
-    fv1(xz::Array{Float64,1})=UMax;
-    fv2(xz::Array{Float64,1})=0.0;
-    fvel=[fv1, fv2];
+    function fvel(xz::Array{Float64,1})
+        return [UMax, 0.0]
+    end
     f=Dict(:rho=>frho,:theta=>ftheta,:v=>fvel,:rhoBar=>frho,:pBar=>fpBar,:thBar=>ftheta);
 
     assembMass!(p);
     assembStiff!(p);
     println("Matrizen berechnet")
-    p.boundaryValues[(:theta,:P1)]=300*ones(p.degFBoundary[:P1].numB-p.degFBoundary[:P1].num);
+    #p.boundaryValues[(:theta,:P1)]=300*ones(p.degFBoundary[:P1].numB-p.degFBoundary[:P1].num);
     applyStartValues!(p, f);
 
     rho0=p.solution[0.0].rho;
@@ -70,13 +77,14 @@ function testMountainWaves()
     p.solution[0.0].rhoV=projectChi(p,rho0,p.solution[0.0].v,:rho,:v);
     println("Startwerte proijziert")
 
-    taskRecovery ? pos=[1,3] : pos=[1];
     advectionTypes=Symbol[];
     for i in [:rho,:rhoTheta,:rhoV]
-        append!(advectionTypes,femType[i][pos]);
+        push!(advectionTypes,femType[i][1]);
+        push!(advectionTypes,femType[i][3]);
     end
-    nquadPhi, nquadPoints=coordTrans(m.meshType, m.normals, collect(Set(advectionTypes)), size(p.kubWeights,2));
+    nquadPhi, nquadPoints=coordTrans(m, m.normals, advectionTypes, size(p.kubWeights,2));
     setEdgeData!(p, :v)
+    recoveryMatrix!(p)
 
     MrT=assembMass(p.degFBoundary[femType[:rhoTheta][1]], m, p.kubPoints, p.kubWeights);
     MrV=assembMass(p.degFBoundary[femType[:rhoV][1]], m, p.kubPoints, p.kubWeights);

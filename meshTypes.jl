@@ -56,6 +56,7 @@ struct mesh
   normals::Array{Float64,2} #Normalen des Referenzelementes
   boundaryEdges::SparseVector{Int,Int};
   boundaryVertices::SparseVector{Int,Int};
+  orientation::Array{Float64,1};
   boundaryConditionEW::Symbol;
   boundaryConditionTB::Symbol;
 end
@@ -71,11 +72,16 @@ function mesh(topology::meshTopology, geometry::meshGeometry, bE::SparseVector{I
       l[i]=sqrt(sum((c[:,1].-c[:,2]).^2));
       z+=2;
   end
-
-  #Hier normale*Kantenlänge (beachte auch richtung der integration -> +-)
-  #wegen discEdges, ist sozusagen transformation auf jeweilige Kante
-  mt==4 ? n=[0.0 1.0 0.0 1.0;-1.0 0.0 -1.0 0.0] : n=[0.0 1.0 1.0;-1.0 1.0 0.0];
-  #mt==4 ? n=[0.0 1.0 0.0 -1.0;-1.0 0.0 1.0 0.0] : n=[0.0 1.0 1.0;-1.0 1.0 0.0];
-
-  mesh(topology, geometry, mt, l, n, bE, bV, condEW, condTB)
+  if mt==4
+    if geometry.dim==3
+      #n=[0.0 1.0 0.0 1.0;-1.0 0.0 -1.0 0.0]
+      n=[0.0 1.0 0.0 1.0;-1.0 0.0 -1.0 0.0]
+    else
+      n=[0.0 1.0 0.0 1.0;1.0 0.0 1.0 0.0]
+    end
+  else
+    n=[0.0 1.0 1.0;-1.0 1.0 0.0];
+  end
+  orientation=Float64[];
+  mesh(topology, geometry, mt, l, n, bE, bV, orientation, condEW, condTB)
 end

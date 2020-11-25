@@ -38,7 +38,6 @@ function discGalerkinCells!(M::Array{Float64,2},
             z=0.0;
             for j in 1:length(globalNumF)
                 gj=globalNumF[j];
-                zLoc=0.0;
                 for r in 1:size(kubWeights,2)
                     for l in 1:size(kubWeights,1)
                         z+=fval[gj]*kubWeights[l,r]*(abs(dJ[l,r])/dJ[l,r])*phiT[i][l,r]*(w[l,r]*dphiF[j][l,r]+(gradw1[l,r]*phiF[1,j][l,r]+gradw2[l,r]*phiF[2,j][l,r]));
@@ -124,7 +123,6 @@ function discGalerkinCells!(M::Array{Float64,2},
                             m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2}, coord::Array{Float64,2})
 
     sk=size(kubWeights);
-
     ddJ=Array{Float64,2}(undef,sk);
     jphiT=initJacobi(size(phiT),sk);
 
@@ -266,38 +264,36 @@ function discGalerkinCells!(M::Array{Float64,2},
     sk=size(kubWeights);
     J=initJacobi((m.geometry.dim,m.topology.dim),sk);
     ddJ=Array{Float64,2}(undef,sk);
-    jphiT=initJacobi(size(phiT),sk);
-    jphiF=initJacobi(size(phiF),sk);
+    jphiT=initJacobi((m.geometry.dim,size(phiT,2)),sk);
 
-    w1=zeros(sk);
-    w2=zeros(sk);
-    gradw11=zeros(sk);
-    gradw12=zeros(sk);
-    gradw21=zeros(sk);
-    gradw22=zeros(sk);
+    w=[zeros(sk) for d in 1:m.geometry.dim]
+    gradw=Array{Array{Float64,2},2}(undef,m.geometry.dim,m.topology.dim);
+    for k in 1:m.topology.dim
+        for j in 1:m.geometry.dim
+            gradw[j,k]=zeros(sk);
+        end
+    end
 
     for k in 1:m.topology.size[3]
         jacobi!(J,ddJ,jphiT,m,k,kubPoints,phiT,coord);
         l2g!(globalNumW,degFW,k);
 
-        fill!(w1,0.0);
-        fill!(w2,0.0);
-        for i in 1:length(globalNumW)
-            @. w1+=wval[globalNumW[i]]*phiW[1,i];
-            @. w2+=wval[globalNumW[i]]*phiW[2,i];
+        for d in 1:m.geometry.dim
+            fill!(w[d], 0.0)
+            for i in 1:length(globalNumW)
+                @. w[d]+=wval[globalNumW[i]]*phiW[d,i];
+            end
         end
 
-        fill!(gradw11,0.0);
-        fill!(gradw12,0.0);
-        fill!(gradw21,0.0);
-        fill!(gradw22,0.0);
-        zg=0;
-        for i in 1:size(phiW,2)
-            @. gradw11+=wval[globalNumW[i]]*gradphiW[1,1+zg];
-            @. gradw12+=wval[globalNumW[i]]*gradphiW[1,2+zg];
-            @. gradw21+=wval[globalNumW[i]]*gradphiW[2,1+zg];
-            @. gradw22+=wval[globalNumW[i]]*gradphiW[2,2+zg];
-            zg+=2;
+        for dt in 1:m.topology.dim
+            for dg in 1:m.geometry.dim
+                fill!(gradw[dg,dt], 0.0)
+                zg=0
+                for i in 1:size(phiW,2)
+                    @. gradw[dg,dt]+=wval[globalNumW[i]]*gradphiW[dg,dt+zg];
+                    zg+=2;
+                end
+            end
         end
 
 
@@ -310,7 +306,15 @@ function discGalerkinCells!(M::Array{Float64,2},
                 gj=globalNumF[j];
                 for r in 1:size(kubWeights,2)
                     for l in 1:size(kubWeights,1)
-                        z+=fval[gj]*kubWeights[l,r]*abs(ddJ[l,r])*(jphiT[1,i][l,r]*(dphiF[j][l,r]*w1[l,r]+gradw11[l,r]*phiF[1,j][l,r]+gradw12[l,r]*phiF[2,j][l,r])+jphiT[2,i][l,r]*(dphiF[j][l,r]*w2[l,r]+gradw21[l,r]*phiF[1,j][l,r]+gradw22[l,r]*phiF[2,j][l,r]));
+                        vecdot=0.0;
+                        for d in 1:m.geometry.dim
+                            gradwPhiF=0.0
+                            for dt in 1:m.topology.dim
+                                gradwPhiF+=gradw[d,dt][l,r]*phiF[dt,j][l,r]
+                            end
+                            vecdot+=jphiT[d,i][l,r]*(dphiF[j][l,r]*w[d][l,r]+gradwPhiF)
+                        end
+                        z+=fval[gj]*kubWeights[l,r]*abs(ddJ[l,r])*vecdot
                     end
                 end
             end

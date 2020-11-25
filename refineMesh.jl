@@ -21,3 +21,27 @@ function refineRectMesh(m::mesh,rx::Int,ry::Int,condEW::Symbol, condTB::Symbol)
     mf.topology.offset["CF"]=off
     return mf;
 end
+
+function refineCubedSphere(m::mesh,rn::Int)
+    n=m.topology.n[1];
+    inc=Int[];
+    off=collect(1:rn^2:m.topology.size[3]*rn^2+1) #statt 4 n?
+    z=1
+    for h in 1:6
+        for i in 1:n
+            for j in 1:n
+                for k in 0:n*rn:n*rn*(rn-1)
+                    for l in 0:rn-1
+                        push!(inc,z+k+l);
+                    end
+                end
+                z+=rn;
+            end
+            z+=rn*(rn-1)*n;
+        end
+    end
+    mf=generateCubedSphere(rn*n,m.geometry.r[1])
+    mf.topology.incidence["CF"]=inc #CF = Coarse -> Fine
+    mf.topology.offset["CF"]=off
+    return mf;
+end
