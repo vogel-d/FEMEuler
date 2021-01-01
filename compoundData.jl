@@ -25,7 +25,7 @@ function createCompoundData(method::Symbol,femElements::Set{Symbol},m::mesh)
             boundary[edge]=Dict(edge=>2, mod(edge,6)+1=>1)
         end
         quadPoints, quadWeights=getQuad(9);
-        nquadPhi, nquadPoints=coordTrans(m.meshType, m.normals, [:RT0], 5);
+        nquadPhi, nquadPoints=coordTrans(m, m.normals, [:RT0], 5);
         nCompoundPhi=Dict(:RT0=>6, :DG0=>1);
         femElements=Set([:RT0,:DG0]);
         nVerticesSubElement=4
@@ -40,7 +40,7 @@ function createCompoundData(method::Symbol,femElements::Set{Symbol},m::mesh)
             boundary[edge]=Dict(edge=>2, mod(edge,4)+1=>1)
         end
         quadPoints, quadWeights=getQuad(9);
-        nquadPhi, nquadPoints=coordTrans(m.meshType, m.normals, [:RT0], 5);
+        nquadPhi, nquadPoints=coordTrans(m, m.normals, [:RT0], 5);
         nCompoundPhi=Dict(:RT0=>4, :DG0=>1);
         femElements=Set([:RT0,:DG0]);
         nVerticesSubElement=4
@@ -55,7 +55,7 @@ function createCompoundData(method::Symbol,femElements::Set{Symbol},m::mesh)
             boundary[edge]=Dict((edge-1)*2+1=>1, edge*2=>1);
         end
         quadPoints, quadWeights=getQuad(9); #TODO: find better way to handle g (argument of getQuad)
-        nquadPhi, nquadPoints=coordTrans(m.meshType, m.normals, [:RT0], 5);
+        nquadPhi, nquadPoints=coordTrans(m, m.normals, [:RT0], 5);
         nCompoundPhi=Dict(:RT0=>6, :DG0=>1);
         femElements=Set([:RT0,:DG0]);
         nVerticesSubElement=3
@@ -70,7 +70,7 @@ function createCompoundData(method::Symbol,femElements::Set{Symbol},m::mesh)
             boundary[edge]=Dict((edge-1)*2+1=>1, edge*2=>1);
         end
         quadPoints, quadWeights=getQuad(9);
-        nquadPhi, nquadPoints=coordTrans(m.meshType, m.normals, [:RT0], 5);
+        nquadPhi, nquadPoints=coordTrans(m, m.normals, [:RT0], 5);
         nCompoundPhi=Dict(:RT0=>4, :DG0=>1);
         femElements=Set([:RT0,:DG0]);
         nVerticesSubElement=3
