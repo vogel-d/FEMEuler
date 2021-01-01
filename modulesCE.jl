@@ -16,6 +16,7 @@ include("findall.jl");
 include("transformation.jl")
 
 include("compoundData.jl")
+include("femData.jl")
 include("getOrderBoundary.jl")
 include("getElementProperties.jl")
 include("degF.jl");
