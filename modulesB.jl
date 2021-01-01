@@ -18,6 +18,7 @@ include("transformation.jl")
 
 include("coordTrans.jl")
 include("compoundData.jl")
+include("femData.jl")
 
 include("getOrderBoundary.jl")
 include("getElementProperties.jl")
