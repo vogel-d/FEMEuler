@@ -18,6 +18,10 @@ function create_mesh(poly :: Polygon_pslg;
                                 set_angle_min :: Bool = false,
                                 add_switches :: String = "")
 
+# this is a custom method taken and adapted from the TriangleMesh pkg
+# where (if chosen to be given manually) the maximum area does not get asked for (like in the package)
+# but has to be given as an optional argument
+
     switches = "p"
 
     if ~verbose
