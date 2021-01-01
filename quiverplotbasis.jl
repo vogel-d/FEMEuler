@@ -66,7 +66,7 @@ function quiverPlotCompound(method::Symbol)
 
     femType=Dict(:p=>[:DG0, :P1, :DG1, :DG0], :v=>[:RT0, :VecP1, :VecDG1, :RT0B], :b=>[:DG0, :P1, :DG1, :DG0]);
     p=femProblem(m, femType, compoundMethod=method);
-    nSubCells=p.compoundData.nSubCells;
+    nSubCells=p.data.compoundData.nSubCells;
     meshType=m.meshType;
 
     assemblePhiPre!(p);
@@ -74,11 +74,11 @@ function quiverPlotCompound(method::Symbol)
     subcoord=Array{Array{Float64,2},1}(undef,nSubCells);
     for i in 1:nSubCells
         #fill! causes mutating all entries of subcoord when changing a single entry
-        subcoord[i]=Array{Float64,2}(undef,2,p.compoundData.nVerticesSubElement);
+        subcoord[i]=Array{Float64,2}(undef,2,p.data.compoundData.nVerticesSubElement);
     end
     coord= m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][1]:m.topology.offset["20"][1+1]-1]]
     center=Array{Float64,1}(undef,2)
-    getSubCells!(subcoord, coord, center, p.compoundData);
+    getSubCells!(subcoord, coord, center, p.data.compoundData);
 
     if meshType==4
         phi, divphi, gradphi, cm, nFace, nEdge, nVert=getQuadElementProperties(:RT0);
@@ -117,7 +117,7 @@ function quiverPlotCompound(method::Symbol)
                 dJ=J11*J22-J21*J12;
                 vec=zeros(2);
                 for subPhi in 1:size(phi,2)
-                    vec+=p.compoundData.assembledPhiPre[:RT0][1][compoundPhi][subPhi,subCell]*
+                    vec+=p.data.compoundData.assembledPhiPre[:RT0][1][compoundPhi][subPhi,subCell]*
                         (1/dJ)*J*[phi[1,subPhi](ref_point[1],ref_point[2]);phi[2,subPhi](ref_point[1],ref_point[2])];
                 end
                 quiverplotx[(subCell-1)*nrefcoords+i]=vec[1];
@@ -143,7 +143,7 @@ function quiverPlotCompound(method::Symbol)
                 dJ=J[1,1]*J[2,2]-J[2,1]*J[1,2];
                 vec=zeros(2);
                 for subPhi in 1:size(phi,2)
-                    vec+=p.compoundData.assembledPhiPre[:RT0][1][compoundPhi][subPhi,subCell]*
+                    vec+=p.data.compoundData.assembledPhiPre[:RT0][1][compoundPhi][subPhi,subCell]*
                         (1/dJ)*J*[phi[1,subPhi](ref_point[1],ref_point[2]);phi[2,subPhi](ref_point[1],ref_point[2])];
                 end
                 quiverplotx[(subCell-1)*nrefcoords+i]=vec[1];

@@ -3,7 +3,7 @@ function setCompoundEdgeData!(p::femProblem, compVf::Symbol)
     degFVf=p.degFBoundary[p.femType[compVf][1]];
     mt=m.meshType;
     nVertices_CompoundElement=diff(m.topology.offset["20"][1:2])[1];
-    refBound, edgeTypes=getCompoundElementProperties(p.femType[compVf][1],p.compoundData);
+    refBound, edgeTypes=getCompoundElementProperties(p.femType[compVf][1],p.data.compoundData);
     #if mt==4
     #    edgeTypes=Dict([1,2]=>1,[2,3]=>2,[3,4]=>3,[1,4]=>4)
     #    coordref=[0.0 1.0 1.0 0.0; 0.0 0.0 1.0 1.0]
@@ -137,8 +137,8 @@ function setCompoundEdgeData!(p::femProblem, compVf::Symbol)
         push!(edgeType,eT1)
         push!(edgeType,eT2)
         push!(edgeNum,e)
-        push!(p.compoundData.isEdgePeriodic,h1)
+        push!(p.data.compoundData.isEdgePeriodic,h1)
     end
-    p.edgeData=[edgeNum,cells,edgeType,globv,off];
+    p.data.edgeData=[edgeNum,cells,edgeType,globv,off];
     return nothing;
 end

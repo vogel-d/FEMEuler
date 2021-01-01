@@ -1,5 +1,5 @@
 function assemblePhiPre!(p::femProblem)
-    compoundData=p.compoundData;
+    compoundData=p.data.compoundData;
     m=p.mesh;
     femElements=keys(p.degFBoundary);
 
@@ -34,7 +34,7 @@ function assemblePhiPre!(p::femProblem)
                 coord= m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][Cell]:m.topology.offset["20"][Cell+1]-1]]
                 getSubCells!(subcoord, coord, center, compoundData);
                 assemblePhi!(assembledPhi, compoundData);
-                p.compoundData.assembledPhiPre[femElement][Cell]=deepcopy(assembledPhi);
+                p.data.compoundData.assembledPhiPre[femElement][Cell]=deepcopy(assembledPhi);
             end
         elseif femElement==:RT0
             quadWeights=compoundData.quadWeights;
@@ -52,7 +52,7 @@ function assemblePhiPre!(p::femProblem)
                 coord= m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][Cell]:m.topology.offset["20"][Cell+1]-1]]
                 getSubCells!(subcoord, coord, center, compoundData);
                 assemblePhi!(assembledPhi, subcoord, m, divphi, J_edge, ddJ_edge, jphi_edge, nquadPhi, nquadPoints, quadWeights, compoundData);
-                p.compoundData.assembledPhiPre[femElement][Cell]=deepcopy(assembledPhi);
+                p.data.compoundData.assembledPhiPre[femElement][Cell]=deepcopy(assembledPhi);
             end
         else
             @error("unknown finite element space");

@@ -15,7 +15,7 @@ function advection(p::femProblem, gamma, y::solution,
                           p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],sparse(y.hV),
                           p.degFBoundary[fTv[3]],nquadPhi[fTv[3]],cR,
                           gamma,p.mesh,p.kubPoints,p.kubWeights,
-                          nquadPoints,p.edgeData);
+                          nquadPoints,p.data.edgeData);
 
       else
         cR=recovery(p,fTv,cR);
@@ -23,14 +23,14 @@ function advection(p::femProblem, gamma, y::solution,
                           p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],sparse(y.hV),
                           p.degFBoundary[fTv[3]],nquadPhi[fTv[3]],cR,
                           gamma,p.mesh,p.kubPoints,p.kubWeights,
-                          nquadPoints,p.edgeData);
+                          nquadPoints,p.data.edgeData);
         #=
         cR=recovery(p,fTv,cR,2);
         Sv=advectionStiffR(p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],
                           p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],sparse(y.hV),
                           fTv[3],cR,
                           gamma,p.mesh,p.kubPoints,p.kubWeights,
-                          nquadPoints,p.edgeData);
+                          nquadPoints,p.data.edgeData);
         =#
       end
     else
@@ -38,7 +38,7 @@ function advection(p::femProblem, gamma, y::solution,
                         p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],sparse(y.hV),
                         p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],cR,
                         gamma,p.mesh,p.kubPoints,p.kubWeights,
-                        nquadPoints,p.edgeData);
+                        nquadPoints,p.data.edgeData);
     end
     rCv=Fv\(Sv+p.stiffM[:fv]*y.hV);
   else

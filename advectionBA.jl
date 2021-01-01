@@ -10,7 +10,7 @@ function advection(p::femProblem, gamma::Float64, Vfval::SparseVector{Float64,In
                        p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
                        p.degFBoundary[fTp[3]],nquadPhi[fTp[3]],cR,
                        gamma,p.mesh,p.kubPoints,p.kubWeights,
-                       nquadPoints,p.edgeData,p.compoundData);
+                       nquadPoints,p.data.edgeData,p.data.compoundData);
       rCp=Fp\S;
     else
       cR=recovery(p,fTp,cval.p);
@@ -18,7 +18,7 @@ function advection(p::femProblem, gamma::Float64, Vfval::SparseVector{Float64,In
                        p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
                        fTp[3],cR,
                        gamma,p.mesh,p.kubPoints,p.kubWeights,
-                       nquadPoints,p.edgeData);
+                       nquadPoints,p.data.edgeData);
       rCp=Fp\S;
     end
     if iszero(p.recoveryOrders[2])
@@ -27,7 +27,7 @@ function advection(p::femProblem, gamma::Float64, Vfval::SparseVector{Float64,In
                        p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
                        p.degFBoundary[fTb[3]],nquadPhi[fTb[3]],cR,
                        gamma,p.mesh,p.kubPoints,p.kubWeights,
-                       nquadPoints,p.edgeData,p.compoundData);
+                       nquadPoints,p.data.edgeData,p.data.compoundData);
       rCb=Fb\S;
     else
       cR=recovery(p,fTb,cval.b);
@@ -35,7 +35,7 @@ function advection(p::femProblem, gamma::Float64, Vfval::SparseVector{Float64,In
                        p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
                        fTb[3],cR,
                        gamma,p.mesh,p.kubPoints,p.kubWeights,
-                       nquadPoints,p.edgeData);
+                       nquadPoints,p.data.edgeData);
       rCb=Fb\S;
     end
     if iszero(p.recoveryOrders[3])
@@ -44,7 +44,7 @@ function advection(p::femProblem, gamma::Float64, Vfval::SparseVector{Float64,In
                        p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
                        p.degFBoundary[fTv[3]],nquadPhi[fTv[3]],cR,
                        gamma,p.mesh,p.kubPoints,p.kubWeights,
-                       nquadPoints,p.edgeData,p.compoundData);
+                       nquadPoints,p.data.edgeData,p.data.compoundData);
       rCv=Fv\S;
     else
       cR=recovery(p,fTv,cval.v,2);
@@ -52,7 +52,7 @@ function advection(p::femProblem, gamma::Float64, Vfval::SparseVector{Float64,In
                        p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
                        fTv[3],cR,
                        gamma,p.mesh,p.kubPoints,p.kubWeights,
-                       nquadPoints,p.edgeData);
+                       nquadPoints,p.data.edgeData);
       rCv=Fv\S;
     end
   else
@@ -60,20 +60,20 @@ function advection(p::femProblem, gamma::Float64, Vfval::SparseVector{Float64,In
                      p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
                      p.degFBoundary[fTp[1]],nquadPhi[fTp[1]],cval.p,
                      gamma,p.mesh,p.kubPoints,p.kubWeights,
-                     nquadPoints,p.edgeData,p.compoundData);
+                     nquadPoints,p.data.edgeData,p.data.compoundData);
     rCp=Fp\S;
     S=advectionStiff(p.degFBoundary[fTb[1]],nquadPhi[fTb[1]],
                      p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
                      p.degFBoundary[fTb[1]],nquadPhi[fTb[1]],cval.b,
                      gamma,p.mesh,p.kubPoints,p.kubWeights,
-                     nquadPoints,p.edgeData,p.compoundData);
+                     nquadPoints,p.data.edgeData,p.data.compoundData);
 
     rCb=Fb\S;
     S=advectionStiff(p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],
                      p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
                      p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],cval.v,
                      gamma,p.mesh,p.kubPoints,p.kubWeights,
-                     nquadPoints,p.edgeData,p.compoundData);
+                     nquadPoints,p.data.edgeData,p.data.compoundData);
 
     rCv=Fv\S;
   end

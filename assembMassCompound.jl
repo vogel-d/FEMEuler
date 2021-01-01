@@ -13,7 +13,7 @@ function assembMassCompound!(p::femProblem)
     end
     comp=Set{Symbol}(s);
     for i in comp
-        @time massM=assembMassCompound(p.degFBoundary[i],p.mesh,p.kubPoints,p.kubWeights,p.compoundData);
+        @time massM=assembMassCompound(p.degFBoundary[i],p.mesh,p.kubPoints,p.kubWeights,p.data.compoundData);
         n=p.degFBoundary[i].num
         p.massM[i]=lu(massM[1:n,1:n]);
         p.massMBoundary[i]=lu(massM);
