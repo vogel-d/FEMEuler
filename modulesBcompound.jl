@@ -14,7 +14,6 @@ include("getQuad.jl");
 include("meshTypes.jl");
 include("meshFunctions.jl");
 include("findall.jl");
-include("getSpace.jl")
 include("transformation.jl")
 include("initAssembledPhi.jl");
 include("coordTrans.jl");

@@ -15,7 +15,6 @@ include("meshTypes.jl");
 include("meshFunctions.jl");
 include("findall.jl");
 include("transformation.jl")
-include("getSpace.jl")
 
 include("coordTrans.jl")
 include("compoundData.jl")
