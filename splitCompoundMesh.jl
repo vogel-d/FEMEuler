@@ -1,7 +1,7 @@
 function splitCompoundMeshKites(p::femProblem)
     compoundMesh=p.mesh;
     size=compoundMesh.topology.size;
-    nSubCells=p.compoundData.nSubCells;
+    nSubCells=p.data.compoundData.nSubCells;
     mt=compoundMesh.meshType;
     n=copy(compoundMesh.topology.n);
     condEW=compoundMesh.boundaryConditionEW;
@@ -18,7 +18,7 @@ function splitCompoundMeshKites(p::femProblem)
     off20=compoundMesh.topology.offset["20"];
     off10=compoundMesh.topology.offset["10"];
     off01=compoundMesh.topology.offset["01"];
-    String(typeof(p.compoundData).parameters[1])[(end-4):end]!="Kites" && error("splitting available for kites only")
+    String(typeof(p.data.compoundData).parameters[1])[(end-4):end]!="Kites" && error("splitting available for kites only")
 
 
     coordx=copy(compoundMesh.geometry.coordinates[1,:]);
@@ -127,7 +127,7 @@ end
 function splitCompoundMeshTris(p::femProblem)
     compoundMesh=p.mesh;
     size=compoundMesh.topology.size;
-    nSubCells=p.compoundData.nSubCells;
+    nSubCells=p.data.compoundData.nSubCells;
     mt=compoundMesh.meshType;
     condEW=compoundMesh.boundaryConditionEW;
     condTB=compoundMesh.boundaryConditionTB;

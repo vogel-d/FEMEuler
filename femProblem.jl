@@ -3,8 +3,7 @@ mutable struct femProblem
     boundaryValues::Dict{Tuple{Symbol,Symbol}, Array{Float64,1}};
     degFBoundary::Dict{Symbol, degF};
     femType::Dict{Symbol, Array{Symbol,1}};
-    edgeData::Array{Array{Int64,1},1};
-    compoundData::compoundData;
+    data::femData;
     solution::Dict{Float64, solution};
     massM::Dict{Symbol, SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64}};
     massMBoundary::Dict{Symbol, SuiteSparse.UMFPACK.UmfpackLU{Float64,Int64}};
@@ -19,7 +18,6 @@ mutable struct femProblem
     advection::Bool;
     recoveryOrders::Tuple;
 end
-
 
 #Konstruktoren
 
@@ -64,6 +62,9 @@ function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}};stencilOrder
     else
         compoundData=createCompoundData();
     end
+    edgeData=Array{Array{Int64,1},1}();
+
+    data=femData(compoundData, edgeData)
 
     if taskRecovery && !iszero(stencilOrder)
         stencil, stencilBoundary=getStencil(m,stencilOrder)
@@ -71,7 +72,6 @@ function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}};stencilOrder
         stencil=Array{Array{Int,1},1}();
         stencilBoundary=spzeros(Int,0)
     end
-    edgeData=Array{Array{Int64,1},1}();
     massM=Dict();
     massMB=Dict();
     stiffM=Dict();
@@ -80,5 +80,6 @@ function femProblem(m::mesh, femType::Dict{Symbol, Array{Symbol,1}};stencilOrder
     bV=Dict();
     s=Set{Symbol}([:poisson,:boussinesq,:compressible,:shallow,:linshallow]);
     !in(t,s) && error("Die Methode $t ist keine zulässige Eingabe. Möglich sind $s");
-    femProblem(m,bV,dF,femType,edgeData,compoundData,sol,massM,massMB,stiffM,recoveryM,stencil,stencilBoundary,t,kubWeights, kubPoints, taskRecovery, advection, recoveryOrders);
+
+    femProblem(m,bV,dF,femType,data,sol,massM,massMB,stiffM,recoveryM,stencil,stencilBoundary,t,kubWeights, kubPoints, taskRecovery, advection, recoveryOrders);
 end

@@ -84,7 +84,7 @@ function setEdgeData!(p::femProblem, compVf::Symbol)
         push!(edgeType,eT2)
         push!(edgeNum,e)
     end
-    
-    p.edgeData=[edgeNum,cells,edgeType,globv,off];
+
+    p.data.edgeData=[edgeNum,cells,edgeType,globv,off];
     return nothing;
 end

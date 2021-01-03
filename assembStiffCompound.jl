@@ -7,9 +7,9 @@ function assembStiffCompound!(p::femProblem)
 
         z=[0.0, 1.0];
 
-        Spv=assembStiffCompound(degF[pkey], degF[vkey], p.mesh, p.kubWeights, p.kubPoints, p.compoundData);
+        Spv=assembStiffCompound(degF[pkey], degF[vkey], p.mesh, p.kubWeights, p.kubPoints, p.data.compoundData);
         Svp = copy(-Spv');
-        Sbv=assembStiffCompound(degF[bkey], degF[vkey], z, p.mesh, p.kubWeights, p.kubPoints, p.compoundData)
+        Sbv=assembStiffCompound(degF[bkey], degF[vkey], z, p.mesh, p.kubWeights, p.kubPoints, p.data.compoundData)
         Svb = copy(Sbv');
 
         p.stiffM[:pv]=Spv[1:degF[pkey].num,:];
@@ -25,9 +25,9 @@ function assembStiffCompound!(p::femProblem)
 
         z=[0.0,1.0]
 
-        Spv=assembStiffCompound(degF[pkey], degF[vkey], p.mesh, p.kubWeights, p.kubPoints, p.compoundData);
+        Spv=assembStiffCompound(degF[pkey], degF[vkey], p.mesh, p.kubWeights, p.kubPoints, p.data.compoundData);
         Svp = copy(-Spv');
-        Srhov=assembStiffCompound(degF[rhokey], degF[vkey], z, p.mesh, p.kubWeights, p.kubPoints, p.compoundData)
+        Srhov=assembStiffCompound(degF[rhokey], degF[vkey], z, p.mesh, p.kubWeights, p.kubPoints, p.data.compoundData)
         Svrho = copy(Srhov');
 
         p.stiffM[:rho]=Spv[1:degF[rhokey].num,:];
@@ -40,7 +40,7 @@ function assembStiffCompound!(p::femProblem)
         vkey=p.femType[:rhoV][1];
         pkey=p.femType[:p][1];
 
-        Spv=assembStiffCompound(degF[pkey], degF[vkey], p.mesh, p.kubWeights, p.kubPoints, p.compoundData);
+        Spv=assembStiffCompound(degF[pkey], degF[vkey], p.mesh, p.kubWeights, p.kubPoints, p.data.compoundData);
         Svp = copy(-Spv');
 
         p.stiffM[:rho]=Spv[1:degF[rhokey].num,:];

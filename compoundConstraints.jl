@@ -8,7 +8,7 @@ p=testCompoundAcoustic();
 #integratedAnsatzfcn[k][j][i] : integral value from i-th ansatzfcn in subCell j from Cell k
 function integrateAnsatzfcnOverCells(p::femProblem)
     m=p.mesh;
-    nSubCells=p.compoundData.nSubCells;
+    nSubCells=p.data.compoundData.nSubCells;
     kubWeights=p.kubWeights;
     kubPoints=p.kubPoints;
     sk=size(kubWeights);
@@ -28,14 +28,14 @@ function integrateAnsatzfcnOverCells(p::femProblem)
     subcoord=Array{Array{Float64,2},1}(undef,nSubCells);
     ddJmatrix=Array{Float64,1}(undef,nSubCells);
 
-    nquadPhi=p.compoundData.nquadPhi
-    nquadPoints=p.compoundData.nquadPoints;
+    nquadPhi=p.data.compoundData.nquadPhi
+    nquadPoints=p.data.compoundData.nquadPoints;
 
     #outer edges alsays edge 1 for triangles
     phi=nquadPhi[:RT0][1];
     kubPn=nquadPoints[1];
 
-    quadWeights=p.compoundData.quadWeights;
+    quadWeights=p.data.compoundData.quadWeights;
     sk=length(quadWeights)
 
     J1=initJacobi((m.geometry.dim,m.topology.dim),sk);
@@ -45,7 +45,7 @@ function integrateAnsatzfcnOverCells(p::femProblem)
     for Cell in 1:p.mesh.topology.size[p.mesh.geometry.dim+1]
         coord= m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][Cell]:m.topology.offset["20"][Cell+1]-1]]
 
-        getSubCells!(subcoord, coord, p.compoundData);
+        getSubCells!(subcoord, coord, p.data.compoundData);
         gvertices=l2g(degF,Cell);
         for subCell in 1:nSubCells
             integratedAnsatzfcnSubCell=zeros(nAnsatzfcn);

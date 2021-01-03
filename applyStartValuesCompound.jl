@@ -7,7 +7,7 @@ function applyStartValuesCompound!(p::femProblem,f)
         ti=p.femType[i][1];
         if haskey(f,i)
             F=p.massMBoundary[ti];
-            l=assembLoadCompound(p.degFBoundary[ti],f[i], p.mesh, p.kubPoints, p.kubWeights, p.compoundData)
+            l=assembLoadCompound(p.degFBoundary[ti],f[i], p.mesh, p.kubPoints, p.kubWeights, p.data.compoundData)
             h=F\l;
         else
             h=zeros(nc)

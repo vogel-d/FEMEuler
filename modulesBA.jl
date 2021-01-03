@@ -17,6 +17,7 @@ include("transformation.jl")
 
 include("getOrderBoundary.jl")
 include("CompoundData.jl")
+include("femData.jl")
 include("getElementProperties.jl")
 include("degF.jl");
 include("generateMesh.jl")

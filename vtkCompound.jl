@@ -22,7 +22,7 @@ function compound_unstructured_vtk(p::femProblem, tend::Float64, comp::Array{Sym
     if m.geometry.dim==3
         celltype = VTKCellTypes.VTK_POLYGON;
     end
-    if typeof(p.compoundData).parameters[1]!=:nomethod
+    if typeof(p.data.compoundData).parameters[1]!=:nomethod
         celltype = VTKCellTypes.VTK_POLYGON;
     end
     cells = MeshCell[]
@@ -35,7 +35,7 @@ function compound_unstructured_vtk(p::femProblem, tend::Float64, comp::Array{Sym
     end
     fComp=Array{Array{Float64},1}(undef, length(comp))
     for l in 1:length(comp)
-        fComp[l]=getCompoundElementProperties(p.femType[comp[l]][1],m.meshType,p.compoundData.assembledPhi[p.femType[comp[l]][1]],mx,my,p.compoundData);
+        fComp[l]=getCompoundElementProperties(p.femType[comp[l]][1],m.meshType,p.data.compoundData.assembledPhi[p.femType[comp[l]][1]],mx,my,p.data.compoundData);
     end
     J=Array{Float64,2}(undef,m.geometry.dim,m.topology.dim);
     dJ=0.0;
@@ -57,31 +57,31 @@ function compound_unstructured_vtk(p::femProblem, tend::Float64, comp::Array{Sym
             vtk_cell_data(vtk, cvtk, name[l])
         else
             cvtk=zeros(Float64, m.geometry.dim, nf)
-            fCompoundLoc=zeros(Float64, m.geometry.dim, p.compoundData.nCompoundPhi[p.femType[comp[l]][1]])
+            fCompoundLoc=zeros(Float64, m.geometry.dim, p.data.compoundData.nCompoundPhi[p.femType[comp[l]][1]])
             center=Array{Float64,1}(undef,2);
-            subcoord=Array{Array{Float64,2},1}(undef,p.compoundData.nSubCells);
-            assembledPhi=p.compoundData.assembledPhi[p.femType[comp[l]][1]]
+            subcoord=Array{Array{Float64,2},1}(undef,p.data.compoundData.nSubCells);
+            assembledPhi=p.data.compoundData.assembledPhi[p.femType[comp[l]][1]]
             divphi=p.degFBoundary[p.femType[comp[l]][1]].divphi;
-            sq=length(p.compoundData.quadWeights)
+            sq=length(p.data.compoundData.quadWeights)
             J_edge=initJacobi((m.geometry.dim,m.topology.dim),sq);
             ddJ_edge=Array{Float64,1}(undef,sq);
             jphi_edge=initJacobi((m.geometry.dim,size(phi,2)),sq);
             for i in 1:nSubCells
                 #fill! causes mutating all entries of subcoord when changing a single entry
-                subcoord[i]=Array{Float64,2}(undef,2,p.compoundData.nVerticesSubElement);
+                subcoord[i]=Array{Float64,2}(undef,2,p.data.compoundData.nVerticesSubElement);
             end
             for k in 1:nf
                 cLoc=solc[l2g(p.degFBoundary[p.femType[comp[l]][1]], k)]
                 coord= m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][k]:m.topology.offset["20"][k+1]-1]]
-                getSubCells!(subcoord, coord, center, p.compoundData);
-                assemblePhi!(assembledPhi, subcoord, m, divphi, J_edge, ddJ_edge, jphi_edge, nquadPhi, nquadPoints, p.quadWeights, p.compoundData);
+                getSubCells!(subcoord, coord, center, p.data.compoundData);
+                assemblePhi!(assembledPhi, subcoord, m, divphi, J_edge, ddJ_edge, jphi_edge, nquadPhi, nquadPoints, p.quadWeights, p.data.compoundData);
                 fill!(fCompoundLoc,0.0)
-                for subCell in 1:p.compoundData.nSubCells
+                for subCell in 1:p.data.compoundData.nSubCells
                     dJ=jacobi!(J,mx,my,subcoord[subCell],mt);
                     fLoc=(1/dJ)*J*fComp[l]
                     for i in 1:length(assembledPhi)
                         for subi in 1:size(phi,2)
-                            fCompoundLoc[:,i]+=(1/p.compoundData.nSubCells)*(assembledPhi[i][subi,subCell]*fLoc[:,subi]);
+                            fCompoundLoc[:,i]+=(1/p.data.compoundData.nSubCells)*(assembledPhi[i][subi,subCell]*fLoc[:,subi]);
                         end
                     end
                 end
@@ -125,7 +125,7 @@ function compound_unstructured_vtk(p::femProblem, t::Array{Float64,1}, comp::Arr
     if m.geometry.dim==3
         celltype = VTKCellTypes.VTK_POLYGON;
     end
-    if typeof(p.compoundData).parameters[1]!=:nomethod
+    if typeof(p.data.compoundData).parameters[1]!=:nomethod
         celltype = VTKCellTypes.VTK_POLYGON;
     end
     cells = MeshCell[]
@@ -138,7 +138,7 @@ function compound_unstructured_vtk(p::femProblem, t::Array{Float64,1}, comp::Arr
     end
     fComp=Array{Array{Float64},1}(undef, length(comp))
     for l in 1:length(comp)
-        fComp[l]=getCompoundElementProperties(p.femType[comp[l]][1],m.meshType,mx,my,p.compoundData);
+        fComp[l]=getCompoundElementProperties(p.femType[comp[l]][1],m.meshType,mx,my,p.data.compoundData);
     end
     J=Array{Float64,2}(undef,m.geometry.dim,m.topology.dim);
     dJ=0.0;
@@ -172,28 +172,28 @@ function compound_unstructured_vtk(p::femProblem, t::Array{Float64,1}, comp::Arr
                     end
                     =#
                     cvtk=zeros(Float64, m.geometry.dim, nf)
-                    fCompoundLoc=zeros(Float64, m.geometry.dim, p.compoundData.nCompoundPhi[p.femType[comp[l]][1]])
+                    fCompoundLoc=zeros(Float64, m.geometry.dim, p.data.compoundData.nCompoundPhi[p.femType[comp[l]][1]])
                     center=Array{Float64,1}(undef,2);
-                    subcoord=Array{Array{Float64,2},1}(undef,p.compoundData.nSubCells);
-                    assembledPhi=p.compoundData.assembledPhi[p.femType[comp[l]][1]]
+                    subcoord=Array{Array{Float64,2},1}(undef,p.data.compoundData.nSubCells);
+                    assembledPhi=p.data.compoundData.assembledPhi[p.femType[comp[l]][1]]
                     divphi=p.degFBoundary[p.femType[comp[l]][1]].divphi;
-                    sq=length(p.compoundData.quadWeights);
-                    nquadPhi=p.compoundData.nquadPhi[p.femType[comp[l]][1]];
-                    nSubCells=p.compoundData.nSubCells;
-                    nquadPoints=p.compoundData.nquadPoints;
-                    quadWeights=p.compoundData.quadWeights;
+                    sq=length(p.data.compoundData.quadWeights);
+                    nquadPhi=p.data.compoundData.nquadPhi[p.femType[comp[l]][1]];
+                    nSubCells=p.data.compoundData.nSubCells;
+                    nquadPoints=p.data.compoundData.nquadPoints;
+                    quadWeights=p.data.compoundData.quadWeights;
                     J_edge=initJacobi((m.geometry.dim,m.topology.dim),sq);
                     ddJ_edge=Array{Float64,1}(undef,sq);
                     jphi_edge=initJacobi((m.geometry.dim,size(fComp[l],2)),sq);
                     for i in 1:nSubCells
                         #fill! causes mutating all entries of subcoord when changing a single entry
-                        subcoord[i]=Array{Float64,2}(undef,2,p.compoundData.nVerticesSubElement);
+                        subcoord[i]=Array{Float64,2}(undef,2,p.data.compoundData.nVerticesSubElement);
                     end
                     for k in 1:nf
                         cLoc=solc[l2g(p.degFBoundary[p.femType[comp[l]][1]], k)]
                         coord= m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][k]:m.topology.offset["20"][k+1]-1]]
-                        getSubCells!(subcoord, coord, center, p.compoundData);
-                        assemblePhi!(assembledPhi, subcoord, m, divphi, J_edge, ddJ_edge, jphi_edge, nquadPhi, nquadPoints, quadWeights, p.compoundData);
+                        getSubCells!(subcoord, coord, center, p.data.compoundData);
+                        assemblePhi!(assembledPhi, subcoord, m, divphi, J_edge, ddJ_edge, jphi_edge, nquadPhi, nquadPoints, quadWeights, p.data.compoundData);
                         fill!(fCompoundLoc,0.0)
                         for subCell in 1:nSubCells
                             dJ=jacobi!(J,mx,my,subcoord[subCell],m.meshType);
@@ -249,7 +249,7 @@ function split_unstructured_vtk(p::femProblem, tend::Float64, comp::Array{Symbol
     if m.geometry.dim==3
         celltype = VTKCellTypes.VTK_POLYGON;
     end
-    if typeof(p.compoundData).parameters[1]!=:nomethod
+    if typeof(p.data.compoundData).parameters[1]!=:nomethod
         celltype = VTKCellTypes.VTK_POLYGON;
     end
     cells = MeshCell[]
@@ -263,7 +263,7 @@ function split_unstructured_vtk(p::femProblem, tend::Float64, comp::Array{Symbol
     end
     fComp=Array{Array{Float64},1}(undef, length(comp))
     for l in 1:length(comp)
-        fComp[l]=getCompoundElementProperties(p.femType[comp[l]][1],m.meshType,p.compoundData.assembledPhi[p.femType[comp[l]][1]],mx,my,p.compoundData);
+        fComp[l]=getCompoundElementProperties(p.femType[comp[l]][1],m.meshType,p.data.compoundData.assembledPhi[p.femType[comp[l]][1]],mx,my,p.data.compoundData);
     end
     J=Array{Float64,2}(undef,m.geometry.dim,m.topology.dim);
     dJ=0.0;
@@ -276,7 +276,7 @@ function split_unstructured_vtk(p::femProblem, tend::Float64, comp::Array{Symbol
     for l in 1:length(comp)
         solc=getfield(sol,comp[l]);
         if isa(p.degFBoundary[p.femType[comp[l]][1]],degF{1})
-            nSubCells=p.compoundData.nSubCells;
+            nSubCells=p.data.compoundData.nSubCells;
             cvtk=zeros(Float64, nf)
             for k in 1:nf
                 cLoc=solc[l2g(p.degFBoundary[p.femType[comp[l]][1]], k)]
@@ -289,26 +289,26 @@ function split_unstructured_vtk(p::femProblem, tend::Float64, comp::Array{Symbol
         else
             cvtk=zeros(Float64, m.geometry.dim, nf)
             center=Array{Float64,1}(undef,2);
-            subcoord=Array{Array{Float64,2},1}(undef,p.compoundData.nSubCells);
-            assembledPhi=p.compoundData.assembledPhi[p.femType[comp[l]][1]]
+            subcoord=Array{Array{Float64,2},1}(undef,p.data.compoundData.nSubCells);
+            assembledPhi=p.data.compoundData.assembledPhi[p.femType[comp[l]][1]]
             divphi=p.degFBoundary[p.femType[comp[l]][1]].divphi;
-            sq=length(p.compoundData.quadWeights);
-            nquadPhi=p.compoundData.nquadPhi[p.femType[comp[l]][1]];
-            nSubCells=p.compoundData.nSubCells;
-            nquadPoints=p.compoundData.nquadPoints;
-            quadWeights=p.compoundData.quadWeights;
+            sq=length(p.data.compoundData.quadWeights);
+            nquadPhi=p.data.compoundData.nquadPhi[p.femType[comp[l]][1]];
+            nSubCells=p.data.compoundData.nSubCells;
+            nquadPoints=p.data.compoundData.nquadPoints;
+            quadWeights=p.data.compoundData.quadWeights;
             J_edge=initJacobi((m.geometry.dim,m.topology.dim),sq);
             ddJ_edge=Array{Float64,1}(undef,sq);
             jphi_edge=initJacobi((m.geometry.dim,size(fComp[l],2)),sq);
             for i in 1:nSubCells
                 #fill! causes mutating all entries of subcoord when changing a single entry
-                subcoord[i]=Array{Float64,2}(undef,2,p.compoundData.nVerticesSubElement);
+                subcoord[i]=Array{Float64,2}(undef,2,p.data.compoundData.nVerticesSubElement);
             end
             for k in 1:nf
                 cLoc=solc[l2g(p.degFBoundary[p.femType[comp[l]][1]], k)]
                 coord= compound_m.geometry.coordinates[:,compound_m.topology.incidence["20"][compound_m.topology.offset["20"][k]:compound_m.topology.offset["20"][k+1]-1]]
-                getSubCells!(subcoord, coord, center, p.compoundData);
-                assemblePhi!(assembledPhi, subcoord, m, divphi, J_edge, ddJ_edge, jphi_edge, nquadPhi, nquadPoints, quadWeights, p.compoundData);
+                getSubCells!(subcoord, coord, center, p.data.compoundData);
+                assemblePhi!(assembledPhi, subcoord, m, divphi, J_edge, ddJ_edge, jphi_edge, nquadPhi, nquadPoints, quadWeights, p.data.compoundData);
                 for subCell in 1:nSubCells
                     dJ=jacobi!(J,mx,my,subcoord[subCell],m.meshType);
                     fLoc=(1/dJ)*J*fComp[l]
@@ -358,7 +358,7 @@ function split_unstructured_vtk(p::femProblem, t::Array{Float64,1}, comp::Array{
     if m.geometry.dim==3
         celltype = VTKCellTypes.VTK_POLYGON;
     end
-    if typeof(p.compoundData).parameters[1]!=:nomethod
+    if typeof(p.data.compoundData).parameters[1]!=:nomethod
         celltype = VTKCellTypes.VTK_POLYGON;
     end
     cells = MeshCell[]
@@ -372,7 +372,7 @@ function split_unstructured_vtk(p::femProblem, t::Array{Float64,1}, comp::Array{
     end
     fComp=Array{Array{Float64},1}(undef, length(comp))
     for l in 1:length(comp)
-        fComp[l]=getCompoundElementProperties(p.femType[comp[l]][1],m.meshType,mx,my,p.compoundData);
+        fComp[l]=getCompoundElementProperties(p.femType[comp[l]][1],m.meshType,mx,my,p.data.compoundData);
     end
     J=Array{Float64,2}(undef,m.geometry.dim,m.topology.dim);
     dJ=0.0;
@@ -387,7 +387,7 @@ function split_unstructured_vtk(p::femProblem, t::Array{Float64,1}, comp::Array{
             for l in 1:length(comp)
                 solc=getfield(sol,comp[l]);
                 if isa(p.degFBoundary[p.femType[comp[l]][1]],degF{1})
-                    nSubCells=p.compoundData.nSubCells;
+                    nSubCells=p.data.compoundData.nSubCells;
                     cvtk=zeros(Float64, nf)
                     for k in 1:compound_nf
                         cLoc=solc[l2g(p.degFBoundary[p.femType[comp[l]][1]], k)]
@@ -410,26 +410,26 @@ function split_unstructured_vtk(p::femProblem, t::Array{Float64,1}, comp::Array{
                     =#
                     cvtk=zeros(Float64, m.geometry.dim, nf)
                     center=Array{Float64,1}(undef,2);
-                    subcoord=Array{Array{Float64,2},1}(undef,p.compoundData.nSubCells);
-                    assembledPhi=p.compoundData.assembledPhi[p.femType[comp[l]][1]]
+                    subcoord=Array{Array{Float64,2},1}(undef,p.data.compoundData.nSubCells);
+                    assembledPhi=p.data.compoundData.assembledPhi[p.femType[comp[l]][1]]
                     divphi=p.degFBoundary[p.femType[comp[l]][1]].divphi;
-                    sq=length(p.compoundData.quadWeights);
-                    nquadPhi=p.compoundData.nquadPhi[p.femType[comp[l]][1]];
-                    nSubCells=p.compoundData.nSubCells;
-                    nquadPoints=p.compoundData.nquadPoints;
-                    quadWeights=p.compoundData.quadWeights;
+                    sq=length(p.data.compoundData.quadWeights);
+                    nquadPhi=p.data.compoundData.nquadPhi[p.femType[comp[l]][1]];
+                    nSubCells=p.data.compoundData.nSubCells;
+                    nquadPoints=p.data.compoundData.nquadPoints;
+                    quadWeights=p.data.compoundData.quadWeights;
                     J_edge=initJacobi((m.geometry.dim,m.topology.dim),sq);
                     ddJ_edge=Array{Float64,1}(undef,sq);
                     jphi_edge=initJacobi((m.geometry.dim,size(fComp[l],2)),sq);
                     for i in 1:nSubCells
                         #fill! causes mutating all entries of subcoord when changing a single entry
-                        subcoord[i]=Array{Float64,2}(undef,2,p.compoundData.nVerticesSubElement);
+                        subcoord[i]=Array{Float64,2}(undef,2,p.data.compoundData.nVerticesSubElement);
                     end
                     for k in 1:compound_nf
                         cLoc=solc[l2g(p.degFBoundary[p.femType[comp[l]][1]], k)]
                         coord= compound_m.geometry.coordinates[:,compound_m.topology.incidence["20"][compound_m.topology.offset["20"][k]:compound_m.topology.offset["20"][k+1]-1]]
-                        getSubCells!(subcoord, coord, center, p.compoundData);
-                        assemblePhi!(assembledPhi, subcoord, m, divphi, J_edge, ddJ_edge, jphi_edge, nquadPhi, nquadPoints, quadWeights, p.compoundData);
+                        getSubCells!(subcoord, coord, center, p.data.compoundData);
+                        assemblePhi!(assembledPhi, subcoord, m, divphi, J_edge, ddJ_edge, jphi_edge, nquadPhi, nquadPoints, quadWeights, p.data.compoundData);
                         for subCell in 1:nSubCells
                             dJ=jacobi!(J,mx,my,subcoord[subCell],m.meshType);
                             fLoc=(1/dJ)*J*fComp[l]

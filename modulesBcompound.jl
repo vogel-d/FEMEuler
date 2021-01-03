@@ -14,7 +14,6 @@ include("getQuad.jl");
 include("meshTypes.jl");
 include("meshFunctions.jl");
 include("findall.jl");
-include("getSpace.jl")
 include("transformation.jl")
 include("initAssembledPhi.jl");
 include("coordTrans.jl");
@@ -25,6 +24,7 @@ include("degF.jl");
 include("generateMesh.jl")
 include("refineMesh.jl")
 include("compoundData.jl")
+include("femData.jl")
 include("getCompoundElementProperties.jl")
 include("getSubCells.jl")
 include("femProblem.jl");
