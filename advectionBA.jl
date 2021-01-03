@@ -47,7 +47,7 @@ function advection(p::femProblem, gamma::Float64, Vfval::SparseVector{Float64,In
                        nquadPoints,p.edgeData,p.compoundData);
       rCv=Fv\S;
     else
-      cR=recovery(p,fTv,cval.v,2);
+      cR=recovery(p,fTv,cval.v);
       S=advectionStiffR(p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],
                        p.degFBoundary[Vfcomp],nquadPhi[Vfcomp],Vfval,
                        fTv[3],cR,
