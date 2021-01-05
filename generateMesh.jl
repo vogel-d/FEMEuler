@@ -68,69 +68,74 @@ function generateRectMesh(nx::Int, ny::Int, condEW::Symbol, condTB::Symbol, xl::
     #   -x für periodische RandKante/Knoten mit x gegenüberliegende RandKante/Knoten
     bE=spzeros(Int, size[2]);
     bV=spzeros(Int, size[1]);
-    ordV=Int[];
-    corners=Set{Int}();
     #Berechnen des Boundaryvektors für die Randknoten
-    for i in 1:size[1]
-        if (coord[1,i]==xl || coord[1,i]==xr) && (coord[2,i]==yl || coord[2,i]==yr)
-            push!(corners,i);
-            if condEW==:constant && condTB==:constant
-                bV[i]=1;
-            elseif condEW==:periodic && condTB==:periodic && !(coord[1,i]==xl && coord[2,i]==yl)
-                bV[i]=-1;
-            elseif condEW==:periodic && condTB==:constant && coord[1,i]==xl
-                bV[i]=-i-nx;
-            elseif condTB==:periodic && condEW==:constant && coord[2,i]==yl
-                bV[i]=-i-(nx+1)*ny;
-            end
-        elseif condEW==:constant && (coord[1,i]==xl || coord[1,i]==xr)
-            bV[i]=1;
-        elseif coord[1,i]==xl
-            #condEW==:periodic
-            bV[i]=-i-nx;
-        elseif condTB==:constant && (coord[2,i]==yl || coord[2,i]==yr)
-            bV[i]=1;
-        elseif coord[2,i]==yl
-            #condTB==:periodic
-            bV[i]=-i-(nx+1)*ny;
-        end
+
+    #find vertices at each side without corners,
+    #add corners in extended versions of the vectors (_ex)
+    corner_vertices=[1,1+nx,(nx+1)*(ny+1),(nx+1)*(ny+1)-nx];
+
+    south_vertices=collect(range(2,step=1,length=nx-1));
+    south_vertices_ex=collect(range(1,step=1,length=nx+1));
+
+    east_vertices=collect(range((nx+1)+(nx+1),step=nx+1,length=ny-1));
+    east_vertices_ex=collect(range(nx+1,step=nx+1,length=ny+1));
+
+    north_vertices=collect(range(1+ny*(nx+1)+1,step=1,length=nx-1));
+    north_vertices_ex=collect(range(1+ny*(nx+1),step=1,length=nx+1));
+
+    west_vertices=collect(range(1+(nx+1),step=nx+1,length=ny-1));
+    west_vertices_ex=collect(range(1,step=nx+1,length=ny+1));
+
+    if condTB==:constant
+        #note: for constant boundary conditions
+        #      the corners are supposed to be constant too
+        bV[south_vertices_ex].=1
+        bV[north_vertices_ex].=1
+    elseif condTB==:periodic
+        bV[south_vertices]=-north_vertices
+        #seperate corner treatment for periodic boundary conditions
+    else
+        error("Boundary condition $(String(condTB)) not accepted, choose :constant or :periodic.")
     end
+
+    if condEW==:constant
+        #note: for constant boundary conditions
+        #      the corners are supposed to be constant too
+        bV[east_vertices_ex].=1
+        bV[west_vertices_ex].=1
+    elseif condEW==:periodic
+        bV[west_vertices]=-east_vertices
+        #seperate corner treatment for periodic boundary conditions
+    else
+        error("Boundary condition $(String(condEW)) not accepted, choose :constant or :periodic.")
+    end
+
+    if condTB==:periodic && condEW==:periodic
+        bV[corner_vertices[2:4]].=-1
+    end #else: corners already treated
+
 
     #Berechnen des Boundaryvektors für die Randkanten
-    for i in 1:size[2]
-        v1=ince[offe[i]];
-        v2=ince[offe[i]+1]
-        b1=bV[v1];
-        b2=bV[v2];
-        if b1==0 && b2==0
-            continue;
-        elseif v1==1 || v2==1 #Kante unten links gesondert behandelt wegen periodic/periodic, 0 in bV[1] macht Probleme
-            if b2==b1==1
-                bE[i]=1;
-            elseif (b1==1 && b2<=0) || (b1<=0 && b2==1)
-                bE[i]=1;
-            elseif (b1==0 && b2<0) || (b1<0 && b2==0) || (b1<0 && b2<0)
-                if coord[1,v1]==coord[1,v2]
-                    bE[i]=-i-nx;
-                elseif coord[2,v1]==coord[2,v2]
-                    bE[i]=-i-ny;
-                end
-            end
-        elseif (b1!=0 && b2!=0) || in(v1,corners) || in(v2,corners)
-            if b2==b1==1
-                bE[i]=1;
-            elseif (b1==1 && b2<=0) || (b1<=0 && b2==1)
-                bE[i]=1;
-            elseif b1<0 && b2<0
-                if coord[1,v1]==coord[1,v2]
-                    bE[i]=-i-nx;
-                elseif coord[2,v1]==coord[2,v2]
-                    bE[i]=-i-ny;
-                end
-            end
-        end
+    #find edges at each side
+    skipVertical=ny*(nx+1)+1;
+    south_edges=collect(range(skipVertical,step=ny+1,length=nx));
+    east_edges=collect(range(nx+1,step=nx+1,length=ny));
+    north_edges=collect(range(skipVertical+ny,step=ny+1,length=nx));
+    west_edges=collect(range(1,step=nx+1,length=ny));
+
+    if condTB==:constant
+        bE[north_edges].=1
+        bE[south_edges].=1
+    elseif condTB==:periodic
+        bE[south_edges]=-north_edges
     end
 
+    if condEW==:constant
+        bE[east_edges].=1
+        bE[west_edges].=1
+    elseif condEW==:periodic
+        bE[west_edges]=-east_edges
+    end
 
     #Initialisieren der Topologie, Geometrie und damit des Meshes
     n=Int[nx,ny];
@@ -467,81 +472,73 @@ function generateTriMeshQuartered(nx::Int, ny::Int, condEW::Symbol, condTB::Symb
     #   -x für periodische RandKante/Knoten mit x gegenüberliegende RandKante/Knoten
     bE=spzeros(Int, size[2]);
     bV=spzeros(Int, size[1]);
-    ordV=Int[];
-    corners=Set{Int}();
     #Berechnen des Boundaryvektors für die Randknoten
-    for i in 1:size[1]
-        if (coord[1,i]==xl || coord[1,i]==xr) && (coord[2,i]==yl || coord[2,i]==yr)
-            push!(corners,i);
-            if condEW==:constant && condTB==:constant
-                bV[i]=1;
-            elseif condEW==:periodic && condTB==:periodic && !(coord[1,i]==xl && coord[2,i]==yl)
-                bV[i]=-1;
-            elseif condEW==:periodic && condTB==:constant && coord[1,i]==xl
-                bV[i]=-i-nx;
-            elseif condTB==:periodic && condEW==:constant && coord[2,i]==yl
-                bV[i]=-i-(nx+1)*ny;
-            end
-        elseif condEW==:constant && (coord[1,i]==xl || coord[1,i]==xr)
-            bV[i]=1;
-        elseif coord[1,i]==xl
-            #condEW==:periodic
-            bV[i]=-i-nx;
-        elseif condTB==:constant && (coord[2,i]==yl || coord[2,i]==yr)
-            bV[i]=1;
-        elseif coord[2,i]==yl
-            #condTB==:periodic
-            bV[i]=-i-(nx+1)*ny;
-        end
+
+    #find vertices at each side without corners,
+    #add corners in extended versions of the vectors (_ex)
+    corner_vertices=[1,1+nx,(nx+1)*(ny+1),(nx+1)*(ny+1)-nx];
+
+    south_vertices=collect(range(2,step=1,length=nx-1));
+    south_vertices_ex=collect(range(1,step=1,length=nx+1));
+
+    east_vertices=collect(range((nx+1)+(nx+1),step=nx+1,length=ny-1));
+    east_vertices_ex=collect(range(nx+1,step=nx+1,length=ny+1));
+
+    north_vertices=collect(range(1+ny*(nx+1)+1,step=1,length=nx-1));
+    north_vertices_ex=collect(range(1+ny*(nx+1),step=1,length=nx+1));
+
+    west_vertices=collect(range(1+(nx+1),step=nx+1,length=ny-1));
+    west_vertices_ex=collect(range(1,step=nx+1,length=ny+1));
+
+    if condTB==:constant
+        #note: for constant boundary conditions
+        #      the corners are supposed to be constant too
+        bV[south_vertices_ex].=1
+        bV[north_vertices_ex].=1
+    elseif condTB==:periodic
+        bV[south_vertices]=-north_vertices
+        #seperate corner treatment for periodic boundary conditions
+    else
+        error("Boundary condition $(String(condTB)) not accepted, choose :constant or :periodic.")
     end
 
+    if condEW==:constant
+        #note: for constant boundary conditions
+        #      the corners are supposed to be constant too
+        bV[east_vertices_ex].=1
+        bV[west_vertices_ex].=1
+    elseif condEW==:periodic
+        bV[west_vertices]=-east_vertices
+        #seperate corner treatment for periodic boundary conditions
+    else
+        error("Boundary condition $(String(condEW)) not accepted, choose :constant or :periodic.")
+    end
+
+    if condTB==:periodic && condEW==:periodic
+        bV[corner_vertices[2:4]].=-1
+    end #else: corners already treated
+
+
     #Berechnen des Boundaryvektors für die Randkanten
-    for i in 1:size[2]
-        v1=ince[offe[i]];
-        v2=ince[offe[i]+1]
-        b1=bV[v1];
-        b2=bV[v2];
+    #find edges at each side
+    skipVertical=ny*(nx+1)+1;
+    south_edges=collect(range(skipVertical,step=ny+1,length=nx));
+    east_edges=collect(range(nx+1,step=nx+1,length=ny));
+    north_edges=collect(range(skipVertical+ny,step=ny+1,length=nx));
+    west_edges=collect(range(1,step=nx+1,length=ny));
 
-        #bei schrägen Kanten continue
-        if !(isequal(coord[1,v1],coord[1,v2]) || isequal(coord[2,v1],coord[2,v2]))
-            continue;
-        end
+    if condTB==:constant
+        bE[north_edges].=1
+        bE[south_edges].=1
+    elseif condTB==:periodic
+        bE[south_edges]=-north_edges
+    end
 
-        if b1==0 && b2==0
-            continue;
-        elseif v1==1 || v2==1 #Kanten unten links gesondert behandelt wegen periodic/periodic, 0 in bV[1] macht Probleme
-            if b2==b1==1
-                bE[i]=1;
-            elseif (b1==1 && b2<=0) || (b1<=0 && b2==1)
-                bE[i]=1;
-            elseif (b1==0 && b2<0) || (b1<0 && b2==0) || (b1<0 && b2<0)
-                if coord[1,v1]==coord[1,v2]
-                    #bE[i]=-i-nx;
-                    #top=-bottom correction for global edge order
-                    bE[i+nx]=-i;
-                elseif coord[2,v1]==coord[2,v2]
-                    #bE[i]=-i-ny;
-                    #top=-bottom correction for global edge order
-                    bE[i+ny]=-i;
-                end
-            end
-        elseif (b1!=0 && b2!=0) || in(v1,corners) || in(v2,corners)
-            if b2==b1==1
-                bE[i]=1;
-            elseif (b1==1 && b2<=0) || (b1<=0 && b2==1)
-                bE[i]=1;
-            elseif b1<0 && b2<0
-                if coord[1,v1]==coord[1,v2]
-                    #bE[i]=-i-nx;
-                    #top=-bottom correction for global edge order
-                    bE[i+nx]=-i;
-                elseif coord[2,v1]==coord[2,v2]
-                    #bE[i]=-i-ny;
-                    #top=-bottom correction for global edge order
-                    bE[i+ny]=-i;
-                end
-            end
-        end
+    if condEW==:constant
+        bE[east_edges].=1
+        bE[west_edges].=1
+    elseif condEW==:periodic
+        bE[west_edges]=-east_edges
     end
 
 
