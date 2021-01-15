@@ -1,7 +1,3 @@
-include("getQuadElementProperties.jl")
-include("getSphereElementProperties.jl")
-include("getTriElementProperties.jl")
-
 function getElementProperties(type::Symbol, kubPoints::Array{Float64,2}, mt::Int, dim::Int)
     if mt==4
         if dim==2
