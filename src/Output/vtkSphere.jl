@@ -43,7 +43,7 @@ function unstructured_vtkSphere(p::femProblem, tend::Float64, comp::Array{Symbol
     dJ=0.0;
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
-    vtk_filename_noext = (@__DIR__)*"/VTK/"*filename;
+    vtk_filename_noext = (@__DIR__)*"/../../VTK/"*filename;
     vtk = vtk_grid(vtk_filename_noext, pts, cells,compress=3)
 
     sol=p.solution[tend];

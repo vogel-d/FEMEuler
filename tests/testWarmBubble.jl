@@ -1,4 +1,4 @@
-include("modulesCE.jl")
+include("../src/Modules/modulesCE.jl")
 #include("advectionStiffN.jl")
 
 const stencilOrder=2;

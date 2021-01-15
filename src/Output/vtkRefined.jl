@@ -48,7 +48,7 @@ function refined_vtk(p::femProblem, r::Int, tend::Float64, comp::Array{Symbol,1}
     dJ=0.0;
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
-    vtk_filename_noext = (@__DIR__)*"/VTK/"*filename;
+    vtk_filename_noext = (@__DIR__)*"/../../VTK/"*filename;
     vtk = vtk_grid(vtk_filename_noext, pts, cells,compress=3)
 
     sol=p.solution[tend];
@@ -168,7 +168,7 @@ function refined_vtk(p::femProblem, rx::Int, ry::Int, t::Array{Float64,1}, comp:
     dJ=0.0;
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
-    vtk_filename_noext = (@__DIR__)*"/VTK/"*filename;
+    vtk_filename_noext = (@__DIR__)*"/../../VTK/"*filename;
 
     fComp=Array{Array{Float64},1}(undef, r^2);
     rcoord=Array{Float64,2}(undef,2,r^2)

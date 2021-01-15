@@ -6,46 +6,49 @@ using Plots;
 #pyplot()
 gr() #Pkg.build("CodecZlib") #Pkg.build("LightXML")
 
-include("solution.jl");
+include("../System/Variables/solution.jl");
 @solution(v,p,b);
-include("constants.jl")
-include("getKub.jl");
-include("getQuad.jl");
-include("meshTypes.jl");
-include("meshFunctions.jl");
-include("findall.jl");
-include("transformation.jl")
+include("../System/constants.jl")
+include("../Utilities/getKub.jl");
+include("../Utilities/getQuad.jl");
+include("../Mesh/meshTypes.jl");
+include("../Mesh/meshFunctions.jl");
+include("../Utilities/findall.jl");
+include("../Transformation/transformation.jl")
 
-include("coordTrans.jl")
-include("compoundData.jl")
-include("femData.jl")
+include("../Transformation/coordTrans.jl")
+include("../System/Compound/compoundData.jl")
+include("../System/femData.jl")
 
-include("getOrderBoundary.jl")
-include("getElementProperties.jl")
-include("degF.jl");
-include("generateMesh.jl")
-include("refineMesh.jl")
-include("femProblem.jl");
-include("splitCompoundMesh.jl")
-include("initAssembledPhi.jl")
+include("../System/getOrderBoundary.jl")
+include("../FiniteElements/getQuadElementProperties.jl")
+include("../FiniteElements/getSphereElementProperties.jl")
+include("../FiniteElements/getTriElementProperties.jl")
+include("../FiniteElements/getElementProperties.jl")
+include("../FiniteElements/degF.jl");
+include("../Mesh/generateMesh.jl")
+include("../Mesh/refineMesh.jl")
+include("../System/femProblem.jl");
+include("../Mesh/splitCompoundMesh.jl")
+include("../System/Compound/initAssembledPhi.jl")
 
-include("l2g.jl")
-include("jacobi.jl");
-include("initJacobi.jl")
-include("adaptGeometry.jl")
-include("additionalFunctions.jl")
+include("../FiniteElements/l2g.jl")
+include("../Transformation/jacobi.jl");
+include("../Transformation/initJacobi.jl")
+include("../Mesh/adaptGeometry.jl")
+include("../Utilities/additionalFunctions.jl")
 
-include("assembMass.jl");
-include("assembLoad.jl");
-include("assembStiff.jl");
-include("applyStartValues.jl");
-include("solveB.jl");
+include("../System/Matrices/assembMass.jl");
+include("../System/Matrices/assembLoad.jl");
+include("../System/Matrices/assembStiff.jl");
+include("../System/applyStartValues.jl");
+include("../Solvers/solveB.jl");
 
-include("plotSolution.jl");
-include("plotSolutionGif.jl");
-include("plotMesh.jl");
-include("plotFEM.jl")
-include("vtk.jl");
-include("vtkTest.jl");
-include("vtkRefined.jl");
-include("jld.jl");
+include("../Output/plotSolution.jl");
+include("../Output/plotSolutionGif.jl");
+include("../Output/plotMesh.jl");
+include("../Output/plotFEM.jl")
+include("../Output/vtk.jl");
+include("../Output/vtkTest.jl");
+include("../Output/vtkRefined.jl");
+include("../Output/jld.jl");

@@ -38,7 +38,7 @@ function unstructured_vtk(p::femProblem, tend::Float64, comp::Array{Symbol,1}, n
     dJ=0.0;
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
-    vtk_filename_noext = (@__DIR__)*"/VTK/"*filename;
+    vtk_filename_noext = (@__DIR__)*"/../../VTK/"*filename;
     vtk = vtk_grid(vtk_filename_noext, pts, cells,compress=3)
 
     sol=p.solution[tend];
@@ -119,7 +119,7 @@ function unstructured_vtk(p::femProblem, t::Array{Float64,1}, comp::Array{Symbol
     dJ=0.0;
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
-    vtk_filename_noext = (@__DIR__)*"/VTK/"*filename;
+    vtk_filename_noext = (@__DIR__)*"/../../VTK/"*filename;
 
     outfiles = paraview_collection(vtk_filename_noext) do pvd
         for it in 1:length(t)
@@ -211,7 +211,7 @@ function unstructured_vtk(p::femProblem, rx::Int, ry::Int, tend::Float64, comp::
     coord=Array{Float64,2}(undef,mf.geometry.dim,mf.meshType);
     nfc=p.mesh.topology.size[3];
 
-    vtk_filename_noext = (@__DIR__)*"/VTK/"*filename;
+    vtk_filename_noext = (@__DIR__)*"/../../VTK/"*filename;
     vtk = vtk_grid(vtk_filename_noext, pts, cells,compress=3)
 
     sol=p.solution[tend];
@@ -317,7 +317,7 @@ function unstructured_vtk(p::femProblem, rx::Int, ry::Int, t::Array{Float64,1}, 
     coord=Array{Float64,2}(undef,mf.geometry.dim,mf.meshType);
     nfc=p.mesh.topology.size[3];
 
-    vtk_filename_noext = (@__DIR__)*"/VTK/"*filename;
+    vtk_filename_noext = (@__DIR__)*"/../../VTK/"*filename;
 
     fComp=Array{Array{Float64},1}(undef, rx*ry);
     rcoord=Array{Float64,2}(undef,2,rx*ry)
