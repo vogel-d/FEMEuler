@@ -58,7 +58,6 @@ include("../System/Variables/projectPressure.jl")
 include("../System/Variables/projectChi.jl")
 include("../System/Variables/projectRhoChi.jl")
 
-
 include("../Output/plotSolution.jl");
 include("../Output/plotSolutionGif.jl");
 include("../Output/plotMesh.jl");
