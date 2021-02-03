@@ -41,7 +41,7 @@ function compound_unstructured_vtk(p::femProblem, tend::Float64, comp::Array{Sym
     dJ=0.0;
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
-    vtk_filename_noext = (@__DIR__)*"/../../VTK/"*filename;
+    vtk_filename_noext = pwd()*"/output/VTK/"*filename;
     vtk = vtk_grid(vtk_filename_noext, pts, cells,compress=3)
 
     sol=p.solution[tend];
@@ -144,7 +144,7 @@ function compound_unstructured_vtk(p::femProblem, t::Array{Float64,1}, comp::Arr
     dJ=0.0;
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
-    vtk_filename_noext = (@__DIR__)*"/../../VTK/"*filename;
+    vtk_filename_noext = pwd()*"/output/VTK/"*filename;
 
     outfiles = paraview_collection(vtk_filename_noext) do pvd
         for it in 1:length(t)
@@ -269,7 +269,7 @@ function split_unstructured_vtk(p::femProblem, tend::Float64, comp::Array{Symbol
     dJ=0.0;
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
-    vtk_filename_noext = (@__DIR__)*"/../../VTK/"*filename;
+    vtk_filename_noext = pwd()*"/output/VTK/"*filename;
     vtk = vtk_grid(vtk_filename_noext, pts, cells,compress=3)
 
     sol=p.solution[tend];
@@ -378,7 +378,7 @@ function split_unstructured_vtk(p::femProblem, t::Array{Float64,1}, comp::Array{
     dJ=0.0;
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
-    vtk_filename_noext = (@__DIR__)*"/../../VTK/"*filename;
+    vtk_filename_noext = pwd()*"/output/VTK/"*filename;
 
     outfiles = paraview_collection(vtk_filename_noext) do pvd
         for it in 1:length(t)
@@ -496,7 +496,7 @@ function compound_vtk(m::mesh, degF::degF{2}, compoundData::compoundData, sol::A
     dJ=0.0;
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
-    vtk_filename_noext = (@__DIR__)*"/../../VTK/"*filename;
+    vtk_filename_noext = pwd()*"/output/VTK/"*filename;
     vtk = vtk_grid(vtk_filename_noext, pts, cells,compress=3)
 
     #=
@@ -595,7 +595,7 @@ function compound_vtk(m::mesh, degF::degF{1}, compoundData::compoundData, sol::A
     dJ=0.0;
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
-    vtk_filename_noext = (@__DIR__)*"/../../VTK/"*filename;
+    vtk_filename_noext = pwd()*"/output/VTK/"*filename;
     vtk = vtk_grid(vtk_filename_noext, pts, cells,compress=3)
 
     #=

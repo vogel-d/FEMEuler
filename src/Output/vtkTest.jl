@@ -31,7 +31,7 @@ function vtk(m::mesh, degF::degF{1}, sol::Array{Float64,1}, femType::Symbol, fil
     dJ=0.0;
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
-    vtk_filename_noext = (@__DIR__)*"/../../VTK/"*filename;
+    vtk_filename_noext = pwd()*"/output/VTK/"*filename;
     vtk = vtk_grid(vtk_filename_noext, pts, cells,compress=3)
 
     cvtk=zeros(Float64, nf)
@@ -78,7 +78,7 @@ function vtk(m::mesh, degF::degF{2}, sol::Array{Float64,1}, femType::Symbol, fil
     dJ=0.0;
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
-    vtk_filename_noext = (@__DIR__)*"/../../VTK/"*filename;
+    vtk_filename_noext = pwd()*"/output/VTK/"*filename;
     vtk = vtk_grid(vtk_filename_noext, pts, cells,compress=3)
 
     cvtk=zeros(Float64, m.geometry.dim, nf)
@@ -149,7 +149,7 @@ function vtk(m::mesh, rx::Int, ry::Int, degF::degF{1}, sol::Array{Float64,1}, fe
     coord=Array{Float64,2}(undef,mf.geometry.dim,mf.meshType);
     nfc=m.topology.size[3];
 
-    vtk_filename_noext = (@__DIR__)*"/../../VTK/"*filename;
+    vtk_filename_noext = pwd()*"/output/VTK/"*filename;
     vtk = vtk_grid(vtk_filename_noext, pts, cells,compress=3)
 
     fComp=Array{Array{Float64},1}(undef, rx*ry);
@@ -221,7 +221,7 @@ function vtk(m::mesh, rx::Int, ry::Int, degF::degF{2}, sol::Array{Float64,1}, fe
     coord=Array{Float64,2}(undef,mf.geometry.dim,mf.meshType);
     nfc=m.topology.size[3];
 
-    vtk_filename_noext = (@__DIR__)*"/../../VTK/"*filename;
+    vtk_filename_noext = pwd()*"/output/VTK/"*filename;
     vtk = vtk_grid(vtk_filename_noext, pts, cells,compress=3)
 
     fComp=Array{Array{Float64},1}(undef, rx*ry);
@@ -289,7 +289,7 @@ function vtkScalar(m::mesh,val::Array{T,1} where T,filename::String)
         c = MeshCell(celltype, inds)
         push!(cells, c)
     end
-    vtk_filename_noext = (@__DIR__)*"/../../VTK/"*filename;
+    vtk_filename_noext = pwd()*"/output/VTK/"*filename;
     vtk = vtk_grid(vtk_filename_noext, pts, cells,compress=3)
 
     vtk_cell_data(vtk, val, "Werte")
@@ -315,7 +315,7 @@ function vtkVec(m::mesh,val::Array{T,2} where T,filename::String)
         c = MeshCell(celltype, inds)
         push!(cells, c)
     end
-    vtk_filename_noext = (@__DIR__)*"/../../VTK/"*filename;
+    vtk_filename_noext = pwd()*"/output/VTK/"*filename;
     vtk = vtk_grid(vtk_filename_noext, pts, cells,compress=3)
 
     for i in 1:size(val,1)

@@ -44,7 +44,7 @@ function vtkRecovery(m::mesh, r::Int, sol::Array{Float64,1}, femType::Symbol, ::
 
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
-    vtk_filename_noext = (@__DIR__)*"/../../VTK/"*filename;
+    vtk_filename_noext = pwd()*"/output/VTK/"*filename;
     vtk = vtk_grid(vtk_filename_noext, pts, cells,compress=3)
 
     fComp=Array{Array{Float64},1}(undef, r^2);
@@ -130,7 +130,7 @@ function vtkRecovery(m::mesh, r::Int, sol::Array{Float64,1}, femType::Symbol, ::
     dJ=0.0;
     jcoord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
-    vtk_filename_noext = (@__DIR__)*"/../../VTK/"*filename;
+    vtk_filename_noext = pwd()*"/output/VTK/"*filename;
     vtk = vtk_grid(vtk_filename_noext, pts, cells,compress=3)
 
     fComp=Array{Array{Float64},1}(undef, r^2);
@@ -235,7 +235,7 @@ function vtkRecovery(m::mesh, r::Int, degF::degF{1}, sol::Array{Float64,1}, femT
 
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
-    vtk_filename_noext = (@__DIR__)*"/../../VTK/"*filename;
+    vtk_filename_noext = pwd()*"/output/VTK/"*filename;
     vtk = vtk_grid(vtk_filename_noext, pts, cells,compress=3)
 
     fComp=Array{Array{Float64},1}(undef, r^2);
@@ -335,7 +335,7 @@ function vtkRecovery(m::mesh, r::Int, degF::degF{2}, sol::Array{Float64,1}, femT
     dJ=0.0;
     jcoord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
-    vtk_filename_noext = (@__DIR__)*"/../../VTK/"*filename;
+    vtk_filename_noext = pwd()*"/output/VTK/"*filename;
     vtk = vtk_grid(vtk_filename_noext, pts, cells,compress=3)
 
     fComp=Array{Array{Float64},1}(undef, r^2);
