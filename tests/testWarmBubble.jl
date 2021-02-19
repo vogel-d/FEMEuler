@@ -1,5 +1,6 @@
 include("../src/Modules/modulesCE.jl")
-#include("advectionStiffN.jl")
+include("../src/Advection/AdvectionStiff/advectionStiffN.jl")
+include("../src/Mesh/setOrientation.jl")
 
 const stencilOrder=2;
 
@@ -9,15 +10,15 @@ recoverySpaceVec=Symbol("VecDGQuad")
 @recovery(recoverySpace,recoverySpaceVec)
 
 function testWarmBubble()
-    filename = "warmBubbleNNFENoAdv";
+    filename = "warmBubbleDG2";
 
     #order: comp, compHigh, compRec, compDG
-    femType=Dict(:rho=>[:DG0, :DG0, recoverySpace],
-                 :rhoV=>[:RT0, :RT0, recoverySpaceVec],
-                 :rhoTheta=>[:DG0, :DG0, recoverySpace],
-                 :p=>[:DG0],
-                 :v=>[:RT0],
-                 :theta=>[:DG0]);
+    femType=Dict(:rho=>[:DG2, :DG0, recoverySpace],
+                 :rhoV=>[:VecDG2, :RT0, recoverySpaceVec],
+                 :rhoTheta=>[:DG2, :DG0, recoverySpace],
+                 :p=>[:DG2],
+                 :v=>[:VecDG2],
+                 :theta=>[:DG2]);
     #=
     femType=Dict(:rho=>[:DG0, :P1, :DG1, :DG0],
                  :rhoV=>[:RT0, :VecP1, :VecDG1, :RT0B],
@@ -41,7 +42,9 @@ function testWarmBubble()
 
     #m=generateRectMesh(160,80,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
     m=generateRectMesh(80,40,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
-
+    #meshConnectivity!(m,2,1)
+    #meshConnectivity!(m,1,2)
+    #setEdgeOrientation!(m::mesh)
     #adaptGeometry!(m,(0.3,0.3),false); #sin perbutation
 
     p=femProblem(m, femType,t=:compressible, advection=advection, taskRecovery=taskRecovery,

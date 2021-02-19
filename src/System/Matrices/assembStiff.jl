@@ -122,6 +122,57 @@ function assembStiff(degFs::degF{1,:H1}, degFv::degF{2,:H1div}, m::mesh, kubWeig
     end
     return sparse(rows,cols,vals);
 end
+function assembStiff(degFs::degF{1,:H1}, degFv::degF{2,:H1xH1}, m::mesh, kubWeights::Array{Float64,2}, kubPoints::Array{Float64,2})
+
+    nf=m.topology.size[m.topology.dim+1]
+    nT=degFs.numB;
+    nF=degFv.numB;
+    phiT=degFs.phi;
+    divphiF=degFv.divphi;
+
+    rows=Int64[];
+    cols=Int64[];
+    vals=Float64[];
+
+    sk=size(kubWeights)
+
+    J=initJacobi((m.geometry.dim,m.topology.dim),sk);
+    dJ=Array{Float64,2}(undef,sk);
+    coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
+
+    lS=zeros(length(phiT), length(divphiF));
+    for k in 1:m.topology.size[m.topology.dim+1]
+        jacobi!(J, dJ, m, k, kubPoints, coord);
+        for i in 1:length(phiT)
+            for j in 1:length(divphiF)
+                currentval=0.0;
+                for r in 1:sk[2]
+                    for l in 1:sk[1]
+                        currentval+=kubWeights[l,r]*abs(dJ[l,r])*phiT[i][l,r]*divphiF[j][l,r];
+                    end
+                end
+                lS[i,j] = currentval;
+            end
+        end
+
+        globalNumT=l2g(degFs,k);
+        globalNumF=l2g(degFv,k);
+
+        for j in 1:length(globalNumF)
+            for i in 1:length(globalNumT)
+                gi=globalNumT[i];
+                gj=globalNumF[j];
+                if !isequal(lS[i,j],0.0) || (gi==nT && gj==nF)
+                    push!(rows,gi);
+                    push!(cols,gj);
+                    push!(vals,lS[i,j]);
+                end
+            end
+        end
+    end
+    return sparse(rows,cols,vals);
+end
+
 
 #skalare Größe mit vektorieller Größe
 function assembStiff(degFs::degF{1,:H1}, degFv::degF{2,:H1div}, z::Array{Float64,1}, m::mesh, kubWeights::Array{Float64,2}, kubPoints::Array{Float64,2})
@@ -178,6 +229,65 @@ function assembStiff(degFs::degF{1,:H1}, degFv::degF{2,:H1div}, z::Array{Float64
     end
     return sparse(rows,cols,vals);
 end
+function assembStiff(degFs::degF{1,:H1}, degFv::degF{2,:H1xH1}, z::Array{Float64,1}, m::mesh, kubWeights::Array{Float64,2}, kubPoints::Array{Float64,2})
+    nT=degFs.numB;
+    nF=degFv.numB;
+    phiT=degFs.phi;
+    phiF=degFv.phi;
+
+    rows=Int64[];
+    cols=Int64[];
+    vals=Float64[];
+
+    sk=size(kubWeights)
+
+    J=initJacobi((m.geometry.dim,m.topology.dim),sk);
+    dJ=Array{Float64,2}(undef,sk);
+    coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
+
+    lS=zeros(length(phiT), size(phiF,2));
+
+    for k in 1:m.topology.size[m.topology.dim+1]
+        jacobi!(J, dJ, m, k, kubPoints, coord);
+        for i in 1:length(phiT)
+            for j in 1:size(phiF,2)
+                currentval=0.0;
+                for r in 1:sk[2]
+                    for l in 1:sk[1]
+                        zphi=0.0
+                        for d in 1:m.geometry.dim
+                            zphi+=z[d]*phiF[d,j][l,r]
+                        end
+                        currentval+=kubWeights[l,r]*abs(dJ[l,r])*phiT[i][l,r]*zphi;
+                    end
+                end
+                lS[i,j] = currentval;
+            end
+        end
+
+        globalNumT=l2g(degFs,k);
+        globalNumF=l2g(degFv,k);
+
+        for j in 1:length(globalNumF)
+            for i in 1:length(globalNumT)
+                gi=globalNumT[i];
+                gj=globalNumF[j];
+                if !isequal(lS[i,j],0.0) || (gi==nT && gj==nF)
+                    push!(rows,gi);
+                    push!(cols,gj);
+                    push!(vals,lS[i,j]);
+                end
+            end
+        end
+    end
+    return sparse(rows,cols,vals);
+end
+
+
+
+
+
+
 
 #vektorielle Größe mit Vektorprodukt von Normale und vektorieller Größe
 function assembStiff(degFT::degF{2}, degFF::degF{2}, degFW::degF{1}, m::mesh, kubWeights::Array{Float64,2}, kubPoints::Array{Float64,2})

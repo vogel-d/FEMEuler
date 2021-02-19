@@ -1,7 +1,7 @@
-include("discGalerkinCellsN.jl")
-include("discGalerkinEdgesN.jl")
+include("../DiscontinousGalerkin/discGalerkinCellsN.jl")
+include("../DiscontinousGalerkin/discGalerkinEdgesN.jl")
 function advectionStiff(degFT::degF{1,:H1}, phiTtrans::Array{Array{Array{Float64,1},2},1},
-                        degFF::degF{2,:H1div}, phiFtrans::Array{Array{Array{Float64,1},2},1}, fval::SparseVector{Float64,Int64},
+                        degFF::degF{2,S} where S, phiFtrans::Array{Array{Array{Float64,1},2},1}, fval::SparseVector{Float64,Int64},
                         degFW::degF{1,:H1}, phiWtrans::Array{Array{Array{Float64,1},2},1}, wval::Array{Float64,1},
                         gamma::Float64,m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2},
                         nquadPoints::Array{Array{Float64,2},1}, data::femData)
@@ -42,8 +42,8 @@ function advectionStiff(degFT::degF{1,:H1}, phiTtrans::Array{Array{Array{Float64
     return M[1:degFT.num]
 end
 
-function advectionStiff(degFT::degF{2,:H1div}, phiTtrans::Array{Array{Array{Float64,1},2},1},
-                        degFF::degF{2,:H1div}, phiFtrans::Array{Array{Array{Float64,1},2},1},  fval::SparseVector{Float64,Int64},
+function advectionStiff(degFT::degF{2,S} where S, phiTtrans::Array{Array{Array{Float64,1},2},1},
+                        degFF::degF{2,S} where S, phiFtrans::Array{Array{Array{Float64,1},2},1},  fval::SparseVector{Float64,Int64},
                         degFW::degF{2,S} where S, phiWtrans::Array{Array{Array{Float64,1},2},1}, wval::Array{Float64,1},
                         gamma::Float64,m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2},
                         nquadPoints::Array{Array{Float64,2},1}, data::femData)
@@ -88,7 +88,7 @@ function advectionStiff(degFT::degF{2,:H1div}, phiTtrans::Array{Array{Array{Floa
 end
 
 function advectionStiffMatrix(degFT::degF{1,:H1}, phiTtrans::Array{Array{Array{Float64,1},2},1},
-                              degFF::degF{2,:H1div}, phiFtrans::Array{Array{Array{Float64,1},2},1},fval::Array{Float64,1},
+                              degFF::degF{2,S} where S, phiFtrans::Array{Array{Array{Float64,1},2},1},fval::Array{Float64,1},
                               degFW::degF{1,:H1}, phiWtrans::Array{Array{Array{Float64,1},2},1},wval::Array{Float64,1},
                               gamma::Float64, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2},
                               nquadPoints::Array{Array{Float64,2},1}, data::femData)

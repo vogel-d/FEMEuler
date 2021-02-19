@@ -76,8 +76,8 @@ function mesh(topology::meshTopology, geometry::meshGeometry, bE::SparseVector{I
     if geometry.dim==3
       n=[0.0 1.0 0.0 1.0;-1.0 0.0 -1.0 0.0]
     else
-      n=[0.0 1.0 0.0 1.0;-1.0 0.0 -1.0 0.0]
-      #n=[0.0 1.0 0.0 1.0;1.0 0.0 1.0 0.0]
+      #n=[0.0 1.0 0.0 1.0;-1.0 0.0 -1.0 0.0]
+      n=[0.0 1.0 0.0 1.0;1.0 0.0 1.0 0.0]
     end
   else
     n=[0.0 1.0 1.0;-1.0 1.0 0.0];

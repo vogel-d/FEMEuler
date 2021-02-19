@@ -86,6 +86,51 @@ function assembLoad(degF::degF{2,:H1div}, f, m::mesh, kubPoints::Array{Float64,2
     return gb;
 end
 
+function assembLoad(degF::degF{2,:H1xH1}, f, m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2})
+    phiT=degF.phi;
+    sk=size(kubWeights);
+    iter=size(phiT,2);
+
+    J=initJacobi((m.geometry.dim,m.topology.dim),sk);
+    dJ=Array{Float64,2}(undef,sk);
+    jcoord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
+    gb=zeros(degF.numB);
+
+    ft=[zeros(sk) for d in 1:m.geometry.dim]
+
+    for k in 1:m.topology.size[m.topology.dim+1]
+        coord=@views m.geometry.coordinates[:,m.topology.incidence["20"][m.topology.offset["20"][k]:m.topology.offset["20"][k+1]-1]]
+
+        jacobi!(J,dJ,m,k,kubPoints,jcoord);
+        for d in 1:m.geometry.dim
+            fill!(ft[d],0.0);
+            if sk[1]==1 # <=> dreiecke, muss liste durchlaufen
+                for i=1:sk[2]
+                    xy=transformation(m,coord,kubPoints[1,i],kubPoints[2,i])
+                    ft[d][i]=f(xy)[d];
+                end
+            else # <=> vierecke, muss matrix durchlaufen
+                for i=1:sk[1], j=1:sk[2]
+                    xy=transformation(m,coord,kubPoints[1,i],kubPoints[2,j])
+                    ft[d][i,j]=f(xy)[d];
+                end
+            end
+        end
+        globalNum=l2g(degF,k);
+        for j in 1:iter
+            for r in 1:sk[2]
+                for l in 1:sk[1]
+                    vecdot=0.0
+                    for d in 1:m.geometry.dim
+                        vecdot+=ft[d][l,r]*phiT[d,j][l,r]
+                    end
+                    gb[globalNum[j]]+=kubWeights[l,r]*vecdot*abs(dJ[l,r]);
+                end
+            end
+        end
+    end
+    return gb;
+end
 
 function assembLoad!(F::Array{Float64,1},
                      degFRT::degF{2,:H1div}, f::Array{Float64,1},
