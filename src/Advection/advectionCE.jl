@@ -42,7 +42,7 @@ function advection(p::femProblem, gamma, y::solution,
                          p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],y.rhoV,
                          p.degFBoundary[fTtheta[3]],nquadPhi[fTtheta[3]],cR,
                          gamma,p.mesh,p.kubPoints,p.kubWeights,
-                         nquadPoints, p.data.edgeData, p.data.compoundData);
+                         nquadPoints, p.data);
     else
       Sth=advectionStiffMatrix(p.degFBoundary[fTtheta[1]],nquadPhi[fTtheta[1]],
                          p.degFBoundary[fTv[1]],nquadPhi[fTv[1]],y.rhoV,
