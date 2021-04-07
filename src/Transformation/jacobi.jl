@@ -459,7 +459,7 @@ function jacobi!(J::Array{Array{Float64,1},2},ddJ::Array{Float64,1},jphi::Array{
 end
 
 #For DG/CG method
-function jacobi!(J::Array{Array{Float64,2},2},dJ::Array{Float64,2},jinvTphi::Array{Array{Float64,2},2},m::mesh, fid::Int, kubPoints::Array{Float64,2}, phi::Array{Array{Float64,2},2}, coord::Array{Float64,2})
+function jacobi!(dJ::Array{Float64,2},J::Array{Array{Float64,2},2},jinvTphi::Array{Array{Float64,2},2},m::mesh, fid::Int, kubPoints::Array{Float64,2}, phi::Array{Array{Float64,2},2}, coord::Array{Float64,2})
     key="20";
     mt=m.meshType;
     rstart=m.topology.offset[key][fid];
