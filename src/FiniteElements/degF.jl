@@ -32,6 +32,10 @@ function degF(m::mesh, femType::Symbol, ordEdgesB::Array{Int,1}, nebP::Int, nebC
     nvf=offfv[2]-offfv[1];
     phi, divphi,  gradphi, refFace, refEdge, refVert=getElementProperties(femType, kubPoints, m.meshType, m.geometry.dim)
 
+    boundaryDirV,boundaryDirE=getBoundaryDirection(m)
+    offBv=collect(1:refVert)
+    offBe=collect(1:refEdge)
+
     ndegF=refFace+nef*refEdge+nvf*refVert
     inc=zeros(Int, nf*ndegF);
     off=collect(1:ndegF:nf*ndegF+1);
@@ -43,9 +47,18 @@ function degF(m::mesh, femType::Symbol, ordEdgesB::Array{Int,1}, nebP::Int, nebC
         vert=incfv[offfv[f]:offfv[f+1]-1];
         zv=off[f]+refFace+nef*refEdge
         for v in vert
-            if m.boundaryVertices[v]>=0
+            if m.boundaryVertices[v]==0
                 for d in 1:refVert
                     inc[zv]=nf*refFace+(ne-nebP)*refEdge+refVert*(ordVerticesB[v]-1)+d; #evtl in zwei Konstanten speichern
+                    zv+=1;
+                end
+            elseif m.boundaryVertices[v]==1
+                if refVert>1
+                    #boundaryDirV[v]>refVert ? offB.+=nvbC : offB[boundaryDirV[v]]+=nvbC
+                    offBv[2]=2+nvbC-1
+                end
+                for d in 1:refVert
+                    inc[zv]=nf*refFace+(ne-nebP)*refEdge+(nv-nvbP-nvbC)*refVert+(ordVerticesB[v]-nv+nvbP+nvbC-1)+offBv[d] #evtl in zwei Konstanten speichern
                     zv+=1;
                 end
             elseif m.boundaryVertices[v]<0
@@ -85,9 +98,18 @@ function degF(m::mesh, femType::Symbol, ordEdgesB::Array{Int,1}, nebP::Int, nebC
 
         ze=off[f]+refFace;
         for e in edges
-            if m.boundaryEdges[e]>=0
+            if m.boundaryEdges[e]==0
                 for d in 1:refEdge
                     inc[ze]=nf*refFace+refEdge*(ordEdgesB[e]-1)+d; #evtl in zwei Konstanten speichern
+                    ze+=1;
+                end
+            elseif m.boundaryEdges[e]==1
+                if refEdge>1
+                    #boundaryDirV[v]>refVert ? offB.+=nvbC : offB[boundaryDirV[v]]+=nvbC
+                    offBe[2]=2+nebC-1
+                end
+                for d in 1:refEdge
+                    inc[ze]=nf*refFace+(ne-nebP-nebC)*refEdge+(ordEdgesB[e]-ne+nebP+nebC-1)+offBe[d] #evtl in zwei Konstanten speichern
                     ze+=1;
                 end
             elseif m.boundaryEdges[e]<0
@@ -99,7 +121,14 @@ function degF(m::mesh, femType::Symbol, ordEdgesB::Array{Int,1}, nebP::Int, nebC
         end
     end
     nb=nf*refFace+(ne-nebP)*refEdge+(nv-nvbP)*refVert;
-    n=nb-nebC*refEdge-nvbC*refVert;
+    if refVert>1
+        n=nb-nebC*refEdge-div(nvbC,2)*refVert;
+        if refEdge>1
+            n=nb-div(nebC,2)*refEdge-div(nvbC,2)*refVert;
+        end
+    else
+        n=nb-nebC*refEdge-nvbC*refVert;
+    end
     degF{ndims(phi),getSpace(femType)}(femType, nb, n, inc, off, phi, divphi, gradphi);
 end
 
@@ -118,4 +147,29 @@ function getSpace(femType::Symbol)
     else
         error("Bitte für $femType Raum spezifizieren.")
     end
+end
+
+function getBoundaryDirection(m::mesh)
+    boundaryDirV=spzeros(Int,m.topology.size[1])
+    boundaryDirE=spzeros(Int,m.topology.size[2])
+    constBoundaryEW=(m.boundaryConditionEW==:constant)
+    constBoundaryTB=(m.boundaryConditionTB==:constant)
+    for v in 1:m.topology.size[1]
+        if m.geometry.coordinates[1,v]==m.geometry.l[1] || m.geometry.coordinates[1,v]==m.geometry.r[1]
+            boundaryDirV[v]+=1
+        end
+        if m.geometry.coordinates[2,v]==m.geometry.l[2] || m.geometry.coordinates[2,v]==m.geometry.r[2]
+            boundaryDirV[v]+=2
+        end
+    end
+    for e in 1:m.topology.size[2]
+        @views vertE=m.topology.incidence["10"][m.topology.offset["10"][e]:m.topology.offset["10"][e+1]-1];
+        if m.geometry.coordinates[1,vertE[1]]==m.geometry.coordinates[1,vertE[2]]==m.geometry.l[1] || m.geometry.coordinates[1,vertE[1]]==m.geometry.coordinates[1,vertE[2]]==m.geometry.r[1]
+            boundaryDirE[e]+=1
+        end
+        if m.geometry.coordinates[2,vertE[1]]==m.geometry.coordinates[2,vertE[2]]==m.geometry.l[2] || m.geometry.coordinates[2,vertE[1]]==m.geometry.coordinates[2,vertE[2]]==m.geometry.r[2]
+            boundaryDirE[e]+=2
+        end
+    end
+    return boundaryDirV, boundaryDirE
 end
