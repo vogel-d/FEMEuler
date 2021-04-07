@@ -171,12 +171,12 @@ end
 
 
 
-
+#For DG/CG method
 
 function discGalerkinCells!(M::Array{Float64,2},
-                            degFT::degF{1,:H1},gradphiT::Array{Array{Float64,2},2}, globalNumT::Array{Int64,1},
-                            degFF::degF{2,:H1xH1},phiF::Array{Array{Float64,2},2}, fval::SparseVector{Float64,Int64}, globalNumF::Array{Int64,1},
-                            degFW::degF{1,:H1},phiW::Array{Array{Float64,2},1}, wval::Array{Float64,1}, globalNumW::Array{Int64,1},
+                            degFT::degF{1,:H1}, phiT::Array{Array{Float64,2},1}, gradphiT::Array{Array{Float64,2},2}, globalNumT::Array{Int64,1},
+                            degFF::degF{2,:H1xH1}, phiF::Array{Array{Float64,2},2}, dphiF::Array{Array{Float64,2},1}, fval::SparseVector{Float64,Int64}, globalNumF::Array{Int64,1},
+                            degFW::degF{1,:H1}, phiW::Array{Array{Float64,2},1}, wval::Array{Float64,1}, globalNumW::Array{Int64,1},
                             m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2}, coord::Array{Float64,2})
 
     sk=size(kubWeights);
@@ -185,11 +185,13 @@ function discGalerkinCells!(M::Array{Float64,2},
 
     J=initJacobi((m.geometry.dim,m.topology.dim),sk);
     dJ=Array{Float64,2}(undef,sk);
+    #(J^T)^(-1)*gradphiT
+    jgradphiT=initJacobi((m.geometry.dim,length(phiT)),sk);
 
     for k in 1:m.topology.size[3]
         l2g!(globalNumW,degFW,k);
 
-        jacobi!(J,dJ,m,k,kubPoints,coord);
+        jacobi!(J,dJ,jgradphiT,m,k,kubPoints,gradphiT,coord);
 
         fill!(w,0.0);
         for i in 1:length(globalNumW)
@@ -206,11 +208,12 @@ function discGalerkinCells!(M::Array{Float64,2},
                 gj=globalNumF[j];
                 for r in 1:size(kubWeights,2)
                     for l in 1:size(kubWeights,1)
-                        phiFgradphiT=0.0;
+                        phiFjgradphiT=0.0;
                         for d in 1:m.topology.dim
-                            phiFgradphiT+=phiF[d,j][l,r]*gradphiT[d,i][l,r]
+                            phiFjgradphiT+=phiF[d,j][l,r]*jgradphiT[d,i][l,r]
                         end
-                        z+=fval[gj]*kubWeights[l,r]*(abs(dJ[l,r])/dJ[l,r])*w[l,r]*phiFgradphiT;
+                        z+=fval[gj]*kubWeights[l,r]*abs(dJ[l,r])*w[l,r]*
+                            (phiFjgradphiT+1/dJ[l,r]*dphiF[j][l,r]*phiT[i][l,r]);
                     end
                 end
             end
@@ -223,8 +226,8 @@ end
 
 
 function discGalerkinCells!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Array{Float64,1},
-                            degFT::degF{1,:H1},gradphiT::Array{Array{Float64,2},2}, globalNumT::Array{Int64,1},
-                            degFF::degF{2,:H1div},phiF::Array{Array{Float64,2},2}, fval::Array{Float64,1}, globalNumF::Array{Int64,1},
+                            degFT::degF{1,:H1},phiT::Array{Array{Float64,2},1}, gradphiT::Array{Array{Float64,2},2}, globalNumT::Array{Int64,1},
+                            degFF::degF{2,:H1xH1},phiF::Array{Array{Float64,2},2}, dphiF::Array{Array{Float64,2},1}, fval::Array{Float64,1}, globalNumF::Array{Int64,1},
                             degFW::degF{1,:H1},phiW::Array{Array{Float64,2},1}, wval::Array{Float64,1}, globalNumW::Array{Int64,1},
                             m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2}, coord::Array{Float64,2})
 
@@ -238,13 +241,15 @@ function discGalerkinCells!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
 
     J=initJacobi((m.geometry.dim,m.topology.dim),sk);
     dJ=Array{Float64,2}(undef,sk);
+    #(J^T)^(-1)*gradphiT
+    jgradphiT=initJacobi((m.geometry.dim,length(phiT)),sk);
 
     lM=zeros(nT,nF);
 
     for k in 1:m.topology.size[3]
         l2g!(globalNumW,degFW,k);
 
-        jacobi!(J,dJ,m,k,kubPoints,coord);
+        jacobi!(J,dJ,jgradphiT,m,k,kubPoints,gradphiT,coord);
 
         fill!(w,0.0);
         for i in 1:length(globalNumW)
@@ -256,11 +261,12 @@ function discGalerkinCells!(rows::Array{Int64,1}, cols::Array{Int64,1}, vals::Ar
             for i in 1:nT
                 for r in 1:sk[2]
                     for l in 1:sk[1]
-                        phiFgradphiT=0.0;
+                        phiFjgradphiT=0.0;
                         for d in 1:m.topology.dim
-                            phiFgradphiT+=phiF[d,j][l,r]*gradphiT[d,i][l,r]
+                            phiFjgradphiT+=phiF[d,j][l,r]*jgradphiT[d,i][l,r]
                         end
-                        lM[i,j]+=kubWeights[l,r]*(abs(dJ[l,r])/dJ[l,r])*w[l,r]*phiFgradphiT;
+                        lM[i,j]+=kubWeights[l,r]*abs(dJ[l,r])*w[l,r]*
+                            (phiFjgradphiT+1/dJ[l,r]*dphiF[j][l,r]*phiT[i][l,r]);
                     end
                 end
             end
@@ -283,9 +289,9 @@ end
 
 
 function discGalerkinCells!(M::Array{Float64,2},
-                            degFT::degF{2,:H1div},gradphiT::Array{Array{Float64,2},2}, globalNumT::Array{Int64,1},
-                            degFF::degF{2,:H1div},phiF::Array{Array{Float64,2},2}, fval::SparseVector{Float64,Int64}, globalNumF::Array{Int64,1},
-                            degFW::degF{2,:H1div},phiW::Array{Array{Float64,2},2}, wval::Array{Float64,1}, globalNumW::Array{Int64,1},
+                            degFT::degF{2,:H1xH1}, phiT::Array{Array{Float64,2},2}, gradphiT::Array{Array{Float64,2},2}, globalNumT::Array{Int64,1},
+                            degFF::degF{2,:H1xH1}, phiF::Array{Array{Float64,2},2}, dphiF::Array{Array{Float64,2},1}, fval::SparseVector{Float64,Int64}, globalNumF::Array{Int64,1},
+                            degFW::degF{2,:H1xH1}, phiW::Array{Array{Float64,2},2}, wval::Array{Float64,1}, globalNumW::Array{Int64,1},
                             m::mesh, kubPoints::Array{Float64,2}, kubWeights::Array{Float64,2}, coord::Array{Float64,2})
 
     sk=size(kubWeights);
@@ -294,19 +300,20 @@ function discGalerkinCells!(M::Array{Float64,2},
     w2=zeros(sk);
 
     J=initJacobi((m.geometry.dim,m.topology.dim),sk);
-    ddJ=Array{Float64,2}(undef,sk);
-    jphiW=initJacobi((m.geometry.dim,size(phiW,2)),sk);
+    dJ=Array{Float64,2}(undef,sk);
+    #(J^T)^(-1)
+    Jinvt=initJacobi((m.geometry.dim,m.topology.dim),sk);
 
     w=[zeros(sk) for d in 1:m.geometry.dim]
 
     for k in 1:m.topology.size[3]
-        jacobi!(J,ddJ,jphiW,m,k,kubPoints,phiW,coord);
+        jacobi!(J,Jinvt,dJ,m,k,kubPoints,coord);
 
         l2g!(globalNumW,degFW,k);
         for d in 1:m.geometry.dim
             fill!(w[d], 0.0)
             for i in 1:length(globalNumW)
-                @. w[d]+=wval[globalNumW[i]]*jphiW[d,i];
+                @. w[d]+=wval[globalNumW[i]]*phiW[d,i];
             end
         end
 
@@ -320,7 +327,8 @@ function discGalerkinCells!(M::Array{Float64,2},
                 gj=globalNumF[j];
                 for r in 1:size(kubWeights,2)
                     for l in 1:size(kubWeights,1)
-                        val=0.0;
+                        jgradphiTphiFw=0.0;
+                        phiTw=0.0
                         for d in 1:m.geometry.dim
                             jgradphiTphiF=0.0;
                             for dt in 1:m.topology.dim
@@ -328,11 +336,13 @@ function discGalerkinCells!(M::Array{Float64,2},
                                 for dti in 1:m.topology.dim
                                     gradphiTphiF+=gradphiT[dt,zg+dti][l,r]*phiF[dti,j][l,r]
                                 end
-                                jgradphiTphiF+=J[d,dt][l,r]*gradphiTphiF
+                                jgradphiTphiF+=Jinvt[d,dt][l,r]*gradphiTphiF
                             end
-                            val+=jgradphiTphiF*w[d][l,r]
+                            jgradphiTphiFw+=jgradphiTphiF*w[d][l,r]
+                            phiTw+=phiT[d,i][l,r]*w[d][l,r]
                         end
-                        z+=fval[gj]*kubWeights[l,r]*(ddJ[l,r]^3)/abs(ddJ[l,r])*val
+                        z+=fval[gj]*kubWeights[l,r]*abs(dJ[l,r])*
+                            (jgradphiTphiFw+1/dJ[l,r]*dphiF[j][l,r]*phiTw)
                     end
                 end
             end
