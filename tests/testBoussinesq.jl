@@ -1,9 +1,9 @@
-include("modulesB.jl")
+include("../src/Modules/modulesB.jl")
 
 function testBoussinesq()
-    filename = "boussinesq";
+    filename = "boussinesqCG1";
 
-    femType=Dict(:p=>[:DG0], :v=>[:RT0], :b=>[:DG0]);
+    femType=Dict(:p=>[:DG0], :v=>[:VecCG1], :b=>[:DG0]);
     #femType=Dict(:p=>[:DG0], :v=>[:RT0], :b=>[:P1]);
     #femType=Dict(:p=>[:DG1], :v=>[:RT1], :b=>[:DG1]);
 
@@ -15,8 +15,8 @@ function testBoussinesq()
     tend=3000.0;
 
     #determines at which points of time the solution is saved
-    solSaves=1;
-    #solSaves=15;
+    #solSaves=1;
+    solSaves=10;
     nIter=tend/solSaves;
 
     b0=0.01;
@@ -47,7 +47,8 @@ function testBoussinesq()
     #Speichern des Endzeitpunktes als vtu-Datei:
     unstructured_vtk(pv, tend, [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesq/"*filename)
     #Speichern aller berechneten Zwischenwerte als vtz-Datei:
-    #unstructured_vtk(pv, sort(collect(keys(pv.solution))), [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesq/"*filename)
+    unstructured_vtk(pv, sort(collect(keys(pv.solution))), [:p, :b, :v], ["Pressure", "Buoyancy", "Velocity"], "testBoussinesq/"*filename)
 
     return pv
 end
+p=testBoussinesq();
