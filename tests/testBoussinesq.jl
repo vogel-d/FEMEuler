@@ -3,7 +3,7 @@ include("../src/Modules/modulesB.jl")
 function testBoussinesq()
     filename = "boussinesqCG1";
 
-    femType=Dict(:p=>[:DG0], :v=>[:VecCG1], :b=>[:DG0]);
+    femType=Dict(:p=>[:DG0], :v=>[:VecP1], :b=>[:DG0]);
     #femType=Dict(:p=>[:DG0], :v=>[:RT0], :b=>[:P1]);
     #femType=Dict(:p=>[:DG1], :v=>[:RT1], :b=>[:DG1]);
 
