@@ -33,7 +33,7 @@ function jacobi!(J::Array{Array{Float64,2},2},dJ::Array{Float64,2},m::mesh, fid:
              J[2,1][i,j]=(coord[2,2]-coord[2,1])+(coord[2,3]-coord[2,4]-coord[2,2]+coord[2,1])*kubPoints[2,j];
              J[1,2][i,j]=(coord[1,4]-coord[1,1])+(coord[1,3]-coord[1,4]-coord[1,2]+coord[1,1])*kubPoints[1,i];
              J[2,2][i,j]=(coord[2,4]-coord[2,1])+(coord[2,3]-coord[2,4]-coord[2,2]+coord[2,1])*kubPoints[1,i];
-             dJ[i,j]=abs(J[1,1][i,j]*J[2,2][i,j]-J[2,1][i,j]*J[1,2][i,j]);
+             dJ[i,j]=J[1,1][i,j]*J[2,2][i,j]-J[2,1][i,j]*J[1,2][i,j];
          end
     end
     return nothing;
@@ -497,7 +497,7 @@ function jacobi!(dJ::Array{Float64,2},J::Array{Array{Float64,2},2},jinvTphi::Arr
             J[2,1][i,j]=(coord[2,2]-coord[2,1])+(coord[2,3]-coord[2,4]-coord[2,2]+coord[2,1])*kubPoints[2,j];
             J[1,2][i,j]=(coord[1,4]-coord[1,1])+(coord[1,3]-coord[1,4]-coord[1,2]+coord[1,1])*kubPoints[1,i];
             J[2,2][i,j]=(coord[2,4]-coord[2,1])+(coord[2,3]-coord[2,4]-coord[2,2]+coord[2,1])*kubPoints[1,i];
-            dJ[i,j]=abs(J[1,1][i,j]*J[2,2][i,j]-J[2,1][i,j]*J[1,2][i,j]);
+            dJ[i,j]=J[1,1][i,j]*J[2,2][i,j]-J[2,1][i,j]*J[1,2][i,j];
             for k in 1:size(phi,2)
                 jinvTphi[1,k][i,j]=1/(J[1,1][i,j]*J[2,2][i,j]-J[1,2][i,j]*J[2,1][i,j])*
                     (J[2,2][i,j]*phi[1,k][i,j]-J[2,1][i,j]*phi[2,k][i,j]);
@@ -508,6 +508,7 @@ function jacobi!(dJ::Array{Float64,2},J::Array{Array{Float64,2},2},jinvTphi::Arr
     end
     return nothing;
 end
+
 function jacobi!(J::Array{Array{Float64,2},2}, JinvT::Array{Array{Float64,2},2}, dJ::Array{Float64,2},m::mesh, fid::Int, kubPoints::Array{Float64,2}, coord::Array{Float64,2})
     key="20";
     mt=m.meshType;
@@ -546,7 +547,7 @@ function jacobi!(J::Array{Array{Float64,2},2}, JinvT::Array{Array{Float64,2},2},
             J[2,1][i,j]=(coord[2,2]-coord[2,1])+(coord[2,3]-coord[2,4]-coord[2,2]+coord[2,1])*kubPoints[2,j];
             J[1,2][i,j]=(coord[1,4]-coord[1,1])+(coord[1,3]-coord[1,4]-coord[1,2]+coord[1,1])*kubPoints[1,i];
             J[2,2][i,j]=(coord[2,4]-coord[2,1])+(coord[2,3]-coord[2,4]-coord[2,2]+coord[2,1])*kubPoints[1,i];
-            dJ[i,j]=abs(J[1,1][i,j]*J[2,2][i,j]-J[2,1][i,j]*J[1,2][i,j]);
+            dJ[i,j]=J[1,1][i,j]*J[2,2][i,j]-J[2,1][i,j]*J[1,2][i,j];
             JinvT[1,1][i,j]=1/(J[1,1][i,j]*J[2,2][i,j]-J[1,2][i,j]*J[2,1][i,j])*J[2,2][i,j];
             JinvT[2,1][i,j]=-1/(J[1,1][i,j]*J[2,2][i,j]-J[1,2][i,j]*J[2,1][i,j])*J[1,2][i,j];
             JinvT[1,2][i,j]=-1/(J[1,1][i,j]*J[2,2][i,j]-J[1,2][i,j]*J[2,1][i,j])*J[2,1][i,j];
