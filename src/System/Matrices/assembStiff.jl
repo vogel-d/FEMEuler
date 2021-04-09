@@ -128,7 +128,7 @@ function assembStiff(degFs::degF{1,:H1}, degFv::degF{2,:H1xH1}, m::mesh, kubWeig
     nT=degFs.numB;
     nF=degFv.numB;
     phiT=degFs.phi;
-    divphiF=degFv.divphi;
+    gradphiF=degFv.gradphi;
 
     rows=Int64[];
     cols=Int64[];
@@ -140,18 +140,24 @@ function assembStiff(degFs::degF{1,:H1}, degFv::degF{2,:H1xH1}, m::mesh, kubWeig
     dJ=Array{Float64,2}(undef,sk);
     coord=Array{Float64,2}(undef,m.geometry.dim,m.meshType);
 
-    lS=zeros(length(phiT), length(divphiF));
+    lS=zeros(length(phiT), div(size(gradphiF,2),2));
     for k in 1:m.topology.size[m.topology.dim+1]
         jacobi!(J, dJ, m, k, kubPoints, coord);
         for i in 1:length(phiT)
-            for j in 1:length(divphiF)
+            jcount=1
+            for j in 1:2:size(gradphiF,2)
                 currentval=0.0;
                 for r in 1:sk[2]
                     for l in 1:sk[1]
-                        currentval+=kubWeights[l,r]*abs(dJ[l,r])*phiT[i][l,r]*divphiF[j][l,r];
+                        currentval+=kubWeights[l,r]*abs(dJ[l,r])/dJ[l,r]*phiT[i][l,r]*(
+                            J[2,2][l,r]*gradphiF[1,j][l,r]
+                            -J[1,2][l,r]*gradphiF[2,j][l,r]
+                            -J[2,1][l,r]*gradphiF[1,j+1][l,r]
+                            +J[1,1][l,r]*gradphiF[2,j+1][l,r]);
                     end
                 end
-                lS[i,j] = currentval;
+                lS[i,jcount] = currentval;
+                jcount+=1
             end
         end
 
