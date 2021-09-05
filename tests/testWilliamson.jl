@@ -1,4 +1,4 @@
-include("modulesSphereAdv.jl")
+include("../src/Modules/modulesSphereAdv.jl")
 
 stencilOrder=1;
 
@@ -11,8 +11,7 @@ recoverySpaceVec=Symbol("VecDGLinS")
 @recovery(recoverySpace,recoverySpaceVec)
 
 function testWilliamson()
-
-    filename = "testWilliamsonTRLin";
+    filename = "testWilliamson";
 
     femType=Dict(:rho=>[:DG0, :DG0, recoverySpace],
                  :rhoV=>[:RT0, :RT0, recoverySpaceVec],
@@ -47,7 +46,6 @@ function testWilliamson()
     Rad=6371220.0
     UMax=2*pi*Rad/(12*60*60*24)
 
-    #m=generateCubedSphere(20,6300000.0)
     m=generateCubedSphere(n,Rad)
 
     p=femProblem(m, femType,t=:compressible, advection=advection, taskRecovery=taskRecovery, stencilOrder=stencilOrder);
@@ -147,7 +145,7 @@ function testWilliamson()
     nquadPhi, nquadPoints=coordTrans(m, m.normals, advectionTypes, size(p.kubWeights,2));
     setEdgeData!(p, :v)
     recoveryMatrix!(p)
-    
+
     MrT=assembMass(p.degFBoundary[femType[:rhoTheta][1]], m, p.kubPoints, p.kubWeights);
     MrV=assembMass(p.degFBoundary[femType[:rhoV][1]], m, p.kubPoints, p.kubWeights);
 
@@ -179,3 +177,4 @@ function testWilliamson()
 
     return p;
 end
+p=testWilliamson();

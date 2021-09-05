@@ -1,5 +1,5 @@
 #https://journals.ametsoc.org/doi/pdf/10.1175/MWR-D-15-0398.1 S.4362 f.
-include("modulesCE.jl")
+include("../src/Modules/modulesCE.jl")
 
 const stencilOrder=1;
 
@@ -9,7 +9,7 @@ recoverySpaceVec=Symbol("VecDGLin")
 @recovery(recoverySpace,recoverySpaceVec)
 
 function testCollidingBubbles()
-    filename = "collidingBubblesTRLin";
+    filename = "collidingBubbles";
 
     #order: comp, compHigh, compRec, compDG
     femType=Dict(:rho=>[:DG0, :DG0, recoverySpace],
@@ -88,7 +88,6 @@ function testCollidingBubbles()
 
     assembMass!(p);
     assembStiff!(p);
-    #p.boundaryValues[(:theta,:P1)]=300*ones(p.degFBoundary[:P1].numB-p.degFBoundary[:P1].num);
     applyStartValues!(p, f);
 
     rho0=p.solution[0.0].rho;
@@ -129,7 +128,8 @@ function testCollidingBubbles()
     #Speichern des Endzeitpunktes als vtu-Datei:
     unstructured_vtk(p, EndTime, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
     #Speichern aller berechneten Zwischenwerte als vtz-Datei:
-    unstructured_vtk(p, sort(collect(keys(p.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
+    #unstructured_vtk(p, sort(collect(keys(p.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
 
     return p
 end
+p=testCollidingBubbles();

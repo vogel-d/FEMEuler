@@ -1,7 +1,5 @@
-
-
-include("modulesBA.jl")
-include("symplektischerEulerA.jl")
+include("../src/Modules/modulesBA.jl")
+include("../src/Solvers/symplektischerEulerA.jl")
 
 function testAdvection()
   filename = "test"
@@ -95,7 +93,7 @@ function testAdvection()
 
   return p
 end
-
+p=testAdvection();
 
 
 

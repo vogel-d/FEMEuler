@@ -1,4 +1,4 @@
-include("modulesB.jl")
+include("../src/Modules/modulesB.jl")
 
 function testBoussinesqTri()
     filename = "testjez";

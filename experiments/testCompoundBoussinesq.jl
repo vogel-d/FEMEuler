@@ -1,4 +1,4 @@
-include("modulesBCompound.jl")
+include("../src/Modules/modulesBCompound.jl")
 
 function testCompoundBoussinesq()
     filename = "testCompoundBoussinesq";

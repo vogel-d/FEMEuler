@@ -1,5 +1,5 @@
-include("modulesSphereAdv.jl")
-include("advectionStiffN.jl")
+include("../src/Modules/modulesSphereAdv.jl")
+include("../src/Advection/AdvectionStiff/advectionStiffN.jl")
 
 function testSphereAdv()
 

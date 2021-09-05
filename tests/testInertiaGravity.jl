@@ -1,4 +1,4 @@
-include("modulesCE.jl")
+include("../src/Modules/modulesCE.jl")
 
 const stencilOrder=2;
 
@@ -61,7 +61,6 @@ function testInertiaGravity2()
 
     assembMass!(p);
     assembStiff!(p);
-    #p.boundaryValues[(:theta,:P1)]=300*ones(p.degFBoundary[:P1].numB-p.degFBoundary[:P1].num);
     applyStartValues!(p, f);
 
     rho0=p.solution[0.0].rho;
@@ -97,13 +96,13 @@ function testInertiaGravity2()
 
     #Speichern des Endzeitpunktes als vtu-Datei:
     #unstructured_vtk(p, EndTime, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
-    #Speichern aller berechneten Zwischenwerte als vtz-Datei:
+    #Speichern aller berechneten Zwischenwerte als vtk-Datei:
     unstructured_vtk(p, sort(collect(keys(p.solution))), [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
 
     #unstructured_vtk(p, 0.0, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename*"Start")
     return p
 end
-
+p=testInertiaGravity2();
 
 #Startbedingungen ohne Background
 #=

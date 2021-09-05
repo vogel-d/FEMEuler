@@ -1,5 +1,5 @@
-include("modulesBACompound.jl")
-include("symplektischerEulerAcousticA.jl")
+include("../src/Modules/modulesBACompound.jl")
+include("../src/Solvers/symplektischerEulerAcousticA.jl")
 
 function testCompoundAcousticAdvection()
   filename = "testStripeVertical"

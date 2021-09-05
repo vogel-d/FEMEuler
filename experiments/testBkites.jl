@@ -1,5 +1,5 @@
-include("modulesB.jl")
-include("coordTrans.jl")
+include("../src/Modules/modulesB.jl")
+include("../src/Transformations/coordTrans.jl")
 
 function testBoussinesq()
     filename = "bachelor_boussinesq_kite";

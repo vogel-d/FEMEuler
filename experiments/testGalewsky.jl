@@ -1,4 +1,4 @@
-include("modulesSphere.jl")
+include("../src/Modules/modulesSphere.jl")
 
 function testGalewsky()
 

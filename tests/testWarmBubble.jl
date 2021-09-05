@@ -1,5 +1,4 @@
 include("../src/Modules/modulesCE.jl")
-#include("advectionStiffN.jl")
 
 const stencilOrder=2;
 
@@ -9,7 +8,7 @@ recoverySpaceVec=Symbol("VecDGQuad")
 @recovery(recoverySpace,recoverySpaceVec)
 
 function testWarmBubble()
-    filename = "warmBubbleNNFENoAdv";
+    filename = "warmBubble";
 
     #order: comp, compHigh, compRec, compDG
     femType=Dict(:rho=>[:DG0, :DG0, recoverySpace],
@@ -36,7 +35,7 @@ function testWarmBubble()
                  :theta=>[:DG1]);
     =#
 
-    taskRecovery=false;
+    taskRecovery=true;
     advection=true;
 
     #m=generateRectMesh(160,80,:periodic,:constant,-10000.0,10000.0,0.0,10000.0); #(east/west, top/bottom)
@@ -51,12 +50,11 @@ function testWarmBubble()
     UMax=0.0; #UMax determines the advection in x direction
     MISMethod=MIS(:MIS2); #method of time integration
 
-    dt=2.0; #Coarse: 2.0
-    #dt=0.5; #Coarse: 1.0
+    dt=2.0; #Fine: 1.0 Coarse: 2.0
+    #dt=0.5; #Fine: 0.5 Coarse: 1.0
     ns=15;
     EndTime=1000.0;
     nIter=Int64(EndTime/dt);
-    #nIter=1
 
     #start functions
     xCM=0.0; zCM=2000.0;
@@ -81,7 +79,6 @@ function testWarmBubble()
 
     assembMass!(p);
     assembStiff!(p);
-    #p.boundaryValues[(:theta,:P1)]=300.0*ones(p.degFBoundary[:P1].numB-p.degFBoundary[:P1].num);
     applyStartValues!(p, f);
 
     rho0=p.solution[0.0].rho;

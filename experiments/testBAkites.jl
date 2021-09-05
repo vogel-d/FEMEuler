@@ -1,4 +1,4 @@
-include("modulesBA.jl")
+include("../src/Modules/modulesBA.jl")
 
 function testBoussinesqAdvection()
   filename = "BA_kites"

@@ -1,5 +1,5 @@
-include("modulesBcompound.jl")
-include("solveAcoustic.jl")
+include("../src/Modules/modulesBcompound.jl")
+include("../src/Solvers/solveAcoustic.jl")
 
 function testCompoundAcoustic()
     filename = "test";

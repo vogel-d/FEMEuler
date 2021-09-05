@@ -1,4 +1,4 @@
-include("modulesCE.jl")
+include("../src/Modules/modulesCE.jl")
 
 const stencilOrder=2;
 
@@ -8,7 +8,7 @@ recoverySpaceVec=Symbol("VecDGQuad")
 @recovery(recoverySpace,recoverySpaceVec)
 
 function testColdMountainBubble()
-    filename = "coldMountainBubbleTRQuad";
+    filename = "coldMountainBubble";
 
     #order: comp, compHigh, compRec, compDG
     femType=Dict(:rho=>[:DG0, :DG0, recoverySpace],
@@ -86,7 +86,6 @@ function testColdMountainBubble()
 
     assembMass!(p);
     assembStiff!(p);
-    #p.boundaryValues[(:theta,:P1)]=300*ones(p.degFBoundary[:P1].numB-p.degFBoundary[:P1].num);
     applyStartValues!(p, f);
 
     rho0=p.solution[0.0].rho;
@@ -133,3 +132,4 @@ function testColdMountainBubble()
 
     return p
 end
+p=testColdMountainBubble();

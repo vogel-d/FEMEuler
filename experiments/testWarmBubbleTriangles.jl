@@ -1,4 +1,4 @@
-include("modulesCE.jl")
+include("../src/Modules/modulesCE.jl")
 
 function testWarmBubbleTri()
     filename = "testWarmBubbleTri";

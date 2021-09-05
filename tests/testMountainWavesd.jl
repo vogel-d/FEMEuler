@@ -1,4 +1,4 @@
-include("modulesCEd.jl")
+include("../src/Modules/modulesCEd.jl")
 
 const stencilOrder=2;
 
@@ -69,7 +69,6 @@ function testMountainWaves()
     assembMass!(p);
     assembStiff!(p);
     println("Matrizen berechnet")
-    #p.boundaryValues[(:theta,:P1)]=300*ones(p.degFBoundary[:P1].numB-p.degFBoundary[:P1].num);
     applyStartValues!(p, f);
 
     rho0=p.solution[0.0].rho;
@@ -115,3 +114,4 @@ function testMountainWaves()
 
     return p
 end
+p=testMountainWaves();

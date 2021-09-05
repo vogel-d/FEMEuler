@@ -1,4 +1,4 @@
-include("modulesCE.jl")
+include("../src/Modules/modulesCE.jl")
 
 const stencilOrder=2;
 
@@ -8,7 +8,7 @@ recoverySpaceVec=Symbol("VecDGQuad")
 @recovery(recoverySpace,recoverySpaceVec)
 
 function testSchaer()
-    filename = "mountainSchaerTRQuad";
+    filename = "mountainSchaer";
 
     #order: comp, compHigh, compRec, compDG
     femType=Dict(:rho=>[:DG0, :DG0, recoverySpace],
@@ -58,7 +58,6 @@ function testSchaer()
     assembMass!(p);
     assembStiff!(p);
     println("Matrizen berechnet")
-    #p.boundaryValues[(:theta,:P1)]=300*ones(p.degFBoundary[:P1].numB-p.degFBoundary[:P1].num);
     applyStartValues!(p, f);
     unstructured_vtk(p, 0.0, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename)
 
@@ -105,3 +104,4 @@ function testSchaer()
 
     return p
 end
+p=testSchaer();

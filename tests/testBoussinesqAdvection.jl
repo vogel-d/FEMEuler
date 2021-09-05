@@ -1,5 +1,4 @@
 include("../src/Modules/modulesBA.jl")
-#include("advectionStiffN.jl")
 
 const stencilOrder=1;
 
@@ -86,3 +85,4 @@ function testBoussinesqAdvection()
 
   return p
 end
+p=testBoussinesqAdvection();

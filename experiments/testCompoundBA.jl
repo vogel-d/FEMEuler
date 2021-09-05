@@ -1,4 +1,4 @@
-include("modulesBAcompound.jl")
+include("../src/Modules/modulesBAcompound.jl")
 
 function testCompoundBA()
   filename = "bachelor_boussinesqA_HexToTri"

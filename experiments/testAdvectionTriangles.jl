@@ -1,4 +1,4 @@
-include("modulesBA.jl")
+include("../src/Modules/modulesBA.jl")
 
 function testAdvectionTri()
   filename = "testBubbleY"

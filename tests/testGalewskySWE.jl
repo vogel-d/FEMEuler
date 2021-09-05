@@ -1,5 +1,4 @@
-include("modulesSWE.jl")
-#include("advectionStiffN.jl")
+include("../src/Modules/modulesSWE.jl")
 
 const stencilOrder=2;
 
@@ -142,4 +141,4 @@ function testGalewsky()                                                         
 
     return p;
 end
-p=testGalewsky()
+p=testGalewsky();

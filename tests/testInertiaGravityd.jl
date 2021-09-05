@@ -1,4 +1,4 @@
-include("modulesCEd.jl")
+include("../src/Modules/modulesCEd.jl")
 
 const stencilOrder=2;
 
@@ -128,3 +128,4 @@ function testInertiaGravity()
     #unstructured_vtk(p, 0.0, [:rho, :rhoV, :rhoTheta, :v, :theta], ["Rho", "RhoV", "RhoTheta", "Velocity", "Theta"], "testCompressibleEuler/"*filename*"Start")
     return p
 end
+p=testInertiaGravity();

@@ -1,5 +1,5 @@
-include("modulesBACompound.jl")
-include("symplektischerEulerA.jl")
+include("../src/Modules/modulesBACompound.jl")
+include("../src/Solvers/symplektischerEulerA.jl")
 
 function testCompoundAdvection()
   filename = "OSWVGLCOMP"

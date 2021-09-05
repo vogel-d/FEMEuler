@@ -1,4 +1,4 @@
-include("modulesB.jl")
+include("../src/Modules/modulesB.jl")
 
 function testBoussinesq()
     filename = "boussinesq";
@@ -51,3 +51,4 @@ function testBoussinesq()
 
     return pv
 end
+p=testBoussinesq();

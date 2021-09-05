@@ -1,4 +1,4 @@
-include("modulesSWE.jl")
+include("../src/Modules/modulesSWE.jl")
 
 const stencilOrder=2;
 
@@ -128,3 +128,4 @@ function testRossbyHauritzWave()
 
     return p;
 end
+p=testRossbyHauritzWave();

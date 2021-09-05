@@ -1,4 +1,4 @@
-include("modulesLinSWE.jl")
+include("../src/Modules/modulesLinSWE.jl")
 
 function testLinearSWE()
 
@@ -85,3 +85,4 @@ function testLinearSWE()
 
     return p;
 end
+p=testLinearSWE();

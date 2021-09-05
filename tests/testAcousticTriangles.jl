@@ -1,5 +1,5 @@
-include("modulesB.jl")
-include("solveAcoustic.jl")
+include("../src/Modules/modulesB.jl")
+include("../src/Solvers/solveAc.jl")
 
 function testAcousticTri()
     filename = "testAcousticbig";
@@ -75,3 +75,4 @@ function testAcousticTri()
 
     return p
 end
+p=testAcousticTri();
