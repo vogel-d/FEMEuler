@@ -76,8 +76,10 @@ function mesh(topology::meshTopology, geometry::meshGeometry, bE::SparseVector{I
     if geometry.dim==3
       n=[0.0 1.0 0.0 1.0;-1.0 0.0 -1.0 0.0]
     else
-      n=[0.0 1.0 0.0 1.0;-1.0 0.0 -1.0 0.0]
-      #n=[0.0 1.0 0.0 1.0;1.0 0.0 1.0 0.0]
+      # Compund Finite Elements
+      # TO DO: Fix bug to use these normals for regular finite elements in the plane
+      #n=[0.0 1.0 0.0 1.0;-1.0 0.0 -1.0 0.0]
+      n=[0.0 1.0 0.0 1.0;1.0 0.0 1.0 0.0]
     end
   else
     n=[0.0 1.0 1.0;-1.0 1.0 0.0];

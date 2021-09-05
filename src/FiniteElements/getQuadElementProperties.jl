@@ -245,21 +245,23 @@ function getQuadElementProperties(type::Symbol)
         cm=Dict([1,2]=>[0,0,0,0,0,0,0,0,0], [2,3]=>[0,0,0,0,0,0,0,0,0], [3,4]=>[0,0,0,0,0,0,0,0,0], [1,4]=>[0,0,0,0,0,0,0,0,0]);
 
     elseif type==:RT0
-
+        #=
+        # Compund Finite Elements
+        # TO DO: Fix bug to use these normals for regular finite elements in the plane
         phi=[null h11_0 null h10_0;
              h0_10neg null h0_11neg null];
 
         divphi=[Dyh0_10neg, Dxh11_0, Dyh0_11neg, Dxh10_0];
         gradphi=[null null    Dxh11_0 null null null    Dxh10_0 null;
                  null Dyh0_10neg null    null null Dyh0_11neg null    null];
-        #=
+        =#
         phi=[null h11_0 null h10_0;
              h0_10 null h0_11 null];
 
         divphi=[Dyh0_10, Dxh11_0, Dyh0_11, Dxh10_0];
         gradphi=[null null    Dxh11_0 null null null    Dxh10_0 null;
                  null Dyh0_10 null    null null Dyh0_11 null    null];
-                 =#
+
         nFace=0;
         nEdge=1;
         nVert=0;
@@ -267,22 +269,22 @@ function getQuadElementProperties(type::Symbol)
         cm=Dict([1,2]=>[1,0,0,0], [2,3]=>[0,1,0,0], [3,4]=>[0,0,1,0], [1,4]=>[0,0,0,1]);
 
     elseif type==:RT0B #Broken RT0
-
-
+        #=
+        # Compund Finite Elements
         phi=[null h11_0 null h10_0;
              h0_10neg null h0_11neg null];
 
         divphi=[Dyh0_10neg, Dxh11_0, Dyh0_11neg, Dxh10_0];
         gradphi=[null null    Dxh11_0 null null null    Dxh10_0 null;
                  null Dyh0_10neg null    null null Dyh0_11neg null    null];
-        #=
+        =#
         phi=[null h11_0 null h10_0;
              h0_10 null h0_11 null];
 
         divphi=[Dyh0_10, Dxh11_0, Dyh0_11, Dxh10_0];
         gradphi=[null null    Dxh11_0 null null null    Dxh10_0 null;
                  null Dyh0_10 null    null null Dyh0_11 null    null];
-                 =#
+
         nFace=4;
         nEdge=0;
         nVert=0;
